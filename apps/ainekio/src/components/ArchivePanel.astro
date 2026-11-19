@@ -8,8 +8,8 @@ const { tags = [], categories = [], heading = 'Article library & system referenc
 const allPosts = await getCollection('posts', ({data}) => !data.draft)
 validateReadingPaths(allPosts)
 
-// Curated reading order for reference guides so start-here and current V2 guides always appear first,
-// while historical V1 reference guides sort cleanly at the bottom of the reference group.
+// Curated reading order for reference guides so start-here overviews and active V1/V2/V3 guides appear first,
+// with the July 2026 pre-hardware planning index sorted at the end of the reference group.
 const referencePriority: Record<string, number> = {
   'project-overview': 1,
   'what-ainekio-can-do': 2,
@@ -18,22 +18,22 @@ const referencePriority: Record<string, number> = {
   'ainekio-os': 5,
   'ainekio-companion': 6,
   'ainekio-v2': 7,
-  'three-system-neural-architecture': 8,
-  'ainekio-cockpit': 9,
-  'jam-protection-and-thermal-safety': 10,
-  'gait-development': 11,
-  'protocol-and-safety': 12,
-  'gateway-and-simulator': 13,
-  'vision-loop': 14,
-  'voice-loop': 15,
-  'metahuman-integration': 16,
-  'bounded-autonomy': 17,
-  'v1-v2-comparison': 18,
-  'ainekio-v3-preview': 19,
-  'ainekio-v1': 20,
+  'ainekio-v1': 8,
+  'v1-v2-comparison': 9,
+  'ainekio-v3-preview': 10,
+  'three-system-neural-architecture': 11,
+  'ainekio-cockpit': 12,
+  'jam-protection-and-thermal-safety': 13,
+  'gait-development': 14,
+  'protocol-and-safety': 15,
+  'gateway-and-simulator': 16,
+  'vision-loop': 17,
+  'voice-loop': 18,
+  'metahuman-integration': 19,
+  'bounded-autonomy': 20,
+  'body-design-and-hardware': 21,
+  'controller-firmware': 22,
   'v1-original-posts': 90,
-  'body-design-and-hardware': 91,
-  'controller-firmware': 92,
 }
 
 const normalizedTags = tags.map(tag => tag.toLowerCase())
@@ -49,8 +49,8 @@ const posts = allPosts.filter(post =>
     return kindRank[readA.kind] - kindRank[readB.kind]
   }
   if (readA.kind === 'reference') {
-    const prioA = referencePriority[a.slug] ?? (readA.generation === 'v1' ? 85 : 50)
-    const prioB = referencePriority[b.slug] ?? (readB.generation === 'v1' ? 85 : 50)
+    const prioA = referencePriority[a.slug] ?? 50
+    const prioB = referencePriority[b.slug] ?? 50
     if (prioA !== prioB) return prioA - prioB
   }
   return b.data.published.getTime() - a.data.published.getTime() || a.slug.localeCompare(b.slug)
@@ -62,21 +62,22 @@ const scope = tags.length ? `Tagged: ${tags.join(', ')}` : categories.length ? `
   <section class="card-base article-library" data-article-library>
     <header class="library-header">
       <div class="library-header-copy">
-        <p class="library-eyebrow">Ainekio Documentation &amp; Archive</p>
+        <p class="library-eyebrow">Ainekio Documentation Library</p>
         <h1 data-library-title data-default-heading={heading}>{heading}</h1>
         <p class="library-lead">Reference guides, dated progress entries, and V1/V2/V3 documentation indexed by subsystem and robot version.</p>
         {scope && <p class="library-scope">{scope} · <a href={url('/archive/')}>Browse complete library</a></p>}
       </div>
       <nav class="library-shortcuts" aria-label="Library shortcuts">
         <a href={url('/posts/project-overview/')}>System Overview →</a>
+        <a href={url('/posts/ainekio-v1/')}>Ainekio V1 →</a>
+        <a href={url('/posts/ainekio-v2/')}>Ainekio V2 →</a>
         <a href={url('/updates/')}>Build Journal →</a>
-        <a href={url('/posts/v1-original-posts/')}>V1 Archive →</a>
       </nav>
     </header>
 
     <form class="library-filters" method="get" data-library-filters aria-label="Filter articles">
       <label>Subsystem / topic<select name="topic"><option value="">All topics</option>{Object.entries(topics).map(([id,topic]) => <option value={id}>{topic.title}</option>)}</select></label>
-      <label>Robot version<select name="generation"><option value="">All versions</option><option value="v2">Current V2 · 12 servos</option><option value="v3">In development V3 · DS3235</option><option value="both">Cross-version guides</option><option value="v1">Historical V1 · 8 servos</option></select></label>
+      <label>Robot version<select name="generation"><option value="">All versions</option><option value="v1">Active V1 · 8 servos</option><option value="v2">Active V2 · 12 servos</option><option value="v3">In development V3 · DS3235</option><option value="both">Cross-version guides</option></select></label>
       <label>Document type<select name="kind"><option value="">All documents</option>{Object.entries(kinds).map(([id,label]) => <option value={id}>{label}</option>)}</select></label>
       <label class="library-query">Search title or summary<input name="q" type="search" placeholder="Linkage, battery, LCD, memory…" autocomplete="off" /></label>
       <div class="library-buttons"><button type="submit">Apply</button><button type="reset">Reset</button></div>
@@ -86,7 +87,7 @@ const scope = tags.length ? `Tagged: ${tags.join(', ')}` : categories.length ? `
 
     <div class="library-status-bar">
       <p class="library-results" aria-live="polite" aria-atomic="true" data-library-results>{posts.length} articles</p>
-      <p class="library-topic-note" data-library-topic-note>Ordered with start-here &amp; current V2 reference guides first, followed by dated journal logs and historical V1 notes.</p>
+      <p class="library-topic-note" data-library-topic-note>Ordered with start-here &amp; active V1/V2/V3 system guides first, followed by dated journal logs and early July 2026 planning notes.</p>
     </div>
 
     <div class="library-list">
@@ -98,7 +99,7 @@ const scope = tags.length ? `Tagged: ${tags.join(', ')}` : categories.length ? `
           <a class="library-image" href={postHref} tabindex="-1" aria-hidden="true"><img src={url(post.data.image)} alt="" loading="lazy" decoding="async" /></a>
           <div class="library-item-body">
             <div class="library-badges">
-              <span class:list={['badge-gen', { 'is-v1': isV1 }]}>{isV1 ? 'Historical V1 · 8 servos' : generations[reading.generation]}</span>
+              <span class:list={['badge-gen', { 'is-v1': isV1 }]}>{generations[reading.generation]}</span>
               <span class="badge-kind">{kinds[reading.kind]}</span>
               <time datetime={post.data.published.toISOString()}>{dateFormat.format(post.data.published)}</time>
             </div>
@@ -127,7 +128,7 @@ const scope = tags.length ? `Tagged: ${tags.join(', ')}` : categories.length ? `
     const title = root.querySelector<HTMLElement>('[data-library-title]')!
     const note = root.querySelector<HTMLElement>('[data-library-topic-note]')!
     const empty = root.querySelector<HTMLElement>('[data-library-empty]')!
-    const kindTitles: Record<string,string> = { reference: 'System reference guides', journal: 'Dated build journal entries', original: 'Original V1 archive documents' }
+    const kindTitles: Record<string,string> = { reference: 'System reference guides', journal: 'Dated build journal entries', original: 'July 2026 early planning notes' }
     function applyFilters(historyMode: 'push' | 'replace' | false) {
       const {topic, generation, kind, q} = Object.fromEntries(names.map(name => [name,controls[name].value]))
       const terms = q.trim().toLowerCase().split(/\s+/).filter(Boolean)
@@ -144,10 +145,10 @@ const scope = tags.length ? `Tagged: ${tags.join(', ')}` : categories.length ? `
       const topicControl = controls.topic as HTMLSelectElement
       title.textContent = topic ? topicControl.selectedOptions[0].text : kindTitles[kind] || title.dataset.defaultHeading || 'Article library'
       note.textContent = kind === 'reference'
-        ? 'Start-here overview & current V2/V3 system guides first; V1 baseline & archive references appear alongside.'
+        ? 'Start-here overview & active V1, V2, and V3 system reference guides.'
         : generation === 'v1' || generation === 'v2' || generation === 'v3'
           ? 'Includes cross-version comparison and architecture guides.'
-          : 'Ordered with current system reference guides first, followed by dated journal logs and V1 archive notes.'
+          : 'Ordered with active V1/V2/V3 reference guides first, followed by dated journal logs and early July 2026 planning notes.'
       if (historyMode) {
         const address = new URL(location.href)
         for (const name of names) {

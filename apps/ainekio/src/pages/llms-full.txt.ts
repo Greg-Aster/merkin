@@ -36,7 +36,7 @@ export const GET: APIRoute = async ({ site }) => {
   ]
 
   const activePosts = posts
-    .filter(p => getReading(p).generation !== 'v1' || p.slug === 'ainekio-v1')
+    .filter(p => !p.data.archive && getReading(p).kind !== 'original')
     .sort((a, b) => {
       const ai = prioritySlugs.indexOf(a.slug)
       const bi = prioritySlugs.indexOf(b.slug)

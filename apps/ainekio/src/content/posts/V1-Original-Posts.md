@@ -1,8 +1,8 @@
 ---
-title: "Original Ainekio V1: The July 2026 Build Journal Archive"
+title: "July 2026 Early Planning Notes: Pre-Hardware Google Docs"
 published: 2026-10-12
-updated: 2026-11-13
-description: "Preserved July 2026 Google Docs archive from the start of Ainekio V1—plus links to the complete V1 ESP32-S3 Systems Guide, CAD layout, and later V2/V3 generations."
+updated: 2026-11-18
+description: "Preserved July 2026 pre-hardware Google Docs planning drafts—plus links to the active, functioning 8-servo Ainekio V1 Systems Guide, ongoing ESP32-P4/683ZZ CAD upgrades, and V2/V3 documentation."
 image: "/posts/ainekio-v1/v1-cad-three-quarter.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Ainekio"
@@ -22,11 +22,11 @@ reading:
   related: ["ainekio-v1", "body-design-and-hardware", "controller-firmware", "v1-v2-comparison"]
 ---
 
-> **Want a clear, up-to-date explanation of how Ainekio V1 actually works?** Start with the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)**, which explains V1's complete eight-servo mechanics, dedicated Blender CAD scene, dual-buck `2S` power system, `ESP32-S3` firmware, 38 `.amot` motions, 52 OLED expressions, and `protocol-v1` gateway loop in one place—alongside **[V1 Body & Hardware](/posts/body-design-and-hardware/)** and **[V1 Controller Firmware](/posts/controller-firmware/)**.
+> **Note — Ainekio V1 is active and NOT archived:** Only the July 2026 pre-hardware Google Docs planning drafts below are historical notes. The **8-servo Ainekio V1 robot itself is functioning and under active improvement and development**—start with the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)** for V1's live eight-servo floor build, interactive 3D CAD + 38-clip motion viewer, `59` V2-derived OLED expressions (`303` frames), `8× 683ZZ` counter-bearings, coaxial torsion wiring, and `ESP32-P4` / 4th-wire upgrade path, alongside **[V1 Body & Hardware](/posts/body-design-and-hardware/)** and **[V1 Controller Firmware](/posts/controller-firmware/)**.
 
-## Preserved July 2026 eight-servo notes
+## Preserved July 2026 pre-hardware notes
 
-The pages indexed below are the **unedited July 2026 Google Docs working notes** written while Ainekio V1 was first being conceived, simulated, ordered, and wired around a Freenove `ESP32-S3-WROOM CAM` and an eight-servo quadruped chassis. For the active `650 g` twelve-servo robot and the upcoming ~1.7× `DS3235` + Linux PC build, see **[Ainekio V2](/posts/ainekio-v2/)**, **[V1 vs. V2 Comparison](/posts/v1-v2-comparison/)**, and **[Ainekio V3 Preview](/posts/ainekio-v3-preview/)**.
+The pages indexed below are the **unedited July 2026 Google Docs working notes** written before parts arrived while Ainekio V1 was first being conceived, simulated, ordered, and wired around a Freenove `ESP32-S3-WROOM CAM` and an eight-servo quadruped chassis. For the active 8-servo and 12-servo physical robots and the armored `DS3235` + Linux SBC V3 build, see **[Ainekio V1](/posts/ainekio-v1/)**, **[Ainekio V2](/posts/ainekio-v2/)**, **[V1 vs. V2 Comparison](/posts/v1-v2-comparison/)**, and **[Ainekio V3 Preview](/posts/ainekio-v3-preview/)**.
 
 Copied verbatim from Google Docs on October 12, 2026 with original source links preserved. Publication dates reflect the original July 2026 posts.
 

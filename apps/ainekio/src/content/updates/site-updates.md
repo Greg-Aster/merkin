@@ -156,8 +156,8 @@ entries:
     url: "/posts/archive/2026-09-09-project-status/"
 ---
 
-# About the build archive
+# About the build journal
 
-These dated workbench entries follow Ainekio from the earliest eight-servo `ESP32-S3` experiments in summer 2026 (and its modernized `Scene 'v1'` `ESP32-P4` CAD revisit) through the active `650 g` twelve-servo `ESP32-P4` V2 floor robot, the `608`-mesh armored `DS3235` V3 CAD, and [Ainekio OS](https://github.com/Greg-Aster/ainekio-os) (formerly MetaHuman OS).
+These dated workbench entries cover ongoing development across the active eight-servo **Ainekio V1** quadruped (`ESP32-S3` floor build & `Scene 'v1'` `ESP32-P4`/`683ZZ`/4th-wire upgrades), the active `650 g` twelve-servo **Ainekio V2** floor robot, the `608`-mesh armored `DS3235` **Ainekio V3** CAD, and [Ainekio OS](https://github.com/Greg-Aster/ainekio-os) (formerly MetaHuman OS).
 
-If you want a high-level picture before reading individual bench logs, start with the [System Overview](/posts/project-overview/), [What Ainekio Can Do](/posts/what-ainekio-can-do/), [How Does Ainekio Stack Up?](/posts/how-does-ainekio-stack-up/), or the [Ainekio OS Guide](/posts/ainekio-os/). Early summer 2026 notes from the first eight-servo prototype remain preserved in the [Original V1 Archive](/posts/v1-original-posts/).
+If you want a high-level picture before reading individual bench logs, start with the [System Overview](/posts/project-overview/), [What Ainekio Can Do](/posts/what-ainekio-can-do/), [How Does Ainekio Stack Up?](/posts/how-does-ainekio-stack-up/), [Ainekio V1 Guide](/posts/ainekio-v1/), or [Ainekio OS Guide](/posts/ainekio-os/). Pre-hardware planning drafts from July 2026 remain preserved in [July 2026 Early Planning Notes](/posts/v1-original-posts/).

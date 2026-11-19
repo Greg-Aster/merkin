@@ -12,7 +12,7 @@ if (!source) throw new Error('Build journal requires updates/site-updates')
 const feed = await parseJournalContent(source.body, source.data.entries, { baseUrl: import.meta.env.BASE_URL })
 const posts = await getCollection('posts', ({ data }) => !data.draft)
 validateReadingPaths(posts)
-const subsystemTopics = Object.entries(topics).filter(([id]) => !['overview', 'v1'].includes(id)).map(([id, topic]) => {
+const subsystemTopics = Object.entries(topics).filter(([id]) => id !== 'overview').map(([id, topic]) => {
   const count = posts.filter(post => {
     const r = getReading(post)
     return r.topic === id && r.kind === 'journal'
@@ -21,12 +21,12 @@ const subsystemTopics = Object.entries(topics).filter(([id]) => !['overview', 'v
 }).filter(topic => topic.count > 0)
 const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 ---
-<MainGridLayout title="Ainekio Build Journal — Workbench Milestones & Robot Progress" description="Chronological workbench notes following Ainekio from early 3D-printed leg linkages through fourth-wire servo feedback, carpet walking trials, on-chip neural gait distillation, and Ainekio OS." oneColumn={true}>
+<MainGridLayout title="Ainekio Build Journal — Workbench Milestones & Robot Progress" description="Chronological workbench notes across Ainekio V1 (8-servo), V2 (12-servo), V3 CAD, fourth-wire servo feedback, carpet walking trials, on-chip neural gait distillation, and Ainekio OS." oneColumn={true}>
   <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: 'Ainekio Build Journal',
-    description: 'Chronological workbench notes documenting the twelve-servo ESP32-P4 quadruped robot and Ainekio OS.',
+    description: 'Chronological workbench notes documenting the active Ainekio V1 (8-servo) and V2 (12-servo) quadruped robots, V3 CAD, and Ainekio OS.',
     url: Astro.url.href,
   })}></script>
 
@@ -36,12 +36,12 @@ const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'nume
         <div class="journal-header-copy">
           <p class="journal-eyebrow">Chronological Progress</p>
           <h1>Build journal</h1>
-          <p>Dated progress across Blender CAD iterations, 3D-printed four-bar linkages, fourth-wire servo feedback, ESP32-P4 firmware, floor walking tests, neural gait distillation, and Ainekio OS.</p>
+          <p>Dated progress across the active V1 (8-servo) and V2 (12-servo) robots, V3 armored CAD, 3D-printed linkages, fourth-wire servo feedback, ESP32-S3 &amp; ESP32-P4 firmware, floor walking tests, neural gait distillation, and Ainekio OS.</p>
         </div>
         <nav class="journal-top-nav" aria-label="Journal shortcuts">
           <a href={url('/posts/project-overview/')}>System overview →</a>
+          <a href={url('/posts/ainekio-v1/')}>Ainekio V1 guide →</a>
           <a href={url('/posts/ainekio-os/')}>Ainekio OS guide →</a>
-          <a href={url('/posts/v1-original-posts/')}>V1 archive →</a>
         </nav>
       </header>
 
@@ -93,7 +93,7 @@ const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'nume
 
       {feed.introHtml && (
         <details class="journal-context-notes">
-          <summary>About the V1, V2 &amp; V3 build archives</summary>
+          <summary>About the V1, V2 &amp; V3 build journal</summary>
           <Markdown class="journal-notes"><div set:html={feed.introHtml} /></Markdown>
         </details>
       )}

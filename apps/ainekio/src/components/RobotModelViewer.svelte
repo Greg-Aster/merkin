@@ -125,9 +125,9 @@ const V2_TO_V1_FALLBACK: Record<string, string> = {
 const ROBOTS: Record<RobotId, RobotMeta> = {
   v1: {
     id: 'v1',
-    shortLabel: 'V1 (8-Servo)',
-    title: 'Ainekio V1 · 8-Servo Modernized P4 CAD',
-    badge: 'S3 Baseline → P4 CAD · 8 DOF',
+    shortLabel: 'V1 (Active 8-Servo)',
+    title: 'Ainekio V1 · Active 8-Servo Quadruped',
+    badge: 'Active Floor Robot + P4 Upgrade · 8 DOF',
     glbPath: '/models/ainekio-v1.glb',
     motionPath: '/models/ainekio-v1-motions.json',
     clipCount: 38,

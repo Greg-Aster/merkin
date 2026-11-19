@@ -103,17 +103,17 @@ const specs = [
 const generationCards = [
   {
     id: 'v1',
-    badge: 'V1 · Spider Baseline + P4 Revisit',
+    badge: 'V1 · Active 8-Servo Robot',
     tone: 'v1',
-    title: 'Ainekio V1: 8-Servo Quadruped & P4 CAD Revisit',
+    title: 'Ainekio V1: Active 8-Servo Quadruped',
     image: '/posts/ainekio-v1/v1-cad-three-quarter.webp',
     imageAlt: '3D CAD render of Ainekio V1 showing the seated matte-charcoal Frame8 enclosure cap, cyan-blue serrated 2-DOF spider legs, 683ZZ counter-bearings, tucked 4-wire harnesses, dual 2S flank battery bays, and 0.96-inch OLED bracket eyes.',
-    specLine: '8× MG90S + 683ZZ · S3 Baseline / P4 + 4th-Wire CAD · 0.96" OLED (59 faces)',
-    description: 'Custom 8-DOF spider-stance quadruped: first proven on carpet as an ESP32-S3 robot (38 .amot motions), now revisited in CAD (196.7 × 186.5 × 78.1 mm) with 683ZZ counter-bearings, tucked 4-wire harnesses, ESP32-P4 + 4th-wire sensing, and all 59 V2-derived OLED faces.',
+    specLine: '8× MG90S + 683ZZ · Active S3 Floor Build & P4 Upgrade · 0.96" OLED (59 faces)',
+    description: 'Functioning 8-DOF spider-stance quadruped under active improvement: walking and emoting on the floor (38 motions, 59 V2-derived OLED faces) and advancing in CAD/hardware (196.7 × 186.5 × 78.1 mm Frame8 enclosure, 683ZZ counter-bearings, coaxial Hip-Z wiring, and ESP32-P4 + 4th-wire sensing).',
     primaryHref: '/posts/ainekio-v1/',
     primaryLabel: 'V1 Systems Guide',
-    secondaryHref: '/posts/v1-original-posts/',
-    secondaryLabel: 'July 2026 Archive',
+    secondaryHref: '/posts/body-design-and-hardware/',
+    secondaryLabel: 'V1 Hardware & BOM',
   },
   {
     id: 'v2',
@@ -154,7 +154,7 @@ const generationCards = [
         <p class="home-eyebrow">Quadruped Robotics &amp; Local AI</p>
         <h1 id="home-title">Ainekio: a 3D-printed quadruped with a persistent mind</h1>
         <p class="home-intro">
-          Ainekio pairs a custom <strong>650&nbsp;g</strong>, twelve-servo walking robot (<a href="https://github.com/Greg-Aster/Ainekio-bot" target="_blank" rel="noreferrer">Ainekio-bot</a>) with <strong><a href={url('/posts/ainekio-os/')}>Ainekio OS</a></strong> (<a href="https://github.com/Greg-Aster/ainekio-os" target="_blank" rel="noreferrer">ainekio-os</a>)—a local-first AI runtime for persistent memory, room-audio conversation, and physical reactions.
+          Ainekio pairs custom 3D-printed walking quadrupeds—the active eight-servo <strong><a href={url('/posts/ainekio-v1/')}>V1</a></strong> and <strong>650&nbsp;g</strong> twelve-servo <strong><a href={url('/posts/ainekio-v2/')}>V2</a></strong> (with heavy armored <strong><a href={url('/posts/ainekio-v3-preview/')}>V3</a></strong> in CAD, <a href="https://github.com/Greg-Aster/Ainekio-bot" target="_blank" rel="noreferrer">Ainekio-bot</a>)—with <strong><a href={url('/posts/ainekio-os/')}>Ainekio OS</a></strong> (<a href="https://github.com/Greg-Aster/ainekio-os" target="_blank" rel="noreferrer">ainekio-os</a>), a local-first AI runtime for persistent memory, room-audio conversation, and physical reactions.
         </p>
 
         <dl class="hero-specs" aria-label="At-a-glance specifications">
@@ -341,17 +341,17 @@ const generationCards = [
     </ol>
   </section>
 
-  <!-- ZONE 6: FULL ARTICLE LIBRARY & ARCHIVE FOOTER BAR -->
-  <footer id="article-library" class="home-library-bar" aria-label="Full documentation archive and project links">
+  <!-- ZONE 6: FULL ARTICLE LIBRARY & REPO FOOTER BAR -->
+  <footer id="article-library" class="home-library-bar" aria-label="Full documentation library and project links">
     <div class="library-bar-copy">
-      <p class="home-eyebrow">Documentation &amp; Source Archive</p>
+      <p class="home-eyebrow">Documentation Library</p>
       <p class="library-bar-text">
-        <strong>{posts.length}</strong> reference guides, dated progress entries, and July 2026 V1 documents indexed by subsystem and robot generation.
+        <strong>{posts.length}</strong> reference guides, dated progress entries, and V1/V2/V3 engineering notes indexed by subsystem and robot generation.
       </p>
     </div>
     <div class="library-bar-links">
       <a class="home-primary-link" href={url('/archive/')}>Search &amp; filter all {posts.length} articles →</a>
-      <a class="home-secondary-link" href={url('/posts/v1-original-posts/')}>Original V1 archive →</a>
+      <a class="home-secondary-link" href={url('/posts/ainekio-v1/')}>Ainekio V1 guide →</a>
       <a class="home-secondary-link" href={url('/about/')}>About &amp; GitHub repos →</a>
     </div>
   </footer>

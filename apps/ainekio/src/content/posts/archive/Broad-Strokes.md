@@ -24,7 +24,7 @@ reading:
 
 > **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1uv5FAk8vwUOn8M2ttY6TtQT92P0Z5SP95sxKeCuTWRM/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [Ainekio V1 Systems Guide](/posts/ainekio-v1/) · [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
 
-> **Later project updates:** The browser simulator described here was retired once physical V1 hardware came online. See the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)** for how the completed eight-servo V1 robot operated.
+> **Later project updates:** The browser simulator described here was retired once physical V1 hardware came online. See the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)** for how the active eight-servo V1 robot operates and continues to evolve today.
 
 ---
 

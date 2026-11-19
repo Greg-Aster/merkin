@@ -24,7 +24,7 @@ reading:
 
 > **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1AVtNyFN7AG5ymLqshQI-77jO4nfG0yev8FUABZ8YE9E/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [Ainekio V1 Systems Guide](/posts/ainekio-v1/) · [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
 
-> **Later project updates:** MetaHuman OS is now **[Ainekio OS](/posts/ainekio-os/)** (`Greg-Aster/ainekio-os`), and the browser simulator mentioned here was retired after V1 hardware bring-up. See the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)** for the completed eight-servo V1 architecture, or **[System Overview](/posts/project-overview/)** for the active V2 and upcoming V3 robots.
+> **Later project updates:** MetaHuman OS is now **[Ainekio OS](/posts/ainekio-os/)** (`Greg-Aster/ainekio-os`), and the browser simulator mentioned here was retired after V1 hardware bring-up. See the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)** for the active eight-servo V1 architecture and ongoing upgrades, or **[System Overview](/posts/project-overview/)** for V1, V2, and upcoming V3.
 
 ---
 

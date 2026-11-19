@@ -24,7 +24,7 @@ reading:
 
 > **Dedicated Cockpit HUD Guide:** For a complete tour of **Ainekio Cockpit** (`#cockpit-section`)—including one-tap **`Tap to Talk`**, the translucent **7-graph Ainekio OS live stream** (`POST /api/metahuman-stream`), 10 immediate-apply runtime switches, and the 2D vector joystick—see **[Ainekio Cockpit: Full-Screen Camera HUD, Tap-to-Talk & Live Stream](/posts/ainekio-cockpit/)**.
 
-Three connected subsystems in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot) sit between the physical `ESP32-P4` V2 robot (or V1 `ESP32-S3` baseline) and **[Ainekio OS](/posts/ainekio-os/)** ([embodied integration](/posts/metahuman-integration/)), giving both a real-time session owner and a workbench for calibration, teleoperation, and physics simulation:
+Three connected subsystems in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot) sit between the physical `ESP32-P4` V2 and `ESP32-S3` V1 robots and **[Ainekio OS](/posts/ainekio-os/)** ([embodied integration](/posts/metahuman-integration/)), giving both a real-time session owner and a workbench for calibration, teleoperation, and physics simulation:
 
 1. **The Host Gateway**: Maintains the authenticated `protocol-v1` WebSocket link with the robot, tracks command sequence numbers and connection epochs, streams camera frames and bidirectional `16 kHz` PCM audio, commands on-chip `50 Hz` MicroDuck velocity twists, or streams `50 Hz` host neural gait frames.
 2. **The Embodied Adapter**: Translates high-level intents from Ainekio OS into capability-checked robot commands, persists crash-safe SQLite action receipts, exposes a one-click pause/resume switch for Ainekio OS control, and forwards structured telemetry and body-contact events upward.
@@ -65,7 +65,7 @@ To guarantee that a brief Wi-Fi drop never triggers duplicate physical motion, e
 
 ## MuJoCo hardware twins (and the retired July browser simulator)
 
-This page's URL (`gateway-and-simulator`) dates back to July 2026, when an early browser keyframe simulator was tested alongside the first gateway prototype. That browser-based keyframe simulator proved inadequate for real contact physics and was retired once physical V1 and V2 bring-up began (historical notes remain in the [V1 Archive](/posts/archive/motion-systems/)).
+This page's URL (`gateway-and-simulator`) dates back to July 2026, when an early browser keyframe simulator was tested alongside the first gateway prototype. That browser-based keyframe simulator proved inadequate for real contact physics and was retired once physical V1 and V2 bring-up began (early notes remain in [July 2026 Motion Systems](/posts/archive/motion-systems/)).
 
 Today, simulation for Ainekio V2 runs in **MuJoCo (`MJCF`) and JAX / Brax / MJX** across **`4,096` parallel GPU hardware-twin environments**:
 

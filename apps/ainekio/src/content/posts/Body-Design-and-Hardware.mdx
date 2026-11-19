@@ -2,7 +2,7 @@
 title: "V1 Eight-Servo Body & Hardware Reference"
 published: 2026-08-27T09:30:00-07:00
 updated: 2026-11-18
-description: "Mechanical, CAD, power, and bill-of-materials reference for the eight-servo Ainekio V1 quadruped: Summer 2026 ESP32-S3 floor build, modernized Nov 18 Scene 'v1' ESP32-P4 CAD enclosure, dual-buck 2S power isolation, and how V1 led to V2 and V3."
+description: "Mechanical, CAD, power, and bill-of-materials reference for the active eight-servo Ainekio V1 quadruped: functioning ESP32-S3 floor build, ongoing Scene 'v1' ESP32-P4 / 683ZZ / 4th-wire CAD & hardware upgrades, dual-buck 2S power isolation, and comparison with V2 and V3."
 image: "/gallery/20260827_093250-960.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Greg the Mechanic"
@@ -22,9 +22,9 @@ reading:
   related: ["ainekio-v1", "controller-firmware", "v1-original-posts", "v1-v2-comparison"]
 ---
 
-> **V1 hardware reference:** For an end-to-end overview of how V1's Summer 2026 `ESP32-S3` physical floor build, modernized November 18 `Scene 'v1'` 3D CAD assembly, vision, voice, **`59` OLED expressions (`303` frames)**, and `protocol-v1` gateway work together, start with the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)**. For the active `650 g` twelve-servo `ESP32-P4` robot and the industrial armored `DS3235` + onboard Linux SBC V3 build, see **[Ainekio V2](/posts/ainekio-v2/)**, **[V1 vs. V2 Comparison](/posts/v1-v2-comparison/)**, and **[Ainekio V3 Preview](/posts/ainekio-v3-preview/)**.
+> **Active V1 hardware reference:** **Ainekio V1** is a functioning, actively developed eight-servo quadruped. For an end-to-end overview of how V1's `ESP32-S3` physical floor build, ongoing `Scene 'v1'` `ESP32-P4` / `683ZZ` / 4th-wire CAD & hardware upgrades, vision, voice, **`59` OLED expressions (`303` frames)**, 38 motions, and `protocol-v1` gateway work together, start with the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)**. For the `650 g` twelve-servo `ESP32-P4` robot and the industrial armored `DS3235` + onboard Linux SBC V3 build, see **[Ainekio V2](/posts/ainekio-v2/)**, **[V1 vs. V2 Comparison](/posts/v1-v2-comparison/)**, and **[Ainekio V3 Preview](/posts/ainekio-v3-preview/)**.
 
-Ainekio's original **V1** hardware baseline is an eight-degree-of-freedom (`4 legs × 2 DOF`) quadruped built in Summer 2026 around a **Freenove `ESP32-S3-WROOM CAM`** (`N16R8`) microcontroller and eight **`MG90S`** micro servos—and revisited on November 16–18 in a modernized **`Scene 'v1'` Blender CAD enclosure (`196.7 × 186.5 × 78.1 mm`)**. Each corner leg uses two planar joints—an inboard hip yaw servo (`R1` front-right, `R2` rear-right, `L1` front-left, `L2` rear-left) sweeping an upper `R2V10` trussed bracket horizontally, and an outboard knee pitch servo (`R4` front-right, `R3` rear-right, `L3` rear-left, `L4` front-left) lifting a curved, serrated lower leg vertically—while **[Ainekio OS](/posts/ainekio-os/)** (formerly MetaHuman OS) handles conversation, memory, and high-level planning over Wi-Fi.
+**Ainekio V1** is an active eight-degree-of-freedom (`4 legs × 2 DOF`) quadruped running on the floor around a **Freenove `ESP32-S3-WROOM CAM`** (`N16R8`) microcontroller and eight **`MG90S`** micro servos—and advancing on the workbench through its **`Scene 'v1'` Blender CAD & closed-loop electronics upgrade (`196.7 × 186.5 × 78.1 mm`)**. Each corner leg uses two planar joints—an inboard hip yaw servo (`R1` front-right, `R2` rear-right, `L1` front-left, `L2` rear-left) sweeping an upper `R2V10` trussed bracket horizontally, and an outboard knee pitch servo (`R4` front-right, `R3` rear-right, `L3` rear-left, `L4` front-left) lifting a curved, serrated lower leg vertically—while **[Ainekio OS](/posts/ainekio-os/)** (formerly MetaHuman OS) handles conversation, memory, and high-level planning over Wi-Fi.
 
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
   <figure>

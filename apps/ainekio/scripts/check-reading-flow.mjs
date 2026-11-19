@@ -98,7 +98,7 @@ for (const slug of ['firmware', 'software', 'discussion', 'robot-familiar-parts-
 const home = page('')
 assert.doesNotMatch(home, /home-library-entry/, 'Homepage must not repeat the entire archive')
 assert.ok(links(home).includes(`${base}archive/`), 'Homepage must expose the article library')
-assert.ok(links(home).includes(route('v1-original-posts')), 'Original V1 must remain prominent')
+assert.ok(links(home).includes(route('ainekio-v1')), 'Ainekio V1 guide must remain prominent on homepage')
 assert.ok(links(home).includes(route('project-overview')), 'System overview must be reachable from homepage')
 
 const library = page('archive')

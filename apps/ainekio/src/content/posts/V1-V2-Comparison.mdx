@@ -2,7 +2,7 @@
 title: "8-Servo ESP32-S3 vs. 12-Servo ESP32-P4 Quadruped Robot Comparison (V1 vs. V2)"
 published: 2026-09-24
 updated: 2026-11-18
-description: "Side-by-side technical comparison of the 8-servo Ainekio V1 (Summer 2026 ESP32-S3 floor build + Nov 18 Scene 'v1' CAD revisit) and the 650 g 12-servo ESP32-P4 V2 closed-loop quadruped running 3-system neural motion and Ainekio OS—plus how both inform V3."
+description: "Side-by-side technical comparison of both active Ainekio quadrupeds—the 8-servo Ainekio V1 (functioning ESP32-S3 floor build + ongoing Scene 'v1' ESP32-P4 upgrades) and the 650 g 12-servo ESP32-P4 V2—plus how both inform V3."
 image: "/posts/2026-09-24-progress/v1-physical.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Greg the Mechanic"
@@ -22,10 +22,10 @@ reading:
   related: ["ainekio-v1", "ainekio-v2", "ainekio-v3-preview", "gait-development", "v1-original-posts"]
 ---
 
-Ainekio ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) has been built across two completed physical quadruped generations—with V1 also receiving a modernized closed-loop CAD revisit and a third industrial armored Linux SBC generation now modeled in `608`-mesh Blender CAD:
+Ainekio ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) runs across **two active, functioning physical quadruped generations**—with both robots under active improvement and a third industrial armored Linux SBC generation modeled in `608`-mesh Blender CAD:
 
-- **[Ainekio V1](/posts/ainekio-v1/)** (Summer 2026 physical build & Nov 18 `Scene 'v1'` CAD revisit) proved out the end-to-end voice, vision, `0.96"` `SSD1306` OLED (upgraded to **`59` V2-derived procedural faces / `303` frames**), `protocol-v1` gateway, and **[Ainekio OS](/posts/ainekio-os/)** ([`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os), formerly MetaHuman OS) loop on a custom eight-servo `ESP32-S3` spider-stance floor prototype—now paired with a modernized November 18 **`Scene 'v1'` CAD assembly (`196.7 × 186.5 × 78.1 mm`)** featuring a seated enclosed `Frame8` cap, `8× 683ZZ` counter-bearings, coaxial zero-bending torsion wiring, and an `ESP32-P4-WIFI6` + `PCA9685` + 8× 4th-wire feedback + `GY-LSM6DS3` + `Arducam B0066` deck.
-- **[Ainekio V2](/posts/ainekio-v2/)** (Active Physical Robot) is a complete `650 g` mechanical, electrical, and control redesign around the **`Waveshare ESP32-P4-WIFI6`**, adding lateral hip roll joints (twelve servos total), compact `35/20/28/38/55 mm` four-bar leg linkages with curved rocking soles, 4th-wire potentiometer feedback (`CD74HC4067` `C4–C15` → `GPIO49`, `S0–S3` on `GPIO27–30`), a `208 Hz` IMU, a 1.9-inch **59-expression** color LCD, open **`microWakeWord` + WebRTC VAD** audio, an **`8–10 s` `I²t` winding thermal fuse**, a `2S` **Wireless Keeper Bridge**, and a **3-system neural motion stack (`50 Hz` on-chip `MicroDuck v19-snag-p4` + `50 Hz` `NeuralPose v5-adaptive` / `Qwen3.5-0.8B` LoRA + `20 Hz` `Living Presence`)**.
+- **[Ainekio V1](/posts/ainekio-v1/)** (Active 8-Servo Robot) runs a functioning eight-servo `ESP32-S3` spider-stance floor body with onboard `OV3660` vision, I2S room audio, a `0.96"` `SSD1306` OLED (**`59` V2-derived procedural faces / `303` frames**), 38 `.amot` motions, and **[Ainekio OS](/posts/ainekio-os/)** ([`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os)) over `protocol-v1`—and is actively advancing through its **`Scene 'v1'` hardware & CAD upgrade (`196.7 × 186.5 × 78.1 mm`)** adding a seated enclosed `Frame8` cap, `8× 683ZZ` counter-bearings, coaxial zero-bending torsion wiring, and an `ESP32-P4-WIFI6` + `PCA9685` + 8× 4th-wire feedback + `GY-LSM6DS3` + `Arducam B0066` deck.
+- **[Ainekio V2](/posts/ainekio-v2/)** (Active 12-Servo Robot) is a `650 g` mechanical, electrical, and control build around the **`Waveshare ESP32-P4-WIFI6`**, adding lateral hip roll joints (twelve servos total), compact `35/20/28/38/55 mm` four-bar leg linkages with curved rocking soles, 4th-wire potentiometer feedback (`CD74HC4067` `C4–C15` → `GPIO49`, `S0–S3` on `GPIO27–30`), a `208 Hz` IMU, a 1.9-inch **59-expression** color LCD, open **`microWakeWord` + WebRTC VAD** audio, an **`8–10 s` `I²t` winding thermal fuse**, a `2S` **Wireless Keeper Bridge**, and a **3-system neural motion stack (`50 Hz` on-chip `MicroDuck v19-snag-p4` + `50 Hz` `NeuralPose v5-adaptive` / `Qwen3.5-0.8B` LoRA + `20 Hz` `Living Presence`)**.
 - **[Ainekio V3](/posts/ainekio-v3-preview/)** (In Development) scales up into a **`608`-mesh industrial armored `DS3235` CAD assembly (`436.3 × 236.5 × 381.4 mm` w/ whip antenna)** with `87.65 / 40 / 56 / 93.55 / 158.4 mm` shrouded four-bar crawler legs, a low-CG `4× 21700` (`2S2P`) belly pack, a **recessed `2.8"` `MSP2807` (`ILI9341`) vault TFT behind a swept ROPS bull-bar**, a rear clamshell `2.0 mm`-pin piano hinge, and an **onboard `Radxa Dragon Q6A` Linux SBC + `ESP32-P4-WIFI6`** inside the hull.
 
 <div className="grid grid-cols-2 gap-3">
@@ -41,7 +41,7 @@ Ainekio ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) 
 
 ## Mechanical & motion architecture (V1 vs. V2)
 
-| Feature | V1 · Eight-Servo Baseline & `Scene 'v1'` CAD | V2 · Twelve-Servo Closed-Loop Body |
+| Feature | V1 · Active 8-Servo Quadruped & `Scene 'v1'` Upgrade | V2 · Active 12-Servo Closed-Loop Body |
 | --- | --- | --- |
 | **Actuators** | 8× `MG90S` (2 per leg; open-loop PWM on S3 physical build; 8× 4th-wire `J0–J7` in Nov 18 `Scene 'v1'` CAD) | 12× Miuzei `MG90S` (3 per leg) modified with 4th-wire potentiometer wiper feedback |
 | **Leg mechanism & bearings** | Direct planar sweep + knee fold (`R1..L4`) in `Frame7`/`Frame8` spider-stance chassis (`8× 683ZZ` counter-bearings + coaxial zero-bending torsion wiring in `Scene 'v1'`) | Shoulder roll (`±h`) + compact four-bar linkage (`35 mm` carrier, `20 mm` crank, `28 mm` pickup, `38 mm` rod, `55 mm` lower leg) + curved rocking soles |

@@ -11,24 +11,24 @@ export const GET: APIRoute = async ({ site }) => {
 
   const systemReferences = posts.filter(p => {
     const r = getReading(p)
-    return r.kind === 'reference' && (r.generation !== 'v1' || p.slug === 'ainekio-v1')
+    return r.kind === 'reference' && !p.data.archive
   })
   const journalEntries = posts.filter(p => {
     const r = getReading(p)
-    return r.kind === 'journal' && r.generation !== 'v1'
+    return r.kind === 'journal'
   })
-  const v1ArchiveDocs = posts.filter(p => getReading(p).generation === 'v1' && p.slug !== 'ainekio-v1')
+  const earlyPlanningDocs = posts.filter(p => p.data.archive === true || getReading(p).kind === 'original')
   const videos = gallery.filter(item => item.src)
 
   const lines: string[] = [
-    '# Ainekio — 12-Servo ESP32-P4 Quadruped Companion & Ainekio OS',
+    '# Ainekio — 8-Servo V1, 12-Servo V2, Armored V3 & Ainekio OS',
     '',
-    '> Ainekio is a custom 650 g 3D-printed 12-servo quadruped robot (~$85 electronics/hardware BOM) running a 107.8 KB int8 DAgger-distilled RL locomotion policy at 50 Hz inside the Waveshare ESP32-P4-WIFI6 128 KB L2 cache, paired with Ainekio OS—a local-first cognitive runtime for persistent memory, room-audio voice conversation, generative Freestyle inverse-kinematics motion, and bounded physical autonomy across three hardware generations (V1, V2, and armored V3).',
+    '> Ainekio pairs custom 3D-printed quadruped robots—the active 8-servo V1 and 650 g 12-servo V2 (~$85 electronics/hardware BOM running a 107.8 KB int8 DAgger-distilled RL locomotion policy at 50 Hz inside the Waveshare ESP32-P4-WIFI6 128 KB L2 cache), plus the 608-mesh armored DS3235 V3 in CAD—with Ainekio OS, a local-first cognitive runtime for persistent memory, room-audio voice conversation, generative Freestyle inverse-kinematics motion, and bounded physical autonomy.',
     '',
     '## Key Technical Facts',
     '',
     '- **Three Robot Generations (V1 · V2 · V3)**:',
-    '  - **Ainekio V1 (8-Servo Spider Lineage)**: Summer 2026 physical carpet baseline (`ESP32-S3-WROOM CAM`, 8× open-loop `MG90S`, `OV3660`, 38 `.amot` motions) plus the modernized `Scene \'v1\'` CAD revisit (`196.7 × 186.5 × 78.1 mm`): seated `Frame8` enclosure cap, cyan-blue serrated 2-DOF legs, `8× 683ZZ` counter-bearings, coaxial Hip-Z torsion wire routing, `Waveshare ESP32-P4-WIFI6` + `PCA9685` + 8× 4th-wire analog sense (`J0–J7`) + `GY-LSM6DS3` IMU + `Arducam B0066`, and all **59** procedural V2 expressions (`303` `.bin` frames) derived to the `0.96"` `SSD1306` OLED.',
+    '  - **Ainekio V1 (Active 8-Servo Quadruped)**: Functioning floor robot (`ESP32-S3-WROOM CAM`, 8× `MG90S`, `OV3660`, 38 `.amot` motions, `0.96"` `SSD1306` OLED upgraded to all **59** procedural V2 expressions / `303` `.bin` frames) under active mechanical and electronics development (`Scene \'v1\'` `196.7 × 186.5 × 78.1 mm` seated `Frame8` enclosure, cyan-blue serrated 2-DOF legs, `8× 683ZZ` counter-bearings, coaxial Hip-Z torsion wire routing, and `Waveshare ESP32-P4-WIFI6` + `PCA9685` + 8× 4th-wire analog sense `J0–J7` + `GY-LSM6DS3` IMU + `Arducam B0066`).',
     '  - **Ainekio V2 (Active 650 g Closed-Loop Floor Robot)**: 3-DOF-per-leg four-bar quadruped (`244.9 × 141.5 × 103.4 mm` neutral CAD; `35/20/28/38/55 mm` linkage; 34 `Red/` STLs) with 12× `MG90S` servos modified for 4th-wire potentiometer feedback (`CD74HC4067` `S0–S3 = GPIO27–30` → `GPIO49` `ADC2_CH0`, `[1..4094]` full-span jam sensing + `8–10 s` per-joint `I²t` winding thermal fuse), `PCA9685` 50 Hz PWM, `LSM6DS3` 6-axis IMU (`208 Hz`), `OV5647` CSI camera, `ES8311` + `NS4150B` audio (`microWakeWord` + WebRTC VAD), and `1.9"` `ST7789` LCD (`320 × 170`, 59 procedural expressions).',
     '  - **Ainekio V3 (608-Mesh Armored DS3235 CAD, In Dev)**: Heavy-equipment ROPS quadruped (`436.3 × 236.5 × 381.4 mm` neutral CAD w/ whip in `v3-2.blend`) with 12× waterproof `DS3235` servos, `87.7/40/93.6/158.4 mm` shrouded crawler legs, `2.0 mm` rear clamshell piano hinge, `38` `M3` subframe fasteners, recessed `2.8"` `MSP2807` vault TFT, `4× 21700` (`2S2P`) belly pack, and onboard `Radxa Dragon Q6A` Linux SBC + `ESP32-P4`.',
     '- **3-System Neural Motion & Cockpit HUD**: System 1 runs a 110,432-byte (`107.84 KiB`) `int8` MicroDuck walking policy (`v18` Sys-ID & `v19-snag-p4` swing-foot snag reflex + `1.8 s` `-0.45 m/s` reverse unsnag + RISC-V PIE vector fixes) natively at 50 Hz inside the ESP32-P4 128 KB L2 cache; System 2 runs 50 Hz `NeuralPose v5-adaptive` (`6.7 mm` ground-friction snag micro-stepping, `280 ms` single-joint recoil, and multi-joint stance jam `replan_recovery`) over a `2,322`-example (`94`-family) `Qwen3.5-0.8B` Freestyle curriculum; System 3 runs a retrained 20 Hz `56.4 KB` `int8` Living Presence policy (`99.65%` expression accuracy, `14 mm` vertical yield, speech-RMS body motion, and silent-lock `~0.42 s` wake-word perk during VAD speech capture). Controlled via Ainekio Cockpit (`Tap to Talk` + translucent 7-graph Ainekio OS live stream).',
@@ -75,9 +75,9 @@ export const GET: APIRoute = async ({ site }) => {
       v => `- [${v.title}](${origin}${v.src}) (${v.date}): ${v.caption}`,
     ),
     '',
-    '## Optional: Retained Summer 2026 V1 Design Archive',
+    '## Optional: Early July 2026 Pre-Hardware Planning Notes',
     '',
-    ...v1ArchiveDocs.map(
+    ...earlyPlanningDocs.map(
       p => `- [${p.data.title}](${origin}/posts/${p.slug}/): ${p.data.description}`,
     ),
     '',

@@ -35,7 +35,7 @@ Instead of letting a language model poll hardware sensors or stream raw servo an
 
 The bridge connects Ainekio OS to the robot's **Host Gateway** ([gateway guide](/posts/gateway-and-simulator/)) across whichever link is active—local workstation loopback, home Wi-Fi LAN, an edge `Radxa Dragon Q6A` board, an SSH tunnel, or an optional remote tunnel.
 
-- **Single authoritative stream**: Multi-host connection following keeps one active observation and action session pinned to the physical robot (supporting both the 12-servo `ESP32-P4` V2 body and the earlier 8-servo `ESP32-S3` V1 frame) so switching between bench and living-room hosts never spawns duplicate command streams.
+- **Single authoritative stream**: Multi-host connection following keeps one active observation and action session pinned to the physical robot (supporting both the 12-servo `ESP32-P4` V2 body and the active 8-servo `ESP32-S3` V1 body) so switching between bench and living-room hosts never spawns duplicate command streams.
 - **Instant operator override**: A top-bar switch in the Body Control workbench and Cockpit HUD pauses or resumes Ainekio OS control immediately without dropping telemetry or manual teleoperation.
 
 ## Upward flow: how sensory data and telemetry enter Ainekio OS

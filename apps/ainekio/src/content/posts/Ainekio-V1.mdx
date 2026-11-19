@@ -1,8 +1,8 @@
 ---
-title: "Ainekio V1: Eight-Servo ESP32-S3 Quadruped Systems Guide"
+title: "Ainekio V1: Active Eight-Servo Quadruped Systems Guide"
 published: 2026-08-31
 updated: 2026-11-18
-description: "Complete technical systems guide to Ainekio V1: Summer 2026 physical 8-servo ESP32-S3 prototype, modernized Nov 18 Scene 'v1' ESP32-P4 3D CAD revisit, embodied voice, vision, 59 OLED expressions (303 frames), 38 .amot motions, and protocol-v1 Ainekio OS loop."
+description: "Complete technical systems guide to the active eight-servo Ainekio V1 quadruped: functioning ESP32-S3 floor build, ongoing ESP32-P4 / 683ZZ / 4th-wire CAD & hardware upgrades, embodied voice, vision, 59 OLED expressions (303 frames), 38 motions, and protocol-v1 Ainekio OS loop."
 image: "/posts/ainekio-v1/ainekio-v1-physical.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Greg the Mechanic"
@@ -23,11 +23,11 @@ reading:
 ---
 import RobotModelViewer from '../../components/RobotModelViewer.svelte'
 
-> **Where V1 fits in the Ainekio lineage:** **Ainekio V1** spans a clear two-stage engineering lineage: (1) the **Summer 2026 physical `ESP32-S3` baseline** that first brought **[Ainekio OS](/posts/ainekio-os/)** into a physical room—walking, speaking, listening, seeing, and making `0.96"` `SSD1306` OLED faces (upgraded on November 17 from `52` faces to full `59`-expression / `303`-frame parity with V2)—and (2) the **November 16–18 modernized `Scene 'v1'` Blender CAD revisit** (`196.7 × 186.5 × 78.1 mm`, shown in the interactive 3D viewer below), which brings seated `Frame8` enclosure armor, `8× 683ZZ` counter-bearings, coaxial zero-bending torsion wiring, and an `ESP32-P4-WIFI6` + `PCA9685` + 8× 4th-wire feedback + `GY-LSM6DS3` deck back to the 8-servo spider-stance form factor. Its original floor lessons led directly to the `650 g` twelve-servo closed-loop **[Ainekio V2](/posts/ainekio-v2/)** and the industrial armored `DS3235` + onboard `Radxa Dragon Q6A` Linux SBC **[Ainekio V3](/posts/ainekio-v3-preview/)**. In [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot), V1 (`v1-8servo`) remains a documented, first-class `protocol-v1` body alongside V2.
+> **Active 8-servo platform:** **Ainekio V1** is not an archived prototype—it is a **functioning, actively developed eight-servo quadruped** running alongside **[Ainekio V2](/posts/ainekio-v2/)** (`12` servos) and the in-development **[Ainekio V3](/posts/ainekio-v3-preview/)** (`DS3235` + onboard Linux SBC). On the floor today, the `ESP32-S3` V1 robot walks, emotes across **38 `.amot` motions**, speaks, listens, snaps `OV3660` vision stills, and renders all **`59` procedural V2-derived facial expressions (`303` frames)** on its `0.96"` `SSD1306` OLED over `protocol-v1` with **[Ainekio OS](/posts/ainekio-os/)**. Simultaneously, V1 is undergoing active mechanical and electronics upgrades in **`Scene 'v1'` (`196.7 × 186.5 × 78.1 mm`, inspectable and animatable in the 3D viewer below)**: seated `Frame8` matte-charcoal enclosure armor, `8× 683ZZ` counter-bearings, coaxial zero-bending Hip-Z torsion wiring, and an upgraded `Waveshare ESP32-P4-WIFI6` + `PCA9685` + 8× 4th-wire feedback + `GY-LSM6DS3` IMU + `Arducam B0066` deck.
 
-Before twelve-servo four-bar linkages, fourth-wire potentiometer feedback, or on-chip neural walking existed on the workbench, **Ainekio V1** answered the foundational engineering question of the project: *can a compact, 3D-printed sub-$100 hobby quadruped carry enough onboard vision, audio, face expression, and deterministic safety firmware to act as a genuine embodied body for a persistent local AI mind?*
+**Ainekio V1** demonstrates how much embodied capability fits inside a compact, 3D-printed sub-$100 eight-servo spider-stance quadruped—combining onboard vision, full-duplex room audio, expressive OLED eyes, and deterministic safety firmware into a live physical body for a persistent local AI mind.
 
-Because the early July–August 2026 V1 notes were written incrementally while parts were still arriving ([Original V1 Build Journal](/posts/v1-original-posts/)), this guide brings **both stages of Ainekio V1—the physical Summer 2026 `ESP32-S3` build and the modernized November 18 `Scene 'v1'` CAD assembly—together with its electrical, firmware, perception, motion, and gateway systems** in one place.
+While early pre-hardware planning drafts from July 2026 are preserved separately as [July 2026 Early Planning Notes](/posts/v1-original-posts/), this guide documents **the active Ainekio V1 robot across both its functioning `ESP32-S3` floor configuration and its ongoing `Scene 'v1'` `ESP32-P4` / `683ZZ` / 4th-wire upgrades**.
 
 ---
 
@@ -43,17 +43,17 @@ Ainekio V1 splits responsibility cleanly across three layers so servo pulse gene
 
 ---
 
-## 2. Mechanical design: two-stage V1 lineage (Summer 2026 physical build & Nov 18 `Scene 'v1'` CAD revisit)
+## 2. Mechanical design: functioning `ESP32-S3` floor build & ongoing `Scene 'v1'` `ESP32-P4` upgrades
 
-Mechanically, V1 is a **custom eight-degree-of-freedom (`4 legs × 2 DOF`) spider-stance quadruped** modeled and iteratively refined across `FrameV1` → `Frame6` → `Frame7` → `Frame8` (`Bottom-Housing1`, `oled-box1`, `Board-hold1..3`, `R2V10` upper brackets, and serrated lower legs) in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot). Its hardware record cleanly separates into two documented stages:
+Mechanically, V1 is an **active eight-degree-of-freedom (`4 legs × 2 DOF`) spider-stance quadruped** modeled and continuously refined across `FrameV1` → `Frame6` → `Frame7` → `Frame8` (`Bottom-Housing1`, `oled-box1`, `Board-hold1..3`, `R2V10` upper brackets, and serrated lower legs) in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot):
 
-- **Stage 1 — Summer 2026 Physical Baseline:** Built around the **Freenove `ESP32-S3-WROOM CAM`** (`N16R8`) with direct `MCPWM` servo outputs, a delivered **`OV3660`** DVP camera, cyan printed serrated lower legs, dual `MINI560` `5 V` buck rails, and a front **`0.96"` `SSD1306` OLED** (upgraded on November 17 via `derive_v1_oled.py` from `52` monochrome faces to full **`59`-expression / `303`-frame** procedural parity with V2).
-- **Stage 2 — November 16–18 Modernized `Scene 'v1'` CAD Revisit (`196.7 × 186.5 × 78.1 mm`, live in the interactive 3D viewer):** Rebuilds the 8-servo CAD assembly with a **seated low-profile `Frame8` top enclosure cap** over a deepened matte charcoal **`Frame7` (`122 × 92 × 37.5 mm`)** and matte charcoal `R2V10` brackets, **cyan-blue serrated lower legs** supported by **`8× 683ZZ` hip/knee counter-bearings**, **coaxial zero-bending torsion wire routing** (`44.8 mm` vertical arch along each hip Z-axis yielding `0.00 mm` endpoint push-pull across leg sweeps, retained by 9 printed `Wire Clips`), 3D cyan bracket OLED eyes, and an upgraded interior electronics deck (**`Waveshare ESP32-P4-WIFI6`**, **`Adafruit PCA9685`** on `I2C1+OE`, **8× 4th-wire analog sense leads `J0–J7`**, **`GY-LSM6DS3` IMU** on `I2C0`, **`Arducam B0066`** CSI camera, **`20×30 mm` speaker + cradle**, dual **`2S 1000 mAh` `14500`** flank battery packs, **`19×12 mm` master rocker switch**, and **`Mini560` `5 V / 5 A`** buck converter).
+- **Current Physical Floor Build (`ESP32-S3`):** Runs on the **Freenove `ESP32-S3-WROOM CAM`** (`N16R8`) with direct `MCPWM` servo outputs, a **`OV3660`** DVP camera, cyan printed serrated lower legs, dual `MINI560` `5 V` buck rails, and a front **`0.96"` `SSD1306` OLED** running all **`59` V2-derived procedural expressions (`303` frames)**.
+- **Ongoing `Scene 'v1'` Mechanical & `ESP32-P4` Upgrade (`196.7 × 186.5 × 78.1 mm`, live in the interactive 3D viewer):** Advances the 8-servo assembly with a **seated low-profile `Frame8` top enclosure cap** over a deepened matte charcoal **`Frame7` (`122 × 92 × 37.5 mm`)** and matte charcoal `R2V10` brackets, **cyan-blue serrated lower legs** supported by **`8× 683ZZ` hip/knee counter-bearings**, **coaxial zero-bending torsion wire routing** (`44.8 mm` vertical arch along each hip Z-axis yielding `0.00 mm` endpoint push-pull across leg sweeps, retained by 9 printed `Wire Clips`), 3D cyan bracket OLED eyes, and an upgraded interior electronics deck (**`Waveshare ESP32-P4-WIFI6`**, **`Adafruit PCA9685`** on `I2C1+OE`, **8× 4th-wire analog sense leads `J0–J7`**, **`GY-LSM6DS3` IMU** on `I2C0`, **`Arducam B0066`** CSI camera, **`20×30 mm` speaker + cradle**, dual **`2S 1000 mAh` `14500`** flank battery packs, **`19×12 mm` master rocker switch**, and **`Mini560` `5 V / 5 A`** buck converter).
 
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
   <figure>
     <img src="/gallery/ainekio-v1-physical-wave-1600.webp" alt="Physical eight-servo Ainekio V1 quadruped on carpet lifting its front-left cyan serrated leg in a wave gesture with glowing SSD1306 OLED eyes." width="1600" height="900" loading="lazy" />
-    <figcaption>Physical Summer 2026 Ainekio V1 executing a front-leg <code>wave</code> gesture on carpet while rendering an animated expression on its <code>0.96"</code> <code>SSD1306</code> OLED.</figcaption>
+    <figcaption>Physical Ainekio V1 executing a front-leg <code>wave</code> gesture on carpet while rendering an animated expression on its <code>0.96"</code> <code>SSD1306</code> OLED.</figcaption>
   </figure>
   <figure>
     <img src="/gallery/ainekio-v1-physical-dance-1600.webp" alt="Physical eight-servo Ainekio V1 quadruped splayed in a wide spider-stance dance motion on carpet with glowing blue OLED eyes and chin OV3660 camera." width="1600" height="900" loading="lazy" />
@@ -61,22 +61,22 @@ Mechanically, V1 is a **custom eight-degree-of-freedom (`4 legs × 2 DOF`) spide
   </figure>
 </div>
 
-Between the Summer 2026 floor prototype and the final November 18 `Scene 'v1'` enclosure, an intermediate November 16–17 open-deck Stage 1 CAD pass (`177.5 × 194.1 × 88.9 mm`) first mapped out dual-flank `14500` battery bays around the original `ESP32-S3` before the seated `Frame8` cap, cyan-blue legs, `683ZZ` counter-bearings, coaxial torsion harness, and `ESP32-P4-WIFI6` swap were completed:
+The CAD renders below show the current seated `Frame8` / `683ZZ` / coaxial-harness exterior alongside the dual-flank `14500` electronics packaging study:
 
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
   <figure>
-    <img src="/posts/ainekio-v1/v1-cad-three-quarter.webp" alt="Intermediate November 16–17 open-deck Stage 1 Blender CAD render of Ainekio V1 showing the shallow Frame7 bottom chassis, floated Frame8 top cap, front 0.96-inch OLED and camera module, dual flank 2S 14500 battery packs, Freenove ESP32-S3-WROOM CAM, PCA9685 header deck, and cyan eight-servo legs." width="1280" height="800" loading="lazy" />
-    <figcaption>Nov 16–17 intermediate open-deck Stage 1 CAD revisit (<code>177.5 × 194.1 × 88.9 mm</code>): shallow <code>Frame7</code> tray and floated <code>Frame8</code> cap captured prior to the seated low-profile <code>Frame8</code> enclosure, cyan-blue serrated lower legs, <code>8× 683ZZ</code> counter-bearings, and <code>ESP32-P4-WIFI6</code> deck swap.</figcaption>
+    <img src="/posts/ainekio-v1/v1-cad-three-quarter.webp" alt="Blender CAD render of Ainekio V1 showing the seated matte-charcoal Frame8 top cap over Frame7, cyan-blue serrated 2-DOF lower legs, 683ZZ counter-bearings, tucked 4-wire harnesses, dual flank 2S 14500 battery bays, and glowing cyan OLED eyes." width="1280" height="800" loading="lazy" />
+    <figcaption>Current <code>Scene 'v1'</code> three-quarter CAD assembly (<code>196.7 × 186.5 × 78.1 mm</code>): seated matte-charcoal <code>Frame8</code> cap over <code>Frame7</code>, cyan-blue serrated lower legs, <code>8× 683ZZ</code> counter-bearings, and tucked coaxial Hip-Z wire arches.</figcaption>
   </figure>
   <figure>
-    <img src="/posts/ainekio-v1/v1-cad-top-electronics.webp" alt="Orthographic top-down intermediate Stage 1 Blender CAD render of Ainekio V1 showing the earlier open-deck Freenove ESP32-S3 CAM placement, PCA9685 header deck, dual flank 2S 1000 mAh battery packs, Mini560 buck converter, and HiLetgo 2S USB-C charger." width="1280" height="960" loading="lazy" />
-    <figcaption>Nov 16–17 intermediate open-deck Stage 1 top view: shows the transitional <code>ESP32-S3</code> deck before the November 18 <code>Scene 'v1'</code> upgrade seated the <code>Frame8</code> cap, coaxial zero-bending torsion wiring, <code>ESP32-P4-WIFI6</code>, 8× 4th-wire feedback leads (<code>J0–J7</code>), and <code>GY-LSM6DS3</code> IMU.</figcaption>
+    <img src="/posts/ainekio-v1/v1-cad-top-electronics.webp" alt="Orthographic top-down Stage 1 Blender CAD render of Ainekio V1 showing dual flank 2S 1000 mAh battery bays, central controller and PCA9685 deck, Mini560 buck converter, and HiLetgo 2S USB-C charger." width="1280" height="960" loading="lazy" />
+    <figcaption>Top-down open-deck packaging pass mapping dual-flank <code>2S 1000 mAh</code> (<code>14500</code>) battery bays prior to seating the <code>Frame8</code> cap and swapping in the <code>ESP32-P4-WIFI6</code> + 8× 4th-wire (<code>J0–J7</code>) + <code>GY-LSM6DS3</code> deck below.</figcaption>
   </figure>
 </div>
 
 <figure className="my-6">
   <img src="/gallery/v1-p4-revisit-4view-cad-1600.webp" alt="Four-view engineering layout of the modernized Scene 'v1' CAD interior showing Waveshare ESP32-P4-WIFI6, PCA9685, 8 direct-ADC 4th-wire sense leads, 20x30 mm speaker bridge cradle over GY-LSM6DS3 IMU, rear master rocker switch and 2S charge jack, and coaxial Hip-Z wire arches." width="1600" height="1254" loading="lazy" />
-  <figcaption>Completed November 17–18 <code>Scene 'v1'</code> interior layout (<code>Frame8</code> cap hidden): <code>Waveshare ESP32-P4-WIFI6</code>, <code>PCA9685</code> + 8× 4th-wire sense leads, bridge-cradled <code>20×30 mm</code> speaker above the <code>GY-LSM6DS3</code> IMU, rear master rocker switch + external <code>2S</code> charge jack, and coaxial zero-bending Hip-Z wire arches.</figcaption>
+  <figcaption>Current <code>Scene 'v1'</code> interior layout (<code>Frame8</code> cap hidden): <code>Waveshare ESP32-P4-WIFI6</code>, <code>PCA9685</code> + 8× 4th-wire sense leads, bridge-cradled <code>20×30 mm</code> speaker above the <code>GY-LSM6DS3</code> IMU, rear master rocker switch + external <code>2S</code> charge jack, and coaxial zero-bending Hip-Z wire arches.</figcaption>
 </figure>
 
 <RobotModelViewer
@@ -84,7 +84,7 @@ Between the Summer 2026 floor prototype and the final November 18 `Scene 'v1'` e
   initialModel="v1"
   pageGeneration="v1"
   compact={true}
-  caption="Interactive 3D CAD assembly of the modernized November 18 Scene 'v1' Ainekio V1 (196.7 × 186.5 × 78.1 mm). Toggle X-Ray or Bare Core to look beneath the seated Frame8 top cap and matte charcoal Frame7 chassis into the Waveshare ESP32-P4-WIFI6, Adafruit PCA9685, 8× 4th-wire feedback harness (J0–J7), GY-LSM6DS3 IMU, Arducam B0066, 0.96-inch SSD1306 OLED, coaxial zero-bending torsion wiring, 683ZZ counter-bearings, and cyan-blue serrated legs—or switch to 1:1 Lineup beside V2 and V3."
+  caption="Interactive 3D CAD assembly of Ainekio V1 (196.7 × 186.5 × 78.1 mm). Open Motions & Gaits (38) to make V1 walk, emote, or strike poses, toggle X-Ray or Bare Core to inspect the Waveshare ESP32-P4-WIFI6, PCA9685, 8× 4th-wire harness, GY-LSM6DS3 IMU, 0.96-inch SSD1306 OLED, coaxial torsion wiring, and 683ZZ counter-bearings, or compare at 1:1 scale beside V2 and V3."
 />
 
 ### How V1's 2-DOF legs move (and why turns on the S3 build are open-loop)
@@ -177,9 +177,9 @@ V1 proved the entire **body ↔ gateway ↔ Ainekio OS** architecture in real ro
 - **Why [Ainekio V2](/posts/ainekio-v2/) was built (Active 12-Servo Closed-Loop Body):** Two-DOF open-loop legs could not step sideways, balance dynamically in roll, or tell when a foot caught on thick carpet (`45°/90°/180°` turns varied with floor friction). V2 added lateral hip roll (`12` servos), compact `35/20/28/38/55 mm` four-bar linkages, **4th-wire potentiometer feedback** (`CD74HC4067` `C4–C15` → `GPIO49` with select lines `S0–S3` on `GPIO27–30`), a `208 Hz` `LSM6DS3` IMU, a `1.9"` color LCD (**59 expressions**), open `microWakeWord` (`int8` TFLite Micro) + WebRTC VAD audio, an `8–10 s` `I²t` winding thermal fuse, and an **on-chip `50 Hz` `107.8 KB` L2-cached neural gait** in a `650 g` shell ([V1 vs. V2 Comparison](/posts/v1-v2-comparison/)).
 - **Why [Ainekio V3](/posts/ainekio-v3-preview/) is now in CAD (Industrial Armored `DS3235` + Onboard Linux SBC):** Scaling up into a `608`-mesh industrial armored assembly (`436.3 × 236.5 × 381.4 mm` w/ whip) with waterproof **`DS3235`** standard servos, `87.65 / 40 / 56 / 93.55 / 158.4 mm` shrouded four-bar crawler legs, and a low-CG `4× 21700` (`2S2P`) belly pack lets V3 carry **both** an `ESP32-P4-WIFI6` motor controller and an **onboard `Radxa Dragon Q6A` Linux SBC** inside a weather-resistant hull—pairing a **recessed `2.8"` `MSP2807` (`ILI9341`) vault TFT behind a swept ROPS bull-bar** with rear-accessible Linux I/O and a `2.0 mm`-pin clamshell service piano hinge.
 
-### Deeper V1 archive & engineering references
+### Deeper V1 engineering references
 
 - **[V1 Eight-Servo Body & Hardware Reference](/posts/body-design-and-hardware/)** — Detailed bill of materials, `Frame8` / CAD mechanical notes, and dual-buck power wiring.
-- **[V1 ESP32-S3 Controller Firmware](/posts/controller-firmware/)** — Portable C11 `ainekio_core` lifecycle, `MCPWM` timing, OTA rollback, and SoftAP provisioning details.
-- **[V1 vs. V2 Side-by-Side Comparison](/posts/v1-v2-comparison/)** — Joint excursion tables, compute comparison, and downloadable `.amot` range CSVs.
-- **[Original V1 Build Journal (July 2026 Google Docs Archive)](/posts/v1-original-posts/)** — The preserved early design discussions, parts lists, and virtual-bridge experiments from before hardware arrived.
+- **[V1 ESP32-S3 Controller Firmware](/posts/controller-firmware/)** — Portable C11 `ainekio_core` lifecycle, `MCPWM` timing, OTA rollback, SoftAP provisioning, and the `ESP32-P4` closed-loop upgrade path.
+- **[V1 vs. V2 Side-by-Side Comparison](/posts/v1-v2-comparison/)** — Joint excursion tables, compute comparison, and downloadable `.amot` range CSVs across both active robots.
+- **[July 2026 Early Planning Notes (Pre-Hardware Drafts)](/posts/v1-original-posts/)** — The preserved July 2026 Google Docs design discussions from before the first physical parts arrived.
