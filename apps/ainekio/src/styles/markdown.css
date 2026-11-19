@@ -33,6 +33,21 @@
         -webkit-overflow-scrolling: touch;
     }
 
+    @media (max-width: 640px) {
+        table {
+            font-size: 0.8125rem;
+            line-height: 1.45;
+        }
+        th, td {
+            padding: 0.45rem 0.55rem;
+            overflow-wrap: anywhere;
+        }
+        td code, th code {
+            font-size: 0.75rem;
+            word-break: break-word;
+        }
+    }
+
     a:not(.no-styling) {
         @apply relative bg-none link font-medium text-[var(--primary)]
         underline decoration-[var(--link-underline)] decoration-1 decoration-dashed underline-offset-4;

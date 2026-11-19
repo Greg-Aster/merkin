@@ -11,6 +11,7 @@ export let initialModel: ViewerMode = 'v2'
 export let allowModelSwitch = true
 export let compact = false
 export let caption = ''
+export let pageGeneration: 'v1' | 'v2' | 'v3' | '' = ''
 
 type RobotId = 'v1' | 'v2' | 'v3'
 
@@ -35,7 +36,7 @@ const ROBOTS: Record<RobotId, RobotMeta> = {
     title: 'Ainekio V1 · 8-Servo Baseline CAD',
     badge: 'Summer 2026 · 8 DOF',
     glbPath: '/models/ainekio-v1.glb',
-    envelope: '197.9 × 195.0 × 100.9 mm',
+    envelope: '187.1 × 193.1 × 100.8 mm',
     actuators: '8× MG90S (2-DOF spider legs)',
     compute: '0.96" OLED · Dual-Buck 2S',
     guideHref: '/posts/ainekio-v1/',
@@ -75,6 +76,8 @@ let shellMode: ShellMode = 'full'
 let activePreset: CameraPreset = 'three-quarter'
 let autoRotate = true
 let wheelZoomArmed = false
+let isTouchDevice = false
+let touchInteractive = false
 let isLoading = true
 let loadProgressText = 'Initializing 3D studio…'
 let loadError = ''
@@ -258,9 +261,9 @@ async function ensureEngine() {
     const orbit = new OrbitControls(camera, canvasEl)
     orbit.enableDamping = true
     orbit.dampingFactor = 0.075
-    orbit.enableZoom = wheelZoomArmed
+    orbit.enableZoom = isTouchDevice ? true : wheelZoomArmed
     orbit.minDistance = 0.14
-    orbit.maxDistance = 2.4
+    orbit.maxDistance = 3.6
     orbit.maxPolarAngle = Math.PI * 0.495
     orbit.autoRotate = autoRotate
     orbit.autoRotateSpeed = 1.15
@@ -274,6 +277,7 @@ async function ensureEngine() {
     loader.setMeshoptDecoder(MeshoptDecoder)
     gltfLoaderInstance = loader
 
+    let prevAspectBucket = w < h * 1.35 ? 'narrow' : 'wide'
     resizeObserver = new ResizeObserver(entries => {
       const entry = entries[0]
       if (!entry || !renderer || !camera) return
@@ -282,6 +286,11 @@ async function ensureEngine() {
       camera.aspect = rw / rh
       camera.updateProjectionMatrix()
       renderer.setSize(rw, rh, false)
+      const nextBucket = rw < rh * 1.35 ? 'narrow' : 'wide'
+      if (nextBucket !== prevAspectBucket) {
+        prevAspectBucket = nextBucket
+        moveToPreset(activePreset, true)
+      }
     })
     resizeObserver.observe(stageEl)
 
@@ -407,7 +416,11 @@ function computeCameraFraming(
   const center = box.getCenter(new T.Vector3())
   const target = new T.Vector3(center.x, center.y * 0.88, center.z)
   const maxDim = Math.max(size.x, size.y, size.z)
-  const dist = mode === 'lineup' ? maxDim * 1.32 : maxDim * 1.72
+  const aspect = Math.max(0.55, camera?.aspect || 1.6)
+  // Scale distance up on narrow portrait mobile canvases so horizontal span never clips
+  const refAspect = mode === 'lineup' ? 1.65 : 1.25
+  const aspectScale = Math.max(1, refAspect / aspect)
+  const dist = (mode === 'lineup' ? maxDim * 1.32 : maxDim * 1.72) * aspectScale
 
   const pos = new T.Vector3()
   if (preset === 'front') {
@@ -529,20 +542,29 @@ function zoomBy(factor: number) {
   if (!camera || !controls || !THREE) return
   camTween = null
   const offset = camera.position.clone().sub(controls.target)
-  const nextLen = Math.min(2.2, Math.max(0.15, offset.length() * factor))
+  const nextLen = Math.min(3.4, Math.max(0.15, offset.length() * factor))
   offset.setLength(nextLen)
   camera.position.copy(controls.target).add(offset)
   controls.update()
 }
 
 function armWheelZoom() {
+  if (isTouchDevice) return
   wheelZoomArmed = true
   if (controls) controls.enableZoom = true
 }
 
 function disarmWheelZoom() {
+  if (isTouchDevice) return
   wheelZoomArmed = false
   if (controls) controls.enableZoom = false
+}
+
+function toggleTouchInteractive() {
+  touchInteractive = !touchInteractive
+  if (controls) {
+    controls.enableZoom = true
+  }
 }
 
 function renderTick(now: number) {
@@ -587,6 +609,9 @@ function handleVisibilityChange() {
 
 onMount(() => {
   if (typeof window === 'undefined' || !rootEl) return
+  isTouchDevice =
+    window.matchMedia('(pointer: coarse)').matches ||
+    (navigator.maxTouchPoints ?? 0) > 0
   document.addEventListener('visibilitychange', handleVisibilityChange)
 
   intersectionObserver = new IntersectionObserver(
@@ -594,6 +619,9 @@ onMount(() => {
       const entry = entries[0]
       if (!entry) return
       isInViewport = entry.isIntersecting
+      if (!isInViewport && touchInteractive) {
+        touchInteractive = false
+      }
       if (isInViewport && !engineInitPromise) {
         void activateMode(activeMode, true)
       }
@@ -726,45 +754,89 @@ onDestroy(() => {
     {/if}
   </div>
 
-  <!-- 3D WebGL Viewport Stage -->
-  <div
-    bind:this={stageEl}
-    class="rv-stage"
-    on:pointerdown={armWheelZoom}
-    on:pointerleave={disarmWheelZoom}
-  >
-    <canvas bind:this={canvasEl} class="rv-canvas"></canvas>
+  <!-- 3D WebGL Viewport + Camera Toolbar -->
+  <div class="rv-viewport-wrap">
+    <div
+      bind:this={stageEl}
+      class="rv-stage"
+      on:pointerdown={armWheelZoom}
+      on:pointerleave={disarmWheelZoom}
+    >
+      <canvas
+        bind:this={canvasEl}
+        class="rv-canvas"
+        class:is-scroll-passthrough={isTouchDevice && !touchInteractive}
+      ></canvas>
 
-    <!-- Shell / Cutaway Mode Pill Overlay (Top-Left) -->
-    <div class="rv-hud-top-left" role="group" aria-label="Shell cutaway mode">
-      <button
-        type="button"
-        class="rv-chip"
-        class:is-active={shellMode === 'full'}
-        on:click={() => setShellMode('full')}
-      >
-        Full Shell
-      </button>
-      <button
-        type="button"
-        class="rv-chip"
-        class:is-active={shellMode === 'xray'}
-        on:click={() => setShellMode('xray')}
-      >
-        X-Ray
-      </button>
-      <button
-        type="button"
-        class="rv-chip"
-        class:is-active={shellMode === 'core'}
-        on:click={() => setShellMode('core')}
-      >
-        Bare Core
-      </button>
+      <!-- Shell / Cutaway Mode Pill Overlay (Top-Left) -->
+      <div class="rv-hud-top-left" role="group" aria-label="Shell cutaway mode">
+        <button
+          type="button"
+          class="rv-chip"
+          class:is-active={shellMode === 'full'}
+          on:click={() => setShellMode('full')}
+        >
+          Full Shell
+        </button>
+        <button
+          type="button"
+          class="rv-chip"
+          class:is-active={shellMode === 'xray'}
+          on:click={() => setShellMode('xray')}
+        >
+          X-Ray
+        </button>
+        <button
+          type="button"
+          class="rv-chip"
+          class:is-active={shellMode === 'core'}
+          on:click={() => setShellMode('core')}
+        >
+          Bare Core
+        </button>
+      </div>
+
+      <!-- Mobile Scroll-Safe 3D Touch Toggle Pill -->
+      {#if isTouchDevice && !isLoading && !loadError}
+        <button
+          type="button"
+          class="rv-touch-toggle"
+          class:is-active={touchInteractive}
+          on:click={toggleTouchInteractive}
+        >
+          {touchInteractive ? 'Done 3D · Resume Page Scroll' : 'Tap to Orbit & Pinch-Zoom 3D'}
+        </button>
+      {/if}
+
+      <!-- Lineup Labels Overlay -->
+      {#if activeMode === 'lineup' && !isLoading && !loadError}
+        <div class="rv-lineup-legend" aria-hidden="true">
+          <span><strong>Left:</strong> V1 (187 mm)</span>
+          <span><strong>Center:</strong> V2 (245 mm · 650 g)</span>
+          <span><strong>Right:</strong> V3 (436 mm · DS3235)</span>
+        </div>
+      {/if}
+
+      <!-- Interaction Hint (Desktop Bottom-Right) -->
+      <div class="rv-hint" aria-hidden="true">
+        Drag to orbit · Right-drag to pan · {wheelZoomArmed ? 'Scroll to zoom' : 'Click canvas to scroll-zoom'}
+      </div>
+
+      <!-- Loading / Error Overlay -->
+      {#if isLoading}
+        <div class="rv-overlay" role="status" aria-live="polite">
+          <span class="rv-spinner" aria-hidden="true"></span>
+          <span>{loadProgressText}</span>
+        </div>
+      {:else if loadError}
+        <div class="rv-overlay is-error" role="alert">
+          <span>{loadError}</span>
+        </div>
+      {/if}
     </div>
 
-    <!-- Camera Presets & Zoom Overlay (Top-Right) -->
-    <div class="rv-hud-top-right" role="group" aria-label="Camera views">
+    <!-- Camera Presets & Zoom (Top-Right HUD on desktop; clean dedicated strip on mobile) -->
+    <div class="rv-camera-bar" role="group" aria-label="Camera views">
       <button
         type="button"
         class="rv-chip"
@@ -838,32 +910,6 @@ onDestroy(() => {
         −
       </button>
     </div>
-
-    <!-- Lineup Labels Overlay -->
-    {#if activeMode === 'lineup' && !isLoading && !loadError}
-      <div class="rv-lineup-legend" aria-hidden="true">
-        <span><strong>Left:</strong> V1 (198 mm)</span>
-        <span><strong>Center:</strong> V2 (245 mm · 650 g)</span>
-        <span><strong>Right:</strong> V3 (436 mm · DS3235)</span>
-      </div>
-    {/if}
-
-    <!-- Interaction Hint (Bottom-Right) -->
-    <div class="rv-hint" aria-hidden="true">
-      Drag to orbit · Right-drag to pan · {wheelZoomArmed ? 'Scroll to zoom' : 'Click canvas to scroll-zoom'}
-    </div>
-
-    <!-- Loading / Error Overlay -->
-    {#if isLoading}
-      <div class="rv-overlay" role="status" aria-live="polite">
-        <span class="rv-spinner" aria-hidden="true"></span>
-        <span>{loadProgressText}</span>
-      </div>
-    {:else if loadError}
-      <div class="rv-overlay is-error" role="alert">
-        <span>{loadError}</span>
-      </div>
-    {/if}
   </div>
 
   <!-- Bottom Telemetry & Spec Strip -->
@@ -884,9 +930,9 @@ onDestroy(() => {
         </div>
       </div>
       <div class="rv-links">
-        <a href={url('/posts/ainekio-v1/')}>V1 →</a>
-        <a href={url('/posts/ainekio-v2/')}>V2 →</a>
-        <a href={url('/posts/ainekio-v3-preview/')}>V3 →</a>
+        {#if pageGeneration !== 'v1'}<a href={url('/posts/ainekio-v1/')}>V1 →</a>{/if}
+        {#if pageGeneration !== 'v2'}<a href={url('/posts/ainekio-v2/')}>V2 →</a>{/if}
+        {#if pageGeneration !== 'v3'}<a href={url('/posts/ainekio-v3-preview/')}>V3 →</a>{/if}
       </div>
     {:else if currentMeta}
       <div class="rv-specs">
@@ -905,7 +951,17 @@ onDestroy(() => {
       </div>
       {#if allowModelSwitch}
         <div class="rv-links">
-          <a href={url(currentMeta.guideHref)}>{currentMeta.guideLabel} →</a>
+          {#if pageGeneration === currentMeta.id}
+            <button
+              type="button"
+              class="rv-link-btn"
+              on:click={() => void activateMode('lineup')}
+            >
+              Compare in 1:1 Lineup →
+            </button>
+          {:else}
+            <a href={url(currentMeta.guideHref)}>{currentMeta.guideLabel} →</a>
+          {/if}
         </div>
       {/if}
     {/if}
@@ -988,6 +1044,10 @@ onDestroy(() => {
     background: #38bdf8;
   }
 
+  .rv-viewport-wrap {
+    position: relative;
+  }
+
   .rv-stage {
     position: relative;
     width: 100%;
@@ -1008,12 +1068,18 @@ onDestroy(() => {
     touch-action: none;
   }
 
+  .rv-canvas.is-scroll-passthrough {
+    touch-action: pan-y !important;
+    pointer-events: none;
+    cursor: default;
+  }
+
   .rv-canvas:active {
     cursor: grabbing;
   }
 
   .rv-hud-top-left,
-  .rv-hud-top-right {
+  .rv-camera-bar {
     position: absolute;
     top: 0.65rem;
     display: flex;
@@ -1026,9 +1092,36 @@ onDestroy(() => {
     left: 0.7rem;
   }
 
-  .rv-hud-top-right {
+  .rv-camera-bar {
     right: 0.7rem;
     justify-content: flex-end;
+  }
+
+  .rv-touch-toggle {
+    position: absolute;
+    left: 50%;
+    bottom: 0.65rem;
+    transform: translateX(-50%);
+    min-height: 2.25rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 750;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    color: #e0f2fe;
+    background: rgb(8 20 28 / 0.86);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgb(56 189 248 / 0.55);
+    box-shadow: 0 4px 14px rgb(0 0 0 / 0.35);
+    cursor: pointer;
+    z-index: 3;
+  }
+
+  .rv-touch-toggle.is-active {
+    color: #061015;
+    background: #38bdf8;
+    border-color: #7dd3fc;
   }
 
   .rv-chip {
@@ -1173,13 +1266,20 @@ onDestroy(() => {
     font-weight: 700;
   }
 
-  .rv-links a {
+  .rv-links a,
+  .rv-link-btn {
     color: #38bdf8;
     text-decoration: none;
     white-space: nowrap;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
   }
 
-  .rv-links a:hover {
+  .rv-links a:hover,
+  .rv-link-btn:hover {
     text-decoration: underline;
   }
 
@@ -1194,18 +1294,52 @@ onDestroy(() => {
   }
 
   @media (max-width: 680px) {
-    .rv-hint {
+    .rv-topbar {
+      padding: 0.7rem 0.85rem;
+    }
+    .rv-segmented {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .rv-segmented button {
+      min-height: 2.25rem;
+      padding: 0.38rem 0.35rem;
+      font-size: 0.78rem;
+      text-align: center;
+    }
+    .rv-hud-top-left {
+      top: 0.55rem;
+      left: 0.55rem;
+      right: 0.55rem;
+    }
+    .rv-chip {
+      min-height: 2.25rem;
+      padding: 0.36rem 0.68rem;
+      font-size: 0.76rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .rv-zoom-btn {
       display: none;
     }
-    .rv-hud-top-left,
-    .rv-hud-top-right {
-      top: 0.5rem;
+    .rv-camera-bar {
+      position: static;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 0.3rem;
+      padding: 0.48rem 0.65rem;
+      background: #081218;
+      border-top: 1px solid rgb(255 255 255 / 0.08);
     }
-    .rv-hud-top-right {
-      top: auto;
-      bottom: 0.5rem;
-      right: 0.5rem;
+    .rv-camera-bar .rv-chip {
+      padding: 0.36rem 0.2rem;
+      font-size: 0.73rem;
+      min-width: 0;
     }
+    .rv-hint,
     .rv-lineup-legend {
       display: none;
     }
