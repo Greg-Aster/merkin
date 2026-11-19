@@ -1,8 +1,8 @@
 ---
 title: "Ainekio V2 Hardware: 3D-Printed 12-Servo ESP32-P4 Quadruped, 4th-Wire MG90S Feedback & Pinout"
 published: 2026-09-07T12:00:00-07:00
-updated: 2026-11-16
-description: "Complete V2 hardware reference: 650 g 12-servo closed-loop chassis, 35/20/28/38/55 mm leg linkages, on-chip 107.8 KB L2-cached ESP32-P4 neural gait, per-joint I²t thermal fuse, PCA9685 and CD74HC4067 (C4–C15 → GPIO49) wiring diagrams, and STL archives."
+updated: 2026-11-18
+description: "Complete V2 hardware reference: interactive 3D CAD model, 650 g 12-servo closed-loop chassis, 35/20/28/38/55 mm leg linkages, on-chip 107.8 KB L2-cached ESP32-P4 neural gait, per-joint I²t thermal fuse, PCA9685 and CD74HC4067 (C4–C15 → GPIO49) wiring diagrams, and STL archives."
 image: "/assets/ainekio/2026-10-12-refresh/blender-front.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Greg the Mechanic"
@@ -21,8 +21,16 @@ reading:
   next: protocol-and-safety
   related: ["jam-protection-and-thermal-safety", "three-system-neural-architecture", "ainekio-v3-preview", "2026-11-16-cockpit-stream-jam-fuse-and-v3-armor"]
 ---
+import RobotModelViewer from '../../components/RobotModelViewer.svelte'
 
 Ainekio V2 ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) is a `650 g`, twelve-servo, closed-loop quadruped body built around the **Waveshare ESP32-P4-WIFI6**. Where the eight-servo V1 prototype moved each leg in a single plane with two open-loop motors, V2 adds a third actuator per leg for lateral hip roll (`±h`), a compact four-bar linkage for upper-carrier (`alpha`) and knee (`theta`) actuation with curved rocking soles, 4th-wire potentiometer feedback on all twelve joints, a `208 Hz` inertial measurement unit, on-chip `50 Hz` Core 1 neural gait execution inside the `ESP32-P4`'s `128 KB` L2 cache, and a modular **Wireless Keeper Bridge** `2S` power carrier.
+
+<RobotModelViewer
+  client:visible
+  initialModel="v2"
+  compact={true}
+  caption="Interactive 3D CAD assembly of the active 650 g Ainekio V2 Wireless chassis. Toggle X-Ray or Bare Core to peel away the crimson carapace and front visor, exposing the 1.9-inch ST7789 LCD, OV5647 chin camera, ESP32-P4-WIFI6, PCA9685, CD74HC4067 4th-wire mux, Wireless Keeper Bridge 2S pack, and 35/20/28/38/55 mm four-bar legs."
+/>
 
 ![Ainekio V2 Assembly Reference](/gallery/diagram-assembly-reference-960.webp)
 

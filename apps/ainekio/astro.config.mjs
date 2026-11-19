@@ -25,6 +25,7 @@ import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs'
 
 function manualClientChunks(id) {
   if (!id.includes('node_modules')) return undefined
+  if (id.includes('/three/')) return 'vendor-three'
   if (id.includes('photoswipe')) return 'vendor-photoswipe'
   if (id.includes('marked') || id.includes('markdown-it')) return 'vendor-markdown'
   if (id.includes('katex')) return 'vendor-katex'

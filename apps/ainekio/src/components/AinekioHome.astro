@@ -2,6 +2,7 @@
 import { getCollection, getEntry } from 'astro:content'
 import gallery from '../data/gallery.json'
 import GalleryImage from './GalleryImage.astro'
+import RobotModelViewer from './RobotModelViewer.svelte'
 import { topics, getReading, validateReadingPaths } from '../lib/reading'
 import { url } from '../utils/url-utils'
 
@@ -224,6 +225,12 @@ const generationCards = [
         </article>
       ))}
     </div>
+
+    <RobotModelViewer
+      client:visible
+      initialModel="lineup"
+      caption="Live Blender CAD exports at 1:1 millimeter scale on a 100 mm major / 20 mm minor reference grid. Switch between the 3-robot lineup and individual V1, V2, or V3 assemblies, or toggle X-Ray and Bare Core to inspect internal boards, battery bays, and four-bar linkages."
+    />
   </section>
 
   <!-- ZONE 3: DARK STUDIO MEDIA STAGE (VIDEO + BALANCED 2x2 VISUAL GRID) -->

@@ -1,8 +1,8 @@
 ---
 title: "Ainekio V1: Eight-Servo ESP32-S3 Quadruped Systems Guide"
 published: 2026-08-31
-updated: 2026-11-16
-description: "Complete technical systems guide to Ainekio V1: physical 8-servo ESP32-S3 quadruped photos, dedicated Blender CAD scene, embodied voice, vision, 52 OLED expressions, 38 .amot motions, and protocol-v1 Ainekio OS loop."
+updated: 2026-11-18
+description: "Complete technical systems guide to Ainekio V1: physical 8-servo ESP32-S3 quadruped photos, interactive 3D Blender CAD model, embodied voice, vision, 52 OLED expressions, 38 .amot motions, and protocol-v1 Ainekio OS loop."
 image: "/posts/ainekio-v1/ainekio-v1-physical.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Greg the Mechanic"
@@ -21,6 +21,7 @@ reading:
   next: body-design-and-hardware
   related: ["body-design-and-hardware", "controller-firmware", "v1-original-posts", "v1-v2-comparison", "ainekio-v2"]
 ---
+import RobotModelViewer from '../../components/RobotModelViewer.svelte'
 
 > **Where V1 fits in the Ainekio lineage:** **Ainekio V1** (Summer 2026) is the original eight-servo `ESP32-S3` quadruped that first brought **[Ainekio OS](/posts/ainekio-os/)** into a physical room—walking, speaking, listening, seeing, and making faces over Wi-Fi. Its mechanical and sensing lessons led directly to the `650 g` twelve-servo closed-loop **[Ainekio V2](/posts/ainekio-v2/)** (active today) and the upcoming ~1.7× `DS3235` + onboard Linux PC **[Ainekio V3](/posts/ainekio-v3-preview/)**. In [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot), V1 (`v1-8servo`) remains a documented, first-class `protocol-v1` body alongside V2.
 
@@ -63,6 +64,13 @@ Alongside the physical August 2026 floor prototype, V1 now has a **dedicated, fu
     <figcaption>Top-down V1 CAD deck layout: central `Freenove ESP32-S3-WROOM CAM` and `PCA9685` distribution header flanked by symmetrical `2S` `14500` (`1000 mAh`) battery bays, `Mini560` `5 V / 5 A` buck converter, and `HiLetgo 2S` USB-C boost charger with printed retention clips.</figcaption>
   </figure>
 </div>
+
+<RobotModelViewer
+  client:visible
+  initialModel="v1"
+  compact={true}
+  caption="Interactive 3D CAD assembly of Ainekio V1 exported from the live Blender scene. Toggle X-Ray or Bare Core to see through the Frame7 chassis walls into the 0.96-inch SSD1306 OLED, dual 2S 14500 flank battery bays, PCA9685 distribution deck, and eight MG90S servos, or switch to 1:1 Lineup to compare V1 directly beside V2 and V3."
+/>
 
 ### How V1's 2-DOF legs move (and why turns are open-loop)
 

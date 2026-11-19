@@ -1,8 +1,8 @@
 ---
 title: "Ainekio V3 (In Development): Armored DS3235 Quadruped, 2.8\" Vault Screen & Onboard Linux SBC"
 published: 2026-11-13
-updated: 2026-11-16
-description: "Active Blender CAD reference for Ainekio V3 (v3-2.blend): a 440.8 × 234.4 × 307.8 mm heavy-equipment armored quadruped with 12 waterproof DS3235 servos, 87.7/40/93.6/158.4 mm shrouded four-bar legs, recessed 2.8-inch MSP2807 vault display, 4× 21700 battery pack, and onboard Radxa Q6A Linux SBC + ESP32-P4."
+updated: 2026-11-18
+description: "Active Blender CAD reference and interactive 3D viewer for Ainekio V3 (v3-2.blend): a 440.8 × 234.4 × 307.8 mm heavy-equipment armored quadruped with 12 waterproof DS3235 servos, 87.7/40/93.6/158.4 mm shrouded four-bar legs, recessed 2.8-inch MSP2807 vault display, 4× 21700 battery pack, and onboard Radxa Q6A Linux SBC + ESP32-P4."
 image: "/posts/ainekio-v3/v3-armored-three-quarter.webp"
 authorName: "Ainekio Project"
 showImageOnPost: true
@@ -19,6 +19,7 @@ reading:
   next: ainekio-v2
   related: ["ainekio-v2", "ainekio-v1", "2026-11-16-cockpit-stream-jam-fuse-and-v3-armor", "q6a-chassis-and-active-loop", "ainekio-os"]
 ---
+import RobotModelViewer from '../../components/RobotModelViewer.svelte'
 
 > **Workbench status — Active CAD (`v3-2.blend`, updated November 16, 2026):** The `650 g` twelve-servo **[Ainekio V2](/posts/ainekio-v2/)** remains the active physical robot walking untethered on the floor today, following the original eight-servo **[Ainekio V1](/posts/ainekio-v1/)**. **Ainekio V3** has progressed in Blender from an initial open-leg sketch into a complete, watertight **`293`-mesh industrial armored assembly** (`440.83 × 234.40 × 307.81 mm` body/ROPS envelope; `381.42 mm` with strobe beacon and whip antenna) verified with zero static or dynamic `BVHTree` mesh collisions across all boards, bearings, harnesses, and swing poses.
 
@@ -30,6 +31,13 @@ Getting the `650 g` micro-servo V2 robot walking untethered on its on-chip `50 H
 **Ainekio V3** addresses both limits simultaneously by stepping up to **twelve waterproof `DSSERVO DS3235` (`~35 kg·cm` class) standard aluminum-case servos** (`~15×` V2's stall torque), scaling the four-bar leg linkages to **`87.65 / 40.00 / 93.55 / 158.40 mm`** (`131.3 mm` belly skid ground clearance), and packaging **both an `ESP32-P4-WIFI6` real-time motor controller and an onboard `Radxa Dragon Q6A` Linux SBC + `4× 21700` battery pack** inside a modular heavy-equipment shell.
 
 ![1:1 orthographic Blender CAD scale comparison between the 650 g Ainekio V2 micro-quadruped and the heavy-equipment armored Ainekio V3](/posts/ainekio-v3/v3-armored-vs-v2-scale.webp)
+
+<RobotModelViewer
+  client:visible
+  initialModel="v3"
+  compact={true}
+  caption="Interactive 3D CAD assembly of Ainekio V3 exported from v3-2.blend. Orbit around the swept ROPS bull-bar, recessed 2.8-inch MSP2807 vault bezel, 3-ring planetary hip drums, cam thigh shells, twin rear thigh struts, and split-toe crawler feet—or click X-Ray / Bare Core to inspect the stacked Radxa Dragon Q6A + Armor 7056A heatsink, 4× 21700 belly cells, ESP32-P4-WIFI6, 14 AWG copper-busbar PCA9685, and twelve DS3235 servos."
+/>
 
 ---
 
