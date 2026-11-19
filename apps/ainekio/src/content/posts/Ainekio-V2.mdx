@@ -44,12 +44,12 @@ Ainekio V2 ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot
 | **Degrees of freedom** | 12 actuated joints (3 per leg: shoulder roll, upper-carrier pitch, knee linkage crank) |
 | **Compact linkage geometry** | `35 mm` upper carrier, `20 mm` input crank, `28 mm` lower-leg pickup radius, `38 mm` connecting rod, `55 mm` distal lower leg with curved rocking sole |
 | **Actuators** | 12× Miuzei `MG90S` metal-gear micro servos modified with a 4th analog wiper feedback wire (housed in shimmed upper servo brackets) |
-| **PWM driver** | `HUAREW / Adafruit PCA9685` 16-channel 12-bit PWM controller over I2C (`50 Hz` frame rate with staggered channel phase offsets) |
-| **Position feedback** | `CD74HC4067` 16-channel analog multiplexer routing 12 servo wiper voltages on **`C4–C15`** into `ESP32-P4` **`GPIO49`** (`ADC2_CH0`, select lines `S0–S3` on `GPIO28–31`) with One-Euro velocity filtering |
+| **PWM driver** | `HUAREW / Adafruit PCA9685` 16-channel 12-bit PWM controller over I2C (`50 Hz` frame rate with staggered channel phase offsets and selective per-channel jam cutoff) |
+| **Position feedback & thermal safety** | `CD74HC4067` 16-channel analog multiplexer routing 12 servo wiper voltages on **`C4–C15`** into `ESP32-P4` **`GPIO49`** (`ADC2_CH0`, select lines `S0–S3` on **`GPIO27–30`**) with One-Euro velocity filtering + **[`8–10 s` per-joint `I²t` winding thermal fuse](/posts/jam-protection-and-thermal-safety/)** |
 | **Main controller & on-chip RL** | `Waveshare ESP32-P4-WIFI6` (dual-core `360 MHz` RISC-V, `128 KB` L2 cache running a `107.8 KB` `int8` MicroDuck neural actor at `50 Hz` on Core 1, `32 MB` PSRAM, `32 MB` flash) + `ESP32-C6` Wi-Fi 6 |
 | **Inertial sensor** | `LSM6DS3` 6-axis accelerometer/gyroscope (`208 Hz` sampling, yaw-zeroed attitude filter, dedicated gyro carrier) |
 | **Face display & camera** | `1.9"` `ST7789` IPS LCD (`320 × 170`, **59** animated expressions, recessed bezel + 4 wireless spacers) + chin-mounted `OV5647` MIPI-CSI camera below the LCD (`180°` inverted mount) |
-| **Audio subsystem** | Onboard `ES8311` codec + `NS4150B` Class-D amplifier, microphone, `20 × 30 mm` `8 Ω 2 W` speaker, and `WakeNet9s` |
+| **Audio subsystem** | Onboard `ES8311` codec + `NS4150B` Class-D amplifier, microphone, `20 × 30 mm` `8 Ω 2 W` speaker, and open **`microWakeWord` (`int8` TFLite Micro) + WebRTC VAD** (alongside `WakeNet9s` support) |
 | **Power & Keeper Bridge** | Battery-mounted **Wireless Keeper Bridge**: `2S` (`8.4 V` max) Li-ion pack (`73.6 × 46 × 22 mm`), `Mini560` `5 V / 5 A` buck converter, `HiLetgo` `2S` USB-C boost charger, and snap-in `ESP32-P4`/`PCA9685`/`HiLetgo` PCB clips |
 
 ## Compact leg linkage geometry
@@ -83,9 +83,9 @@ Motor power branches directly from the `Mini560` `5 V / 5 A` regulator into the 
 
 ![PCA9685 Wiring](/gallery/diagram-pca9685-wiring-960.webp)
 
-### CD74HC4067 4th-wire feedback multiplexer wiring
+### CD74HC4067 4th-wire feedback multiplexer & per-joint `I²t` jam safety
 
-Every `MG90S` servo is opened on the bench to solder a 4th wire onto its internal potentiometer wiper. Those twelve analog lines route into channels **`C4–C15`** of a `CD74HC4067` multiplexer—addressed via select lines `S0–S3` on `GPIO28–31` and sampled at `50 Hz` into `ESP32-P4` **`GPIO49` (`ADC2_CH0`)**—allowing the controller to measure real shaft positions, detect stalls or jams, and verify target arrival (`Stand` within `2 mm` and closed-loop `Walk` synchronization):
+Every `MG90S` servo is opened on the bench to solder a 4th wire onto its internal potentiometer wiper. Those twelve analog lines route into channels **`C4–C15`** of a `CD74HC4067` multiplexer—addressed via select lines `S0–S3` on **`GPIO27–30`** and sampled at `50 Hz` into `ESP32-P4` **`GPIO49` (`ADC2_CH0`)**—allowing the controller to measure real shaft positions, verify target arrival (`Stand` within `2 mm` and closed-loop `Walk` synchronization), and run an **[`8–10 s` per-joint `I²t` winding thermal fuse](/posts/jam-protection-and-thermal-safety/)** with selective `PCA9685` channel cutoff so a snagged or jammed joint relaxes before overheating without collapsing healthy supporting legs:
 
 ![Multiplexer Wiring](/gallery/diagram-multiplexer-wiring-960.webp)
 
@@ -97,20 +97,25 @@ Earlier design studies tested heavy external USB-PD power banks (`Anker` 10,000 
 2. **Step-down regulation**: A `Mini560` `5 V / 5 A` synchronous buck converter steps the `2S` pack down to a regulated `5 V` rail capable of sustaining twelve-servo standing and walking loads.
 3. **Onboard USB-C charging & snap-in PCB clips**: A `HiLetgo` `2S` USB-C boost charger board charges the `2S` pack directly from standard `5 V` USB-C input, while dedicated printed clips retain the `ESP32-P4-WIFI6`, `PCA9685`, `HiLetgo` charger, and `LSM6DS3` gyro carrier securely during dynamic walking bouts.
 
+<figure className="my-6">
+  <img src="/gallery/v2-cad-open-keeper-deck-1600.webp" alt="Top-down orthographic Blender CAD cutaway of Ainekio V2 with dorsal carapace hidden, exposing the Waveshare ESP32-P4-WIFI6, PCA9685, CD74HC4067 4th-wire mux, and rear 2S Wireless Keeper Bridge." width="1280" height="878" loading="lazy" />
+  <figcaption>Top-down V2 CAD packaging with dorsal carapace removed: central <code>Waveshare ESP32-P4-WIFI6</code> and <code>PCA9685</code> deck, forward <code>CD74HC4067</code> 4th-wire multiplexer tucked behind the faceted head mask, and rear <code>HiLetgo</code> <code>2S</code> Wireless Keeper Bridge.</figcaption>
+</figure>
+
 ## CAD, 3D printing & repository
 
-All V2 structural parts—including the recessed `1.9"` LCD bezel and wireless spacers, lower-jaw `OV5647` camera mount, battery-mounted Wireless Keeper Bridge, snap-in PCB clips, shimmed upper servo brackets, `35 mm` `4.9 mm` outside-horn plain-bore carriers, `38 mm` styled coupler rods, carapace side protectors, curved rocking soles, and the `140 × 110 mm` bench calibration stand—are modeled in Blender and printed on a desktop FDM printer in PLA/PETG. Firmware, gateway code, printable STLs (`Slave/hardware/v2-12servo/STL/`), and trained model assets live in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot).
+All V2 structural parts—including the recessed `1.9"` LCD bezel and wireless spacers, lower-jaw `OV5647` camera mount, battery-mounted Wireless Keeper Bridge, snap-in PCB clips, shimmed upper servo brackets, `35 mm` `4.9 mm` outside-horn plain-bore carriers, `38 mm` styled coupler rods, carapace side protectors, curved rocking soles, and the `140 × 110 mm` bench calibration stand—are modeled in Blender and printed on a desktop FDM printer in PLA/PETG. Firmware, gateway code, the **34 print-ready `Red/` carapace & linkage STLs** (`Slave/hardware/v2-12servo/STL/Red/`, organized across `full carapace/`, `boots/`, and `blue-carrier/`), and trained model assets live in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot).
 
 ## Design evolution from V1 to V2
 
 ![Illustrated comparison of Ainekio V1 and a prospective V2 hybrid with a stout body and serrated red legs.](/assets/ainekio/v2/evolution-concept.webp)
 
-| Subsystem | V1 (Eight-Servo S3) | V2 (Twelve-Servo P4) |
+| Subsystem | V1 (Eight-Servo Baseline & `Scene 'v1'` CAD) | V2 (Twelve-Servo P4) |
 | --- | --- | --- |
-| **Legs** | 2 joints per leg; 8× `MG90S` | 3 joints per leg; 12× feedback-modified `MG90S` |
+| **Legs** | 2 joints per leg; 8× `MG90S` (`8× 683ZZ` counter-bearings in Nov 18 `Scene 'v1'`) | 3 joints per leg; 12× feedback-modified `MG90S` |
 | **Foot placement** | Fore/aft and vertical only | Full 3D foot workspace including lateral hip roll and curved rocking soles |
-| **Chassis** | Custom open-top `Frame7`/`Frame8` frame | Custom enclosed shell (`245.85 × 182.79 × 109.06 mm`) with modular front face and Wireless Keeper Bridge |
-| **Controller** | `ESP32-S3 N16R8` (direct MCPWM) | `Waveshare ESP32-P4-WIFI6` (`50 Hz` Core 1 `107.8 KB` L2 neural gait) + `PCA9685` PWM + `CD74HC4067` (`C4–C15` → `GPIO49`) ADC mux |
+| **Chassis** | `Frame7`/`Frame8` spider-stance frame (seated `196.7 × 186.5 × 78.1 mm` cap in `Scene 'v1'`) | Custom enclosed shell (`245.85 × 182.79 × 109.06 mm`) with modular front face and Wireless Keeper Bridge |
+| **Controller** | Summer 2026 `ESP32-S3 N16R8` (direct MCPWM) · Nov 18 `Scene 'v1'` `ESP32-P4-WIFI6` + `PCA9685` + 8× 4th-wire | `Waveshare ESP32-P4-WIFI6` (`50 Hz` Core 1 `107.8 KB` L2 neural gait) + `PCA9685` PWM + `CD74HC4067` (`C4–C15` → `GPIO49`, `S0–S3` on `GPIO27–30`) ADC mux |
 | **Host compute** | Desktop over Wi-Fi | Desktop or `Radxa Dragon Q6A` over Wi-Fi running **[Ainekio OS](/posts/ainekio-os/)** |
 | **Power** | `2S 1000 mAh` Li-ion + dual `Mini560` | `2S` pack + `Mini560` `5 V / 5 A` + `HiLetgo` `2S` USB-C charger in Wireless Keeper Bridge |
 

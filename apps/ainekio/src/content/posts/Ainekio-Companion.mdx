@@ -1,7 +1,7 @@
 ---
 title: "Ainekio as a Companion: Voice, 59-Expression Face, Physical Reactions & Memory Continuity"
 published: 2026-10-14
-updated: 2026-11-12
+updated: 2026-11-18
 description: "What Ainekio is like on a desk or living-room floor: wake-word conversation, 59 animated LCD expressions, varied pickup and tip reactions, multi-day memory continuity, and standalone vs. host operation."
 image: "/posts/companion-guide/companion-loop.svg"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
@@ -33,19 +33,19 @@ Ainekio (`650 g` V2 body in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-A
 
 ## Voice conversation without robotic filler
 
-In a room, talking to Ainekio starts with onboard **`WakeNet9s`** wake-word detection on the `ESP32-P4` body. When it hears its wake phrase, the robot perks its front shoulders slightly (`+6°`) so you can tell physically that it is listening, captures your spoken turn until voice activity settles, and pairs the audio with a camera frame if visual context is helpful.
+In a room, talking to Ainekio starts with onboard **`microWakeWord`** (`TFLite Micro`) and **`esp-sr` WebRTC VAD** on the `ESP32-P4` body (or one-tap `Tap to Talk` in [Cockpit HUD](/posts/ainekio-cockpit/)). When it hears its wake phrase, **System 3 (`20 Hz` Living Presence)** executes a smooth **`~0.42 s` `+6°` front-shoulder perk**, switches to the **`listening` face**, and locks quiet holding stance (`stop(detach=False)`) so servo motion never holds VAD open while capturing your spoken turn and pairing the audio with a camera frame when visual context helps.
 
 Rather than narrating every internal tool call (*"Step 1: standing up. Step 2: taking photo"*), Ainekio OS separates action selection from outward speech:
 
-- **Silent task execution**: Specialist models dispatch movements, camera checks, or posture shifts quietly in the background.
+- **Silent task execution**: **`v26` Intent and Task specialist LoRAs** (`661` source cases / `2,941` dev records) dispatch movements, camera checks, or posture shifts quietly in the background.
 - **One outward voice**: A single **Standing Persona** synthesizes the spoken reply once Ainekio has actually moved or looked, played back through the onboard speaker (`ES8311` codec + `NS4150B` amplifier) using local or LAN-hosted **Kokoro** text-to-speech (with a fast local **Piper** fallback). While speaking, the body suppresses wake-word and microphone re-triggering so it never answers its own voice.
 
 ## A 59-expression face and expressive body language
 
 Because a headless four-legged frame is hard to read across a desk, Ainekio's V2 front carrier pairs a **1.9-inch `ST7789` color IPS LCD** (`320 × 170` landscape at `15 fps`) with a chin-mounted **`OV5647` camera** tucked into the lower jaw below the screen.
 
-- **59 procedural expressions**: The onboard display renders **59 animated expressions**—spanning idle blinks, directional glances, curiosity, drowsiness, live audio-synced voice bars while talking, gesture accompaniments, startled/grumpy contact faces, and `cosmic_horror`.
-- **Freestyle postures and fault recovery**: Beyond analytical gaits (`Walk`, `Run`, `Crawl`, `Crab`), Core 1's `50 Hz` neural walk, and 23 compiled gestures (`Wave`, `Bow`, `Stretch`, `Sit`, `Play Dead`), Ainekio draws on a **349-motion Freestyle library**. Its generative posture specialist was trained on a **489-row dataset** combining **73** curated library motions with **416** synthesized fault-recovery trajectories that safely untangle snagged legs and return to a stable `Stand`.
+- **59 procedural expressions & `20 Hz` Living Presence**: The onboard display renders **59 animated expressions**—spanning idle blinks, directional glances, curiosity, drowsiness, live audio-synced voice bars while talking, gesture accompaniments, startled/grumpy contact faces, and `cosmic_horror`—while **System 3 (`20 Hz` Living Presence, `56.4 KB` INT8)** adds subtle speech-RMS body nods (`±8 mm`), `99.65%`-accurate expression shifts, and `14 mm` vertical jam compliance between explicit gestures.
+- **Freestyle postures, `50 Hz` `NeuralPose v5-adaptive` & fault recovery**: Beyond analytical gaits (`Walk`, `Run`, `Crawl`, `Crab`), Core 1's `50 Hz` `MicroDuck v19-snag-p4` neural walk, and 23 compiled gestures (`Wave`, `Bow`, `Stretch`, `Sit`, `Play Dead`), Ainekio synthesizes natural-language choreography from a **`2,322`-row (`94`-family) `Qwen3.5-0.8B` Freestyle curriculum** (`1,510` ordinary motions + `812` fault-recovery trajectories across `splayed_stand`, `lay_down`, and `dead` starting postures) tracked closed-loop at **`50 Hz` by `NeuralPose v5-adaptive`** (`6.7 mm` ground-friction micro-step unloading, `280 ms` single-joint recoil, and multi-joint stance jam one-shot `replan_recovery`).
 
 ## Physical reactions when picked up, tipped, or stalled
 
@@ -56,6 +56,19 @@ When Ainekio is tipped over, shaken, or hits a servo stall:
 1. **Immediate hardware awareness**: Onboard firmware detects the attitude excursion or shaft-tracking error in milliseconds and emits a structured body event without cutting servo holding power unnecessarily on minor snags.
 2. **Non-repetitive vocal and facial reflexes**: Instead of playing a fixed sound effect, Ainekio OS routes sudden jostles through a fast reflex path that checks the **last 6 body-event remarks** (with elevated sampling diversity) so it pairs a matching LCD expression with a fresh, dryly varied comment rather than repeating the same canned line every time you pick it up.
 3. **Preserved task context**: Answering a bump or pickup does not erase a paused multi-step goal that Ainekio was working on beforehand.
+
+<figure className="my-6">
+  <video controls playsinline preload="none" width="960" height="540" poster="/gallery/v2-shake-and-greet-test-poster.webp" className="w-full rounded-xl">
+    <source src="/gallery/v2-shake-and-greet-test.mp4" type="video/mp4" />
+    <a href="/gallery/v2-shake-and-greet-test.mp4">Download physical V2 wake-up, conversation, and pickup shake-reflex video (MP4)</a>
+  </video>
+  <figcaption>Living-room companion check: Ainekio wakes with a stretch, chats naturally, fires an immediate snarky vocal and LCD reaction when picked up and shaken mid-turn, and resumes friendly conversation once set back down.</figcaption>
+</figure>
+
+<figure className="my-6">
+  <img src="/posts/ainekio-os/ainekio-os-live-vision-chat.webp" alt="Ainekio OS Environment Mode workbench showing a multi-turn visually grounded room conversation alongside Hybrid specialist model routing." width="1600" height="870" loading="lazy" />
+  <figcaption>Visually grounded companion turns in the Ainekio OS workbench: pairing room conversation and on-demand camera checks with local <code>llama.cpp</code>, LAN compute, and <code>Hybrid</code> specialist routing.</figcaption>
+</figure>
 
 ## Continuity across days (and at `02:00 AM`)
 
@@ -71,7 +84,7 @@ Because the physical body weighs `650 g` and runs on a microcontroller rather th
 
 | Operating Setup | What runs onboard the `ESP32-P4` V2 robot | What the host PC or `Radxa Dragon Q6A` adds |
 | --- | --- | --- |
-| **Standalone Body (`ESP32-P4` only)** | Closed-loop `Stand` (`2 mm` settle), analytical `Walk`/`Run`/`Crawl`/`Crab`, 23 built-in gestures, **on-chip `50 Hz` `107.8 KB` MicroDuck neural walking**, `208 Hz` IMU self-leveling, `CD74HC4067` (`C4–C15` → `GPIO49`) stall detection, **59 LCD expressions**, `WakeNet9s` wake detection, microSD clip recording, and local failsafe / inactivity `Rest` | *Not required for self-contained standing, leveling, or onboard controller/gait testing* |
-| **Connected Companion (Body + Host Gateway & Ainekio OS)** | All real-time motor control, workspace projection, shaft-arrival verification, audio capture/playback, and camera/IMU streaming | Whisper speech-to-text, Kokoro/Piper speech synthesis, Standing Persona conversation, multimodal vision & optical-flow obstacle range, Freestyle posture synthesis, attributed episodic memory, Reactive/Semi/Full Auto agency ([autonomy guide](/posts/bounded-autonomy/)), and overnight `02:00` sleep consolidation |
+| **Standalone Body (`ESP32-P4` only)** | Closed-loop `Stand` (`2 mm` settle), analytical `Walk`/`Run`/`Crawl`/`Crab`, 23 built-in gestures, **on-chip `50 Hz` `110.4 KB` (`107.84 KiB`) `MicroDuck v19-snag-p4` neural walking**, `208 Hz` IMU self-leveling, `CD74HC4067` (`C4–C15` via `GPIO27–30` → `GPIO49`) stall & `8–10 s` `I²t` thermal protection, **59 LCD expressions**, **`microWakeWord` + WebRTC VAD** wake detection, microSD clip recording, and local failsafe / inactivity `Rest` | *Not required for self-contained standing, leveling, or onboard controller/gait testing* |
+| **Connected Companion (Body + Host Gateway & Ainekio OS)** | All real-time motor control, workspace projection, shaft-arrival verification, audio capture/playback, and camera/IMU streaming | Whisper speech-to-text, VRAM-aware Kokoro/Piper speech synthesis, Standing Persona conversation, `v26` specialist routing, multimodal vision & `< 0.30 m` `MoGe-2` corridor braking, `2,322`-row Freestyle + `50 Hz` `NeuralPose v5-adaptive` + `20 Hz` `Living Presence`, attributed episodic memory, Reactive/Semi/Full Auto agency ([autonomy guide](/posts/bounded-autonomy/)), and overnight `02:00` sleep consolidation |
 
 You can inspect and steer both halves from the local web workbench (for chat, memory inspection, cognitive workflows, and model routing) and the **Body Control / Cockpit HUD** interface ([gateway guide](/posts/gateway-and-simulator/)) for live camera views, servo calibration, and manual teleoperation.

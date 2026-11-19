@@ -3,7 +3,7 @@
     "id": "v3-armored-three-quarter",
     "kind": "design",
     "title": "Ainekio V3 heavy-equipment armored CAD (front three-quarter)",
-    "caption": "November 16 Blender CAD (v3-2.blend, 293 visible meshes): 440.8 × 234.4 × 307.8 mm ROPS body (381.4 mm with whip antenna), recessed 2.8-inch MSP2807 vault display, dual brow camera pods, LED worklights, and 12 waterproof DS3235 crawler legs.",
+    "caption": "Blender CAD (v3-2.blend, Scene 'v3', expanded to 608 visible meshes): 436.3 × 236.5 × 381.4 mm neutral CAD envelope (with whip antenna), hinged ROPS bull-bar service hood, recessed 2.8-inch MSP2807 vault display, dual brow camera pods, LED worklights, and 12 waterproof DS3235 crawler legs.",
     "date": "2026-11-16",
     "sourceFile": "v3_hero_three_quarter.png",
     "sourceBytes": 1583732,
@@ -26,6 +26,126 @@
         "width": 1600,
         "height": 1000,
         "bytes": 66952
+      }
+    ]
+  },
+  {
+    "id": "v3-msp2807-cyclops-eye",
+    "kind": "design",
+    "title": "Ainekio V3 recessed 2.8-inch MSP2807 cyan-phosphor Cyclops eye",
+    "caption": "November 18 Scene 'v3' front vault update: a high-contrast cyan-phosphor Cyclops eye display centered inside the 4-bolt cast-gunmetal MSP2807 (ILI9341) bezel behind the swept ROPS bull-bar and dual Arducam B0066 brow camera pods.",
+    "date": "2026-11-18",
+    "sourceFile": "v3_msp2807_cyclops_eye_preview.png",
+    "sourceBytes": 176202,
+    "sourceSha256": "e6bb36b5b526c4e64ce26170fa5ae99c8df2d4b401d8c6933ee07a83f9fded61",
+    "variants": [
+      {
+        "src": "/gallery/v3-msp2807-cyclops-eye-480.webp",
+        "width": 480,
+        "height": 203,
+        "bytes": 10496
+      },
+      {
+        "src": "/gallery/v3-msp2807-cyclops-eye-960.webp",
+        "width": 960,
+        "height": 405,
+        "bytes": 26368
+      },
+      {
+        "src": "/gallery/v3-msp2807-cyclops-eye-1600.webp",
+        "width": 1280,
+        "height": 540,
+        "bytes": 38812
+      }
+    ]
+  },
+  {
+    "id": "v3-clamshell-service-hood",
+    "kind": "design",
+    "title": "Ainekio V3 rear-hinged clamshell service hood (0° closed vs. 50° open)",
+    "caption": "Three-angle CAD study showing all 132 upper hull components (isogrid dorsal radiator core, ROPS frame, rear fenders, and cargo subframe) pivoting open 50° as a single clamshell on the rear 2.0 mm piano hinge to expose the Radxa Dragon Q6A and 4× 21700 bay.",
+    "date": "2026-11-18",
+    "sourceFile": "v3_clamshell_empty_pivot_rig.png",
+    "sourceBytes": 1518465,
+    "sourceSha256": "c04a612d183c89b2ca03b8676ae828acfe6c071ff58d21169d7fbed8bee0228b",
+    "variants": [
+      {
+        "src": "/gallery/v3-clamshell-service-hood-480.webp",
+        "width": 480,
+        "height": 129,
+        "bytes": 8546
+      },
+      {
+        "src": "/gallery/v3-clamshell-service-hood-960.webp",
+        "width": 960,
+        "height": 258,
+        "bytes": 25752
+      },
+      {
+        "src": "/gallery/v3-clamshell-service-hood-1600.webp",
+        "width": 1600,
+        "height": 431,
+        "bytes": 54040
+      }
+    ]
+  },
+  {
+    "id": "v3-printable-piano-hinge",
+    "kind": "design",
+    "title": "Ainekio V3 72 mm printable rear piano hinge & Ø2.0 mm wire core",
+    "caption": "Four-panel mechanical CAD breakdown of V3's rear clamshell service hinge: separate stationary and moving leaves, Ø2.0 × 72 mm stainless wire pin, flush M3×6 screw recesses in the rear vent bumper and cargo trunk, and 60° open service clearance.",
+    "date": "2026-11-18",
+    "sourceFile": "v3_printable_piano_hinge_2mm.png",
+    "sourceBytes": 3528938,
+    "sourceSha256": "3c55881f02eae76a75cb6c96ea0301dd69c5608c4e9dc1072b5e430b3779d682",
+    "variants": [
+      {
+        "src": "/gallery/v3-printable-piano-hinge-480.webp",
+        "width": 480,
+        "height": 380,
+        "bytes": 23772
+      },
+      {
+        "src": "/gallery/v3-printable-piano-hinge-960.webp",
+        "width": 960,
+        "height": 760,
+        "bytes": 57912
+      },
+      {
+        "src": "/gallery/v3-printable-piano-hinge-1600.webp",
+        "width": 1600,
+        "height": 1266,
+        "bytes": 107112
+      }
+    ]
+  },
+  {
+    "id": "v3-dorsal-core-isogrid",
+    "kind": "design",
+    "title": "Ainekio V3 lightweighting triangular isogrid under the dorsal SBC core",
+    "caption": "Underside and assembled CAD views of V3's dorsal Radxa Dragon Q6A radiator spine, using an internal 1.0 mm-rib triangular isogrid pocket pattern to reduce upper-shell mass while preserving torsional stiffness.",
+    "date": "2026-11-18",
+    "sourceFile": "v3_dorsal_core_isogrid.png",
+    "sourceBytes": 1080047,
+    "sourceSha256": "83ca577a7b84c03792532970b28a211cb8e90ec0d44abf7d6c078f85c1bbf834",
+    "variants": [
+      {
+        "src": "/gallery/v3-dorsal-core-isogrid-480.webp",
+        "width": 480,
+        "height": 119,
+        "bytes": 9410
+      },
+      {
+        "src": "/gallery/v3-dorsal-core-isogrid-960.webp",
+        "width": 960,
+        "height": 238,
+        "bytes": 23748
+      },
+      {
+        "src": "/gallery/v3-dorsal-core-isogrid-1600.webp",
+        "width": 1600,
+        "height": 397,
+        "bytes": 44000
       }
     ]
   },
@@ -60,11 +180,71 @@
     ]
   },
   {
+    "id": "v3-motion-library-12pose",
+    "kind": "design",
+    "title": "Ainekio V3 12-pose kinematic motion library contact sheet",
+    "caption": "Twelve keyposes from the 47-chapter V3 kinematic rig (Walk, Walk→Run→Walk, Walk Backward, Turn Left 90, Crawl, Crab Left, Sit, Rest, Wave, Bow, Dance, and experimental Upright) verifying zero BVHTree armor collisions across full limb travel.",
+    "date": "2026-11-16",
+    "sourceFile": "v3_motion_library_showcase.png",
+    "sourceBytes": 2224145,
+    "sourceSha256": "09d97bb3c5834d68e06fad7b38521a2c5c0033dca944dd68d4addeee756e4283",
+    "variants": [
+      {
+        "src": "/gallery/v3-motion-library-12pose-480.webp",
+        "width": 480,
+        "height": 225,
+        "bytes": 10412
+      },
+      {
+        "src": "/gallery/v3-motion-library-12pose-960.webp",
+        "width": 960,
+        "height": 450,
+        "bytes": 41042
+      },
+      {
+        "src": "/gallery/v3-motion-library-12pose-1600.webp",
+        "width": 1600,
+        "height": 750,
+        "bytes": 99238
+      }
+    ]
+  },
+  {
+    "id": "v3-part003-clearance-study",
+    "kind": "design",
+    "title": "Ainekio V3 Part_003 DS3235 shoulder pod & 25T clamping horn clearance audit",
+    "caption": "Four-quadrant Blender CAD clearance check of the V3 shoulder bracket (|OC| = 28.32 mm shaft spacing, 6.50 mm axial stagger), waterproof DS3235 servo wire grommet relief, 25T aluminum clamping horn bolt clearance, and F688ZZ counter-pivot.",
+    "date": "2026-11-12",
+    "sourceFile": "v3_part003_views.png",
+    "sourceBytes": 325034,
+    "sourceSha256": "6998b698601e744f1afb5cfb3e3302c19493545a755c426bbd719447c0b2fc65",
+    "variants": [
+      {
+        "src": "/gallery/v3-part003-clearance-study-480.webp",
+        "width": 480,
+        "height": 480,
+        "bytes": 12936
+      },
+      {
+        "src": "/gallery/v3-part003-clearance-study-960.webp",
+        "width": 904,
+        "height": 904,
+        "bytes": 29166
+      },
+      {
+        "src": "/gallery/v3-part003-clearance-study-1600.webp",
+        "width": 904,
+        "height": 904,
+        "bytes": 29166
+      }
+    ]
+  },
+  {
     "id": "v1-blender-three-quarter",
     "kind": "design",
-    "title": "Ainekio V1 in Blender ('v1 -' scene): 8-servo chassis & 43-wire harness",
-    "caption": "Three-quarter Blender CAD view of the eight-servo ESP32-S3 Ainekio V1 quadruped showing its Frame7 chassis, R2V10 trussed upper leg brackets, serrated 2-DOF lower legs, ventilated dual 2S 14500 battery guards, 43-wire internal harness, and front 0.96-inch SSD1306 OLED + Arducam B0066 face housing.",
-    "date": "2026-11-17",
+    "title": "Ainekio V1 modernized CAD (Scene 'v1'): seated Frame8 cap, 683ZZ bearings & coaxial wiring",
+    "caption": "Three-quarter 3D CAD view of the modernized eight-servo Ainekio V1 assembly (196.7 × 186.5 × 78.1 mm) showing the seated matte-charcoal Frame8 enclosure cap, cyan-blue serrated 2-DOF spider legs, 8× 683ZZ counter-bearings, tucked coaxial Hip-Z 4-wire harnesses, ventilated dual 2S 14500 flank battery bays, and 0.96-inch SSD1306 OLED bracket eyes + Arducam B0066 chin camera.",
+    "date": "2026-11-18",
     "sourceFile": "v1_clean_three_quarter.png",
     "sourceBytes": 402845,
     "sourceSha256": "4a6251751807b5ac50bd2ef214e47280d460c5a66b0ee34ea459f7695b505b05",
@@ -86,6 +266,36 @@
         "width": 1600,
         "height": 1000,
         "bytes": 53698
+      }
+    ]
+  },
+  {
+    "id": "v1-p4-revisit-4view-cad",
+    "kind": "design",
+    "title": "Ainekio V1 modernized ESP32-P4, 4th-wire & coaxial-harness 4-view CAD",
+    "caption": "Four-view engineering layout of the modernized eight-servo Ainekio V1 interior: Waveshare ESP32-P4-WIFI6, PCA9685 + 8 direct-ADC 4th-wire sense leads, 20×30 mm speaker bridge cradle over GY-LSM6DS3 IMU, rear master rocker switch + external 2S charge jack, and coaxial Hip-Z wire arches.",
+    "date": "2026-11-17",
+    "sourceFile": "v1_p4_revisit_layout.png",
+    "sourceBytes": 1986079,
+    "sourceSha256": "b1f5950f38d04026931ba9c5b8ac610d66d3065b4942b6f64adc60f45cd04787",
+    "variants": [
+      {
+        "src": "/gallery/v1-p4-revisit-4view-cad-480.webp",
+        "width": 480,
+        "height": 376,
+        "bytes": 24558
+      },
+      {
+        "src": "/gallery/v1-p4-revisit-4view-cad-960.webp",
+        "width": 960,
+        "height": 753,
+        "bytes": 66592
+      },
+      {
+        "src": "/gallery/v1-p4-revisit-4view-cad-1600.webp",
+        "width": 1600,
+        "height": 1254,
+        "bytes": 129238
       }
     ]
   },
@@ -213,6 +423,66 @@
     ]
   },
   {
+    "id": "ainekio-v1-physical-wave",
+    "kind": "photo",
+    "title": "Physical Ainekio V1 executing a front-leg wave on carpet",
+    "caption": "Action still of the eight-servo ESP32-S3 Ainekio V1 quadruped lifting its front-left cyan serrated 2-DOF leg in a greeting wave while displaying an animated expression on its 0.96-inch SSD1306 OLED.",
+    "date": "2026-08-31",
+    "sourceFile": "ainekio-v1-physical-wave.jpg",
+    "sourceBytes": 212830,
+    "sourceSha256": "6b8f27a61e93446026937ab82e2625db6b018702c191d37b51ffe34f0784e1f1",
+    "variants": [
+      {
+        "src": "/gallery/ainekio-v1-physical-wave-480.webp",
+        "width": 480,
+        "height": 270,
+        "bytes": 21134
+      },
+      {
+        "src": "/gallery/ainekio-v1-physical-wave-960.webp",
+        "width": 960,
+        "height": 540,
+        "bytes": 50034
+      },
+      {
+        "src": "/gallery/ainekio-v1-physical-wave-1600.webp",
+        "width": 1600,
+        "height": 900,
+        "bytes": 89570
+      }
+    ]
+  },
+  {
+    "id": "ainekio-v1-physical-dance",
+    "kind": "photo",
+    "title": "Physical Ainekio V1 in wide spider-stance dance motion",
+    "caption": "The eight-servo ESP32-S3 Ainekio V1 prototype splayed across living-room carpet mid-dance clip (.amot keyframe playback) with glowing SSD1306 OLED eyes and chin-mounted OV3660 camera.",
+    "date": "2026-08-31",
+    "sourceFile": "ainekio-v1-physical-dance.jpg",
+    "sourceBytes": 262543,
+    "sourceSha256": "a0fcc829f4efa0e384e6d6529f76bbb4d08cdcb8aa9fdde8a81f4eaaea81c13e",
+    "variants": [
+      {
+        "src": "/gallery/ainekio-v1-physical-dance-480.webp",
+        "width": 480,
+        "height": 270,
+        "bytes": 28022
+      },
+      {
+        "src": "/gallery/ainekio-v1-physical-dance-960.webp",
+        "width": 960,
+        "height": 540,
+        "bytes": 67814
+      },
+      {
+        "src": "/gallery/ainekio-v1-physical-dance-1600.webp",
+        "width": 1600,
+        "height": 900,
+        "bytes": 115064
+      }
+    ]
+  },
+  {
     "id": "v2-shake-and-greet-test",
     "kind": "physical-video",
     "title": "Capability check: wake-up stretch, physical shake reflex & snarky remark",
@@ -276,6 +546,36 @@
     "duration": 43.477,
     "poster": "/gallery/ainekio-v2-neural-walk-first-run-poster.webp",
     "posterBytes": 87144
+  },
+  {
+    "id": "ainekio-v2-alert-stance",
+    "kind": "photo",
+    "title": "Physical Ainekio V2 standing alert on carpet with glowing ST7789 eyes",
+    "caption": "Close-up floor view of the 650 g 12-servo Ainekio V2 quadruped in an upright standing posture, showing its 1.9-inch ST7789 IPS face, lower-jaw OV5647 camera pocket, serrated four-bar legs, and top-deck 4th-wire feedback harness.",
+    "date": "2026-11-14",
+    "sourceFile": "ainekio-v2-alert-stance.jpg",
+    "sourceBytes": 363824,
+    "sourceSha256": "1305147579e45f53edbaa2f381acfc06eb87090c8dde02948cab02a8d72179ba",
+    "variants": [
+      {
+        "src": "/gallery/ainekio-v2-alert-stance-480.webp",
+        "width": 480,
+        "height": 324,
+        "bytes": 34280
+      },
+      {
+        "src": "/gallery/ainekio-v2-alert-stance-960.webp",
+        "width": 960,
+        "height": 647,
+        "bytes": 101964
+      },
+      {
+        "src": "/gallery/ainekio-v2-alert-stance-1600.webp",
+        "width": 1546,
+        "height": 1042,
+        "bytes": 215780
+      }
+    ]
   },
   {
     "id": "ainekio-v2-physical-three-quarter",
@@ -355,6 +655,23 @@
     "posterBytes": 14222
   },
   {
+    "id": "pupper-mjx-800m-rollout",
+    "kind": "animation",
+    "title": "800M-step omnidirectional MJX walking policy rollout (7-maneuver suite)",
+    "caption": "November 10 checkpoint (804.6M MJX steps at 50 Hz): 11.2-second multi-command evaluation executing zero-drift stand hold, +0.26 m/s forward walk, -0.26 m/s reverse across a 4 mm mat, ±0.12 m/s left/right crab strafes, and ±1.20 rad/s yaw turns in place.",
+    "date": "2026-11-10",
+    "sourceFile": "pupper_mjx_800m_rollout.mp4",
+    "sourceBytes": 461806,
+    "sourceSha256": "247546c55fc73dcf570810bc135efdde80903d8090378c199d50b4e5805a4e7a",
+    "src": "/gallery/pupper-mjx-800m-rollout.mp4",
+    "bytes": 187341,
+    "width": 320,
+    "height": 240,
+    "duration": 11.24,
+    "poster": "/gallery/pupper-mjx-800m-rollout-poster.webp",
+    "posterBytes": 10556
+  },
+  {
     "id": "microduck-terrain-showcase",
     "kind": "animation",
     "title": "MicroDuck teacher terrain rollout: sloped ramps, steps, rocks, slip & pushes",
@@ -370,6 +687,23 @@
     "duration": 17,
     "poster": "/gallery/microduck-terrain-showcase-poster.webp",
     "posterBytes": 19022
+  },
+  {
+    "id": "rl-rough-terrain-400m",
+    "kind": "animation",
+    "title": "400M-step full-CAD Ainekio V2 rough-terrain step-obstacle rollout",
+    "caption": "November 6 MuJoCo MJX rough-terrain policy (400M steps) driving the full-CAD 650 g Ainekio V2 model across randomized floor blocks and step ledges before DAgger distillation.",
+    "date": "2026-11-06",
+    "sourceFile": "ainekio_rough_terrain_400M_policy.mp4",
+    "sourceBytes": 2461465,
+    "sourceSha256": "a68a139e5412e94d70bf07e9114660416688c69a79d28e74b66be3fff7b8e7d5",
+    "src": "/gallery/rl-rough-terrain-400m.mp4",
+    "bytes": 804726,
+    "width": 640,
+    "height": 480,
+    "duration": 10,
+    "poster": "/gallery/rl-rough-terrain-400m-poster.webp",
+    "posterBytes": 14766
   },
   {
     "id": "rl-centered-stride-200m",
@@ -496,6 +830,36 @@
         "width": 1000,
         "height": 700,
         "bytes": 15968
+      }
+    ]
+  },
+  {
+    "id": "v2-cad-open-keeper-deck",
+    "kind": "design",
+    "title": "Ainekio V2 open-top CAD deck: ESP32-P4, PCA9685, CD74HC4067 & Keeper Bridge",
+    "caption": "Orthographic top-down Blender CAD view of the 650 g Ainekio V2 chassis with dorsal carapace hidden, exposing the Waveshare ESP32-P4-WIFI6, PCA9685 PWM board, front CD74HC4067 4th-wire mux behind the faceted head mask, rear 2S Wireless Keeper Bridge, and four-bar linkages.",
+    "date": "2026-11-09",
+    "sourceFile": "v2_cad_open_keeper_deck.jpg",
+    "sourceBytes": 134986,
+    "sourceSha256": "2aad46d6457376fb639dda0c1409090a081b9402d0ea2ce17d6f4dad59d20ccc",
+    "variants": [
+      {
+        "src": "/gallery/v2-cad-open-keeper-deck-480.webp",
+        "width": 480,
+        "height": 329,
+        "bytes": 13380
+      },
+      {
+        "src": "/gallery/v2-cad-open-keeper-deck-960.webp",
+        "width": 960,
+        "height": 659,
+        "bytes": 34624
+      },
+      {
+        "src": "/gallery/v2-cad-open-keeper-deck-1600.webp",
+        "width": 1280,
+        "height": 878,
+        "bytes": 52032
       }
     ]
   },
@@ -1113,6 +1477,66 @@
         "width": 1360,
         "height": 920,
         "bytes": 52264
+      }
+    ]
+  },
+  {
+    "id": "v1-oled-59-expressions",
+    "kind": "diagram",
+    "title": "59 monochrome 128×64 SSD1306 OLED expressions for Ainekio V1",
+    "caption": "Complete 59-expression (303-frame) 1-bit 128×64 SSD1306 OLED contact sheet generated by derive_v1_oled.py from V2's procedural face engine so V1 and V2 share full facial vocabulary parity over protocol-v1.",
+    "date": "2026-11-17",
+    "sourceFile": "v1_oled_derived_from_v2.png",
+    "sourceBytes": 82136,
+    "sourceSha256": "e580038bfe3f987c8e56135903bc4a3dc891634c3e833c0e569ba4fd8bb91792",
+    "variants": [
+      {
+        "src": "/gallery/v1-oled-59-expressions-480.webp",
+        "width": 480,
+        "height": 470,
+        "bytes": 34672
+      },
+      {
+        "src": "/gallery/v1-oled-59-expressions-960.webp",
+        "width": 960,
+        "height": 939,
+        "bytes": 83864
+      },
+      {
+        "src": "/gallery/v1-oled-59-expressions-1600.webp",
+        "width": 1600,
+        "height": 1565,
+        "bytes": 155802
+      }
+    ]
+  },
+  {
+    "id": "microduck-v18-sysid-benchmark",
+    "kind": "diagram",
+    "title": "MicroDuck v18-p4 System-ID & 14–17 mm cable clearance benchmark",
+    "caption": "Benchmark comparison of microduck-v17-p4 vs. System-ID repaired microduck-v18-p4 across carpet, slick wood, reverse, 14–17 mm power cables (+79.7% speed), and weak rear-left gain (+69.5% speed), alongside per-leg peak swing clearance.",
+    "date": "2026-11-12",
+    "sourceFile": "microduck_v18_p4_environment.png",
+    "sourceBytes": 131251,
+    "sourceSha256": "b50005131024890b1af9e2cc832275f400985a724757fc601f800cd1d2f46eae",
+    "variants": [
+      {
+        "src": "/gallery/microduck-v18-sysid-benchmark-480.webp",
+        "width": 480,
+        "height": 188,
+        "bytes": 8584
+      },
+      {
+        "src": "/gallery/microduck-v18-sysid-benchmark-960.webp",
+        "width": 960,
+        "height": 376,
+        "bytes": 24026
+      },
+      {
+        "src": "/gallery/microduck-v18-sysid-benchmark-1600.webp",
+        "width": 1600,
+        "height": 627,
+        "bytes": 45462
       }
     ]
   },

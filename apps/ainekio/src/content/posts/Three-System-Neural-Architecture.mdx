@@ -1,8 +1,8 @@
 ---
 title: "Three-System Neural Motion Stack: On-Chip MicroDuck v19, 50 Hz NeuralPose & Living Presence"
 published: 2026-11-16T09:30:00-08:00
-updated: 2026-11-16
-description: "Architecture and benchmarks for Ainekio's three neural controllers—System 1 L2-cached MicroDuck v18/v19 locomotion, System 2 50 Hz NeuralPose & 1,812-example Freestyle curriculum, and System 3 20 Hz Living Presence—plus the ESP32-P4 RISC-V PIE vector coprocessor build patch."
+updated: 2026-11-18
+description: "Architecture and benchmarks for Ainekio's three neural controllers—System 1 L2-cached MicroDuck v19-snag-p4 locomotion, System 2 50 Hz NeuralPose v5-adaptive & 2,322-row Freestyle curriculum, and System 3 20 Hz Living Presence—plus the ESP32-P4 RISC-V PIE vector coprocessor build patch."
 image: "/posts/2026-11-16-progress/three-system-neural-stack.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -26,9 +26,9 @@ Rather than forcing a single monolithic network to walk over cables, perform sea
 
 | Neural Tier | Rate & Footprint | Active Policy / Adapter | Role on the Robot |
 | :--- | :--- | :--- | :--- |
-| **System 1 · Locomotion** | `50 Hz` · **`107.84 KiB` `int8`** (`ESP32-P4` `128 KB` L2 cache) | `microduck-v18-p4` & `microduck-v19-snag-p4` (`720 → 128 → 64 → 32 → 12`) | Omnidirectional closed-loop walking, slick-wood/carpet seam traversal, weak-servo compensation, and swing-foot snag high-stepping |
-| **System 2 · Pose & Choreography** | `50 Hz` · `826,776` params ONNX (`0.4 ms` CPU) + `Qwen3.5-0.8B` LoRA | `neural-pose-v2-delay` / `v3-jam-compliant` + `freestyle-curriculum` (`1,812` rows) | Translates natural-language prompts into multi-frame IK targets and tracks 12-DOF poses across `180 ms` Wi-Fi delay, faulted pot wires, and limb obstructions |
-| **System 3 · Autonomic Living Presence** | `20 Hz` · **`56,094` params** (`56 KB` `int8`, P4 SRAM-ready) | `ainekio-presence-v1` (`320 → 128 → 96 → 30`) | Speech-RMS body gestures (`±8 mm`), stance compliance chatter relief (`±1.8 mm`), `99.69%`-accurate LCD expression logits, pickup safety, and VAD-silent listening |
+| **System 1 · Locomotion** | `50 Hz` · **`110,432 B` (`107.84 KiB`) `int8`** (`ESP32-P4` `128 KB` L2 cache) | **`MicroDuck v19-snag-p4`** (`policy.bin`, `720 → 128 → 64 → 32 → 12`) | Omnidirectional closed-loop walking, slick-wood/carpet seam traversal, weak-servo compensation, `25 mm` swing-foot snag clearance, and `1.8 s` reverse unsnag |
+| **System 2 · Pose & Choreography** | `50 Hz` · `826,776` params ONNX (`0.4 ms` CPU) + `Qwen3.5-0.8B` / `2B` LoRAs | **`NeuralPose v5-adaptive`** + **`2,322`-row (`94`-family)** Freestyle LoRA + `v25/v26` Intent/Task LoRAs (`2,941` dev + `814` eval) | Synthesizes multi-step IK from `splayed_stand`/`lay_down`/`dead`/standing starts; tracks poses across `180 ms` delay, `6.7 mm` friction micro-step lift, `280 ms` recoil, and multi-joint stance jam escalation |
+| **System 3 · Autonomic Living Presence** | `20 Hz` · **`56,382` params** (**`56.4 KB` INT8**, P4 SRAM-ready) | `ainekio-presence-v1` (`72,000`-seq retrain, `320 → 128 → 96 → 30`) | Speech-RMS body gestures (`±8 mm`), `64.1%` err / `31.1%` torque cut on carrier jam, `_common_mode_drift()` `14 mm` vertical yield, `99.65%` LCD expression accuracy, and `~0.42 s` silent-lock wake-word perk |
 
 ---
 
@@ -47,19 +47,24 @@ Injecting per-world `MG90SActuator` `effort_scale`, coupled weak-`RL` randomizat
 - **Cable Ledges & Carpet:** Speed across `14–17 mm` cables rose **`+79.7%`** (`+0.0575 m/s`, `3.2×` straighter heading), and plush carpet speed rose **`+28.6%`** (`+0.0970 m/s`).
 
 <figure className="my-6">
-  <video controls playsInline preload="metadata" width="960" height="540" poster="/gallery/microduck-v18-sysid-poster.webp" className="w-full rounded-xl">
+  <img src="/gallery/microduck-v18-sysid-benchmark-1600.webp" alt="Dual benchmark chart comparing microduck-v17-p4 and System-ID repaired microduck-v18-p4 across carpet, slick wood, 14-17 mm cables, and weak rear-left gain, plus per-leg peak swing clearance." width="1600" height="627" loading="lazy" />
+  <figcaption>Multi-scenario velocity and per-leg swing-clearance benchmark comparing <code>microduck-v17-p4</code> against System-ID repaired <code>microduck-v18-p4</code> across carpet, hardwood, <code>14–17 mm</code> power cables, and calibrated weak-<code>RL</code> gain.</figcaption>
+</figure>
+
+<figure className="my-6">
+  <video controls playsinline preload="none" width="960" height="540" poster="/gallery/microduck-v18-sysid-poster.webp" className="w-full rounded-xl">
     <source src="/gallery/microduck-v18-sysid.mp4" type="video/mp4" />
     <a href="/gallery/microduck-v18-sysid.mp4">Download the microduck-v18-p4 System-ID evaluation video.</a>
   </video>
   <figcaption><code>microduck-v18-p4</code> (<code>128×64×32 int8</code>) maintaining level pelvis clearance and compensatory rear-left foot lift across the 500 Hz System-ID Weak-RL, slick hardwood, carpet seam, and cable-ledge evaluation suite.</figcaption>
 </figure>
 
-### Swing-foot snag obstacle plant (`microduck-v19-snag-p4`)
+### Active production actor: `25 mm` swing-foot snag obstacle plant (`MicroDuck v19-snag-p4`)
 
-To prevent low-slung micro-quadruped toes from catching on cords or rug edges mid-swing, **`microduck-v19-snag-p4`** (`TASK_REVISION = 19`, compiled into `Slave/software/models/v2-12servo/motions/microduck/policy.bin`) adds a **`500 Hz` unilateral swing-foot snag wrench** (`compute_swing_snag_wrench_500hz`) in MuJoCo:
+To prevent low-slung micro-quadruped toes from catching on cords or rug edges mid-swing, the active on-chip actor **`MicroDuck v19-snag-p4`** (`TASK_REVISION = 19`, compiled into the **`110,432 B` `policy.bin`** at `Slave/software/models/v2-12servo/motions/microduck/policy.bin`) adds a **`25 mm` (`lip_z = 22–27 mm`) `500 Hz` unilateral swing-foot snag plant** (`compute_swing_snag_wrench_500hz`) in MuJoCo:
 
-- During `28%` of episodes (`DEFAULT_SNAG_PROB = 0.28`), an invisible unilateral lip (`lip_z = 22–27 mm`) catches forward-moving swing feet below lip height with a `950 N/m` + `14 N·s/m` contact wrench (capped at `5.5 N`).
-- Paired with a telescopic `snag_clearance` lift reward (`+1.80` clearance bonus) and firmware's `1.8 s` `-0.45 m/s` autonomous reverse unsnag, the policy learns to lift snagged feet cleanly up and over the lip rather than pushing stall current into the obstruction.
+- During `28%` of episodes (`DEFAULT_SNAG_PROB = 0.28`), a `25 mm` nominal unilateral lip (`22–27 mm`) catches forward-moving swing feet below lip height with a `950 N/m` + `14 N·s/m` contact wrench (capped at `5.5 N`).
+- Paired with a telescopic `snag_clearance` lift reward (`+1.80` clearance bonus) and firmware's **`1.8 s` (`-0.45 m/s`) autonomous reverse unsnag**, `MicroDuck v19-snag-p4` lifts snagged feet cleanly up and over obstructions rather than pushing stall current into the snag.
 
 ---
 
@@ -73,23 +78,27 @@ Enabling `ESP32-P4` RISC-V PIE SIMD acceleration alongside multi-task FreeRTOS s
 
 ---
 
-## 3. System 2: `50 Hz` `NeuralPose` & unified `1,812`-example Freestyle curriculum
+## 3. System 2: `50 Hz` `NeuralPose v5-adaptive`, `2,322`-row Freestyle LoRA & `v25/v26` specialist routing
 
-When Ainekio stops walking to bow, wave, brace on its haunches, or execute an operator-prompted emote, control hands off to **System 2**:
+When Ainekio stops walking to bow, wave, brace on its haunches, rise from a splayed or prone floor state, or execute an operator-prompted emote, control hands off to **System 2**:
 
-- **Unified `Qwen3.5-0.8B` Freestyle Curriculum (`experiments/freestyle/freestyle_curriculum.py`):** Consolidates `~25` earlier scripts into one generator producing **`1,812` verified examples** (`1,000` ordinary choreography programs + `812` fault-recovery trajectories, `freestyle-curriculum-adapter.F16.gguf`, `12.79 MB`). Includes unloaded rear-leg step-in bracing (`sit_brace_enter()` / `sit_brace_exit()`) so seated two-paw gestures (`celebrate`, `beg`, `clap`) keep the center of mass stably behind the rear support line without tipping forward. The `:8794` inference daemon (`ainekio-freestyle-api.service`) auto-starts and self-recovers on connection refusal.
-- **`neural-pose-v2-delay` (`50 Hz` closed-loop pose tracking):** `826,776`-parameter actor (`1,290-D` observation vector, `0.38–0.44 ms` CPU inference) trained across `2.95M` PPO steps with simulated `180 ms` Wi-Fi packet jitter and `35%` dropped/faulted 4th-wire potentiometer channels—achieving **`0.52°–1.33°` joint MAE** and **`0` falls** across all 6 qualification suites.
-- **`neural-pose-v3-jam-compliant` & `280 ms` manifold recoil:** Injects unilateral `jnt_range` mechanical obstructions at `30%–65%` limb travel (`28%` episode probability) with a `jam_compliance_cost` (`-2.2`), training the policy to hold a gentle **`~3.4°` (`0.060 rad`) feeler preload** against unexpected stops while the executor backs jammed joints off `2.0°` after `280 ms` (detailed in [Jam Protection & Winding Thermal Fuse](/posts/jam-protection-and-thermal-safety/)).
+- **`2,322`-Row (`94`-Family) `Qwen3.5-0.8B` Freestyle LoRA & `v25/v26` Specialist LoRAs:** `experiments/freestyle/freestyle_curriculum.py` generates **`2,322` geometry-verified examples across `94` choreography families** (**`1,510` ordinary programs + `812` fault-recovery trajectories**, `0.00096` train loss), explicitly covering **`splayed_stand`**, **`lay_down`**, and **`dead`** starting states alongside unloaded rear-leg seated bracing (`sit_brace_enter()` / `sit_brace_exit()`). Upstream in **[Ainekio OS](/posts/ainekio-os/)**, **`v25/v26` Intent and Task specialist LoRAs** (`661` curated source cases expanded to **`2,941` dev + `814` eval records**) route user requests cleanly into `requestMotion` and closed-loop locomotion intents, while the `:8794` Freestyle daemon (`ainekio-freestyle-api.service`) auto-starts and self-recovers on connection refusal.
+- **Four-stage `50 Hz` `NeuralPose` progression (`v2-delay` → `v3-jam-compliant` → `v4-equivariant` → `v5-adaptive`):**
+  1. **`v2-delay`:** `826,776`-parameter actor (`1,290-D` observation vector, `0.38–0.46 ms` CPU inference) trained with `180 ms` Wi-Fi packet jitter and `35%` dropped/faulted 4th-wire potentiometer channels (`0.52°–1.33°` joint MAE).
+  2. **`v3-jam-compliant`:** Injects unilateral `jnt_range` limb obstructions (`28%` episode probability) with a `jam_compliance_cost` (`-2.2`) so stalled joints hold a gentle `~3.4°` feeler preload instead of driving full stall current.
+  3. **`v4-equivariant`:** Enforces exact **left/right mirror symmetry** across paired legs so symmetric bows, sits, and alternate-paw waves never develop unilateral stance lean.
+  4. **`v5-adaptive` (Active):** Trained for **`1.23M` adaptive PPO steps**, **`NeuralPose v5-adaptive`** passes **`7/7` qualification scenarios with `0` falls**, adding **`6.7 mm` ground-friction micro-step unloading** whenever carpet shear resists lateral foot motion.
+- **Local `280 ms` paw recoil vs. multi-joint stance jam escalation:** Single-joint gesture contacts recoil locally by **`2.0°` in `280 ms`** (`+ 0.85 s` Return-to-Ready on final posture hold), while **`>= 2` jammed stance joints** or **`> 12°` left/right recoil asymmetry** escalates to a **one-shot `replan_recovery`** from measured 4th-wire state (detailed in [Jam Protection & Winding Thermal Fuse](/posts/jam-protection-and-thermal-safety/)).
 
 ---
 
-## 4. System 3: `20 Hz` autonomic "Living Presence" (`ainekio-presence-v1`)
+## 4. System 3: `20 Hz` autonomic "Living Presence" (`72,000`-sequence retrain)
 
-Between walks and explicit emotes, a rigid robot locked at static PWM ticks either hums from inter-leg servo fighting or looks lifeless while speaking. **System 3** (`Master/gateway/presence/`) adds a lightweight autonomic neural layer running at `20 Hz` (`50 ms` period):
+Between walks and explicit emotes, a rigid robot locked at static PWM ticks either hums from inter-leg servo fighting or looks lifeless while speaking. **System 3** (`Master/gateway/presence/`) adds a lightweight autonomic neural layer running at `20 Hz` (`50 ms` period), retrained on November 17–18 across **`72,000` sequences**:
 
-- **Compact SRAM-ready network:** `4 × 80 = 320` inputs → `(128, 96)` hidden layers → `30` outputs (`56,094` parameters; `224 KB` FP32 ONNX / **`56 KB` `int8`**, verified `p4_internal_sram_fit = True`). Trained on `72,000` sequences (`32` CUDA epochs in `126 s`) to `val_foot_rmse_norm = 0.0268` and **`99.69%` LCD expression validation accuracy**.
-- **Three simultaneous output heads:**
-  1. **`12` conversational foot residuals (`±8.0 mm`):** Driven by live **`50 ms` PCM RMS audio envelopes** computed across `16 kHz` robot/host TTS playback so Ainekio shifts weight and nods naturally in cadence with its own spoken syllables.
-  2. **`12` stance compliance trim steps (`±1.8 mm`, clamped to `±3.5 mm` XY / `±2.0 mm` Z):** Bleeds off opposing four-bar shear and micro-servo buzz when planted on high-friction carpet without letting the torso sag.
-  3. **`6` LCD facial expression logits:** Synchronizes subtle face shifts with posture and vocal energy.
-- **Strict VAD-listening silence & `< 1 ms` preemption:** System 3 suppresses 20 Hz motor motion completely whenever microphone listening / VAD (`vad_open`) is active—ensuring servo gear noise never holds the speech detector open and leaving P4's quiet `+6°` front-shoulder `listen_frame` ear perk undisturbed. When idle for `180 s` (deferred while `YOLOE` sees a person in the room), System 3 settles into the canonical crouch `(0.0°, -23.22°, -22.03°)` (`> 18°` end-stop margin) and disarms `PCA9685 OE`, preempting in `< 1 ms` whenever a walk, gesture, or `stop` command arrives.
+- **Compact SRAM-ready network (`56,382` parameters / `56.4 KB` INT8):** `4 × 80 = 320` inputs → `(128, 96)` hidden layers → `30` outputs (verified `p4_internal_sram_fit = True`), achieving **`99.65%` LCD expression validation accuracy**.
+- **Carrier-jam relief & `_common_mode_drift()` `14 mm` vertical yield:**
+  1. **`12` conversational foot residuals (`±8.0 mm`):** Driven by live **`50 ms` PCM RMS audio envelopes** across `16 kHz` robot/host TTS playback so Ainekio shifts weight and nods naturally in cadence with its spoken syllables.
+  2. **Jam-compliant stance trim & `14 mm` vertical yield:** Under unexpected carrier-link jams, System 3 reduces **joint tracking error by `64.1%`** and **servo torque by `31.1%`**, while `_common_mode_drift()` permits up to **`14 mm` of vertical jam yield** on an obstructed leg **without causing 4-leg torso sink**.
+  3. **Expression logits:** Synchronizes subtle `ST7789` facial shifts with posture and vocal energy at **`99.65%` accuracy**.
+- **`~0.42 s` silent-lock wake-word perk & `< 1 ms` preemption:** When `microWakeWord` or WebRTC VAD opens (`vad_open`), System 3 executes a **`~0.42 s` silent-lock front-shoulder perk**, switches to the **`listening` face**, and issues **`stop(detach=False)`** so holding torque stays silent throughout user speech and servo gear noise never holds VAD open. After `180 s` of room quiet (deferred while `YOLOE` sees a person), System 3 settles into the canonical crouch `(0.0°, -23.22°, -22.03°)` (`> 18°` end-stop margin) and disarms `PCA9685 OE`, preempting in `< 1 ms` on any incoming command.

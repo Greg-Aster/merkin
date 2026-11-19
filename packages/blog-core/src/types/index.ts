@@ -21,6 +21,11 @@ export type SiteConfig = {
   transparency?: number
   defaultTheme: LIGHT_DARK_MODE
   themeLock?: typeof LIGHT_MODE | typeof DARK_MODE
+  enableAdmin?: boolean
+  enableSpecialPageFeatures?: boolean
+  sidebar?: {
+    enable?: boolean
+  }
   banner: {
     enable: boolean
     src: string

@@ -5,7 +5,6 @@ import type { APIContext } from 'astro'
 import MarkdownIt from 'markdown-it'
 import sanitizeHtml from 'sanitize-html'
 import { getVideoMetaBySrc } from '../lib/seo-media'
-import { createCORSResponse, handleCORS } from '../middleware/cors'
 
 const parser = new MarkdownIt({ html: true, linkify: true })
 
@@ -64,9 +63,6 @@ function prepareMdxForRss(body: string, siteOrigin: string): string {
 }
 
 export async function GET(context: APIContext): Promise<Response> {
-  const corsResponse = handleCORS(context)
-  if (corsResponse) return corsResponse
-
   const siteOrigin = (
     context.site ?? (context.url ? new URL(context.url.origin) : new URL('https://ainek.io'))
   ).href
@@ -141,5 +137,5 @@ export async function GET(context: APIContext): Promise<Response> {
     customData: `<language>${siteConfig.lang}</language><atom:link href="${new URL('rss.xml', siteOrigin).href}" rel="self" type="application/rss+xml" />`,
   })
 
-  return createCORSResponse(response)
+  return response
 }

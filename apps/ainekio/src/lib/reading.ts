@@ -8,9 +8,9 @@ export const topics = {
   control: { title: 'Firmware & connections', description: 'Body control, commands, safety, wired and wireless links.', reference: 'protocol-and-safety' },
   perception: { title: 'Vision, face & voice', description: 'Camera observations, target tracking, display, listening, and speech.', reference: 'vision-loop' },
   metahuman: { title: 'Ainekio OS (The Mind)', description: 'Local-first companion software for persistent memory, conversation, nightly consolidation, and robot reflexes.', reference: 'ainekio-os' },
-  v1: { title: 'Ainekio V1 (8-servo S3)', description: 'The eight-servo ESP32-S3 systems guide, dedicated Blender CAD scene, firmware, and preserved July 2026 archive.', reference: 'ainekio-v1' },
+  v1: { title: 'Ainekio V1 (8-servo)', description: 'The eight-servo spider quadruped across its Summer 2026 ESP32-S3 build, modernized Scene \'v1\' ESP32-P4/683ZZ CAD, and July 2026 archive.', reference: 'ainekio-v1' },
 } satisfies Record<typeof topicIds[number], { title: string; description: string; reference: string }>
-export const generations = { v1: 'V1 · 8 servos', v2: 'V2 · 12 servos', v3: 'V3 · DS3235 (In Dev)', both: 'V1 + V2' }
+export const generations = { v1: 'V1 · 8 servos', v2: 'V2 · 12 servos', v3: 'V3 · DS3235 (In Dev)', both: 'V1 · V2 · V3' }
 export const kinds = { journal: 'Dated experiment', reference: 'Build reference', original: 'Original document' }
 
 export const readingSchema = z.object({

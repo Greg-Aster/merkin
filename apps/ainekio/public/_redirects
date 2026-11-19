@@ -1,5 +1,7 @@
 # HTTP redirects for Cloudflare Pages; the sitemap generator owns the XML.
 /sitemap.xml /sitemap-index.xml 301
+/archive/tag/* /archive/ 301
+/archive/category/* /archive/ 301
 /project-guide/ /posts/project-overview/ 301
 /posts/current-status/ /posts/project-overview/#project-status 301
 /posts/broad-strokes/ /posts/archive/broad-strokes/ 301

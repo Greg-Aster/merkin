@@ -421,35 +421,45 @@ document.addEventListener('astro:page-load', setupMathStyles);
 document.addEventListener('astro:page-load', scheduleCustomScrollbar);
 window.addEventListener('pagehide', destroyCustomScrollbars);
 
+let lastScrollTop = 0;
+
 function scrollFunction() {
+    const scrollTop = Math.max(document.body.scrollTop, document.documentElement.scrollTop);
+    const delta = scrollTop - lastScrollTop;
+
     // Back-to-top button visibility
-// Back-to-top button visibility
-if (backToTopBtn) {
-    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-        backToTopBtn.classList.remove('hide');
-    } else {
-        backToTopBtn.classList.add('hide');
+    if (backToTopBtn) {
+        if (scrollTop > 300) {
+            backToTopBtn.classList.remove('hide');
+        } else {
+            backToTopBtn.classList.add('hide');
+        }
     }
-}
 
-// TOC visibility
-if (toc) {
-    toc.classList.remove('toc-hide');
-}
-
-// Navbar visibility - simplified
-if (navbar) {
-    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-        navbar.classList.add('navbar-hidden');
-    } else {
-        navbar.classList.remove('navbar-hidden');
+    // TOC visibility
+    if (toc) {
+        toc.classList.remove('toc-hide');
     }
-}}
+
+    // Smart navbar visibility: hide on sustained downward scroll past 300px, reveal immediately when scrolling up
+    if (navbar) {
+        if (scrollTop <= 120 || delta < -6) {
+            navbar.classList.remove('navbar-hidden');
+        } else if (scrollTop > 300 && delta > 4) {
+            navbar.classList.add('navbar-hidden');
+        }
+    }
+
+    lastScrollTop = Math.max(0, scrollTop);
+}
 
 window.onscroll = scrollFunction;
-let lightbox: { destroy: () => void } | null = null;
+let lightboxes: Array<{ destroy: () => void }> = [];
 let photoSwipeGeneration = 0;
 let photoSwipeSchedule = 0;
+
+const MARKDOWN_PHOTOSWIPE_SELECTOR = ".custom-md img, #post-cover img";
+const GALLERY_PHOTOSWIPE_SELECTOR = ".robot-gallery a.image-link";
 
 async function createPhotoSwipe(generation: number) {
     const stylesheetHref = document.body.dataset.photoswipeStylesheet;
@@ -462,49 +472,87 @@ async function createPhotoSwipe(generation: number) {
 
     if (generation !== photoSwipeGeneration) return;
 
-    const nextLightbox = new PhotoSwipeLightbox({
-        gallery: ".custom-md img, #post-cover img",
+    const sharedOptions = {
         // Keep this lazy to avoid holding a stale rejected promise after Vite dep re-optimization.
         pswpModule: () => import("photoswipe"),
         closeSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>',
-        zoomSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M340-540h-40q-17 0-28.5-11.5T260-580q0-17 11.5-28.5T300-620h40v-40q0-17 11.5-28.5T380-700q17 0 28.5 11.5T420-660v40h40q17 0 28.5 11.5T500-580q0 17-11.5 28.5T460-540h-40v40q0 17-11.5 28.5T380-460q-17 0-28.5-11.5T340-500v-40Zm40 220q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>',
+        zoomSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M340-540h-40q-17 0-28.5-11.5T260-580q0-17 11.5-28.5T300-620h40v-40q0-17 11.5-28.5T380-700q17 0 28.5 11.5T420-660v40h40q17 0 28.5 11.5T500-580q0 17-11.5 28.5T460-540h-40v40q0 17-11.5 28.5T380-460q-17 0-28.5-11.5T340-500v-40Zm40 220q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0-127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>',
         padding: { top: 20, bottom: 20, left: 20, right: 20 },
         wheelToZoom: true,
-        arrowPrev: false,
-        arrowNext: false,
-        imageClickAction: 'close',
-        tapAction: 'close',
-        doubleTapAction: 'zoom',
-    });
+        imageClickAction: 'close' as const,
+        tapAction: 'close' as const,
+        doubleTapAction: 'zoom' as const,
+    };
 
-    nextLightbox.addFilter("domItemData", (itemData, element) => {
-        if (element instanceof HTMLImageElement) {
-            itemData.src = element.src;
-            itemData.w = Number(element.naturalWidth || window.innerWidth);
-            itemData.h = Number(element.naturalHeight || window.innerHeight);
-            itemData.msrc = element.src;
-        }
-        return itemData;
-    });
+    if (document.querySelector(MARKDOWN_PHOTOSWIPE_SELECTOR)) {
+        const mdLightbox = new PhotoSwipeLightbox({
+            ...sharedOptions,
+            gallery: MARKDOWN_PHOTOSWIPE_SELECTOR,
+            arrowPrev: false,
+            arrowNext: false,
+        });
+        mdLightbox.addFilter("domItemData", (itemData, element) => {
+            if (element instanceof HTMLImageElement) {
+                itemData.src = element.src;
+                itemData.w = Number(element.naturalWidth || window.innerWidth);
+                itemData.h = Number(element.naturalHeight || window.innerHeight);
+                itemData.msrc = element.src;
+            }
+            return itemData;
+        });
+        mdLightbox.init();
+        lightboxes.push(mdLightbox);
+    }
 
-    nextLightbox.init();
-    lightbox = nextLightbox;
+    if (document.querySelector(GALLERY_PHOTOSWIPE_SELECTOR)) {
+        const galleryLightbox = new PhotoSwipeLightbox({
+            ...sharedOptions,
+            gallery: '.robot-gallery',
+            children: 'a.image-link',
+            arrowPrev: true,
+            arrowNext: true,
+        });
+        galleryLightbox.addFilter("domItemData", (itemData, _element, linkEl) => {
+            const anchor = linkEl instanceof HTMLAnchorElement ? linkEl : null;
+            if (anchor) {
+                const thumb = anchor.querySelector('img');
+                itemData.src = anchor.href;
+                itemData.w = Number(anchor.dataset.pswpWidth || thumb?.naturalWidth || 1600);
+                itemData.h = Number(anchor.dataset.pswpHeight || thumb?.naturalHeight || 1000);
+                if (thumb?.currentSrc || thumb?.src) {
+                    itemData.msrc = thumb.currentSrc || thumb.src;
+                }
+                if (thumb?.alt) {
+                    itemData.alt = thumb.alt;
+                }
+            }
+            return itemData;
+        });
+        galleryLightbox.init();
+        lightboxes.push(galleryLightbox);
+    }
 }
+
+const destroyPhotoSwipe = () => {
+    lightboxes.forEach(instance => instance.destroy());
+    lightboxes = [];
+};
 
 const setupPhotoSwipe = () => {
     photoSwipeGeneration += 1;
     const generation = photoSwipeGeneration;
-    lightbox?.destroy();
-    lightbox = null;
+    destroyPhotoSwipe();
     window.clearTimeout(photoSwipeSchedule);
 
-    if (!document.querySelector('.custom-md img, #post-cover img')) return;
+    const hasGallery = Boolean(document.querySelector(GALLERY_PHOTOSWIPE_SELECTOR));
+    const hasMarkdown = Boolean(document.querySelector(MARKDOWN_PHOTOSWIPE_SELECTOR));
+    if (!hasGallery && !hasMarkdown) return;
 
     photoSwipeSchedule = window.setTimeout(() => {
         void createPhotoSwipe(generation).catch(error => {
             console.error('Unable to initialize the image viewer.', error);
         });
-    }, 800);
+    }, hasGallery ? 50 : 800);
 };
 
 setupPhotoSwipe();
@@ -512,7 +560,6 @@ document.addEventListener('astro:page-load', setupPhotoSwipe);
 window.addEventListener('pagehide', () => {
     photoSwipeGeneration += 1;
     window.clearTimeout(photoSwipeSchedule);
-    lightbox?.destroy();
-    lightbox = null;
+    destroyPhotoSwipe();
 });
 </script>

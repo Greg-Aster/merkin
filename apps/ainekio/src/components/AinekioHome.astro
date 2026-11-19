@@ -44,7 +44,7 @@ const directoryCards = [
   {
     num: '02',
     title: 'Legs & 3-System Neural Motion',
-    description: 'Four-bar linkages, on-chip 50 Hz MicroDuck v18/v19 locomotion, 50 Hz NeuralPose choreography, and 20 Hz System 3 Living Presence.',
+    description: 'Four-bar linkages, on-chip 50 Hz MicroDuck v18/v19 locomotion, 50 Hz NeuralPose v5 adaptive recovery, and 20 Hz System 3 Living Presence.',
     primaryHref: '/posts/three-system-neural-architecture/',
     primaryLabel: '3-System Neural Stack',
     secondaryHref: '/posts/gait-development/',
@@ -54,7 +54,7 @@ const directoryCards = [
   {
     num: '03',
     title: 'Chassis, Shell & Power',
-    description: 'The 650 g V2 shell, fourth-wire MG90S servos, GPIO pinouts, Wireless Keeper Bridge, and the armored 440.8 mm V3 DS3235 CAD.',
+    description: 'The 650 g V2 shell (34 Red STLs), modernized V1 P4/683ZZ CAD, 4th-wire servos, Wireless Keeper Bridge, and 608-mesh armored V3 DS3235 CAD.',
     primaryHref: '/posts/ainekio-v2/',
     primaryLabel: 'V2 Hardware & Wiring',
     secondaryHref: '/posts/ainekio-v3-preview/',
@@ -64,7 +64,7 @@ const directoryCards = [
   {
     num: '04',
     title: 'Cockpit HUD, Jam Fuse & Safety',
-    description: 'Full-screen Cockpit HUD with live Ainekio OS stream & Tap-to-Talk, 280 ms pose recoil, 1.8 s reverse unsnag, and 8–10 s per-joint I²t thermal fuse.',
+    description: 'Full-screen Cockpit HUD with live Ainekio OS stream & Tap-to-Talk, 280 ms pose recoil, multi-joint stance replan, 1.8 s reverse unsnag, and 8–10 s I²t thermal fuse.',
     primaryHref: '/posts/ainekio-cockpit/',
     primaryLabel: 'Ainekio Cockpit',
     secondaryHref: '/posts/jam-protection-and-thermal-safety/',
@@ -103,13 +103,13 @@ const specs = [
 const generationCards = [
   {
     id: 'v1',
-    badge: 'V1 · Summer 2026 Baseline',
+    badge: 'V1 · Spider Baseline + P4 Revisit',
     tone: 'v1',
-    title: 'Ainekio V1: 8-Servo ESP32-S3 Quadruped',
+    title: 'Ainekio V1: 8-Servo Quadruped & P4 CAD Revisit',
     image: '/posts/ainekio-v1/v1-cad-three-quarter.webp',
-    imageAlt: 'Blender CAD render of Ainekio V1 showing the eight-servo Frame7/Frame8 chassis, 0.96-inch OLED and camera module, dual flank 2S battery packs, and ESP32-S3 electronics.',
-    specLine: 'ESP32-S3 · 8× MG90S · 0.96" OLED (52 faces) · OV3660',
-    description: 'Custom 8-DOF spider-stance quadruped—modeled in its own dedicated Blender CAD scene—that first proved out room voice, vision, 38 .amot motions, and the protocol-v1 Ainekio OS loop.',
+    imageAlt: '3D CAD render of Ainekio V1 showing the seated matte-charcoal Frame8 enclosure cap, cyan-blue serrated 2-DOF spider legs, 683ZZ counter-bearings, tucked 4-wire harnesses, dual 2S flank battery bays, and 0.96-inch OLED bracket eyes.',
+    specLine: '8× MG90S + 683ZZ · S3 Baseline / P4 + 4th-Wire CAD · 0.96" OLED (59 faces)',
+    description: 'Custom 8-DOF spider-stance quadruped: first proven on carpet as an ESP32-S3 robot (38 .amot motions), now revisited in CAD (196.7 × 186.5 × 78.1 mm) with 683ZZ counter-bearings, tucked 4-wire harnesses, ESP32-P4 + 4th-wire sensing, and all 59 V2-derived OLED faces.',
     primaryHref: '/posts/ainekio-v1/',
     primaryLabel: 'V1 Systems Guide',
     secondaryHref: '/posts/v1-original-posts/',
@@ -122,8 +122,8 @@ const generationCards = [
     title: 'Ainekio V2: 650 g 12-Servo ESP32-P4 Body',
     image: '/gallery/ainekio-v2-physical-three-quarter-960.webp',
     imageAlt: 'Physical 650 g twelve-servo Ainekio V2 quadruped standing on carpet in its red and black 3D-printed shell with four-bar legs and 4th-wire servo feedback harness.',
-    specLine: 'ESP32-P4 · 12× 4th-wire servos · 50 Hz L2 gait · 1.9" LCD',
-    description: 'Clean-sheet ~$85 rebuild adding hip roll, compact four-bar linkages, potentiometer shaft feedback, a 208 Hz IMU, 59 color LCD expressions, WakeNet9s audio, and untethered 50 Hz on-chip neural walking.',
+    specLine: 'ESP32-P4 · 12× 4th-wire servos · 3-system neural motion · 1.9" LCD',
+    description: 'Clean-sheet ~$85 rebuild adding hip roll, compact four-bar linkages, potentiometer shaft feedback + per-joint I²t thermal fuse, 208 Hz IMU, 59 color LCD expressions, microWakeWord audio, and 50 Hz MicroDuck + NeuralPose v5 + 20 Hz Living Presence.',
     primaryHref: '/posts/ainekio-v2/',
     primaryLabel: 'V2 Hardware Guide',
     secondaryHref: '/posts/what-ainekio-can-do/',
@@ -131,13 +131,13 @@ const generationCards = [
   },
   {
     id: 'v3',
-    badge: 'V3 · Active Blender CAD',
+    badge: 'V3 · 608-Mesh Blender CAD',
     tone: 'v3',
     title: 'Ainekio V3: Armored DS3235 & Onboard Linux SBC',
     image: '/posts/ainekio-v3/v3-armored-three-quarter.webp',
     imageAlt: 'Blender CAD render of Ainekio V3 showing its safety-yellow and cast-gunmetal heavy-equipment shell, swept ROPS bull-bar, recessed 2.8-inch MSP2807 vault display, and shrouded DS3235 crawler legs.',
     specLine: '12× Waterproof DS3235 · 2.8" Vault TFT · Radxa Q6A + P4 + 4× 21700',
-    description: 'Heavy-equipment 440.8 × 234.4 × 307.8 mm armored quadruped with 87.7/40/93.6/158.4 mm crawler legs, a recessed 2.8" MSP2807 face screen behind a ROPS bull-bar, and an onboard Radxa Dragon Q6A Linux SBC + ESP32-P4.',
+    description: 'Heavy-equipment 608-mesh armored quadruped (436.3 × 236.5 × 381.4 mm CAD w/ whip) with a hinged ROPS service hood, M3 rear subframe fasteners, 87.7/40/93.6/158.4 mm shrouded crawler legs, recessed 2.8" MSP2807 vault screen, and onboard Radxa Dragon Q6A + ESP32-P4.',
     primaryHref: '/posts/ainekio-v3-preview/',
     primaryLabel: 'V3 Armored CAD',
     secondaryHref: '/archive/?generation=v3',
@@ -229,7 +229,7 @@ const generationCards = [
     <RobotModelViewer
       client:visible
       initialModel="lineup"
-      caption="Live Blender CAD exports at 1:1 millimeter scale on a 100 mm major / 20 mm minor reference grid. Switch between the 3-robot lineup and individual V1, V2, or V3 assemblies, or toggle X-Ray and Bare Core to inspect internal boards, battery bays, and four-bar linkages."
+      caption="Live Blender CAD exports at 1:1 millimeter scale on a 100 mm major / 20 mm minor reference grid. Switch between the 3-robot lineup and individual V1, V2, or V3 assemblies, open Motions & Gaits to make V1 and V2 walk, emote, or strike poses, and toggle X-Ray or Bare Core to watch internal linkages cycle live."
     />
   </section>
 

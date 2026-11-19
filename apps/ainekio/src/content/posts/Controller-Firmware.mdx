@@ -1,8 +1,8 @@
 ---
 title: "V1 ESP32-S3 Controller Firmware Reference"
 published: 2026-08-27T09:15:00-07:00
-updated: 2026-11-13
-description: "Technical reference for the eight-servo Ainekio V1 ESP32-S3 firmware: portable C11 core, 50 Hz MCPWM servo drive, 52 SSD1306 OLED faces, manual-exposure OV3660 stills, vadnet1_medium I2S audio, LittleFS assets, and dual-OTA rollback."
+updated: 2026-11-18
+description: "Technical reference for the eight-servo Ainekio V1 ESP32-S3 firmware: portable C11 core, 50 Hz MCPWM servo drive, 52 baseline SSD1306 OLED faces (expanded via derive_v1_oled.py to all 59 V2 expressions / 303 .bin frames), OV3660 stills, vadnet1_medium I2S audio, dual-OTA rollback, and modernized ESP32-P4/PCA9685/4th-wire CAD option."
 image: "/gallery/20260827_093218-960.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Greg the Mechanic"
@@ -22,7 +22,7 @@ reading:
   related: ["ainekio-v1", "body-design-and-hardware", "v1-original-posts", "protocol-and-safety", "ainekio-v2"]
 ---
 
-> **V1 firmware reference:** This guide documents the eight-servo **`ESP32-S3`** firmware (`Slave/firmware/esp32s3`) used on **[Ainekio V1](/posts/ainekio-v1/)**. For the current twelve-servo `ESP32-P4` firmware—including 4th-wire closed-loop feedback, `WakeNet9s` wake-word audio, 59 color LCD expressions, and on-chip `50 Hz` neural walking—see **[Protocol, Telemetry & Safety](/posts/protocol-and-safety/)** and **[Ainekio V2 Hardware](/posts/ainekio-v2/)**.
+> **V1 firmware reference:** This guide documents the eight-servo **`ESP32-S3`** firmware (`Slave/firmware/esp32s3`) used on **[Ainekio V1](/posts/ainekio-v1/)**. For the current twelve-servo `ESP32-P4` firmware and host motion stack—including 4th-wire closed-loop feedback, open **`microWakeWord` + WebRTC VAD** audio, 59 color LCD expressions, on-chip `50 Hz` `MicroDuck v19-snag-p4` neural walking, `50 Hz` `NeuralPose v5-adaptive` (`2,322`-row `94`-family Freestyle curriculum + `v26` `661`-case / `2,941`-record specialist LoRAs), and `20 Hz` `Living Presence`—see **[Protocol, Telemetry & Safety](/posts/protocol-and-safety/)** and **[Ainekio V2 Hardware](/posts/ainekio-v2/)**.
 
 On the eight-servo **[Ainekio V1](/posts/ainekio-v1/)** quadruped ([V1 vs. V2 comparison](/posts/v1-v2-comparison/)), a **Freenove `ESP32-S3-WROOM CAM`** (`N16R8`, dual-core `160 MHz` Xtensa LX7, `16 MiB` flash, `8 MiB` octal PSRAM) drove eight open-loop `MG90S` servos, an `OV3660` parallel camera, full-duplex `16 kHz` I2S audio (`INMP441` mic + `MAX98357A` speaker amp), and a `0.96"` `SSD1306` OLED face display. **[Ainekio OS](/posts/ainekio-os/)** (formerly MetaHuman OS) handled conversation, memory, and planning over Wi-Fi while the `ESP32-S3` firmware validated `protocol-v1` commands and owned local safety.
 
@@ -37,11 +37,33 @@ V1 split its **ESP-IDF v5.5.4** codebase in [`Greg-Aster/Ainekio-bot`](https://g
 
 Eight hardware **`MCPWM`** channels generated `50 Hz` servo pulses (`732–2500 µs` window, `1500 µs` = `90°` neutral, attached in staggered `20 ms` steps `R1, R2, L1, L2, R4, R3, L3, L4` at boot) so servo timing never collided with the `LEDC` `XCLK` timer required by the camera. Both the **38 stored `.amot` assets** (`3` postures, `5` continuous gaits, `8` timed `45°/90°/180°` open-loop scrub turns, and `22` gestures/dances) and dynamic **`motion_plan_v1`** plans (`1–32` keyframes, `≤ 20 s`) executed through the same clamp and instant-preemption pipeline.
 
-## `OV3660` vision, 52 OLED expressions, and `vadnet1_medium` I2S audio
+<figure className="my-6">
+  <video controls playsinline preload="none" width="1280" height="720" poster="/gallery/early-bench-poster.webp" className="w-full rounded-xl">
+    <source src="/gallery/early-bench.mp4" type="video/mp4" />
+    <a href="/gallery/early-bench.mp4">Download July 29, 2026 V1 electronics and servo bench bring-up video (MP4)</a>
+  </video>
+  <figcaption>July 29, 2026 workbench bring-up of the initial V1 <code>ESP32-S3</code> firmware, <code>MCPWM</code> servo channels, and <code>0.96"</code> <code>SSD1306</code> OLED face before final chassis assembly.</figcaption>
+</figure>
+
+## `OV3660` vision, 52→59 `SSD1306` OLED expressions, and `vadnet1_medium` I2S audio
 
 - **Manual-exposure `OV3660` `XGA` stills before `done`:** Delivered Freenove `N16R8` boards shipped with an **`OV3660`** sensor (superseding early `OV2640` drafts). Firmware captured `XGA` (`1024×768`, JPEG `q=10`) stills using a manual **`72`-line (`~1/60 s`) indoor exposure profile** (`gainceiling=2x`) that eliminated motion blur and early high-gain cross-hatch artifacts, transmitting correlated post-action frames (`0x02` binary WebSocket prefix) *before* sending the motion's `done` acknowledgement.
-- **52 `SSD1306` OLED faces + `UART0` → `I2C` runtime handoff:** Because free pins were scarce, the `0.96"` `128×64` OLED (`0x3C`) used `GPIO0` (`SDA`) and `GPIO43` (`SCL` / `UART0 TX`). After early boot logs completed, firmware cleanly handed `GPIO43` over to `400 kHz` I2C—automatically reverting to `UART0` serial logging if no `0x3C` panel acknowledged on the bench. Onboard `LittleFS` stored **52 `1024`-byte face bitmaps** across core emotional and conversational states with automatic `3.6–6.0 s` idle blinking and a TTS-synchronized `talk` mouth overlay.
-- **Full-duplex `16 kHz` I2S audio & neural VAD:** Assigning `GPIO19/20` to `INMP441` mic data-in and `MAX98357A` speaker data-out intentionally traded native USB-OTG (`D-/D+`) for clean digital audio while preserving the board's dedicated `CH343` USB-UART port for flashing. Incoming mic audio ran through Espressif's **`vadnet1_medium`** neural voice-activity detector (loaded from a `512 KiB` `/srmodels` `SPIFFS` partition with a `200 ms` PSRAM pre-roll ring). A TensorFlow Lite Micro (`microWakeWord`) scaffold was also compiled in, though production wake-word activation waited for V2's `ESP32-P4` **`WakeNet9s`** ([Listening & Speech](/posts/voice-loop/)).
+- **52 Summer 2026 baseline OLED faces + `derive_v1_oled.py` expansion to all `59` V2 expressions (`303` `.bin` frames):** Because free pins were scarce, the `0.96"` `128×64` OLED (`0x3C`) used `GPIO0` (`SDA`) and `GPIO43` (`SCL` / `UART0 TX`). After early boot logs completed, firmware cleanly handed `GPIO43` over to `400 kHz` I2C—automatically reverting to `UART0` serial logging if no `0x3C` panel acknowledged on the bench. Onboard `LittleFS` originally shipped with **52 `1024`-byte face bitmaps** in the Summer 2026 baseline (with `3.6–6.0 s` idle blinking and a TTS-synchronized `talk` mouth overlay), and **`derive_v1_oled.py`** subsequently expanded V1's `128×64` asset pack to cover **all `59` V2 expressions across `303` animated `.bin` frames** so V1 and V2 share complete facial vocabulary parity over `protocol-v1`.
+
+<figure className="my-6">
+  <img src="/gallery/v1-oled-59-expressions-1600.webp" alt="59 monochrome 128x64 SSD1306 OLED facial expressions derived from V2 for Ainekio V1." width="1600" height="1565" loading="lazy" />
+  <figcaption>All <code>59</code> monochrome <code>128 × 64</code> <code>SSD1306</code> OLED expressions (<code>303</code> <code>1,024 B</code> <code>.bin</code> frames) rendered at 2× pixel zoom.</figcaption>
+</figure>
+- **Full-duplex `16 kHz` I2S audio & neural VAD:** Assigning `GPIO19/20` to `INMP441` mic data-in and `MAX98357A` speaker data-out intentionally traded native USB-OTG (`D-/D+`) for clean digital audio while preserving the board's dedicated `CH343` USB-UART port for flashing. Incoming mic audio ran through Espressif's **`vadnet1_medium`** neural voice-activity detector (loaded from a `512 KiB` `/srmodels` `SPIFFS` partition with a `200 ms` PSRAM pre-roll ring). A TensorFlow Lite Micro (`microWakeWord`) scaffold was also compiled in, paving the way for V2's active **`microWakeWord` (`pilot-v1` `int8` on TFLite Micro) + `esp-sr` WebRTC VAD** pipeline ([Listening & Speech](/posts/voice-loop/)).
+
+## Modernized V1 `ESP32-P4` / `PCA9685` / 4th-wire / `GY-LSM6DS3` CAD option
+
+Alongside the preserved August 2026 `ESP32-S3` direct-`MCPWM` firmware baseline documented here, V1's dedicated Blender CAD assembly also defines a **modernized closed-loop electronics option** inside the compact 8-servo `Frame7`/`Frame8` envelope—replacing direct `ESP32-S3` `MCPWM` wiring with a **`Waveshare ESP32-P4-WIFI6`**, **`PCA9685`** I2C servo driver deck, **4th-wire potentiometer feedback** (`CD74HC4067` `C4–C11` → `GPIO49`), and a **`GY-LSM6DS3` `208 Hz` IMU** so builders who print the 8-servo V1 frame today can run V2's closed-loop `ESP32-P4` safety firmware, `microWakeWord` + WebRTC VAD audio, and full `59`-expression asset set.
+
+<figure className="my-6">
+  <img src="/gallery/v1-p4-revisit-4view-cad-1600.webp" alt="Four-panel CAD view of the modernized Ainekio V1 ESP32-P4 electronics bay showing 8 direct-ADC 4th-wire sense leads, PCA9685, speaker bridge cradle over GY-LSM6DS3 IMU, and rear master rocker switch." width="1600" height="1254" loading="lazy" />
+  <figcaption>Modernized V1 <code>ESP32-P4</code> / 4th-wire CAD electronics bay inside the deepened <code>Frame7</code> chassis.</figcaption>
+</figure>
 
 ## SoftAP provisioning, `16 MiB` flash layout & dual-OTA rollback
 

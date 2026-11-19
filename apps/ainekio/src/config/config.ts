@@ -17,6 +17,12 @@ export const siteConfig: SiteConfig = {
   },
   transparency: 0.9,
   defaultTheme: DARK_MODE,
+  themeLock: DARK_MODE,
+  enableAdmin: false,
+  enableSpecialPageFeatures: false,
+  sidebar: {
+    enable: false,
+  },
   banner: {
     enable: false,
     src: '/assets/ainekio/2026-10-12-refresh/render-front.webp',
@@ -33,18 +39,10 @@ export const siteConfig: SiteConfig = {
     minHeadings: 3,
   },
   rightRail: {
-    enable: true,
-    showOnHome: true,
-    showOnPostsWithoutToc: true,
+    enable: false,
+    showOnHome: false,
+    showOnPostsWithoutToc: false,
     stickyTop: '3.5rem',
-    widget: {
-      type: 'updates',
-      collection: 'updates',
-      slug: 'site-updates',
-      excerptLength: 420,
-      pageUrl: '/updates/',
-      pageLinkLabel: 'Open build journal',
-    },
   },
   favicon: [],
 }
@@ -56,7 +54,7 @@ export const navBarConfig: NavBarConfig = {
       url: '/#generations',
       dropdown: [
         { name: 'All 3 Generations', url: '/#generations' },
-        { name: 'V1 · 8-Servo S3', url: '/posts/ainekio-v1/' },
+        { name: 'V1 · 8-Servo', url: '/posts/ainekio-v1/' },
         { name: 'V2 · 12-Servo P4', url: '/posts/ainekio-v2/' },
         { name: 'V3 · Armored SBC', url: '/posts/ainekio-v3-preview/' },
         { name: 'V1 vs. V2', url: '/posts/v1-v2-comparison/' },

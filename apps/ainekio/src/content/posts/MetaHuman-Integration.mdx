@@ -1,7 +1,7 @@
 ---
 title: "Embodied Robot Integration: Bridging Ainekio OS to the Physical ESP32-P4 Body"
 published: 2026-08-27T08:00:00-07:00
-updated: 2026-11-12
+updated: 2026-11-18
 description: "How the embodied bridge carries camera snapshots, IMU and 4th-wire joint telemetry, voice transcripts, and body-contact events up into Ainekio OS, and dispatches bounded motion, face, and speech intents back down."
 image: "/assets/ainekio/v2/metahuman-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -28,6 +28,11 @@ Instead of letting a language model poll hardware sensors or stream raw servo an
 
 ## Connection topology and robot following
 
+<figure className="my-6">
+  <img src="/posts/ainekio-os/ainekio-os-live-vision-chat.webp" alt="Live Ainekio OS Environment Mode session connected to Body Control, showing Ainekio capturing correlated OV5647 camera frames on request and describing the room in conversation." width="1600" height="870" loading="lazy" />
+  <figcaption>Live embodied turn across the bridge in <code>Environment Mode</code>: Ainekio snaps correlated <code>OV5647</code> frames on request, grounds what it sees in the room, and answers in one Standing Persona voice while <code>Body Control</code> holds the live session.</figcaption>
+</figure>
+
 The bridge connects Ainekio OS to the robot's **Host Gateway** ([gateway guide](/posts/gateway-and-simulator/)) across whichever link is active—local workstation loopback, home Wi-Fi LAN, an edge `Radxa Dragon Q6A` board, an SSH tunnel, or an optional remote tunnel.
 
 - **Single authoritative stream**: Multi-host connection following keeps one active observation and action session pinned to the physical robot (supporting both the 12-servo `ESP32-P4` V2 body and the earlier 8-servo `ESP32-S3` V1 frame) so switching between bench and living-room hosts never spawns duplicate command streams.
@@ -39,20 +44,20 @@ Not every hardware reading should trigger a language-model call. The bridge sepa
 
 | Upward Signal | Source on V2 Body & Gateway | How Ainekio OS Consumes It |
 | --- | --- | --- |
-| **Live Robot Status** | `208 Hz` `LSM6DS3` attitude, battery voltage, active posture, and 12-channel `CD74HC4067` (`C4–C15` → `GPIO49`) servo tracking health | Updates live context quietly in the background without firing redundant conversational turns |
-| **Voice Transcripts** | `WakeNet9s` wake-gated `16 kHz` audio from the `ES8311` codec, segmented by 5-mode VAD and transcribed by Whisper ([voice guide](/posts/voice-loop/)) | Enters the embodied workflow as an attributed spoken turn, optionally paired with a camera still taken at utterance end |
+| **Live Robot Status** | `208 Hz` `LSM6DS3` attitude, active posture, and 12-channel `CD74HC4067` (`C4–C15` via `GPIO27–30` → `GPIO49`) servo tracking & `I²t` thermal health (`battery_available = false` on V2; `2S` battery ADC telemetry is V1-only) | Updates live context quietly in the background without firing redundant conversational turns |
+| **Voice Transcripts** | **`microWakeWord` + 5-mode WebRTC VAD** (or Cockpit `Tap to Talk`) `16 kHz` audio from the `ES8311` codec with System 3's `~0.42 s` silent-lock perk, transcribed by Whisper ([voice guide](/posts/voice-loop/)) | Enters the embodied workflow as an attributed spoken turn, optionally paired with a camera still taken at utterance end |
 | **Correlated Camera Snapshots** | Chin-mounted `OV5647` MIPI-CSI stills (explicit captures, post-motion verification frames, or tracked object crops; [vision guide](/posts/vision-loop/)) | Tagged with the exact `action_id`, `command_sequence_id`, or `utterance_id` so vision grounding knows *when* and *why* the frame was captured |
-| **Spatial & Obstacle Metrics** | Cockpit HUD optical-flow + monocular depth obstacle range, YOLOE target boxes, and OpenGV / MoGe depth odometry | Supplies measured forward progress, heading change, and approach clearance during locomotion goals |
+| **Spatial & Obstacle Metrics** | Cockpit HUD optical-flow + `< 0.30 m` `MoGe-2` `8×8` corridor range, 8-sector (`8×45°`) spatial curiosity map, `YOLOE` boxes, and SIFT/depth odometry | Supplies measured forward progress, heading change, and approach clearance during locomotion goals and System 1 Embodied Curiosity |
 | **Body-Contact Events** | Thresholded `tipped`, `shaken`, `stalled` / `jammed`, and `boot` events from the IMU and 4th-wire servo wipers | Routes sudden jostles to the fast body-reflex workflow, and routes `boot` / wake transitions to full contextual orientation |
 
 ## Downward flow: how cognitive intents become robot actions
 
 When an observation enters Ainekio OS's embodied workflow, four distinct cognitive roles split the work so outward speech stays natural and physical actions stay bounded:
 
-1. **Intent Orchestration**: Classifies whether incoming input is a new request, a mid-walk adjustment, a cancellation, or pure conversation, and decides whether a spoken reply is appropriate.
-2. **Task Selection**: Picks concrete, schema-validated robot intents—named postures or gaits (`Stand`, `Walk`, `Run`, `Crawl`, `Crab`, or 23 gestures), measured locomotion goals (distance, turn angle, visual approach/follow using on-chip `50 Hz` MicroDuck or analytical gaits), **Freestyle** 12-DOF target programs (backed by the **349-motion** library and **489-row** training set of **73** library motions + **416** `Stand` fault-recovery trajectories), explicit camera snapshots, or background coding delegations—without injecting robotic step-by-step narration between movements.
-3. **Goal Review**: Inspects the returned hardware action receipt, shaft-arrival telemetry, and post-motion camera frame before marking a multi-step physical objective complete or selecting a follow-up step.
-4. **Outward Expression (Standing Persona, Face & Voice)**: Synthesizes the single conversational reply in Ainekio's voice, pairs it with one of the **59 animated expressions** on the `1.9"` `ST7789` LCD, and streams paced Kokoro or Piper audio to the `NS4150B` speaker while holding an explicit self-speech suppression window so the microphone ignores playback.
+1. **Intent Orchestration (`v26` Intent LoRA)**: Classifies whether incoming input is a new request, a mid-walk adjustment, a cancellation, or pure conversation, and decides whether a spoken reply is appropriate (`v26` Intent/Task specialist training spans **`661` curated source cases / `2,941` dev records**).
+2. **Task Selection (`v26` Task LoRA)**: Picks concrete, schema-validated robot intents—named postures or gaits (`Stand`, `Walk`, `Run`, `Crawl`, `Crab`, or 23 gestures), measured locomotion goals (distance, turn angle, visual approach/follow using on-chip `50 Hz` `MicroDuck v19-snag-p4` or analytical gaits), **Freestyle** 12-DOF target programs synthesized from the **`2,322`-row (`94`-family)** `Qwen3.5-0.8B` curriculum (`1,510` ordinary + `812` recovery across `splayed_stand`/`lay_down`/`dead` starts) and tracked closed-loop at **`50 Hz` by `NeuralPose v5-adaptive`**, explicit camera snapshots, or background coding delegations—without injecting robotic step-by-step narration between movements.
+3. **Goal Review & `5.5 s` Locomotion Progress Window**: Inspects the returned hardware action receipt, shaft-arrival telemetry, and post-motion camera frame before marking a multi-step physical objective complete or selecting a follow-up step. `trackLocomotionProgress()` uses a **`5.5 s` locomotion no-progress window** (`stalledSamples ≥ 4 && elapsedMs ≥ 5,500`) so `MicroDuck`'s `1.8 s` snag detection + `1.8 s` reverse unsnag + forward re-attempt completes cleanly before flagging a blocked path.
+4. **Outward Expression, `20 Hz` Living Presence & `environment.text_stream`**: Synthesizes the single conversational reply in Ainekio's voice, pairs it with **59 animated expressions** on the `1.9"` `ST7789` LCD and **System 3 (`20 Hz` Living Presence, `56.4 KB` INT8)** speech-RMS body nods, streams paced Kokoro or Piper audio to the `NS4150B` speaker (`800 ms` self-speech suppression), and projects live workflow & Big Brother replies across **7 cognitive graphs** over **`environment.text_stream`** (`Body Control Text Out`) directly into the [Ainekio Cockpit HUD](/posts/ainekio-cockpit/) without claiming a `bodyLease`.
 
 ## Fast body-contact reflexes vs. durable multi-step tasks
 

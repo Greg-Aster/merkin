@@ -1,7 +1,7 @@
 ---
 title: "Robot Host Gateway, Cockpit HUD, Body Control & MuJoCo Hardware Twins"
 published: 2026-08-27T08:45:00-07:00
-updated: 2026-11-16
+updated: 2026-11-18
 description: "How Ainekio's host gateway, Body Control workbench, full-viewport Cockpit HUD, and 4,096-environment MuJoCo hardware-twin simulator manage robot sessions, live Ainekio OS streams, servo calibration, and neural gaits."
 image: "/assets/ainekio/v2/gateway-simulator-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -34,13 +34,18 @@ The gateway stack runs on a desktop workstation or an offboard `Radxa Dragon Q6A
 
 ## Cockpit HUD and Body Control workbench
 
+<figure className="my-6">
+  <img src="/posts/2026-11-16-progress/body-control-ui.webp" alt="Live Body Control operator workbench connected to physical robot ainekio-p4-e6ebe5 on carpet, showing real-time OV5647 floor camera feed, top-bar Cockpit launcher, MetaHuman/Ainekio OS control switch, and protocol-v1 status telemetry." width="1600" height="870" loading="lazy" />
+  <figcaption>Body Control workbench connected live to physical unit <code>ainekio-p4-e6ebe5</code> over Wi-Fi (<code>-55 dBm</code>): live <code>OV5647</code> floor camera feed, calibrated 4th-wire servo feedback status, wake-word readiness, and top-bar <code>Cockpit</code> launcher.</figcaption>
+</figure>
+
 | Workspace | What It Provides on V2 |
 | --- | --- |
-| **Cockpit HUD** | Full-viewport live view from the chin-mounted `OV5647` camera overlaid with **pyramidal Lucas-Kanade optical-flow + monocular depth ground-contact obstacle range**, compact 12-servo tracking health, `LSM6DS3` attitude and `2S` battery readouts, an **On-chip MicroDuck vs. Host neural gait** selector, and a top-bar **Ainekio OS control** toggle |
+| **Cockpit HUD** | Full-viewport live view from the chin-mounted `OV5647` camera overlaid with **pyramidal Lucas-Kanade optical-flow + `< 0.30 m` `MoGe-2` forward corridor braking**, one-tap **`Tap to Talk`** (`gate: "open"` wake bypass), a translucent **live Ainekio OS text stream (`environment.text_stream`)**, compact 12-servo tracking health, `208 Hz` `LSM6DS3` attitude readouts (`battery_available = false` on V2; `2S` battery ADC telemetry is V1-only), an **On-chip MicroDuck vs. Host neural gait** selector, and a top-bar **Ainekio OS control** toggle |
 | **Manual Locomotion & Postures** | Direct triggers and live parameter sliders (`Speed`, `Stride %`, `Motion rate`, steering heading, speed multiplier, and clean gait `Finish`) for `Stand`, `Walk`, `Run`, `Crawl`, 6-direction `Crab`, and 23 finite gestures |
-| **12-Channel Servo Feedback** | Live commanded-versus-measured shaft angles across `CD74HC4067` channels `C4–C15` (`GPIO49` / `ADC2_CH0`), One-Euro velocity filter diagnostics, per-servo calibration curves, and closed-loop `Stand` (`2 mm` settle) / `Walk` arrival checks |
+| **12-Channel Servo Feedback** | Live commanded-versus-measured shaft angles across `CD74HC4067` channels `C4–C15` (`GPIO27–30` → `GPIO49` / `ADC2_CH0`), One-Euro velocity filter diagnostics, per-servo calibration curves, and closed-loop `Stand` (`2 mm` settle) / `Walk` arrival checks |
 | **IMU Attitude & Leveling** | Live `208 Hz` `LSM6DS3` roll/pitch telemetry, one-click level-reference capture, 256-sample stationary gyro bias calibration, and self-leveling gain/damping tuning |
-| **Freestyle Motion Library** | SQLite-backed editor and test runner for **349 curated 12-servo motions**—paired with the **489-row** training dataset (**73** library motions + **416** synthesized fault-recovery trajectories ending in `Stand`) |
+| **Freestyle & `50 Hz` NeuralPose** | SQLite-backed editor, `:8794` `Qwen3.5-0.8B` generator trained on the **`2,322`-row (`94`-family: `1,510` ordinary + `812` recovery)** Freestyle curriculum, and **`50 Hz` `NeuralPose v5-adaptive`** closed-loop execution (`6.7 mm` ground-friction micro-step unloading, `280 ms` single-joint recoil + multi-joint stance jam escalation) |
 | **Neural Gait & OTA Maintenance** | Compiles `107.8 KB` `int8` policies for Core 1 `50 Hz` on-chip execution, streams host MJX RL policies with synchronized telemetry logging, manages microSD video clips, and stages `ESP32-P4` firmware updates over Wi-Fi |
 
 ## Command translation and idempotent receipts
@@ -49,11 +54,11 @@ When Ainekio OS dispatches an intent across the embodied bridge, the gateway ada
 
 | Cognitive Intent / Event | Gateway & Adapter Execution Path |
 | --- | --- |
-| **Postures & Locomotion Goals** | Dispatches a checked posture, gesture, or measured distance/turn/visual walk (analytical solver or on-chip `50 Hz` MicroDuck) and monitors progress until terminal `Finish` |
-| **Freestyle Programs** | Validates and streams a multi-target 12-DOF sequence, waiting for 4th-wire shaft arrival at each phase boundary |
+| **Postures & Locomotion Goals** | Dispatches a checked posture, gesture, or measured distance/turn/visual walk (analytical solver or on-chip `50 Hz` `MicroDuck v19-snag-p4` with `< 0.30 m` `MoGe-2` corridor braking) and monitors progress until terminal `Finish` |
+| **Freestyle Programs** | Synthesizes a `2,322`-row curriculum trajectory and tracks 12-DOF targets closed-loop at `50 Hz` via `NeuralPose v5-adaptive` with 4th-wire shaft-arrival checks |
 | **Correlated Snapshots** | Captures an explicit still frame—or attaches a post-motion verification photo immediately before `done`—and returns the matched JPEG |
 | **Robot Speech (TTS)** | Paces synthesized Kokoro or Piper `16 kHz` PCM bursts to the `ES8311` / `NS4150B` speaker queue while holding a self-speech suppression window so wake detection ignores playback |
-| **Spoken Utterances (STT)** | Packages `WakeNet9s` + VAD speech segments as WAV audio (optionally paired with a contemporaneous camera frame) for local or LAN Whisper transcription |
+| **Spoken Utterances (STT)** | Packages **`microWakeWord` + WebRTC VAD** (or Cockpit `Tap to Talk`) speech segments as WAV audio (optionally paired with a contemporaneous camera frame) for local or LAN Whisper transcription |
 | **Body-Contact Events** | Forwards thresholded `tipped`, `shaken`, and `stalled` events to Ainekio OS's fast 6-turn reflex workflow while absorbing routine health ticks into live status |
 
 To guarantee that a brief Wi-Fi drop never triggers duplicate physical motion, every dispatched action is recorded in SQLite with its action ID, payload hash, connection epoch, and sequence number before transmission. Late completions settle the waiting task cleanly without re-sending the movement command.
@@ -63,6 +68,11 @@ To guarantee that a brief Wi-Fi drop never triggers duplicate physical motion, e
 This page's URL (`gateway-and-simulator`) dates back to July 2026, when an early browser keyframe simulator was tested alongside the first gateway prototype. That browser-based keyframe simulator proved inadequate for real contact physics and was retired once physical V1 and V2 bring-up began (historical notes remain in the [V1 Archive](/posts/archive/motion-systems/)).
 
 Today, simulation for Ainekio V2 runs in **MuJoCo (`MJCF`) and JAX / Brax / MJX** across **`4,096` parallel GPU hardware-twin environments**:
+
+<figure className="my-6">
+  <img src="/gallery/ainekio-mjcf-preview-960.webp" alt="Full-CAD 650 g Ainekio V2 MuJoCo MJCF model with 12 servo actuators, 8 passive hinges, and 4 planar four-bar equality constraints." width="960" height="720" loading="lazy" />
+  <figcaption>Full-CAD <code>650 g</code> Ainekio V2 MuJoCo <code>MJCF</code> hardware twin (<code>12</code> servo actuators, <code>8</code> passive hinges, and <code>4</code> planar four-bar equality constraints) used across <code>4,096</code> parallel GPU environments.</figcaption>
+</figure>
 
 - **Exact 375-mesh CAD & four-bar physics**: Exports the `650 g` V2 assembly directly from Blender with closed-loop `35/20/28/38/55 mm` equality constraints, curved 3D-printed rocking soles, and Conjugate Gradient contact solving (`500 Hz` physics / `50 Hz` control).
 - **Sensor & actuator fidelity**: Replicates the `MG90S` speed-torque ceiling, `PCA9685` `4.07 µs` PWM quantization, 12-bit `CD74HC4067` ADC scan with rail sag and One-Euro filtering, `208 Hz` `LSM6DS3` attitude projection, multi-surface floor friction (`0.14–1.45`), and `21–40 mm` cable/rug ledges—matched against the C firmware so distilled `107.8 KB` policies transfer straight onto the physical `ESP32-P4`. See the [Gait Development Guide](/posts/gait-development/) for training results and floor videos.

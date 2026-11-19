@@ -1,9 +1,9 @@
 ---
 title: "What Ainekio Can Do: Technical Capabilities, Function Inventory & System Specs"
 published: 2026-11-12
-updated: 2026-11-16
-description: "Evidence-based technical reference for Ainekio V2 and Ainekio OS: closed-loop 12-servo hardware specs, 3-system neural motion (MicroDuck v19, 50 Hz NeuralPose & 20 Hz Living Presence), per-joint I²t thermal jam protection, Cockpit live stream, and persistent cognitive workflows."
-image: "/gallery/ainekio-v2-physical-three-quarter-960.webp"
+updated: 2026-11-18
+description: "Evidence-based technical reference for Ainekio V2 and Ainekio OS: closed-loop 12-servo hardware specs, 3-system neural motion (MicroDuck v19-snag-p4, 50 Hz NeuralPose v5-adaptive & 20 Hz Living Presence), per-joint I²t thermal jam protection, Cockpit live stream, and persistent cognitive workflows."
+image: "/gallery/ainekio-v2-alert-stance-960.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Greg the Mechanic"
 authorBio: "Builder of Ainekio & Ainekio OS"
@@ -27,8 +27,8 @@ Most build entries on this site record *chronological bench work*—individual l
 The engineering goal of Ainekio is specific: pair an ultra-low-cost (`~$85` BOM, `650 g`) 3D-printed quadruped that has **measured closed-loop joint feedback and onboard `50 Hz` neural locomotion** with a **persistent, local-first AI operating system** that remembers interactions across days, perceives people and objects in the room, executes verified physical goals, and consolidates its own memory and specialist adapters overnight.
 
 <figure>
-  <img src="/gallery/ainekio-v2-physical-three-quarter-960.webp" alt="Physical 650 g Ainekio V2 quadruped on carpet showing its printed shell, four-bar linkage legs, and top-deck 4th-wire feedback harness." width="960" height="720" loading="lazy" />
-  <figcaption>Assembled <code>650 g</code> Ainekio V2 quadruped (<code>245.85 × 182.79 × 109.06 mm</code>) on living-room carpet with twelve 4th-wire potentiometer-modified <code>MG90S</code> servos, front <code>1.9"</code> <code>ST7789</code> IPS face display, chin-mounted <code>OV5647</code> MIPI-CSI camera, and rear <code>2S</code> Keeper Bridge.</figcaption>
+  <img src="/gallery/ainekio-v2-alert-stance-1600.webp" alt="Close-up floor view of the physical 650 g Ainekio V2 quadruped standing alert on carpet with glowing cyan ST7789 eyes, red faceted face shell, serrated four-bar legs, and top-deck 4th-wire feedback harness." width="1546" height="1042" loading="lazy" />
+  <figcaption>Assembled <code>650 g</code> Ainekio V2 quadruped (<code>245.85 × 182.79 × 109.06 mm</code>) standing alert on living-room carpet with twelve 4th-wire potentiometer-modified <code>MG90S</code> servos, front <code>1.9"</code> <code>ST7789</code> IPS face display, chin-mounted <code>OV5647</code> MIPI-CSI camera, and rear <code>2S</code> Keeper Bridge.</figcaption>
 </figure>
 
 ---
@@ -41,8 +41,8 @@ To prevent language-model latency or Wi-Fi jitter from destabilizing motor loops
 | :--- | :--- | :--- | :--- | :--- |
 | **Actuation & Proprioception** | `12× MG90S` via `PCA9685` `50 Hz` phase-staggered PWM (`I2C1`); `CD74HC4067` `16-ch` `50 Hz` wiper scan (`ADC2_CH0`, full `[1..4094]` span), 3-pt NVS cal, One-Euro filter, **per-joint `8–10 s` `I²t` winding thermal fuse** (`7.0°` deadband, selective `LEDn_OFF_H=0x10`) | Per-joint PWM & feedback calibration APIs, live 12-joint tracking, `Tap to Talk`, & live Ainekio OS stream in Body Control & [Cockpit HUD](/posts/ainekio-cockpit/) | Tracks `servo_feedback` & `output_fault`; `5.5 s` unsnag-aligned goal supervision + `stop` (`detach: true`) | **Physical robot & C+Python HIL verified** |
 | **Inertial Balance & Episodes** | `LSM6DS3` @ `208 Hz` ODR (`2 ms` poll), Madgwick fusion, tapered stationary leveling (`≤0.5°` deadband) w/ Jacobian anti-windup | Classifies `tipped` (`>60° / 300 ms`), `rapid_movement` (`>0.75 g` or `180 dps`), `wake`, and `servo_stall` episodes + **8-sector (`8×45°`) Spatial Curiosity** | `fast-body-event-mode` (`lightweight` role, deduplicated over last `6` remarks), `robot-wake-up-mode`, & **single-hop System 1 Embodied Curiosity** | **Physical robot verified** |
-| **3-System Neural & Analytical Motion** | `Stand`, `Walk`, `Run`, `Crawl`, `Crab`, `23` splines, + **Core 1 `50 Hz` `107.84 KiB` `int8` L2-cached `MicroDuck v18/v19-snag-p4`** (`1.8 s` `-0.45 m/s` reverse unsnag + RISC-V PIE build patch) | `MicroduckActor` & `PupperMjxActor` (`50 Hz`) + **System 3 `20 Hz` Living Presence** (`56,094` params / `56 KB` `int8`, `99.69%` face acc, speech-RMS motion, VAD-silent) | Closed-loop `EnvironmentLocomotionGoal` supervisor (`distance` w/ `<0.30 m` `MoGe-2` brake, `relativeTurn`, `approach`, `follow`, `visual`) | **Physical carpet, hardwood & seam bouts verified** (`v18` `+1.3246` 10-suite score, `0` falls) |
-| **Generative Pose & Jam Recoil** | Executes `motion_plan_v2` (`1–32` frames) and `50 Hz` `walk_target` foot offsets w/ `800 ms` bounded 4th-wire arrival checks | **Freestyle** (`Qwen3.5-0.8B` LoRA, `1,812` curriculum examples w/ `sit_brace`) + **`50 Hz` `NeuralPose`** (`v2-delay` `0.52°–1.33°` MAE @ `180 ms` delay, `280 ms` `2.0°` recoil + `0.85 s` Return-to-Stand) | Issues `requestMotion` intents; streams live replies to Cockpit via `Body Control Text Out` across 7 cognitive graphs | **Freestyle, `NeuralPose` & `test_p4_jam_and_thermal.py` verified** |
+| **3-System Neural & Analytical Motion** | `Stand`, `Walk`, `Run`, `Crawl`, `Crab`, `23` splines, + **Core 1 `50 Hz` `107.84 KiB` `int8` L2-cached `MicroDuck v18/v19-snag-p4`** (`25 mm` swing-foot snag plant + `1.8 s` `-0.45 m/s` reverse unsnag + RISC-V PIE build patch) | `MicroduckActor` & `PupperMjxActor` (`50 Hz`) + **System 3 `20 Hz` Living Presence** (`56,382` params / `56.4 KB` INT8, `99.65%` face acc, `64.1%` err & `31.1%` torque cut on carrier jam, `14 mm` vertical yield, `~0.42 s` silent-lock wake perk) | Closed-loop `EnvironmentLocomotionGoal` supervisor (`distance` w/ `<0.30 m` `MoGe-2` brake, `relativeTurn`, `approach`, `follow`, `visual`) | **Physical carpet, hardwood & seam bouts verified** (`v18` `+1.3246` 10-suite score, `0` falls) |
+| **Generative Pose & Jam Recoil** | Executes `motion_plan_v2` (`1–32` frames) and `50 Hz` `walk_target` foot offsets w/ `800 ms` bounded 4th-wire arrival checks (`!actively_leveling` replan guard) | **Freestyle** (`Qwen3.5-0.8B` LoRA, **`2,322` curriculum examples** across `94` families: `1,510` ordinary + `812` recovery, `0.00096` loss) + **`50 Hz` `neural-pose-v5-adaptive`** (`1.23M` steps, `7/7` suites w/ `0` falls, `6.7 mm` snag micro-step lift, `280 ms` single-joint recoil + multi-joint stance jam one-shot `replan_recovery`) | Issues `requestMotion` intents (`v25/v26` specialist LoRAs, `2,941` dev + `814` eval records); streams live replies to Cockpit via `Body Control Text Out` across 7 cognitive graphs | **Freestyle, `neural-pose-v5-adaptive` & `test_p4_jam_and_thermal.py` verified** |
 | **Vision, Identity & Depth** | `OV5647` MIPI-CSI → P4 ISP → 180° upright HW JPEG (`QVGA`–`FHD`, `0–15 fps`, `AUTO` exposure metering) + rolling `60 s / 64 MiB` `.avi` SD recorder | `YOLO`/`YOLOE` + `ByteTrack` + `MobileCLIP` search/box prompt; `YuNet`+`SFace` `128-D` face gallery (`≤16` people); checkerboard PnP + LK flow & `MoGe-2 ViT-L` SIFT odometry | `environmentVision` multimodal grounding, exact 4-tuple frame provenance binding, `single_person_resume` safety gate | **Physical camera, YOLOE, face gallery & SD recording verified**; `MoGe-2` metric scale uncalibrated without checkerboard |
 | **Voice & 59-Face Expression** | `ES8311`+`NS4150B` `16 kHz` I2S (`20 ms` / `640 B` frames), `esp-sr` WebRTC VAD, `+6°` shoulder perk, TFLite Micro `microWakeWord` runtime, `ST7789` `320×170` `15 fps` (`59` faces) | Packages `AIKAUD01` WAV utterances; paces `AIKSPK01` `20 ms` speaker PCM or routes to host audio; foreground/background LCD token slots | `faster-whisper` STT (`:9883`, persona hotwords) + phrase-chunked `Kokoro` (`:9882`) / `Piper` ONNX TTS concurrent with motion | **Physical mic/speaker/LCD & VAD verified** (`microWakeWord` `.tflite` provisioned separately to LittleFS) |
 | **Memory, Agency & Sleep** | Stateless across power cycles (stores only NVS joint/feedback/IMU/Wi-Fi calibration + `8 KiB` RTC panic log) | Durable `30-day` SQLite `ActionReceipts` (`environment-actions.sqlite`) fencing `(sessionId, robotId, epoch, sequence)` | `47` cognitive graphs, `12` model roles, `17`-table `executions.sqlite` (`waitForEvent`), `12` memory types, `1–10` step Desires, `8`-stage `02:00` Sleep, Big Brother CLI | **Production runtime verified** standalone and over `/environment` bridge |
@@ -78,7 +78,7 @@ Onboard FreeRTOS splits supervision and control across cores so servo power is p
 
 - **Core 0 `output_guard` (`5 ms` tick)**: Monitors `/robot` control lease freshness and pulls `PCA9685 OE` high (disarming servo drive) if control/heartbeats go silent for **`> 4,000 ms`**.
 - **Sequential Startup & Staggered Stand**: Fault, panic, or brownout resets inhibit automatic startup motion. On clean engage, channels home **`200 ms` apart** at a `1,000 µs/s` slew limit, then execute a front/rear **`100 ms`-staggered rise** (`1.2 s` lift + `2 mm / 200 ms` settle) verified against 4th-wire shaft landmarks.
-- **3-Tier Recovery-First Jam Protection & Per-Joint `I²t` Winding Thermal Fuse**: Raw 12-bit wiper counts pass through 3-point NVS piecewise calibration (`500 / 1650 / 2800 µs`, extrapolated across the full non-railed `[1..4094]` ADC span) and an adaptive **One-Euro filter** (`min_cutoff = 1.5 Hz`, `beta = 0.002`). Rather than looping through slow LLM re-prompts or dropping all 12 servos on a minor snag, jam protection escalates deterministically: **`280 ms` `2.0°` manifold recoil** (`+ 0.85 s` Return-to-Stand) in `NeuralPose`, **`1.8 s` `-0.45 m/s` autonomous reverse unsnag** during walking, **`800 ms` bounded arrival waits** (`STAND_MAX_REPLANS = 2`), and an **`8.0–10.0 s` per-joint `I²t` thermal fuse** (`DEADBAND = 7.0°`, zero heat under normal standing sag) that cuts `PCA9685 LEDn_OFF_H = 0x10` **only on the locked servo** so the 11 healthy servos hold the body upright ([full guide](/posts/jam-protection-and-thermal-safety/)).
+- **3-Tier Recovery-First Jam Protection & Per-Joint `I²t` Winding Thermal Fuse**: Raw 12-bit wiper counts pass through 3-point NVS piecewise calibration (`500 / 1650 / 2800 µs`, extrapolated across the full non-railed `[1..4094]` ADC span) and an adaptive **One-Euro filter** (`min_cutoff = 1.5 Hz`, `beta = 0.002`). Rather than looping through slow LLM re-prompts or dropping all 12 servos on a minor snag, jam protection escalates deterministically: **`280 ms` `2.0°` single-joint recoil** plus **multi-joint stance jam escalation** (`>= 2` jammed stance joints or `> 12°` L/R recoil asymmetry triggering one-shot `replan_recovery`) in `neural-pose-v5-adaptive`, **`1.8 s` `-0.45 m/s` autonomous reverse unsnag** during walking, **`800 ms` bounded arrival waits** (`STAND_MAX_REPLANS = 2`, debounced by `!actively_leveling` in `body.c`), and an **`8.0–10.0 s` per-joint `I²t` thermal fuse** (`DEADBAND = 7.0°`, zero heat under normal standing sag) that cuts `PCA9685 LEDn_OFF_H = 0x10` **only on the locked servo** so the 11 healthy servos hold the body upright ([full guide](/posts/jam-protection-and-thermal-safety/)).
 - **Tapered IMU Leveling & Local 180 s Auto-Rest**: Stationary balance holds bus-quiet inside `≤ 0.5°` roll/pitch error, wakes above `1.0°` with rate `2 + 6r²/(1+r²) s⁻¹`, and projects 4th-wire tracking lag outside `±120 µs` through the linkage Jacobian for anti-windup. After **`180 s`** of inactivity (deferred while moving, listening, or speaking), `idle_rest.c` locally runs `lay_down` and disarms `PCA9685 OE` without needing a host connection.
 
 ---
@@ -100,14 +100,14 @@ Ainekio V2 supports three distinct locomotion execution paths: **analytical C st
 
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
   <figure>
-    <video controls playsInline preload="metadata" width="960" height="540" poster="/gallery/ainekio-v2-neural-walk-first-run-poster.webp" className="w-full rounded-xl">
+    <video controls playsinline preload="none" width="960" height="540" poster="/gallery/ainekio-v2-neural-walk-first-run-poster.webp" className="w-full rounded-xl">
       <source src="/gallery/ainekio-v2-neural-walk-first-run.mp4" type="video/mp4" />
       <a href="/gallery/ainekio-v2-neural-walk-first-run.mp4">Download physical V2 carpet neural walking video.</a>
     </video>
     <figcaption>Physical <code>650 g</code> Ainekio V2 walking forward and reversing on living-room carpet under its 200M-step trained neural policy (November 6 floor run).</figcaption>
   </figure>
   <figure>
-    <video controls playsInline preload="metadata" width="1280" height="720" poster="/gallery/microduck-p4-student-110kb-poster.webp" className="w-full rounded-xl">
+    <video controls playsinline preload="none" width="1280" height="720" poster="/gallery/microduck-p4-student-110kb-poster.webp" className="w-full rounded-xl">
       <source src="/gallery/microduck-p4-student-110kb.mp4" type="video/mp4" />
       <a href="/gallery/microduck-p4-student-110kb.mp4">Download distilled 107.8 KB ESP32-P4 student rollout.</a>
     </video>
@@ -117,13 +117,13 @@ Ainekio V2 supports three distinct locomotion execution paths: **analytical C st
 
 ---
 
-## 4. Freestyle Choreography & 50 Hz Neural Pose Control
+## 4. Freestyle Choreography, 50 Hz NeuralPose v5-adaptive & 20 Hz Living Presence
 
-Walking policies only handle cyclic stepping; expressive room behavior and fault recovery require arbitrary whole-body postures. Body Control pairs a natural-language **Freestyle** synthesizer (`:8794`) with a closed-loop **50 Hz Neural Pose & Emote runtime** (`experiments/freestyle/neural_pose/`).
+Walking policies only handle cyclic stepping; expressive social greeting, room behavior, and fault recovery require arbitrary whole-body postures and lifelike idle presence. Body Control pairs a natural-language **Freestyle** synthesizer (`:8794`) with **`50 Hz` `neural-pose-v5-adaptive`** (`experiments/freestyle/neural_pose/`) and **System 3 (`20 Hz` Living Presence)** (`Master/gateway/presence/`).
 
-### 4.1 The 1,767-Example Freestyle Library & 11 DSL Primitives
+### 4.1 The 2,322-Example Freestyle Curriculum & 11 DSL Primitives
 
-Freestyle runs a fine-tuned **`Qwen3.5-0.8B` GGUF LoRA** (`rank=16`, `alpha=32` on the shared `:8080` `llama.cpp` server, with optional Big Brother escalation) backed by a curated SQLite motion library containing **`1,767` active programs** (**`939` ordinary motions** across `109` choreography families plus **`828` fault-recovery trajectories** across `16` stall/slip/dropout families, validated against `86` ordinary and `404` recovery probe splits).
+Freestyle runs a fine-tuned **`Qwen3.5-0.8B` GGUF LoRA** (`rank=16`, `alpha=32` on the shared `:8080` `llama.cpp` server, **`0.00096` train loss**, with optional Big Brother escalation) trained on the unified `freestyle_curriculum.py` dataset of **`2,322` verified examples across `94` choreography families** (**`1,510` ordinary motions** plus **`812` fault-recovery trajectories**)—explicitly conditioned across **`splayed_stand`**, **`lay_down`**, and **`dead`** starting postures as well as unloaded rear-leg seated bracing (`sit_brace_enter()` / `sit_brace_exit()`).
 
 Instead of emitting raw unvalidated angles, the model composes programs from **`11` geometry-checked `motion-targets-v1` primitives**:
 
@@ -136,14 +136,29 @@ Instead of emitting raw unvalidated angles, the model composes programs from **`
 | `gait` | `(command, speed_pct, cycles)` | Bounded analytical step/turn segments (auto-chunked to `≤10` cycles per intent) |
 | `hold` / `stand` / `stop` / `release` / `face` | `(seconds)` · `()` · `()` · `()` · `(expr[59])` | Timed dwell, closed-loop neutral recovery, immediate hold-stop, `OE` PWM disarm, and synchronized LCD expression |
 
-When `servo_stall`, `servo_feedback_fault`, `tipped`, or `rapid_movement` interrupts a motion, `bridge.py` feeds the original `motion_goal`, `interrupted_action`, `remaining_program`, and per-joint 4th-wire progress back into Freestyle so it synthesizes an unloading recovery path rather than abandoning the user's request.
+<figure className="my-6">
+  <video controls playsinline preload="none" width="1280" height="720" poster="/gallery/v2-shake-and-greet-test-poster.webp" className="w-full rounded-xl">
+    <source src="/gallery/v2-shake-and-greet-test.mp4" type="video/mp4" />
+    <a href="/gallery/v2-shake-and-greet-test.mp4">Download physical V2 greeting, stretch, and shake-reflex test video.</a>
+  </video>
+  <figcaption>Physical V2 greeting, social motion, and IMU reflex verification on carpet: Ainekio wakes, stretches, greets in conversation, fires an immediate snarky vocal + LCD reflex via <code>fast-body-event-mode</code> when picked up and shaken mid-turn, and resumes friendly interaction cleanly.</figcaption>
+</figure>
 
-### 4.2 Closed-Loop 50 Hz Neural Pose & Emote Controller (neural_pose)
+### 4.2 Closed-Loop 50 Hz Neural Pose & Emote Controller (`neural-pose-v5-adaptive`)
 
-To replace open-loop keyframe interpolation during poses, 3-leg waves, and seated 2-paw mimes, Body Control automatically activates `neural_pose` (`policy.onnx`, **`3.17 MiB`**, **`826,776` parameters**, `(512, 256, 128)` MLP trained across `512` GPU MuJoCo 3.10 environments on a `2,048`-pose goal bank):
+To replace open-loop keyframe interpolation during poses, 3-leg waves, and seated 2-paw mimes, Body Control activates **`neural-pose-v5-adaptive`** (`policy.onnx`, **`3.17 MiB`**, **`826,776` parameters**, `(512, 256, 128)` MLP refined across **`1.23M` adaptive PPO steps** following `v2-delay` → `v3-jam-compliant` → `v4-equivariant` L/R mirror symmetry, passing **`7/7` qualification scenarios with `0` falls**):
 
 - **`1,290`-Float Fault-Tolerant Observation (`15 × 86` @ `20 ms`)**: Combines `joint_rad[12]`, `joint_vel_rad_s[12]`, **`usable_flags[12]`** (automatically substituting commanded angles and zeroing velocity if any 4th-wire ADC channel clips or drops out—trained with **`35%` sensor-faulted episodes** and **`30%` suspended-in-air episodes**), IMU gyro/accel/gravity`[9]`, `goal_joint_rad[12]`, `goal_foot_norm[12]`, `leg_support[4]`, `speed_scale[1]`, and `prev_action[12]`.
-- **`0.46 ms` Host Inference & Ray-Connected IK**: Outputs `12` foot targets scaled across **`(95, 155, 180) mm`**—wide enough to span full `Stand`, `Sit`, `Rest`, high waves, and seated rear-braced gestures—decoded via closed-form `65 × 17` ray-connected 4-bar IK (`zero` Cartesian IK exceptions) and streamed at `50 Hz` over `walk_nominal_v1`, advancing segments early as soon as 4th-wire error settles (`≤ 4.5°`, `≤ 22°/s`).
+- **Adaptive `6.7 mm` Ground-Friction Micro-Step Unloading & Ray-Connected IK**: Rather than dragging a loaded foot sideways across carpet pile, `neural-pose-v5-adaptive` learned **`6.7 mm` vertical micro-step unloading** whenever stance-foot friction resists lateral motion, decoding `12` foot targets (`0.46 ms` host inference across `(95, 155, 180) mm`) through closed-form `65 × 17` ray-connected 4-bar IK (`zero` Cartesian IK exceptions) and advancing segments early as soon as 4th-wire error settles (`≤ 4.5°`, `≤ 22°/s`).
+- **Two-Tier Recoil vs. Multi-Joint Stance Jam Escalation**: Single-joint paw or gesture contacts recoil locally by **`2.0°` in `280 ms`** (`+ 0.85 s` Return-to-Ready on final posture hold) while the remaining 11 joints continue uninterrupted. When **`>= 2` stance joints jam simultaneously** or **left/right recoil asymmetry exceeds `> 12°`**, the executor triggers a **one-shot `replan_recovery`** from measured shaft state (`splayed_stand` / `lay_down` / `dead`-aware) instead of repeatedly re-prompting an LLM loop.
+
+### 4.3 System 3: `20 Hz` Autonomic Living Presence
+
+Between walks and explicit Freestyle gestures, **System 3 (`20 Hz` Living Presence)** keeps the `650 g` body responsive, compliant, and quiet during speech capture:
+
+- **`56,382`-Parameter SRAM-Fit Network (`56.4 KB` INT8)**: Trained across `72,000` sequences to **`99.65%` LCD expression accuracy**, outputting `12` speech-RMS conversational foot residuals (`±8.0 mm`), `12` stance compliance trims, and expression logits at `20 Hz`.
+- **Carrier-Jam Torque Relief & `14 mm` Vertical Yield**: Under unexpected carrier-link jams, active System 3 compliance cuts **joint tracking error by `64.1%`** and **actuator torque by `31.1%`**, while `_common_mode_drift()` provides up to **`14 mm` of vertical jam yield** on an obstructed corner **without 4-leg torso sink**.
+- **`~0.42 s` Silent-Lock Wake-Word Perk**: On wake-word / VAD open, System 3 executes a smooth **`~0.42 s` front-shoulder perk**, sets the **`listening` LCD face**, and issues **`stop(detach=False)`** to lock quiet holding torque throughout user speech—guaranteeing servo gear noise never holds WebRTC VAD open.
 
 ---
 
@@ -165,7 +180,7 @@ To replace open-loop keyframe interpolation during poses, 3-leg waves, and seate
   <figcaption>Ainekio V2's <code>1.9"</code> <code>ST7789</code> IPS LCD (<code>320 × 170</code> @ <code>40 MHz</code> SPI2, <code>15 fps</code>) renders 59 procedural C expressions with eighth-pixel distance-field side-lighting and independent foreground/background token arbitration (<code>face_feedback_v1</code>).</figcaption>
 </figure>
 
-- **Capture, VAD & `microWakeWord`**: Onboard `ES8311` (`0x18`) + `NS4150B` (`GPIO53`) stream `16 kHz` `pcm_s16le` audio in `20 ms` (`640 B`) frames with a `100 ms` pre-roll and `0–42 dB` configurable mic gain. `esp-sr` runs **WebRTC VAD** (`modes 0–4`; proprietary `WakeNet9s` is disabled in favor of open **`microWakeWord` on TFLite Micro**, `40`-mel streaming `int8` with a `62,304 B` `pilot-v1` model). On `vad_open`, front shoulders (`6` & `9`) smoothly perk **`+6.0°`** via a quintic smoothstep; utterances `≥ 300 ms` automatically snap a time-correlated `origin: "audio"` camera frame on `vad_close` and ship an `AIKAUD01` WAV packet (`≤ 15 s` / `512 KiB`) to Ainekio OS.
+- **Capture, VAD & `microWakeWord`**: Onboard `ES8311` (`0x18`) + `NS4150B` (`GPIO53`) stream `16 kHz` `pcm_s16le` audio in `20 ms` (`640 B`) frames with a `100 ms` pre-roll and `0–42 dB` configurable mic gain. `esp-sr` runs **WebRTC VAD** (`modes 0–4`; proprietary `WakeNet9s` is disabled in favor of open **`microWakeWord` on TFLite Micro**, `40`-mel streaming `int8` with a `62,304 B` `pilot-v1` model). On wake / `vad_open`, System 3 and firmware coordinate a **`~0.42 s` silent-lock front-shoulder perk (`+6.0°`)**, display the **`listening` face**, and lock quiet holding stance via `stop(detach=False)` during speech; utterances `≥ 300 ms` automatically snap a time-correlated `origin: "audio"` camera frame on `vad_close` and ship an `AIKAUD01` WAV packet (`≤ 15 s` / `512 KiB`) to Ainekio OS.
 - **Whisper STT + Concurrent Kokoro / Piper Speech**: `faster-whisper` (`:9883`, seeded with persona hotwords) transcribes speech, while outbound replies synthesize through **Kokoro** (`:9882`, custom voicepacks) or **Piper ONNX** (including dual-voice `-5` semitone mixing), chunked (`160` opening / `260` preferred chars) into `AIKSPK01` `20 ms` PCM frames that play **concurrently with walking or gestures** while an `800 ms` post-playback echo guard suppresses self-wake.
 
 ---
@@ -192,7 +207,7 @@ When connected—or when running standalone on a workstation, CLI (`mh`), or mob
 
 1. **`47` Node-Based Cognitive Graphs (`176` `.node.ts` implementations) & `12` Specialist Model Roles**:
    - Every turn executes a deterministic demand-driven graph (`environment-mode.json` has `43` nodes / `172` edges; `robot-autonomy-controller-mode.json` has `26` nodes / `62` edges) across **`12` decoupled roles**: `orchestrator`, `environmentVision`, `persona`, `autonomy`, `environmentActionSelector`, `lightweight`, `curator`, `coder`, `planner`, `summarizer`, `psychotherapist`, and `embedder`.
-   - Shared native `llama.cpp` (`:8080`) demand-loads `Qwen3.5 9B` (multimodal vision + `262K` context), `Qwen3.5 0.8B` / `2B` per-request Intent/Task LoRAs, and `Qwen3.5 4B` (`Q4_K_M`) personalization LoRAs (unloading after `5 min` idle), alongside CPU-pinned **`Qwen3-Embedding-0.6B` (`1024-D`)** so vector search never competes for GPU VRAM. Any role can also route to a LAN GPU server, cloud APIs, or **Big Brother** CLI sessions (**`codex`**, **`claude-code`**, and warm **`GeminiAcpServer`** pools).
+   - Shared native `llama.cpp` (`:8080`) demand-loads `Qwen3.5 9B` (multimodal vision + `262K` context), `Qwen3.5 0.8B` / `2B` per-request **`v25/v26` Intent/Task specialist LoRAs** (`661` source cases / `2,941` dev + `814` eval records), and `Qwen3.5 4B` (`Q4_K_M`) personalization LoRAs (unloading after `5 min` idle), alongside CPU-pinned **`Qwen3-Embedding-0.6B` (`1024-D`)** so vector search never competes for GPU VRAM. Any role can also route to a LAN GPU server, cloud APIs, or **Big Brother** CLI sessions (**`codex`**, **`claude-code`**, and warm **`GeminiAcpServer`** pools).
 2. **Crash-Safe SQLite Durable Execution (`executions.sqlite`)**:
    - Checkpoints graph state across **`17` WAL tables** with `30,000 ms` writer-lease fencing, content-addressed `mh-blob:<sha256>` camera frame deduplication, `waitForEvent` zero-CPU suspension, and a transactional outbox correlated to Body Control's `ActionReceipts`—guaranteeing reconnects or restarts **never double-execute physical robot motions**.
 3. **Provenance-Tagged Memory & Protected Standing Persona**:
@@ -210,7 +225,7 @@ When connected—or when running standalone on a workstation, CLI (`mh`), or mob
 
 Both halves expose full operator inspection rather than hiding behavior inside a black box:
 
-- **Body Control (`:8791` / `:8795`) & `/cockpit` HUD**: Live MIPI-CSI stream with YOLOE/face-gallery overlays, keyboard/gamepad 3D twist teleop, instant `native` (`ESP32-P4` L2) vs. `neural` (host) gait switching, per-joint PWM & 3-point 4th-wire ADC calibration, checkerboard ground-plane calibrator, `1,767`-item Motion Library editor, microSD `.avi` clip browser, and Bearer-authenticated **Wi-Fi HTTP OTA firmware flashing** with automatic peripheral/WebSocket health verification before rollback cancellation.
+- **Body Control (`:8791` / `:8795`) & `/cockpit` HUD**: Live MIPI-CSI stream with YOLOE/face-gallery overlays, keyboard/gamepad 3D twist teleop, instant `native` (`ESP32-P4` L2) vs. `neural` (host) gait switching, per-joint PWM & 3-point 4th-wire ADC calibration, checkerboard ground-plane calibrator, `2,322`-example (`94`-family) Freestyle curriculum & Motion Library editor, microSD `.avi` clip browser, and Bearer-authenticated **Wi-Fi HTTP OTA firmware flashing** with automatic peripheral/WebSocket health verification before rollback cancellation.
 - **Ainekio OS Web Workbench**: Live SvelteFlow cognitive graph editor (`47` graphs), `/architecture` interactive system map, multi-channel conversation & Inner Dialogue inspector, Memory & Vector Index browser, Desire/Agency reviewer, Training curator, and `ServerStatus` per-role model/voice switcher.
 
 ### Documented Hardware & Software Constraints
@@ -224,7 +239,7 @@ Both halves expose full operator inspection rather than hiding behavior inside a
 ## Related Technical References
 
 - **[Project Overview & System Status](/posts/project-overview/)**: High-level 3-layer system map and V1, V2, and V3 summary.
-- **[Three-System Neural Motion Architecture](/posts/three-system-neural-architecture/)**: Deep dive into System 1 (`MicroDuck v18/v19` + RISC-V PIE fixes), System 2 (`50 Hz` `NeuralPose` + `1,812`-row Freestyle), and System 3 (`20 Hz` Living Presence).
+- **[Three-System Neural Motion Architecture](/posts/three-system-neural-architecture/)**: Deep dive into System 1 (`MicroDuck v19-snag-p4` + RISC-V PIE fixes), System 2 (`50 Hz` `NeuralPose v5-adaptive` + `2,322`-row Freestyle), and System 3 (`20 Hz` Living Presence).
 - **[Ainekio Cockpit HUD](/posts/ainekio-cockpit/)**: Full-screen camera HUD, `Tap to Talk` wake bypass, and 7-graph live Ainekio OS stream.
 - **[Jam Protection & Per-Joint I²t Winding Fuse](/posts/jam-protection-and-thermal-safety/)**: Deterministic `280 ms` recoil, `1.8 s` reverse unsnag, and `8–10 s` selective `PCA9685` channel cutoff.
 - **[Ainekio OS Architecture](/posts/ainekio-os/)**: Cognitive graphs, `ExecutionStore` v2 SQLite durability, 8-sector Embodied Curiosity, and the `02:00` sleep cycle.

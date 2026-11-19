@@ -24,6 +24,7 @@ let links: NavBarLink[] = navBarConfig.links.map(
 // Prerendered pages cannot read per-request auth state during static builds.
 // Admin auth is already derived from localStorage on the client.
 const isAuthenticated = false
+const adminEnabled = siteConfig.enableAdmin !== false
 ---
 
 <div id="navbar" class="z-50 onload-animation">
@@ -32,8 +33,16 @@ const isAuthenticated = false
         className,
         "card-base !overflow-visible max-w-[var(--page-width)] h-[var(--navbar-height,4.5rem)] !rounded-t-none mx-auto flex items-center justify-between px-4"]}>
         
-        <!-- Admin Navbar Component (handles login, settings toggle, etc.) -->
-        <AdminNavbar client:load siteTitle={siteConfig.title} />
+        {adminEnabled ? (
+            <AdminNavbar client:load siteTitle={siteConfig.title} />
+        ) : (
+            <a
+                href={url('/')}
+                class="btn-plain scale-animation rounded-lg h-[3.25rem] px-5 font-bold active:scale-95 flex items-center text-md text-[var(--primary)]"
+            >
+                {siteConfig.title}
+            </a>
+        )}
         
         <!-- Regular Navigation Links (hidden when in admin mode) -->
         <div id="standard-nav" class:list={["hidden md:flex", {"hidden": isAuthenticated}]}>
@@ -49,7 +58,7 @@ const isAuthenticated = false
                                 <Icon name="material-symbols:keyboard-arrow-down-rounded" class="text-[1.25rem] transition ml-1"></Icon>
                             </div>
                         </a>
-                        <div class="absolute left-0 mt-1 w-48 rounded-lg shadow-lg bg-[var(--card-bg)] invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 z-50">
+                        <div class="absolute left-0 mt-1 w-52 rounded-lg shadow-lg bg-[var(--card-bg)] invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 transition-all duration-200 z-50">
                             <div class="py-1 rounded-lg overflow-hidden">
                                 {l.dropdown.map((item) => (
                                     <a href={item.external ? item.url : url(item.url)} target={item.external ? "_blank" : null}
@@ -92,13 +101,13 @@ const isAuthenticated = false
         </div>
         
         <NavMenuPanel links={links} isAuthenticated={isAuthenticated}></NavMenuPanel>
-        <DisplaySettings client:only="svelte"></DisplaySettings>
+        {!siteConfig.themeColor.fixed && <DisplaySettings client:only="svelte"></DisplaySettings>}
     </div>
 </div>
 
-<script>
+<script define:vars={{ adminEnabled }}>
 function loadButtonScript() {
-    function toggleFloatPanel(panel: HTMLElement | null) {
+    function toggleFloatPanel(panel) {
         if (!panel) return;
         const isClosed = panel.classList.contains('float-panel-closed');
         if (isClosed) {
@@ -129,20 +138,22 @@ function loadButtonScript() {
         });
     }
 
-    const hasValidAuth = () => {
-        const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-        const expiresAt = Number(localStorage.getItem('authExpiresAt') || '0');
-        if (!isAuthenticated || !expiresAt || Date.now() >= expiresAt) {
-            localStorage.removeItem('isAuthenticated');
-            localStorage.removeItem('authExpiresAt');
-            return false;
-        }
-        return true;
-    };
+    if (adminEnabled) {
+        const hasValidAuth = () => {
+            const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+            const expiresAt = Number(localStorage.getItem('authExpiresAt') || '0');
+            if (!isAuthenticated || !expiresAt || Date.now() >= expiresAt) {
+                localStorage.removeItem('isAuthenticated');
+                localStorage.removeItem('authExpiresAt');
+                return false;
+            }
+            return true;
+        };
 
-    const standardNav = document.getElementById('standard-nav');
-    if (standardNav) {
-        standardNav.style.display = hasValidAuth() ? 'none' : '';
+        const standardNav = document.getElementById('standard-nav');
+        if (standardNav) {
+            standardNav.style.display = hasValidAuth() ? 'none' : '';
+        }
     }
 }
 

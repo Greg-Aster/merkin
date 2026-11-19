@@ -138,7 +138,22 @@ Before deploying the 200M-step MJX policy, November 2 carpet walking trials logg
 **601 physical state transitions** under load while recording live video from the
 lower-jaw OV5647 camera:
 
-- **Watch the onboard camera footage:** [November 2 Physical Carpet Trial in the Gallery](/gallery/#carpet-trial-20261102)
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <figure>
+    <video controls playsInline preload="none" width="640" height="528" poster="/gallery/carpet-trial-20261102-poster.webp" className="w-full rounded-xl">
+      <source src="/gallery/carpet-trial-20261102.mp4" type="video/mp4" />
+      <a href="/gallery/carpet-trial-20261102.mp4">Download November 2 onboard OV5647 carpet walking trial video (MP4)</a>
+    </video>
+    <figcaption>November 2 physical carpet walking trial captured directly from Ainekio's onboard <code>OV5647</code> chin camera (<code>180°</code> rotated with the <code>10,000 µs</code> motion-safe shutter cap).</figcaption>
+  </figure>
+  <figure>
+    <video controls playsInline preload="none" width="640" height="480" poster="/gallery/rl-rough-terrain-400m-poster.webp" className="w-full rounded-xl">
+      <source src="/gallery/rl-rough-terrain-400m.mp4" type="video/mp4" />
+      <a href="/gallery/rl-rough-terrain-400m.mp4">Download 400M-step rough-terrain MJX rollout video (MP4)</a>
+    </video>
+    <figcaption>Follow-on November 6 <code>400M</code>-step rough-terrain MuJoCo MJX rollout stepping across randomized floor blocks and ledges.</figcaption>
+  </figure>
+</div>
 
 Watching real carpet footage made it obvious how easily slow shutter speeds, loose frame
 timestamps, and idealized workspace limits trip up visual odometry and leg protection,

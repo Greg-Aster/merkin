@@ -115,6 +115,20 @@ usually trip small quadrupeds: **6 bouts on slick hardwood** (forward, reverse, 
 turning arcs with `5.4°–15.4°` peak roll and **zero falls**) and **7 bouts crossing and
 straddling a raised carpet-to-hardwood seam** (**zero falls**).
 
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <figure>
+    <video controls playsInline preload="none" width="320" height="240" poster="/gallery/pupper-mjx-800m-rollout-poster.webp" className="w-full rounded-xl">
+      <source src="/gallery/pupper-mjx-800m-rollout.mp4" type="video/mp4" />
+      <a href="/gallery/pupper-mjx-800m-rollout.mp4">Download 800M-step omnidirectional Pupper MJX rollout video (MP4)</a>
+    </video>
+    <figcaption><code>804.6M</code>-step MJX evaluation rollout executing zero-drift stand hold, <code>±0.26 m/s</code> forward/reverse over a <code>4 mm</code> mat, <code>±0.12 m/s</code> crab strafes, and <code>±1.20 rad/s</code> yaw turns.</figcaption>
+  </figure>
+  <figure>
+    <img src="/posts/2026-11-11-progress/microduck-v17-multisurface-benchmark.webp" alt="Multi-surface, 10-15 mm power cable step-over, reverse, and weak-RL benchmark comparing microduck-v16-p4 and microduck-v17-p4." width="1600" height="640" loading="lazy" />
+    <figcaption>November 11 multi-surface &amp; <code>10–15 mm</code> cable step-over benchmark comparing <code>microduck-v16-p4</code> and <code>microduck-v17-p4</code>.</figcaption>
+  </figure>
+</div>
+
 For finite expressive gestures, I also expanded the **Freestyle** recovery dataset to
 **`489` trajectories** covering jam and slip recovery across all `23` base motions,
 returning cleanly to native closed-loop `Stand` whenever a foot catches or stalls.
@@ -138,6 +152,11 @@ and front face mounts across **30 updated body parts**:
   crossbars, tray plates, and all four upper servo brackets with separate rectangular
   shims for tighter bearing preload.
 
+<figure className="my-6">
+  <img src="/gallery/v2-cad-open-keeper-deck-1600.webp" alt="Top-down orthographic Blender CAD view of Ainekio V2 with dorsal carapace hidden, showing the Waveshare ESP32-P4-WIFI6, PCA9685, CD74HC4067 4th-wire mux, and rear 2S Wireless Keeper Bridge." width="1280" height="878" loading="lazy" />
+  <figcaption>Open-top CAD view of the updated V2 interior packaging: rear <code>2S</code> Wireless Keeper Bridge, central <code>ESP32-P4-WIFI6</code> + <code>PCA9685</code> tray, and forward <code>CD74HC4067</code> multiplexer behind the recessed face bezel.</figcaption>
+</figure>
+
 ---
 
 ## 4. Body Control Cockpit HUD for live floor driving
@@ -153,6 +172,11 @@ autonomy cut-off toggle. To gauge clearance from a single monocular camera close
 floor, pyramidal Lucas-Kanade optical flow tracks up to 36 ground-contact features at
 the base of nearby obstacles and fuses them with forward displacement into a live
 range readout.
+
+<figure className="my-6">
+  <img src="/posts/2026-11-16-progress/body-control-ui.webp" alt="Live Body Control workbench connected to physical robot ainekio-p4-e6ebe5 showing real-time floor camera feed, top-bar Cockpit button, and telemetry sidebar." width="1600" height="870" loading="lazy" />
+  <figcaption>Body Control connected live to physical V2 unit <code>ainekio-p4-e6ebe5</code> on carpet, showing the <code>OV5647</code> floor camera view, calibrated 4th-wire servo status, and top-bar <code>Cockpit</code> HUD launcher.</figcaption>
+</figure>
 
 ---
 

@@ -29,7 +29,10 @@ const updates = defineCollection({
     }),
   }),
 })
-const avatar = defineCollection({ schema: z.object({}) })
+const avatar = defineCollection({
+  loader: () => [],
+  schema: z.object({}),
+})
 
 export const collections = {
   avatar,

@@ -1,7 +1,7 @@
 ---
 title: "Bounded Robot Autonomy: Reactive, Semi Mode, Full Auto & Hardware Safety Boundaries"
 published: 2026-08-27T07:45:00-07:00
-updated: 2026-11-12
+updated: 2026-11-18
 description: "How Ainekio governs self-initiated robot behavior across Reactive, Semi Mode, and Full Auto, why language models never drive raw servo PWM, how fast tip/stall reflexes work, and how multi-step goals persist safely."
 image: "/assets/ainekio/v2/bounded-autonomy-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
@@ -38,29 +38,42 @@ When running in embodied mode, Ainekio offers three distinct autonomy levels—a
 
 Rather than polling an LLM in a tight loop while nothing is happening, **Semi Mode** runs on a calm **5-minute (`300 s`) cadence**:
 
-1. **Signed drive updates**: Each tick weighs time since the last interaction or movement, current posture and battery health, and open desires—applying small positive or negative deltas to internal curiosity, restlessness, and social engagement drives.
-2. **Thresholded initiative**: If all drives sit below threshold (or a human conversation is already underway), nothing fires. Once a drive crosses threshold, Ainekio launches a single bounded activity—snapping a chin-camera frame to see what changed in the room, running a brief Freestyle leg stretch, or recording an associative inner reflection.
+1. **Signed drive updates**: Each tick weighs time since the last interaction or movement, current posture and actuator tracking health, and open desires—applying small positive or negative deltas to internal curiosity, restlessness, and social engagement drives.
+2. **Thresholded initiative**: If all drives sit below threshold (or a human conversation is already underway), nothing fires. Once a drive crosses threshold, Ainekio launches a single bounded activity—snapping a chin-camera frame to see what changed in the room, running a brief `2,322`-row Freestyle / `50 Hz` `NeuralPose v5-adaptive` leg stretch, or recording an associative inner reflection (while `20 Hz` `Living Presence` maintains subtle idle posture compliance in between).
 
-### Full Auto: continuous purposeful chaining
+### Full Auto & 8-sector (`8×45°`) System 1 Embodied Curiosity
 
-In **Full Auto**, Ainekio never sits idle between settled executions. Whenever no movement or tool wait is active, a high-reasoning controller reviews the Standing Persona, attributed episodic memories, live V2 telemetry, optical-flow obstacle clearance, and open desires to continue an unfinished objective or start a new one—chaining on-chip `50 Hz` MicroDuck walking, camera checks, spoken remarks, or background computer tasks.
+In **Full Auto**, Ainekio never sits idle between settled executions, combining single-hop physical instincts with high-reasoning goal planning:
+
+- **8-sector (`8 × 45°`) System 1 Embodied Curiosity (`spatial_curiosity.py` → `embodied-curiosity.ts`)**: Body Control fuses `YOLOE` detections, `YuNet`/`SFace` person identities, and floor clearance across eight compass-relative `45°` yaw sectors. System 1 consumes that map directly as a `precomputedEnvironmentPlan`—turning toward uninspected sectors or stepping into open floor space in a single hop without burning extra Intent/Task LLM round-trips—and escalates genuine visual discoveries to System 2 (`environment.curiosity-escalation`) for episodic memory, Desire seeding, and spoken commentary.
+- **High-reasoning chaining & `< 0.30 m` `MoGe-2` corridor braking**: Whenever an objective continues across turns, Ainekio OS (`v26` Intent/Task specialist LoRAs trained across `661` source cases / `2,941` dev records) chains on-chip `50 Hz` `MicroDuck v19-snag-p4` walking, camera checks, spoken remarks, or background computer tasks while enforcing **`< 0.30 m` `MoGe-2` `8×8` forward corridor braking** during autonomous steps.
+
+<figure className="my-6">
+  <img src="/posts/vision-loop/ov5647-chin-cam-floor-pov.webp" alt="Floor-level 1280x960 camera snapshot from Ainekio V2's chin-mounted OV5647 sensor showing open living-room carpet clearance ahead of furniture posts." width="1280" height="960" loading="lazy" />
+  <figcaption>Correlated <code>OV5647</code> chin-camera perspective consumed by 8-sector (<code>8 × 45°</code>) Embodied Curiosity and <code>&lt; 0.30 m</code> <code>MoGe-2</code> forward corridor braking during Semi and Full Auto exploration.</figcaption>
+</figure>
 
 ## Why the LLM never drives raw servo PWM
 
 Regardless of operating mode, **no language model can write raw pulse widths or unvalidated angles to a servo pin**. Autonomy is bounded by four nested safety layers:
 
-1. **Capability-filtered intent vocabulary**: Ainekio OS can only choose high-level semantic postures, bounded velocity twists, locomotion goals, or structured 12-DOF Freestyle target programs that match the connected robot's live readiness state (V2 `ESP32-P4` vs. V1 `ESP32-S3`).
+1. **Capability-filtered intent vocabulary**: Ainekio OS can only choose high-level semantic postures, bounded velocity twists, closed-loop locomotion goals, or structured 12-DOF Freestyle target programs (`2,322`-row `94`-family `Qwen3.5-0.8B` curriculum) that match the connected robot's live readiness state (V2 `ESP32-P4` vs. V1 `ESP32-S3`).
 2. **Onboard Cartesian workspace projection**: Each V2 leg uses a coupled `35/20/28/38/55 mm` four-bar linkage. Before converting any foot target or neural offset into servo angles, `ESP32-P4` firmware projects out-of-reach coordinates back onto the valid reachable linkage boundary using analytical inverse kinematics and 8-pass Gauss-Newton refinement—preventing linkage lockups and mechanical bind.
-3. **4th-wire shaft tracking & current staging**: All twelve `MG90S` servos feed potentiometer wiper voltages through `CD74HC4067` channels `C4–C15` into `GPIO49` (`ADC2_CH0`) while `PCA9685` PWM pulses are phase-staggered across the `50 Hz` frame to prevent `5 V` rail brownouts. Target sequences wait for measured physical shaft arrival (`2 mm` settle in `Stand`) rather than blindly trusting a timer.
-4. **Command leases, preemption & instant `stop`**: Spoken human interruptions cancel in-flight local model inference immediately, while a `stop` command bypasses language models altogether—dropping queued actions and halting the servos on the microcontroller. If Wi-Fi drops mid-stride, lease watchdogs halt locomotion locally without replaying stale motion on reconnect ([protocol guide](/posts/protocol-and-safety/)).
+3. **4th-wire shaft tracking & current staging**: All twelve `MG90S` servos feed potentiometer wiper voltages through `CD74HC4067` channels `C4–C15` (`GPIO27–30`) into `GPIO49` (`ADC2_CH0`) while `PCA9685` PWM pulses are phase-staggered across the `50 Hz` frame to prevent `5 V` rail brownouts. Target sequences wait for bounded (`800 ms`) measured shaft arrival (`2 mm` settle in `Stand`) rather than blindly trusting a timer.
+4. **Command leases, preemption & instant `stop`**: Spoken human interruptions (`microWakeWord` + WebRTC VAD or Cockpit `Tap to Talk`) cancel in-flight local model inference immediately, while a `stop` command bypasses language models altogether—dropping queued actions and halting the servos on the microcontroller. If Wi-Fi drops mid-stride, lease watchdogs halt locomotion locally without replaying stale motion on reconnect ([protocol guide](/posts/protocol-and-safety/)).
 
-## Fast reflexes when tipped, shaken, or stalled
+## Deterministic jam, unsnag & thermal reflexes (without LLM stall loops)
 
-Physical surprises cannot wait for multi-step deliberation:
+Physical surprises cannot wait for multi-second LLM re-prompting:
 
-- **Millisecond hardware detection**: Comparing `208 Hz` `LSM6DS3` IMU attitude and `CD74HC4067` potentiometer velocities against commanded trajectories lets the `ESP32-P4` catch falls, pickups, shakes, and rug snags immediately.
-- **Non-terminal stall recovery**: On a minor foot snag, the body raises a `servo_stall` event while keeping holding torque alive so a backoff-and-`Stand` recovery trajectory (trained across the **489-row** Freestyle dataset: **73** library motions + **416** fault-recovery trajectories) can clear the leg cleanly.
+- **Millisecond hardware detection**: Comparing `208 Hz` `LSM6DS3` IMU attitude and full-span `[1..4094]` `CD74HC4067` potentiometer velocities against commanded trajectories lets the `ESP32-P4` catch falls, pickups, shakes, and rug snags immediately.
+- **Deterministic recoil, stance replan, reverse unsnag & `I²t` thermal fuse**: Rather than splicing LLM prompts on every minor contact, **`50 Hz` `NeuralPose v5-adaptive`** applies **`6.7 mm` ground-friction micro-step unloading**, recoils single-joint paw snags locally by **`2.0°` in `280 ms`**, and escalates multi-joint stance jams (`>= 2` jammed stance joints or `> 12°` L/R recoil asymmetry) to a **one-shot `replan_recovery`**. During walking, `MicroDuck v19-snag-p4` executes a **`1.8 s` (`-0.45 m/s`) autonomous reverse unsnag**, while firmware's **`8–10 s` per-joint `I²t` winding thermal fuse** (`7.0°` gravity-sag deadband) cuts `PCA9685` PWM **only on a locked servo** so the 11 healthy servos hold stance ([jam & thermal guide](/posts/jam-protection-and-thermal-safety/)).
 - **Varied 6-turn vocal & facial reactions**: Tip, shake, and stall events trigger one of the **59 animated expressions** on the `1.9"` `ST7789` LCD alongside a quick vocal remark that checks the last 6 reactions to avoid repeating canned lines—all without wiping out a paused multi-step goal.
+
+<figure className="my-6">
+  <img src="/posts/2026-11-16-progress/cap-test-strip-shake.webp" alt="Eight-frame sequence of physical Ainekio V2 on carpet booting, stretching, getting picked up and shaken mid-turn, firing a snarky vocal and LCD reaction, and resuming friendly interaction." width="1440" height="810" loading="lazy" />
+  <figcaption>Physical pickup-and-shake reflex check on carpet: <code>LSM6DS3</code> acceleration/gyro thresholds route jostles to the fast 6-turn deduplicated reflex path without wiping active goal context.</figcaption>
+</figure>
 
 ## How longer goals persist safely
 

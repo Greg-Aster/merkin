@@ -10,24 +10,30 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "3-system neural motion, per-joint jam thermal fuse & Cockpit live stream on V2; industrial armored V3 in Blender CAD"
-  location: "650 g V2 floor robot · V3 Armored CAD (v3-2.blend) · Ainekio OS"
-  updated: 2026-11-16
-  mileage: "MicroDuck v19 + NeuralPose + 20 Hz Presence · I²t jam fuse · 440.8 mm Armored V3 CAD"
-  section: "Cockpit live Ainekio OS stream, 3-tier servo jam & thermal protection, System 3 Living Presence, single-hop embodied curiosity, and V3 heavy-equipment CAD"
-  nextStop: "Validate MicroDuck v19-snag-p4 and NeuralPose v3-jam-compliant on physical V2 floor runs while printing the first single-corner DS3235 + 87.7/40/93.6/158.4 mm shrouded leg assembly for Ainekio V3."
-  note: "V2 now coordinates three specialized neural controllers—on-chip 50 Hz L2-cached MicroDuck v18/v19 locomotion (with ESP32-P4 RISC-V PIE vector fixes and swing-foot snag clearance), 50 Hz delay-tolerant NeuralPose over a 1,812-example Freestyle curriculum, and a 20 Hz System 3 Living Presence policy—protected by a 280 ms recoil, 1.8 s reverse unsnag, and 8–10 s per-joint I²t thermal fuse. In parallel, Ainekio Cockpit streams live Ainekio OS thoughts and voice transcripts directly over the camera HUD, and Ainekio V3 has been redesigned into a watertight 293-mesh heavy-equipment armored quadruped in Blender."
+  status: "NeuralPose v5 adaptive recovery, 2,322-row Freestyle & v26 LoRAs on V2; V1 ESP32-P4 CAD revisit, 608-mesh V3 & 3D studio"
+  location: "650 g V2 floor robot · Modernized V1 & 608-mesh V3 CAD (v3-2.blend) · Ainekio OS"
+  updated: 2026-11-18
+  mileage: "NeuralPose v5 + 2,322 Freestyle rows · V1 P4/683ZZ revisit · 608-mesh V3 & 1:1 3D viewer"
+  section: "Adaptive multi-joint jam recovery & floor capability checks on V2, Scene 'v1' ESP32-P4/4th-wire/683ZZ CAD modernization & 59-face OLED derivation, V3 clamshell hinge & motion-transfer study, and interactive Three.js 3D CAD studio"
+  nextStop: "Expand physical multi-turn floor enactments on V2 under NeuralPose v5-adaptive + v26 specialist LoRAs while test-printing the V1 683ZZ/coaxial-wire brackets and the first single-corner DS3235 shrouded leg assembly for Ainekio V3."
+  note: "V2's 3-system neural motion stack now runs on-chip 50 Hz L2-cached MicroDuck v18/v19 locomotion, 50 Hz NeuralPose v5-adaptive (6.7 mm ground-friction snag micro-step unloading + multi-joint stance jam replan_recovery escalation) over a 2,322-example (94-family) Freestyle curriculum, and a retrained 20 Hz System 3 Living Presence policy (14 mm vertical yield + silent-lock ~0.42 s wake-word perk), paired with v26 Intent/Task specialist LoRAs and verified in physical floor capability videos. Alongside V2, Ainekio V1 received a modernized ESP32-P4 / 4th-wire / 683ZZ / coaxial-wire CAD revisit and all 59 V2-derived OLED expressions, Ainekio V3 expanded to 608 clean meshes with a 47-motion cross-body transfer study, and all three generations are inspectable at 1:1 millimeter scale in the interactive Three.js 3D CAD studio."
   areas:
-    - label: "Body, safety & V3 CAD"
-      status: "650 g V2 w/ per-joint I²t jam fuse & 440.8 mm armored V3 CAD"
-      detail: "V2 adds full-span [1..4094] ADC jam sensing, 800 ms deadlock-bounded arrival waits, selective single-channel PCA9685 thermal cutoff (8–10 s above 7° deadband while 11 healthy servos hold stance), RISC-V PIE build fixes, and 17 updated Red STLs. V3 (v3-2.blend) packages 12 waterproof DS3235 servos, 87.7/40/93.6/158.4 mm shrouded crawler legs, a recessed 2.8\" MSP2807 vault display, Radxa Q6A SBC, ESP32-P4, and 4× 21700 cells."
-    - label: "3-system neural & Cockpit"
-      status: "MicroDuck v18/v19, 50 Hz NeuralPose, 20 Hz Presence & Cockpit stream"
-      detail: "MicroDuck v18 (+1.3246 10-scenario score, 0 falls) and v19-snag-p4 pair with 1.8 s reverse unsnag; System 2 runs 1,812-row Freestyle + 280 ms recoil; System 3 drives 20 Hz speech-RMS gestures & chatter-relief trims while staying silent during VAD. Cockpit adds Tap-to-Talk, 10 instant toggles, and a live 7-graph Ainekio OS stream overlay."
-    - label: "Ainekio OS (The Mind)"
-      status: "8-sector Embodied Curiosity, ExecutionStore v2 & VRAM-aware voice"
-      detail: "Single-hop System 1 / System 2 Embodied Curiosity driven by 8×45° spatial sectors, MoGe-2 8×8 (<0.30 m) forward corridor braking, durable Body Control Text Out across 7 graphs, synchronous JsonPlus checkpointer, pre-warmed GeminiAcpServer (gemini-4-hydrogen-low), and CUDA↔CPU auto-switching Kokoro TTS."
+    - label: "V1 revisit, V2 & 608-mesh V3 CAD"
+      status: "650 g V2 (34 Red STLs), V1 P4/683ZZ revisit & 608-mesh V3"
+      detail: "V1's Scene 'v1' CAD (196.7 × 186.5 × 78.1 mm) seats the Frame8 cap, cyan-blue serrated legs, 8× 683ZZ counter-bearings, zero-bending coaxial Hip-Z wiring, ESP32-P4 + PCA9685 + 8× 4th-wire sense + LSM6DS3, and 59 derived SSD1306 OLED faces. V2 exports 34 Red STLs with per-joint I²t thermal fuse; V3 reaches 608 meshes with a 2.0 mm rear piano hinge, 38 M3 subframe fasteners, and 47-motion transfer analysis."
+    - label: "3-system neural & floor tests"
+      status: "MicroDuck v19, NeuralPose v5-adaptive (2,322 rows) & 20 Hz Presence"
+      detail: "MicroDuck v19-snag-p4 pairs with 1.8 s reverse unsnag; NeuralPose v5-adaptive (7/7 scenarios, 0 falls) adds 6.7 mm snag micro-stepping and multi-joint stance jam replan_recovery over a 2,322-row (94-family) Freestyle LoRA; retrained Living Presence (99.65% face accuracy, 14 mm vertical yield) locks silent during microWakeWord + WebRTC VAD speech capture."
+    - label: "Ainekio OS & 3D CAD studio"
+      status: "v26 Intent/Task LoRAs, offline-first Whisper & 1:1 Three.js viewer"
+      detail: "Deduplicated v26 Action Selector LoRAs (661 cases / 2,941 dev records) run in 242–713 ms on local Qwen3.5-0.8B alongside 8-sector Embodied Curiosity, 7-graph Cockpit live text streaming, ExecutionStore v2 JsonPlus checkpoints, and live Full Shell / X-Ray / Bare Core 3D CAD inspection across V1, V2, and V3."
 entries:
+  - title: "V1 ESP32-P4 CAD revisit, NeuralPose v5 adaptive recovery, V3 motion transfer, and interactive 3D studio"
+    date: 2026-11-18
+    location: "Modernized V1 CAD, physical V2 floor tests, 608-mesh V3 CAD, Ainekio OS, and 3D viewer"
+    mileage: "NeuralPose v5 + 2,322 Freestyle rows · V1 P4/683ZZ CAD & 59 OLED faces · 608-mesh V3 + 1:1 3D studio"
+    summary: "Modernizing Ainekio V1's Blender CAD around ESP32-P4, 4th-wire servos, 683ZZ bearings, coaxial torsion wiring, and 59 derived OLED faces; training NeuralPose v5-adaptive, a 2,322-row Freestyle LoRA, retrained 20 Hz Living Presence, and v26 specialist LoRAs with physical V2 floor capability videos; detailing V3 to 608 meshes with a 47-motion cross-body transfer study; and launching the interactive Three.js 1:1 3D CAD viewer."
+    url: "/posts/2026-11-18-v1-p4-revisit-neuralpose-v5-and-3d-cad/"
   - title: "Cockpit live stream, 3-system neural motion, per-joint I²t jam fuse, and V3 armored CAD"
     date: 2026-11-16
     location: "Ainekio Cockpit, V2 firmware/RL, Ainekio OS, and Blender V3"
@@ -152,6 +158,6 @@ entries:
 
 # About the build archive
 
-These dated workbench entries follow Ainekio from the earliest eight-servo `ESP32-S3` experiments in summer 2026 through the twelve-servo `ESP32-P4` rebuild and [Ainekio OS](https://github.com/Greg-Aster/ainekio-os) (formerly MetaHuman OS).
+These dated workbench entries follow Ainekio from the earliest eight-servo `ESP32-S3` experiments in summer 2026 (and its modernized `Scene 'v1'` `ESP32-P4` CAD revisit) through the active `650 g` twelve-servo `ESP32-P4` V2 floor robot, the `608`-mesh armored `DS3235` V3 CAD, and [Ainekio OS](https://github.com/Greg-Aster/ainekio-os) (formerly MetaHuman OS).
 
-If you want a high-level picture before reading individual bench logs, start with the [System Overview](/posts/project-overview/), [How Does Ainekio Stack Up?](/posts/how-does-ainekio-stack-up/), or the [Ainekio OS Guide](/posts/ainekio-os/). Early summer 2026 notes from the first eight-servo prototype remain preserved in the [Original V1 Archive](/posts/v1-original-posts/).
+If you want a high-level picture before reading individual bench logs, start with the [System Overview](/posts/project-overview/), [What Ainekio Can Do](/posts/what-ainekio-can-do/), [How Does Ainekio Stack Up?](/posts/how-does-ainekio-stack-up/), or the [Ainekio OS Guide](/posts/ainekio-os/). Early summer 2026 notes from the first eight-servo prototype remain preserved in the [Original V1 Archive](/posts/v1-original-posts/).

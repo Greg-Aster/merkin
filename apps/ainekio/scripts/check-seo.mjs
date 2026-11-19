@@ -39,17 +39,12 @@ await check('homepage and pagination have descriptive, distinct metadata', () =>
   const titles = [title(home), ...pages.map(page => title(read(`${page}/index.html`)))]
   assert.equal(new Set(titles).size, titles.length)
 })
-await check('all topic archives have unique titles, descriptions, and noindex', () => {
-  const titles = [], descriptions = []
-  for (const kind of ['tag', 'category']) {
-    for (const topic of readdirSync(path.join(dist, 'archive', kind))) {
-      const html = read(`archive/${kind}/${topic}/index.html`)
-      assert.match(meta(html, 'robots') || '', /noindex/)
-      titles.push(title(html)); descriptions.push(meta(html, 'description'))
-    }
-  }
-  assert.equal(new Set(titles).size, titles.length)
-  assert.equal(new Set(descriptions).size, descriptions.length)
+await check('retired tag/category archive routes are ungenerated and 301-redirected to /archive/', () => {
+  assert.equal(existsSync(path.join(dist, 'archive', 'tag')), false)
+  assert.equal(existsSync(path.join(dist, 'archive', 'category')), false)
+  const redirects = read('_redirects')
+  assert.match(redirects, /^\/archive\/tag\/\*\s+\/archive\/\s+301$/m)
+  assert.match(redirects, /^\/archive\/category\/\*\s+\/archive\/\s+301$/m)
 })
 await check('all articles have a single h1, BreadcrumbList JSON-LD, and share bar', () => {
   const postFiles = readdirSync(path.join(dist, 'posts'), { recursive: true }).filter(file => file.endsWith('index.html'))

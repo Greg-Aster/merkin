@@ -144,10 +144,10 @@ const scope = tags.length ? `Tagged: ${tags.join(', ')}` : categories.length ? `
       const topicControl = controls.topic as HTMLSelectElement
       title.textContent = topic ? topicControl.selectedOptions[0].text : kindTitles[kind] || title.dataset.defaultHeading || 'Article library'
       note.textContent = kind === 'reference'
-        ? 'Start-here overview & current V2 system guides first; historical V1 references appear at the end.'
-        : generation === 'v1' || generation === 'v2'
+        ? 'Start-here overview & current V2/V3 system guides first; V1 baseline & archive references appear alongside.'
+        : generation === 'v1' || generation === 'v2' || generation === 'v3'
           ? 'Includes cross-version comparison and architecture guides.'
-          : 'Ordered with current V2 reference guides first, followed by dated journal logs and V1 archive notes.'
+          : 'Ordered with current system reference guides first, followed by dated journal logs and V1 archive notes.'
       if (historyMode) {
         const address = new URL(location.href)
         for (const name of names) {

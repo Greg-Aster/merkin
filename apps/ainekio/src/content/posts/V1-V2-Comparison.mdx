@@ -1,8 +1,8 @@
 ---
 title: "8-Servo ESP32-S3 vs. 12-Servo ESP32-P4 Quadruped Robot Comparison (V1 vs. V2)"
 published: 2026-09-24
-updated: 2026-11-13
-description: "Side-by-side technical comparison of the 8-servo ESP32-S3 Ainekio V1 baseline and the 650 g 12-servo ESP32-P4 V2 closed-loop quadruped running on-chip 50 Hz neural walking and Ainekio OS—plus how both inform V3."
+updated: 2026-11-18
+description: "Side-by-side technical comparison of the 8-servo Ainekio V1 (Summer 2026 ESP32-S3 floor build + Nov 18 Scene 'v1' CAD revisit) and the 650 g 12-servo ESP32-P4 V2 closed-loop quadruped running 3-system neural motion and Ainekio OS—plus how both inform V3."
 image: "/posts/2026-09-24-progress/v1-physical.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Greg the Mechanic"
@@ -22,16 +22,16 @@ reading:
   related: ["ainekio-v1", "ainekio-v2", "ainekio-v3-preview", "gait-development", "v1-original-posts"]
 ---
 
-Ainekio ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) has been built across two completed physical quadruped generations—with a third larger, self-contained Linux PC generation now taking shape in Blender CAD:
+Ainekio ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) has been built across two completed physical quadruped generations—with V1 also receiving a modernized closed-loop CAD revisit and a third industrial armored Linux SBC generation now modeled in `608`-mesh Blender CAD:
 
-- **[Ainekio V1](/posts/ainekio-v1/)** (Summer 2026) proved out the end-to-end voice, vision, 52-face OLED, `protocol-v1` gateway, and **[Ainekio OS](/posts/ainekio-os/)** ([`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os), formerly MetaHuman OS) loop on a compact custom eight-servo, open-loop `ESP32-S3` spider-stance frame.
-- **[Ainekio V2](/posts/ainekio-v2/)** (Active Physical Robot) is a complete mechanical, electrical, and control redesign around the **`Waveshare ESP32-P4-WIFI6`**, adding lateral hip roll joints (twelve servos total), compact four-bar leg linkages with curved rocking soles, 4th-wire potentiometer feedback on every actuator, a `208 Hz` IMU, a 1.9-inch **59-expression** color LCD, a `2S` **Wireless Keeper Bridge**, and **on-chip `50 Hz` `107.8 KB` L2-cached MicroDuck neural walking**.
-- **[Ainekio V3](/posts/ainekio-v3-preview/)** (In Development) scales V2's four-bar architecture up ~1.7× (`337.9 × 200.2 × 176.8 mm`) around waterproof **`DS3235`** standard servos, `2S2P` `21700` power, a **`5.0"` `1280×720` capacitive touch face**, and an **onboard Wi-Fi/Bluetooth Linux SBC + `ESP32-P4`** inside the chassis so the robot operates without an intermediate PC and doubles as a mobile Linux desktop computer.
+- **[Ainekio V1](/posts/ainekio-v1/)** (Summer 2026 physical build & Nov 18 `Scene 'v1'` CAD revisit) proved out the end-to-end voice, vision, `0.96"` `SSD1306` OLED (upgraded to **`59` V2-derived procedural faces / `303` frames**), `protocol-v1` gateway, and **[Ainekio OS](/posts/ainekio-os/)** ([`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os), formerly MetaHuman OS) loop on a custom eight-servo `ESP32-S3` spider-stance floor prototype—now paired with a modernized November 18 **`Scene 'v1'` CAD assembly (`196.7 × 186.5 × 78.1 mm`)** featuring a seated enclosed `Frame8` cap, `8× 683ZZ` counter-bearings, coaxial zero-bending torsion wiring, and an `ESP32-P4-WIFI6` + `PCA9685` + 8× 4th-wire feedback + `GY-LSM6DS3` + `Arducam B0066` deck.
+- **[Ainekio V2](/posts/ainekio-v2/)** (Active Physical Robot) is a complete `650 g` mechanical, electrical, and control redesign around the **`Waveshare ESP32-P4-WIFI6`**, adding lateral hip roll joints (twelve servos total), compact `35/20/28/38/55 mm` four-bar leg linkages with curved rocking soles, 4th-wire potentiometer feedback (`CD74HC4067` `C4–C15` → `GPIO49`, `S0–S3` on `GPIO27–30`), a `208 Hz` IMU, a 1.9-inch **59-expression** color LCD, open **`microWakeWord` + WebRTC VAD** audio, an **`8–10 s` `I²t` winding thermal fuse**, a `2S` **Wireless Keeper Bridge**, and a **3-system neural motion stack (`50 Hz` on-chip `MicroDuck v19-snag-p4` + `50 Hz` `NeuralPose v5-adaptive` / `Qwen3.5-0.8B` LoRA + `20 Hz` `Living Presence`)**.
+- **[Ainekio V3](/posts/ainekio-v3-preview/)** (In Development) scales up into a **`608`-mesh industrial armored `DS3235` CAD assembly (`436.3 × 236.5 × 381.4 mm` w/ whip antenna)** with `87.65 / 40 / 56 / 93.55 / 158.4 mm` shrouded four-bar crawler legs, a low-CG `4× 21700` (`2S2P`) belly pack, a **recessed `2.8"` `MSP2807` (`ILI9341`) vault TFT behind a swept ROPS bull-bar**, a rear clamshell `2.0 mm`-pin piano hinge, and an **onboard `Radxa Dragon Q6A` Linux SBC + `ESP32-P4-WIFI6`** inside the hull.
 
 <div className="grid grid-cols-2 gap-3">
   <figure>
     <img src="/posts/2026-09-24-progress/v1-physical.webp" alt="Physical V1 with an open black chassis, eight servos, red feet and exposed wiring." width="700" height="933" loading="lazy" className="w-full aspect-square object-contain" />
-    <figcaption><strong>V1 · Eight-Servo S3 Prototype.</strong> Custom 2-DOF spider-stance frame (`177.5 × 194.1 × 88.9 mm` in CAD) with 0.96" OLED (52 faces) and OV3660 camera.</figcaption>
+    <figcaption><strong>V1 · Eight-Servo S3 Prototype (+ Nov 18 <code>Scene 'v1'</code> CAD).</strong> Summer 2026 2-DOF floor build with <code>0.96"</code> OLED (<code>59</code> derived faces) &amp; <code>OV3660</code>; modernized to <code>196.7 × 186.5 × 78.1 mm</code> enclosed <code>ESP32-P4</code> CAD.</figcaption>
   </figure>
   <figure>
     <img src="/gallery/20261021_083818-1600.webp" alt="V2 on the workbench with red face surround, 1.9-inch color LCD, linkage legs, and enclosed chassis." width="1588" height="1191" loading="lazy" className="w-full aspect-square object-contain" />
@@ -41,28 +41,28 @@ Ainekio ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) 
 
 ## Mechanical & motion architecture (V1 vs. V2)
 
-| Feature | V1 · Eight-Servo Baseline | V2 · Twelve-Servo Closed-Loop Body |
+| Feature | V1 · Eight-Servo Baseline & `Scene 'v1'` CAD | V2 · Twelve-Servo Closed-Loop Body |
 | --- | --- | --- |
-| **Actuators** | 8× `MG90S` (2 per leg, open-loop PWM) | 12× Miuzei `MG90S` (3 per leg) modified with 4th-wire potentiometer wiper feedback |
-| **Leg mechanism** | Direct planar sweep + knee fold (`R1..L4`) in custom `Frame7`/`Frame8` spider-stance chassis | Shoulder roll (`±h`) + compact four-bar linkage (`35 mm` carrier, `20 mm` crank, `28 mm` pickup, `38 mm` rod, `55 mm` lower leg) + curved rocking soles |
-| **Assembled mass & envelope** | Open-frame micro quadruped (`177.45 × 194.09 × 88.91 mm` in `'v1 -'` CAD) | `650 g` complete; `245.85 × 182.79 × 109.06 mm` (`L × W × H`) |
+| **Actuators** | 8× `MG90S` (2 per leg; open-loop PWM on S3 physical build; 8× 4th-wire `J0–J7` in Nov 18 `Scene 'v1'` CAD) | 12× Miuzei `MG90S` (3 per leg) modified with 4th-wire potentiometer wiper feedback |
+| **Leg mechanism & bearings** | Direct planar sweep + knee fold (`R1..L4`) in `Frame7`/`Frame8` spider-stance chassis (`8× 683ZZ` counter-bearings + coaxial zero-bending torsion wiring in `Scene 'v1'`) | Shoulder roll (`±h`) + compact four-bar linkage (`35 mm` carrier, `20 mm` crank, `28 mm` pickup, `38 mm` rod, `55 mm` lower leg) + curved rocking soles |
+| **Assembled mass & envelope** | Micro 8-servo quadruped (`196.7 × 186.5 × 78.1 mm` in Nov 18 enclosed `Scene 'v1'` CAD) | `650 g` complete; `245.85 × 182.79 × 109.06 mm` (`L × W × H`) |
 | **Foot workspace** | Coupled horizontal hip arc + vertical knee fold per leg | 3D Cartesian workspace per leg with 8-pass Gauss-Newton boundary projection and adjustable stance width |
-| **Position verification** | None (open-loop elapsed timer) | `CD74HC4067` multiplexer channels **`C4–C15`** → `ESP32-P4` **`GPIO49` (`ADC2_CH0`)**; `2 mm` `Stand` settle and verified shaft arrival |
-| **Inertial sensing** | None | Onboard `LSM6DS3` 6-axis IMU (`208 Hz`), stationary gyro bias calibration, local attitude self-leveling, and tip/shake events |
-| **Motion repertoire** | 38 fixed `.amot` keyframe assets (`walk_forward`, timed turns, 22 emotes/dances) + `motion_plan_v1` (`1–32` steps) | **On-chip `50 Hz` `107.8 KB` L2-cached MicroDuck neural gait**, continuous analytic solver (`Walk`, `Run`, `Crawl`, 6-dir `Crab`), 23 compiled gestures, **349-motion Freestyle library** (`489`-row fault-recovery dataset), and **Pupper V3 / MuJoCo MJX RL** |
+| **Position verification & jam safety** | None on Summer 2026 S3 floor build (8× 4th-wire sense leads modeled in `Scene 'v1'` CAD) | `CD74HC4067` multiplexer **`C4–C15`** → `ESP32-P4` **`GPIO49` (`ADC2_CH0`)** (`S0–S3` on `GPIO27–30`); `2 mm` `Stand` settle + **[`8–10 s` per-joint `I²t` thermal fuse](/posts/jam-protection-and-thermal-safety/)** |
+| **Inertial sensing** | None on Summer 2026 S3 floor build (`GY-LSM6DS3` on `I2C0` in `Scene 'v1'` CAD) | Onboard `LSM6DS3` 6-axis IMU (`208 Hz`), stationary gyro bias calibration, local attitude self-leveling, and tip/shake events |
+| **Motion repertoire** | 38 fixed `.amot` keyframe assets (`walk_forward`, timed turns, 22 emotes/dances) + `motion_plan_v1` (`1–32` steps) | **On-chip `50 Hz` `MicroDuck v19-snag-p4`** (`107.8 KB` L2-cached RL gait), **`50 Hz` `NeuralPose v5-adaptive`** + **`2,322`-row (`94`-family) Freestyle `Qwen3.5-0.8B` LoRA**, **`20 Hz` `Living Presence`**, continuous analytic gaits (`Walk`, `Run`, `Crawl`, `Crab`), and `8–10 s` `I²t` jam protection |
 
 ## Controller, compute, and peripherals
 
-| Subsystem | V1 (`ESP32-S3`) | V2 (`ESP32-P4` + `C6`) |
+| Subsystem | V1 (Summer 2026 `ESP32-S3` · Nov 18 `Scene 'v1'` CAD) | V2 (`ESP32-P4` + `C6`) |
 | --- | --- | --- |
-| **Controller board** | Freenove `ESP32-S3-WROOM CAM` (`N16R8`) | `Waveshare ESP32-P4-WIFI6` (Rev 1.3) |
-| **Main CPU & cache** | Dual-core Xtensa LX7 @ `160 MHz` | Dual-core RISC-V @ `360 MHz` (`128 KB` L2 cache running Core 1 `50 Hz` `int8` neural gait) |
-| **Flash / PSRAM** | `16 MiB` Flash / `8 MiB` Octal PSRAM (`GPIO33–37` reserved) | `32 MB` NOR Flash / `32 MB` PSRAM |
-| **Wireless** | Integrated 2.4 GHz Wi-Fi | Dedicated onboard `ESP32-C6` Wi-Fi 6 / Bluetooth coprocessor over SDIO |
-| **Servo PWM generation** | 8× direct `MCPWM` GPIO outputs (`732–2500 µs`; `PCA9685` header deck in `'v1 -'` CAD) | `PCA9685` 16-channel 12-bit I2C PWM driver with staggered phase offsets |
-| **Face display** | `0.96"` `SSD1306` monochrome I2C OLED (`128 × 64`, **52 expressions** + `talk` overlay) | `1.9"` `ST7789` color IPS SPI LCD (`320 × 170`, **59 animated expressions**) |
-| **Camera** | `OV3660` DVP parallel camera (`XGA` `1024×768` stills, manual `1/60 s` exposure) | Chin-mounted `OV5647` MIPI-CSI camera below the LCD (`180°` inverted mount, `10,000 µs` motion-safe exposure ceiling, microSD clip recording) |
-| **Audio & wake word** | External `INMP441` mic + `MAX98357A` I2S amp (`8 Ω 2 W` speaker) + **`vadnet1_medium`** neural VAD (`microWakeWord` scaffold) | Onboard `ES8311` codec + `NS4150B` amp, `20 × 30 mm` speaker, **Espressif `WakeNet9s`**, 5 VAD modes, `15 s` window, self-speech suppression |
+| **Controller board** | Physical: Freenove `ESP32-S3-WROOM CAM` (`N16R8`) · `Scene 'v1'` CAD: `Waveshare ESP32-P4-WIFI6` | `Waveshare ESP32-P4-WIFI6` (Rev 1.3) |
+| **Main CPU & cache** | Dual-core Xtensa LX7 @ `160 MHz` (S3 build) / Dual-core RISC-V @ `360 MHz` (`Scene 'v1'` CAD) | Dual-core RISC-V @ `360 MHz` (`128 KB` L2 cache running Core 1 `50 Hz` `int8` `MicroDuck v19-snag-p4`) |
+| **Flash / PSRAM** | `16 MiB` Flash / `8 MiB` Octal PSRAM (`GPIO33–37` reserved on S3) | `32 MB` NOR Flash / `32 MB` PSRAM |
+| **Wireless** | Integrated 2.4 GHz Wi-Fi (S3) / `ESP32-C6` Wi-Fi 6 (`Scene 'v1'` CAD) | Dedicated onboard `ESP32-C6` Wi-Fi 6 / Bluetooth coprocessor over SDIO |
+| **Servo PWM generation** | 8× direct `MCPWM` GPIO outputs on S3 build (`PCA9685` on `I2C1+OE` in `Scene 'v1'` CAD) | `PCA9685` 16-channel 12-bit I2C PWM driver with staggered phase offsets & selective jam cutoff |
+| **Face display** | `0.96"` `SSD1306` monochrome I2C OLED (`128 × 64`, **`59` V2-derived procedural expressions / `303` frames** + `talk` overlay; upgraded from `52` faces) | `1.9"` `ST7789` color IPS SPI LCD (`320 × 170`, **59 animated expressions**) |
+| **Camera** | Physical: `OV3660` DVP camera (`XGA` `1024×768` stills, `1/60 s`) · `Scene 'v1'` CAD: `Arducam B0066` MIPI-CSI | Chin-mounted `OV5647` MIPI-CSI camera below the LCD (`180°` inverted mount, `10,000 µs` motion-safe exposure ceiling, microSD clip recording) |
+| **Audio & wake word** | Physical: `INMP441` mic + `MAX98357A` I2S amp + **`vadnet1_medium`** VAD (`20×30 mm` speaker + cradle in `Scene 'v1'` CAD) | Onboard `ES8311` codec + `NS4150B` amp, `20 × 30 mm` speaker, open **`microWakeWord` (`int8` TFLite Micro) + WebRTC VAD** (plus `WakeNet9s`), `15 s` window, self-speech suppression |
 | **Host gateway & mind** | Desktop running `Master/gateway` + Ainekio OS (formerly MetaHuman OS) | Desktop or **Radxa Dragon Q6A** running Body Control / Cockpit HUD + **[Ainekio OS](/posts/ainekio-os/)** (`Greg-Aster/ainekio-os`) |
 
 ## Power, battery, and charging
@@ -71,9 +71,9 @@ Both generations isolate high-current `5 V` motor power from logic power while s
 
 | Power Component | V1 Configuration | V2 Wireless Keeper Bridge |
 | --- | --- | --- |
-| **Battery pack** | Sea Jump `2S` (`7.4 V` nominal), `1000 mAh` `10C` **Li-ion** (`2× 14500`, `SM-3P`; dual flank bays in `'v1 -'` CAD) | `2S` (`8.4 V` max) **Li-ion** pack (`73.6 × 46 × 22 mm` envelope) seated beneath the battery-mounted **Wireless Keeper Bridge** |
-| **Voltage regulation** | Dual `MINI560 PRO` `5 V / 5 A` buck converters (Buck #1 + `1000 µF` cap for servos; Buck #2 for logic & audio) | `Mini560` `5 V / 5 A` step-down converter feeding the `PCA9685` servo rail |
-| **Charging & retention** | `HiLetgo` `2S` USB-C boost charger + `KCD1` master switch + `GPIO3` telemetry-only ADC divider | Integrated `HiLetgo` `2S` USB-C boost charger + snap-in `ESP32-P4`, `PCA9685`, `HiLetgo`, and `LSM6DS3` PCB clips (retiring earlier Anker and SHARGE power banks) |
+| **Battery pack** | Sea Jump `2S` (`7.4 V` nominal), `1000 mAh` `10C` **Li-ion** (`2× 14500`, `SM-3P`; dual flank packs in `Scene 'v1'` CAD) | `2S` (`8.4 V` max) **Li-ion** pack (`73.6 × 46 × 22 mm` envelope) seated beneath the battery-mounted **Wireless Keeper Bridge** |
+| **Voltage regulation** | Physical S3 build: dual `MINI560 PRO` `5 V / 5 A` bucks (`1000 µF` servo cap + logic rail) · `Scene 'v1'` CAD: `Mini560` `5 V / 5 A` buck feeding `PCA9685` | `Mini560` `5 V / 5 A` step-down converter feeding the `PCA9685` servo rail |
+| **Charging & retention** | `HiLetgo` `2S` USB-C boost charger + master rocker switch (`KCD1` physical / `19×12 mm` in `Scene 'v1'`) + `GPIO3` telemetry-only ADC divider | Integrated `HiLetgo` `2S` USB-C boost charger + snap-in `ESP32-P4`, `PCA9685`, `HiLetgo`, and `LSM6DS3` PCB clips (retiring earlier Anker and SHARGE power banks) |
 
 ## Commanded joint range comparison
 

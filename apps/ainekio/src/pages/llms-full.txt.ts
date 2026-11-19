@@ -7,6 +7,8 @@ function cleanMdxBody(body: string, origin: string): string {
     .replace(/^import\s+.*?['"][^'"]*['"]\s*;?\s*$/gm, '')
     .replace(/^export\s+.*$/gm, '')
     .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
+    .replace(/<[A-Z][A-Za-z0-9]*(?:\s[\s\S]*?)?\/>/g, '')
+    .replace(/<[A-Z][A-Za-z0-9]*(?:\s[\s\S]*?)?>[\s\S]*?<\/[A-Z][A-Za-z0-9]*>/g, '')
     .replace(/(\bsrc|\bhref|\bposter)=["'](\/[^"']+)["']/g, `$1="${origin}$2"`)
     .replace(/\]\((\/[^)\s]+)\)/g, `](${origin}$1)`)
     .replace(/\n{3,}/g, '\n\n')
@@ -17,18 +19,24 @@ export const GET: APIRoute = async ({ site }) => {
   const origin = (site ?? new URL('https://ainek.io')).href.replace(/\/$/, '')
   const posts = await getCollection('posts', ({ data }) => !data.draft)
 
-  // Put V2 reference guides first (starting with what-ainekio-can-do & project-overview), then newest-first V2 journal entries
+  // Put core V1/V2/V3 reference guides first, then remaining reference guides, then newest-first journal entries
   const prioritySlugs = [
     'what-ainekio-can-do',
     'project-overview',
+    'ainekio-weapon-of-mass-destruction',
     'how-does-ainekio-stack-up',
     'ainekio-v2',
+    'ainekio-v1',
+    'ainekio-v3-preview',
+    'three-system-neural-architecture',
+    'jam-protection-and-thermal-safety',
+    'ainekio-cockpit',
     'ainekio-os',
     'gait-development',
   ]
 
   const activePosts = posts
-    .filter(p => getReading(p).generation !== 'v1')
+    .filter(p => getReading(p).generation !== 'v1' || p.slug === 'ainekio-v1')
     .sort((a, b) => {
       const ai = prioritySlugs.indexOf(a.slug)
       const bi = prioritySlugs.indexOf(b.slug)

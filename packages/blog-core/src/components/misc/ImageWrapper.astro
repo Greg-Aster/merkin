@@ -83,7 +83,7 @@ function createRootRelativeCandidates(rootPath: string): string[] {
 let img;
 if (!isVectorOrAnimated && (isLocal || isPublic)) {
   const files = import.meta.glob<ImageMetadata>(
-    '/src/**/*.{avif,jpeg,jpg,png,tiff,webp}',
+    ['/src/**/*.{avif,jpeg,jpg,png,tiff,webp}', '!/src/content/avatar/**'],
     {
       import: 'default',
     }

@@ -34,12 +34,15 @@ for (const item of catalog) {
     record.variants = variants
   } else {
     const file = `gallery/${item.id}.mp4`
-    // H.264/yuv420p + AAC works with native controls; faststart supports progressive playback.
-    encode(['-i', source, '-map', '0:v:0', '-map', '0:a:0?', '-vf', "scale=w='min(1280,iw)':h=-2", '-c:v', 'libx264', '-preset', 'medium', '-crf', '25', '-pix_fmt', 'yuv420p', '-threads', '4', '-c:a', 'aac', '-b:a', '96k', '-movflags', '+faststart', '-map_metadata', '-1', '-map_chapters', '-1', path.join(root, 'public', file)])
-    const info = probe(path.join(root, 'public', file))
+    const destMp4 = path.join(root, 'public', file)
+    if (path.resolve(source) !== path.resolve(destMp4)) {
+      // H.264/yuv420p + AAC works with native controls; faststart supports progressive playback.
+      encode(['-i', source, '-map', '0:v:0', '-map', '0:a:0?', '-vf', "scale=w='min(1280,iw)':h=-2", '-c:v', 'libx264', '-preset', 'medium', '-crf', '25', '-pix_fmt', 'yuv420p', '-threads', '4', '-c:a', 'aac', '-b:a', '96k', '-movflags', '+faststart', '-map_metadata', '-1', '-map_chapters', '-1', destMp4])
+    }
+    const info = probe(destMp4)
     const video = info.streams.find(stream => stream.codec_type === 'video')
     const poster = `gallery/${item.id}-poster.webp`
-    encode(['-ss', String(posterTime), '-i', path.join(root, 'public', file), '-frames:v', '1', '-vf', 'scale=960:-2', '-quality', '80', path.join(root, 'public', poster)])
+    encode(['-ss', String(posterTime), '-i', destMp4, '-frames:v', '1', '-vf', 'scale=960:-2', '-quality', '80', path.join(root, 'public', poster)])
     Object.assign(record, { src: `/${file}`, bytes: await measure(file), width: video.width, height: video.height, duration: Number(info.format.duration), poster: `/${poster}`, posterBytes: await measure(poster) })
   }
   records.push(record)

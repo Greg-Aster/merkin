@@ -22,6 +22,11 @@ import { GithubCardComponent } from './src/plugins/rehype-component-github-card.
 import { parseDirectiveNode } from './src/plugins/remark-directive-rehype.js'
 import { remarkExcerpt } from './src/plugins/remark-excerpt.js'
 import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs'
+import {
+  extractEmbeddedVideoMeta,
+  galleryItems,
+  videoMetaBySrc,
+} from './src/lib/video-catalog.ts'
 
 function manualClientChunks(id) {
   if (!id.includes('node_modules')) return undefined
@@ -64,35 +69,6 @@ if (explicitSiteUrl) {
 
 const htmlMinifierDefaults = CompressDefaults.HTML['html-minifier-terser']
 
-const galleryItems = JSON.parse(
-  fs.readFileSync(join(__dirname, 'src/data/gallery.json'), 'utf8'),
-)
-const postVideoSupplement = JSON.parse(
-  fs.readFileSync(join(__dirname, 'src/data/post-videos.json'), 'utf8'),
-)
-
-const videoMetaBySrc = new Map()
-for (const item of galleryItems) {
-  if (item.src && item.poster) {
-    videoMetaBySrc.set(item.src, {
-      src: item.src,
-      poster: item.poster,
-      title: item.title,
-      caption: item.caption,
-      date: item.date || '2026-11-06',
-      duration: Math.max(1, Math.round(item.duration || 1)),
-    })
-  }
-}
-for (const item of postVideoSupplement) {
-  if (!videoMetaBySrc.has(item.src)) {
-    videoMetaBySrc.set(item.src, {
-      ...item,
-      duration: Math.max(1, Math.round(item.duration || 1)),
-    })
-  }
-}
-
 function toSitemapVideo(meta, origin) {
   return {
     thumbnail_loc: new URL(meta.poster, origin).href,
@@ -126,16 +102,9 @@ function loadPostSeoMap(postsDir, origin) {
         const dateStr = (updated || published || '2026-11-06').replace(/^['"]|['"]$/g, '')
         const parsed = new Date(dateStr)
 
-        const videos = []
-        const seenVideos = new Set()
-        const sourceRe = /<source\b[^>]*\bsrc=["']([^"']+\.mp4)["'][^>]*>/gi
-        let m
-        while ((m = sourceRe.exec(body)) !== null) {
-          if (!seenVideos.has(m[1]) && videoMetaBySrc.has(m[1])) {
-            seenVideos.add(m[1])
-            videos.push(toSitemapVideo(videoMetaBySrc.get(m[1]), origin))
-          }
-        }
+        const videos = extractEmbeddedVideoMeta(body).map(meta =>
+          toSitemapVideo(meta, origin),
+        )
 
         const images = []
         if (cover && cover.startsWith('/')) {

@@ -38,6 +38,17 @@ On V2 (`Waveshare ESP32-P4-WIFI6`), vision moves from V1's parallel `OV3660` mod
 - **`10,000 µs` (`10 ms`) motion-safe exposure ceiling**: Standard indoor auto-exposure algorithms stretch shutter times in dim rooms, smearing frames whenever the robot walks or turns. The V2 camera pipeline enforces a **`10,000 µs` maximum exposure cap**, keeping edges crisp during active `50 Hz` walking and visual odometry.
 - **On-device microSD clip recording**: Alongside live JPEG streaming, the `ESP32-P4` can record segmented video clips directly to its onboard microSD slot for later review in Body Control.
 
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <figure>
+    <img src="/posts/vision-loop/ov5647-chin-cam-floor-pov.webp" alt="Actual 1280x960 180-degree rotated floor-level photograph captured from Ainekio V2's lower-jaw OV5647 MIPI-CSI camera sitting on living-room carpet." width="1280" height="960" loading="lazy" />
+    <figcaption>First-person <code>960P</code> (<code>1280 × 960</code>) room view captured directly from Ainekio V2's chin-mounted <code>OV5647</code> camera on carpet after <code>180°</code> ISP rotation.</figcaption>
+  </figure>
+  <figure>
+    <img src="/gallery/diagram-lcd-wiring-960.webp" alt="SPI2 wiring diagram connecting the XIITIA 1.9-inch ST7789 320x170 IPS LCD to ESP32-P4 GPIO21 through GPIO26." width="960" height="744" loading="lazy" />
+    <figcaption><code>SPI2</code> wiring (<code>GPIO21–26</code>) for the <code>1.9"</code> <code>ST7789</code> (<code>320 × 170</code>) landscape face display seated directly above the chin camera pocket.</figcaption>
+  </figure>
+</div>
+
 ## Action-correlated vision in Ainekio OS
 
 Instead of flooding a multimodal model with continuous room video, the gateway binds still captures to specific events so **[Ainekio OS](/posts/ainekio-os/)** ([embodied bridge](/posts/metahuman-integration/)) always knows *when* an image was taken and *which physical step* it verifies:

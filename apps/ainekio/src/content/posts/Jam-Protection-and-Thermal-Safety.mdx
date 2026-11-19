@@ -1,8 +1,8 @@
 ---
 title: "Recovery-First Jam Protection & Per-Joint I²t Servo Winding Thermal Fuse"
 published: 2026-11-16T10:00:00-08:00
-updated: 2026-11-16
-description: "How Ainekio V2 prevents micro-servo burnout without collapsing on healthy legs: 280 ms NeuralPose manifold recoil, 1.8 s on-chip & host reverse unsnag, full-span [1..4094] ADC stall detection, deadlock-bounded arrival waits, and an 8–10 s per-joint I²t thermal fuse."
+updated: 2026-11-18
+description: "How Ainekio V2 prevents micro-servo burnout without collapsing on healthy legs: 280 ms NeuralPose v5-adaptive recoil, multi-joint stance jam replan escalation, System 3 14 mm vertical compliance, 1.8 s reverse unsnag, [1..4094] ADC stall sensing, and an 8–10 s per-joint I²t thermal fuse."
 image: "/posts/2026-11-16-progress/jam-protection-and-thermal-fuse.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -24,23 +24,40 @@ reading:
 
 At `5.0 V`, a stalled `MG90S` micro servo draws `700–850 mA` (`3.5–4.25 W`) into a tiny brushed coreless/iron-core rotor with almost zero thermal mass—driving an adiabatic copper-winding temperature rise of **`~2.5–2.8 °C/s`**. During bench testing, a single blocked joint (`rear_left_shoulder`) pushed against a mechanical stop outside its nominal `[500, 2800] µs` interior calibration span while waiting on an unbounded arrival checkpoint, cooking the winding over `~156 s`. Conversely, cutting global `PCA9685 OE` power the instant any foot brushes a chair leg would make the robot collapse onto its belly on every minor snag.
 
-To solve both problems without relying on slow, multi-second LLM re-prompting loops, Ainekio V2 now runs a **deterministic 3-tier closed-loop jam & thermal protection stack** spanning `NeuralPose`, the Host Gateway, **Ainekio OS**, and `ESP32-P4` C firmware (`body.c`, `servo_feedback_position.c`, and `servo_feedback_model.c`).
+To solve both problems without relying on slow, multi-second LLM re-prompting loops, Ainekio V2 now runs a **deterministic 3-tier closed-loop jam & thermal protection stack** spanning `NeuralPose v5-adaptive`, System 3 (`Living Presence`), the Host Gateway, **Ainekio OS**, and `ESP32-P4` C firmware (`body.c`, `servo_feedback_position.c`, and `servo_feedback_model.c`).
+
+<figure className="my-6">
+  <video controls playsinline preload="none" width="1280" height="720" poster="/gallery/v2-jam-protection-test-poster.webp" className="w-full rounded-xl">
+    <source src="/gallery/v2-jam-protection-test.mp4" type="video/mp4" />
+    <a href="/gallery/v2-jam-protection-test.mp4">Download physical V2 floor jam-detection and winding-protection test video.</a>
+  </video>
+  <figcaption>Physical floor jam and compliance check on Ainekio V2: the robot boots, rises to <code>Stand</code>, greets the room, catches a stalled joint during its stretch, measures shaft tracking lag via 4th-wire potentiometer feedback, protects the servo winding without collapsing healthy legs, and asks for help.</figcaption>
+</figure>
 
 ---
 
-## 1. Tier 1: Sub-second pose recoil (`280 ms`) & autonomous walking unsnag (`1.8 s`)
+<figure className="my-6">
+  <img src="/posts/2026-11-16-progress/cap-test-strip-jam.webp" alt="Eight-frame annotated sequence of physical Ainekio V2 on carpet booting, standing, greeting, detecting a stalled joint during stretch via 4th-wire feedback, protecting the winding, and asking for help." width="1440" height="810" loading="lazy" />
+  <figcaption>Step-by-step physical floor trace from the capability test above: <code>Boot → Stand → Greet &amp; observe → Stretch → Stall detected via 4th-wire wiper lag → Winding protected &amp; verbal fault report</code>.</figcaption>
+</figure>
 
-Most physical obstructions clear cleanly as soon as the controller stops pushing into them:
+## 1. Tier 1: Sub-second pose recoil (`280 ms`), multi-joint stance escalation, System 3 compliance & walking unsnag (`1.8 s`)
 
-### Tier 1A — System 2 (`NeuralPose`) `280 ms` manifold recoil & `0.85 s` Return-to-Ready
+Most physical obstructions clear cleanly as soon as the controller unloads ground shear or stops pushing into them:
 
-In `experiments/freestyle/neural_pose/executor.py`, `_detect_stalled_recoils()` monitors usable 4th-wire potentiometer feedback on every `50 Hz` (`20 ms`) tick:
+### Tier 1A — System 2 (`NeuralPose v5-adaptive`) `6.7 mm` micro-step unloading, `280 ms` recoil & multi-joint stance jam escalation
 
-1. **Immediate `2.0°` backoff (`0.28 s`):** When `|target_deg - filtered_model_deg| ≥ 10.0°` (`STALL_ERROR_DEG`) and directional velocity toward the target is `< 6.0 deg/s` (`STALL_VELOCITY_DEG_S`) for **`14` consecutive ticks (`280 ms`)**, the executor immediately recoils the obstructed joint **`2.0°` off the stop** (`val - 2.0° * sign_dir`), projects the updated angles onto the exact closed four-bar manifold (`manifold.project_angles_deg()`), and logs a `joint_recoil` event.
-2. **Non-freezing choreography continuation:** Recoiled static targets are propagated forward into subsequent `pose_goal` and `oscillate_goal` segments so the remaining 11 unobstructed joints finish the gesture normally.
-3. **Automatic `0.85 s` Return-to-Ready:** If the final holding posture of a non-`stand` program experienced a jam (`final_posture_jammed`), the executor automatically runs a smooth **`0.85 s` Return-to-Ready (`STAND_ANGLES_DEG`)** trajectory before locking hold. The earlier slow `Bridge.event` path that re-prompted the `0.8B` Freestyle LLM on every stall has been retired.
+In `experiments/freestyle/neural_pose/`, **`NeuralPose v5-adaptive`** (`1.23M` steps, `7/7` qualification scenarios passed with `0` falls) prevents carpet-drag stalls proactively with **`6.7 mm` ground-friction micro-step unloading**, while `executor.py` (`_detect_stalled_recoils()`) separates benign single-paw contacts from destabilizing multi-joint stance jams on every `50 Hz` (`20 ms`) tick:
 
-### Tier 1B — System 1 (`MicroDuck` & Host Gait) `1.8 s` reverse unsnag
+1. **Local single-joint `2.0°` backoff (`280 ms`):** When a single paw or gesture joint hits `|target_deg - filtered_model_deg| ≥ 10.0°` (`STALL_ERROR_DEG`) with directional velocity `< 6.0 deg/s` (`STALL_VELOCITY_DEG_S`) for **`14` consecutive ticks (`280 ms`)**, the executor keeps handling local at `50 Hz`—recoiling that joint **`2.0°` off the stop** (`val - 2.0° * sign_dir`), projecting onto the closed four-bar manifold (`manifold.project_angles_deg()`), and propagating the recoiled target forward so the remaining 11 unobstructed joints finish the gesture normally.
+2. **Multi-joint stance jam escalation (one-shot `replan_recovery`):** If **`>= 2` stance joints jam simultaneously** or **left/right recoil asymmetry exceeds `> 12°`**, local 1-joint backoff would leave the chassis twisted or off-balance. Instead of looping blindly, the executor triggers a **one-shot `replan_recovery`** synthesized from the live 4th-wire posture (`2,322`-row `94`-family curriculum supporting `splayed_stand`, `lay_down`, and `dead` starting states).
+3. **Automatic `0.85 s` Return-to-Ready:** If the final holding posture of a non-`stand` program experienced a local jam (`final_posture_jammed`), the executor runs a smooth **`0.85 s` Return-to-Ready (`STAND_ANGLES_DEG`)** trajectory before locking hold. The earlier chattery `Bridge.event` loop that re-prompted the `0.8B` LLM on every single-joint contact remains retired.
+
+### Tier 1B — System 3 (`20 Hz` Living Presence) `_common_mode_drift()` `14 mm` vertical compliance
+
+While standing or speaking between active gestures, System 3 (`Master/gateway/presence/`, `56,382` params / `56.4 KB` INT8) absorbs external pushes and uneven floor stops before thermal load can accumulate—cutting **carrier-jam tracking error by `64.1%`** and **servo torque by `31.1%`**, while `_common_mode_drift()` permits up to **`14 mm` of vertical compliance** on an obstructed leg **without letting all four legs sink together**.
+
+### Tier 1C — System 1 (`MicroDuck` & Host Gait) `1.8 s` reverse unsnag
 
 When a foot hooks under a power cord or raised rug transition during forward walking (`cmd_twist[0] > 0.05 m/s`), both locomotion owners execute a symmetric **autonomous reverse-unsnag reflex**:
 
@@ -55,11 +72,16 @@ When a foot hooks under a power cord or raised rug transition during forward wal
 Audit of the `156 s` bench stall exposed two firmware blind spots: ADC values outside the `[500, 2800] µs` interior calibration points were ignored as out-of-range, and four arrival-wait loops could block indefinitely if a limb never reached its landmark. Both are now closed:
 
 - **Full-span ADC extrapolation (`servo_feedback_position.c`):** `jam_measurement()` linearly extrapolates each joint's 3-point `CD74HC4067` NVS curve across the entire non-railed 12-bit ADC span (`raw ∈ [1..4094]`), catching hard mechanical jams near `0°` and `180°` while rejecting true open/short wire faults (`0` or `4095`).
+
+<figure className="my-6">
+  <img src="/gallery/diagram-multiplexer-wiring-960.webp" alt="CD74HC4067 4th-wire analog multiplexer schematic routing all 12 MG90S servo potentiometer wipers on channels C4 through C15 into ESP32-P4 GPIO49." width="960" height="696" loading="lazy" />
+  <figcaption>Hardware sensing path behind all three protection tiers: twelve soldered <code>MG90S</code> wiper leads route through <code>CD74HC4067</code> channels <code>C4–C15</code> (<code>S0–S3 = GPIO27–30</code>) into <code>ESP32-P4</code> <code>GPIO49</code> (<code>ADC2_CH0</code>) at <code>50 Hz</code>.</figcaption>
+</figure>
 - **Oscillating `50 Hz` target peak unlock:** `ainekio_p4_feedback_stalled()` enforces `deadband_us = max(tolerance_us, 80.0 µs)`, resets its timer on genuine slewing (`vel_toward ≥ 80.0 µs/s`), and tracks `last_target_us` (`shift_us = max(progress_us, 25.0 µs)`) so cyclic `50 Hz` `walk_target` / `MicroDuck` / `NeuralPose` streams cannot hide a pinned shaft behind shifting targets.
 - **Four firmware arrival deadlocks bounded (`body.c`):**
   1. `MOTION_FREESTYLE` single-frame arrival waits are bounded at **`800 ms`** (`ARRIVAL_WAIT_TIMEOUT_US = 800,000`), clamping blocked channels to their measured pose on timeout.
   2. `MOTION_CLIP` cubic-spline checkpoints are bounded at **`800 ms`**.
-  3. `Stand` posture checkpoints are bounded at **`800 ms`** with **`STAND_MAX_REPLANS = 2`**, eliminating infinite `stand_hold_recover()` replan loops against an obstacle.
+  3. `Stand` posture checkpoints are bounded at **`800 ms`** with **`STAND_MAX_REPLANS = 2`** and a **`stand_hold_replans` debounce (`!actively_leveling` guard in `body.c`)** so legitimate IMU tilt leveling never spuriously consumes replan budget while true mechanical obstacles cap cleanly without infinite `stand_hold_recover()` loops.
   4. Inactivity `lay_down` (`release_on_complete`) is guaranteed to reach `ainekio_pca_idle()` (`PCA9685 OE = 1`) even if a leg is obstructed during rest entry.
 
 ---

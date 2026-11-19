@@ -13,9 +13,12 @@ const feed = await parseJournalContent(source.body, source.data.entries, { baseU
 const posts = await getCollection('posts', ({ data }) => !data.draft)
 validateReadingPaths(posts)
 const subsystemTopics = Object.entries(topics).filter(([id]) => !['overview', 'v1'].includes(id)).map(([id, topic]) => {
-  const count = posts.filter(post => getReading(post).topic === id).length
+  const count = posts.filter(post => {
+    const r = getReading(post)
+    return r.topic === id && r.kind === 'journal'
+  }).length
   return { id, ...topic, count }
-})
+}).filter(topic => topic.count > 0)
 const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 ---
 <MainGridLayout title="Ainekio Build Journal — Workbench Milestones & Robot Progress" description="Chronological workbench notes following Ainekio from early 3D-printed leg linkages through fourth-wire servo feedback, carpet walking trials, on-chip neural gait distillation, and Ainekio OS." oneColumn={true}>
@@ -46,10 +49,10 @@ const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'nume
         <ProjectStatus compact />
       </div>
 
-      <nav class="journal-filter-chips" aria-label="Filter by subsystem">
-        <span class="chip-label">Jump by topic:</span>
+      <nav class="journal-filter-chips" aria-label="Filter journal by subsystem">
+        <span class="chip-label">Filter journal by topic:</span>
         {subsystemTopics.map(topic => (
-          <a class="topic-chip" href={url(`/archive/?topic=${topic.id}`)}>{topic.title} <span>({topic.count})</span></a>
+          <a class="topic-chip" href={url(`/archive/?topic=${topic.id}&kind=journal`)}>{topic.title} <span>({topic.count})</span></a>
         ))}
       </nav>
 
@@ -90,7 +93,7 @@ const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'nume
 
       {feed.introHtml && (
         <details class="journal-context-notes">
-          <summary>About the V1 &amp; V2 build archives</summary>
+          <summary>About the V1, V2 &amp; V3 build archives</summary>
           <Markdown class="journal-notes"><div set:html={feed.introHtml} /></Markdown>
         </details>
       )}

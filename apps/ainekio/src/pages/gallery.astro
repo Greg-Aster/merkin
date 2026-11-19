@@ -26,9 +26,9 @@ const galleryJsonLd = {
 const groups = [
   { id: 'photos', shortLabel: 'Workbench photos', title: 'From the workbench', intro: 'Photographs of the physical build: the 12-servo V2 feedback rebuild, single-leg linkage prototypes, and the earlier 8-servo V1 robot.', kinds: ['photo'] },
   { id: 'videos', shortLabel: 'Floor videos', title: 'The physical robot on video', intro: 'Live V2 capability checks (wake-up, greet, 4th-wire jam detection, and IMU shake reflexes), onboard OV5647 camera footage from carpet walking trials, and floor/bench runs.', kinds: ['physical-video'] },
-  { id: 'animation', shortLabel: 'Sim & RL studies', title: 'Simulation, neural gait & motion studies', intro: 'Cross-morphology V3 motion-transfer rollouts showing why each robot body must learn its own motions, MuJoCo quadruped RL rollouts (MicroDuck v17/v18 System-ID), and C-gait imitation policy comparisons.', kinds: ['animation'] },
-  { id: 'diagrams', shortLabel: 'Wiring & LCD faces', title: 'V2 hardware, wiring & LCD expressions', intro: 'Pinouts, PCA9685 PWM and CD74HC4067 4th-wire feedback wiring diagrams, and the 59-expression ST7789 LCD contact sheet.', kinds: ['diagram'] },
-  { id: 'design', shortLabel: 'CAD & MJCF', title: 'CAD & MuJoCo MJCF models', intro: 'Blender CAD assemblies across all three generations—armored Ainekio V3 (Scene \'V3\'), the 8-servo Ainekio V1 workspace & 43-wire harness (Scene \'v1 -\'), and the full-CAD 650 g Ainekio V2 & MuJoCo MJCF models.', kinds: ['design'] },
+  { id: 'animation', shortLabel: 'Sim & RL studies', title: 'Simulation, neural gait & motion studies', intro: 'Cross-morphology V3 motion-transfer rollouts showing why each robot body must learn its own motions, MuJoCo quadruped RL rollouts (MicroDuck v18/v19-snag-p4 & NeuralPose v5), and C-gait imitation policy comparisons.', kinds: ['animation'] },
+  { id: 'diagrams', shortLabel: 'Wiring & Faces', title: 'Hardware wiring, benchmarks & 59-face libraries', intro: 'ESP32-P4 pinouts, PCA9685 PWM and CD74HC4067 (GPIO27–30 → GPIO49) 4th-wire feedback wiring diagrams, MicroDuck System-ID cable-clearance benchmarks, and full 59-expression face contact sheets across V2 (ST7789 color LCD) and V1 (128×64 SSD1306 OLED).', kinds: ['diagram'] },
+  { id: 'design', shortLabel: 'CAD & MJCF', title: 'CAD & MuJoCo MJCF models', intro: 'Blender CAD assemblies across all three generations—608-mesh armored Ainekio V3 (recessed MSP2807 Cyclops eye, 50° rear clamshell piano hinge, dorsal triangular isogrid & Part_003 shoulder audit), modernized 8-servo Ainekio V1 P4/683ZZ 4-view CAD, and the full-CAD 650 g Ainekio V2 Keeper Bridge & MuJoCo MJCF models.', kinds: ['design'] },
 ].map(group => ({
   ...group,
   items: gallery.filter(item => group.kinds.includes(item.kind)),
@@ -61,20 +61,20 @@ const labelForKind = (kind: string) =>
       <div class="gallery-meta-row">
         <p class="gallery-milestone">
           <strong>Latest milestone:</strong>
-          <a href={url('/posts/2026-11-16-cockpit-stream-jam-fuse-and-v3-armor/')}>Nov 16 Cockpit live stream, 3-system neural motion, I²t jam fuse &amp; V3 armored CAD →</a>
+          <a href={url('/posts/2026-11-18-v1-p4-revisit-neuralpose-v5-and-3d-cad/')}>Nov 18 V1 ESP32-P4 CAD revisit, NeuralPose v5 adaptive recovery, V3 motion transfer &amp; 1:1 3D studio →</a>
         </p>
         <ShareBar title={galleryTitle} description={galleryDescription} url={Astro.url.href} />
       </div>
-
-      <nav class="gallery-jump-bar" aria-label="Gallery sections">
-        {groups.map(group => (
-          <a class="jump-pill" href={`#${group.id}`}>
-            <span>{group.shortLabel}</span>
-            <span class="jump-count">{group.items.length}</span>
-          </a>
-        ))}
-      </nav>
     </header>
+
+    <nav class="gallery-jump-bar" aria-label="Gallery sections">
+      {groups.map(group => (
+        <a class="jump-pill" href={`#${group.id}`}>
+          <span>{group.shortLabel}</span>
+          <span class="jump-count">{group.items.length}</span>
+        </a>
+      ))}
+    </nav>
 
     {groups.map(group => (
       <section id={group.id} class="gallery-section" aria-labelledby={`${group.id}-title`}>
@@ -87,10 +87,19 @@ const labelForKind = (kind: string) =>
         </div>
 
         <div class:list={['gallery-grid', { 'video-grid': group.kinds.some(k => ['physical-video', 'animation'].includes(k)) }]}>
-          {group.items.map(item => (
+          {group.items.map(item => {
+            const largestVariant = item.variants?.at(-1)
+            return (
             <figure id={item.id} class:list={[{ 'is-photo': item.kind === 'photo', 'is-schematic': ['diagram', 'design'].includes(item.kind) }]}>
-              {item.variants ? (
-                <a class="image-link" href={url(item.variants.at(-1)!.src)} aria-label={`Open larger image: ${item.title}`}>
+              {largestVariant ? (
+                <a
+                  class="image-link"
+                  href={url(largestVariant.src)}
+                  data-pswp-width={largestVariant.width}
+                  data-pswp-height={largestVariant.height}
+                  data-navigation="off"
+                  aria-label={`Open full-resolution lightbox: ${item.title}`}
+                >
                   <GalleryImage item={item} />
                 </a>
               ) : (
@@ -110,7 +119,7 @@ const labelForKind = (kind: string) =>
                 )}
               </figcaption>
             </figure>
-          ))}
+          )})}
         </div>
       </section>
     ))}
@@ -122,6 +131,25 @@ const labelForKind = (kind: string) =>
     </footer>
   </article>
 </MainGridLayout>
+
+<script>
+  function setupGalleryVideoExclusivity() {
+    const videos = Array.from(document.querySelectorAll<HTMLVideoElement>('.robot-gallery video'))
+    for (const activeVideo of videos) {
+      if (activeVideo.dataset.exclusiveBound === 'true') continue
+      activeVideo.dataset.exclusiveBound = 'true'
+      activeVideo.addEventListener('play', () => {
+        for (const other of videos) {
+          if (other !== activeVideo && !other.paused) {
+            other.pause()
+          }
+        }
+      })
+    }
+  }
+  setupGalleryVideoExclusivity()
+  document.addEventListener('astro:page-load', setupGalleryVideoExclusivity)
+</script>
 
 <style>
   .robot-gallery { width: 100%; margin: 0; color: var(--text-color); }
@@ -149,12 +177,21 @@ const labelForKind = (kind: string) =>
   .gallery-milestone { font-size: 0.88rem; color: var(--text-color-muted); }
   .gallery-milestone strong { color: var(--text-color); font-weight: 680; margin-right: 0.25rem; }
 
-  /* Crisp 5-column equal jump bar on desktop — fits on 1 row with zero orphan wrapping */
+  /* Sticky 5-column jump bar on desktop; compact horizontal scroll strip on small phones */
   .gallery-jump-bar {
+    position: sticky;
+    top: 0.5rem;
+    z-index: 30;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 0.55rem;
-    margin-top: 1rem;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+    padding: 0.5rem;
+    border-radius: 0.65rem;
+    background: rgb(9 16 20 / 0.88);
+    backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
   }
   .jump-pill {
     display: flex;
@@ -248,7 +285,15 @@ const labelForKind = (kind: string) =>
     .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 640px) {
-    .gallery-jump-bar { grid-template-columns: 1fr; }
+    .gallery-jump-bar {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+      gap: 0.4rem;
+      padding: 0.42rem 0.5rem;
+    }
+    .gallery-jump-bar::-webkit-scrollbar { display: none; }
+    .jump-pill { flex: 0 0 auto; padding: 0.4rem 0.62rem; font-size: 0.78rem; white-space: nowrap; }
     .gallery-grid, .video-grid { grid-template-columns: 1fr; }
   }
 </style>

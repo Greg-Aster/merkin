@@ -50,7 +50,18 @@ Because these July documents were written before physical bring-up completed in 
 - **Custom CAD, firmware & assets (zero external code or meshes retained):** Although early July planning notes referenced an external browser simulator and BOM while scoping ideas, that simulator was retired and the completed Ainekio V1 used 100% custom Blender CAD meshes (`Frame7`/`Frame8`, `R2V10` brackets, serrated lower legs), custom C11 ESP-IDF firmware, and custom motion/OLED assets.
 - **Battery pack (`2600 mAh` → `1000 mAh` `2S`):** The `2600 mAh` `18650` pack in the early shopping list proved too bulky for the compact V1 cavity; the built V1 robot used a **Sea Jump `2S` `7.4 V` `1000 mAh` (`2× 14500`) Li-ion pack** with dual `MINI560 PRO` `5 V / 5 A` buck converters and telemetry-only ADC warnings (`7.2 V / 7.0 V / 6.8 V`, retiring the early deep-sleep auto-cutoff draft).
 - **Octal PSRAM GPIO remap (`GPIO33/34` → `GPIO47/48`):** `GPIO33–37` are occupied internally by `8 MiB` octal PSRAM on the delivered `N16R8` module, so knee servos `R4/R3` moved to `GPIO47/48`.
-- **Delivered camera & expanded asset set:** Delivered boards carried an **`OV3660`** sensor (`XGA` `1024×768` manual `1/60 s` exposure) rather than `OV2640`; LittleFS expanded to **38 `.amot` motions** and **52 `SSD1306` OLED expressions**, and the browser simulator experiment was retired.
+- **Delivered camera & expanded asset set:** Delivered boards carried an **`OV3660`** sensor (`XGA` `1024×768` manual `1/60 s` exposure) rather than `OV2640`; LittleFS expanded to **38 `.amot` motions** and **52 `SSD1306` OLED expressions** (subsequently expanded to **59 V2-derived expressions / 303 frames**), and the browser simulator experiment was retired.
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <figure>
+    <img src="/gallery/20260827_092217-960.webp" alt="Close-up workbench photograph of the physical August 2026 Ainekio V1 printed frame, MG90S leg bracket, and red front camera/OLED housing." width="960" height="720" loading="lazy" />
+    <figcaption>August 27, 2026 physical V1 build close-up: custom printed chassis, <code>R2V10</code> servo bracket, and front <code>SSD1306</code> / <code>OV3660</code> housing realized from the July planning notes.</figcaption>
+  </figure>
+  <figure>
+    <img src="/gallery/20260827_093156-960.webp" alt="Rear-quarter floor photograph of the physical August 2026 eight-servo Ainekio V1 prototype showing its dual-buck wiring and 2S battery cavity." width="911" height="1214" loading="lazy" />
+    <figcaption>Rear-quarter view of the completed August 2026 eight-servo floor prototype.</figcaption>
+  </figure>
+</div>
 
 ### Authoritative V1 engineering references
 
