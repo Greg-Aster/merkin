@@ -188,9 +188,7 @@ const megamealPostsSchema = postsSchema.extend({
       media: z
         .array(
           z.object({
-            afterHeadingId: z
-              .string()
-              .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+            afterHeadingId: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
             src: z.string().regex(/^\/[^\s]+$/),
             alt: z.string().min(1),
             layout: z

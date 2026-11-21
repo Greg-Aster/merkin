@@ -3,9 +3,73 @@
     "id": "v3-armored-three-quarter",
     "kind": "design",
     "source": "media-originals/cad/v3_hero_three_quarter.png",
-    "title": "Ainekio V3 heavy-equipment armored CAD (front three-quarter)",
-    "caption": "Blender CAD (v3-2.blend, Scene 'v3', expanded to 608 visible meshes): 436.3 × 236.5 × 381.4 mm neutral CAD envelope (with whip antenna), hinged ROPS bull-bar service hood, recessed 2.8-inch MSP2807 vault display, dual brow camera pods, LED worklights, and 12 waterproof DS3235 crawler legs.",
-    "date": "2026-11-16"
+    "title": "Ainekio V3 heavy-equipment armored CAD with Option A-1 5-link crawler legs (front three-quarter)",
+    "caption": "November 20 Blender CAD (v3-2.blend, Scene 'v3', 537 active meshes): 402.0 × 236.5 × 343.1 mm neutral CAD envelope (with whip antenna), Option A-1 compact 5-link pantograph legs (54/22/46/56/135 mm, +120% lift, 0.93:1 dual-servo balance), recessed AINEKIO V-003 badging, symmetric front fender arches, 2.8-inch MSP2807 Cyclops eye, and 12 waterproof DS3235 actuators.",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "megameal-v2-lab-simulator",
+    "kind": "design",
+    "source": "media-originals/screenshots/megameal_v2_lab_simulator.png",
+    "title": "game.megameal 3D virtual robot lab: Ainekio V2 in the 1:1 browser simulator (alpha PoC)",
+    "caption": "Live browser WebGL capture from game.megameal (?scene=v2_lab_runtime) showing the 12-servo Ainekio V2 quadruped in the 1:1 cable-and-obstacle arena alongside the interactive MuJoCo-parity HUD (virtual OV5647 chin-camera feed, ST7789 face mirror, Free/Follow/POV cameras, force-wrench perturbations, and J0–J11 servo pin/jam controls).",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "v1-clockspring-open-deck",
+    "kind": "design",
+    "source": "media-originals/cad/v1_clockspring_open_deck.png",
+    "title": "Ainekio V1 open-deck CAD: concentric under-arm 4-wire clock-springs & ESP32-P4 layout",
+    "caption": "Overhead cutaway with the Frame8 enclosure cap hidden, exposing all four hip-coaxial rotary clock-springs (33.9 mm under-arm rotor cups, stationary servo-snout stators, and 4-wire coiled harnesses), Waveshare ESP32-P4-WIFI6, Adafruit PCA9685, and dual 2S 14500 battery bays.",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "v1-sculpted-leg-parity",
+    "kind": "design",
+    "source": "media-originals/cad/v1_sculpted_leg_parity.png",
+    "title": "Ainekio V1 unified sculpted spiked lower leg (21,216 verts) parity comparison",
+    "caption": "Three-panel studio comparison of V1’s bio-mechanical cobalt-blue spiked lower leg (39.30 × 5.30 × 79.17 mm) with recessed MG90S servo-horn pocket and mounting screw clearances.",
+    "date": "2026-11-19"
+  },
+  {
+    "id": "v3-opt-a1-rear-three-quarter",
+    "kind": "design",
+    "source": "media-originals/cad/v3_opt_a1_rear_three_quarter.png",
+    "title": "Ainekio V3 rear three-quarter CAD: Option A-1 legs, AINEKIO V-003 hull & sloped rear tray",
+    "caption": "Rear-left three-quarter Blender render of Ainekio V3 standing on all four compact Option A-1 5-link crawler legs (-48.6 mm shorter rear overhang), showing the 40° sloped F688ZZ rear bearing undertray, ribbed cargo trunk, and recessed AINEKIO V-003 badging.",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "v3-opt-a1-workspaces",
+    "kind": "diagram",
+    "source": "media-originals/cad/v3_opt_a1_workspaces.png",
+    "title": "Ainekio V3 5-link leg kinematic & 270° foot workspace point-cloud study",
+    "caption": "Four-panel sagittal workspace comparison across >5,000 evaluated geometries: Baseline V3 (red fender collision zone) vs. Option A compact angled pantograph, Option B zero-tail tucked bellcrank, and Option C symmetric parallel diamond 5-bar.",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "v3-opt-a1-torque-charts",
+    "kind": "diagram",
+    "source": "media-originals/cad/v3_opt_a1_torque_charts.png",
+    "title": "Ainekio V3 DS3235 torque bottleneck, 270° travel utilization & peak motor power study",
+    "caption": "Engineering plots showing how Option A-1 halves peak servo moment arms (shifting bounding load from 84% stall zone to the 46% peak mechanical power zone for +120% vertical lift and +116% running thrust).",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "v3-fender-ainekio-v003",
+    "kind": "design",
+    "source": "media-originals/cad/v3_fender_ainekio_v003_sym.png",
+    "title": "Ainekio V3 symmetric front fender arches & blocky AINEKIO V-003 FDM badging",
+    "caption": "Four-panel left/right elevation and front-3/4 CAD inspection of V3’s extended planar front fender brows, angled yellow side sponsons, hazard stripes, and 79 × 16.4 mm recessed AINEKIO / V-003 Field Companion Unit lettering.",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "v3-clamshell-clip26-latch",
+    "kind": "design",
+    "source": "media-originals/cad/v3_functional_clamshell_clip26.png",
+    "title": "Ainekio V3 functional Clip 26 leaf-spring clamshell latch & M3 anchor cross-section",
+    "caption": "Four-panel CAD section and exterior view of V3’s Clip 26 service-hood latch: hidden M3 anchor foot, 1.8 mm stress-relieved leaf-spring neck, molded 45° striker catch bar, and upper thumb-pull release lip.",
+    "date": "2026-11-19"
   },
   {
     "id": "v3-msp2807-cyclops-eye",
@@ -67,9 +131,9 @@
     "id": "v1-blender-three-quarter",
     "kind": "design",
     "source": "media-originals/cad/v1_clean_three_quarter.png",
-    "title": "Ainekio V1 modernized CAD (Scene 'v1'): seated Frame8 cap, 683ZZ bearings & coaxial wiring",
-    "caption": "Three-quarter 3D CAD view of the modernized eight-servo Ainekio V1 assembly (187.1 × 193.1 × 100.8 mm) showing the seated matte-charcoal Frame8 enclosure cap, crimson serrated 2-DOF spider legs, 8× 683ZZ counter-bearings, zero-bending coaxial Hip-Z wire arches, ventilated dual 2S 14500 flank battery bays, and 0.96-inch SSD1306 OLED bracket eyes + Arducam B0066 chin camera.",
-    "date": "2026-11-18"
+    "title": "Ainekio V1 modernized CAD: vertical-knee arm setup, under-arm clock-springs & sculpted spiked legs",
+    "caption": "November 20 Scene 'v1' CAD (174.8 × 155.5 × 84.1 mm, 174 active meshes): 36.17 × 36.17 × 37.50 mm R2V10 upper arms with vertical knee MG90S servos, 3-part concentric under-arm 4-wire clock-springs (rotor cup + snout stator + spiral harness), Frame8 clock-spring bays, 21,216-vert cobalt-blue spiked lower legs, and 0.96-inch SSD1306 OLED eyes.",
+    "date": "2026-11-20"
   },
   {
     "id": "v1-p4-revisit-4view-cad",

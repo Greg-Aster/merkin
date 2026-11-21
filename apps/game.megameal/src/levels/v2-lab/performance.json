@@ -1,0 +1,17 @@
+{
+	"schemaVersion": 1,
+	"systems": {
+		"lod": {
+			"mode": "off"
+		},
+		"culling": {
+			"mode": "off"
+		},
+		"streaming": {
+			"mode": "off"
+		},
+		"collision": {
+			"mode": "diagnostic"
+		}
+	}
+}

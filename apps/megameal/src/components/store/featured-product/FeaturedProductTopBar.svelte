@@ -9,9 +9,14 @@ export let bannerSlideIndex: number
 export let bannerSlideCount: number
 export let bannerPaused: boolean
 export let bannerProgress: number
-export let sendBannerControl: (action: 'previous' | 'next' | 'toggle-pause') => void
+export let sendBannerControl: (
+  action: 'previous' | 'next' | 'toggle-pause',
+) => void
 
-function formatRegistryCount(value: number | null | undefined, fallback: string) {
+function formatRegistryCount(
+  value: number | null | undefined,
+  fallback: string,
+) {
   return typeof value === 'number' ? value.toLocaleString() : fallback
 }
 
@@ -19,7 +24,10 @@ $: availableUnitsText = formatRegistryCount(
   product.stockRegistry?.unitsAvailable,
   'N/A',
 )
-$: unitsSoldText = formatRegistryCount(product.stockRegistry?.unitsSold, 'No Data')
+$: unitsSoldText = formatRegistryCount(
+  product.stockRegistry?.unitsSold,
+  'No Data',
+)
 </script>
 
 <div class="featured-product-utilitybar">

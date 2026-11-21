@@ -1,9 +1,9 @@
 <script lang="ts">
+import { createEventDispatcher } from 'svelte'
 import type {
   TimelineCarouselScreen,
   TimelinePortalEvent,
 } from './timelinePortalCarouselModel'
-import { createEventDispatcher } from 'svelte'
 import { getTimelineRecordHref } from './timelinePortalCarouselModel'
 
 export let selectedScreen: TimelinePortalEvent | null = null
@@ -11,7 +11,7 @@ export let selectedScreenView: TimelineCarouselScreen | null = null
 export let selectedCardStyle = ''
 export let selectedStatusStyle = ''
 
-const dispatch = createEventDispatcher<{ open: void }>()
+const dispatch = createEventDispatcher<{ open: undefined }>()
 
 function cssUrl(value = '') {
   return `url("${value.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}")`

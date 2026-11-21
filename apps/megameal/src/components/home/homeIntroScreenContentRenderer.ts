@@ -67,8 +67,10 @@ export class HomeIntroScreenContentRenderer {
     const fullSurfaceGeometry = new PlaneGeometry(2, 2)
     const targetAspect = renderWidth / renderHeight
     const mediaAspect = 16 / 9
-    const coverScaleX = mediaAspect > targetAspect ? mediaAspect / targetAspect : 1
-    const coverScaleY = mediaAspect > targetAspect ? 1 : targetAspect / mediaAspect
+    const coverScaleX =
+      mediaAspect > targetAspect ? mediaAspect / targetAspect : 1
+    const coverScaleY =
+      mediaAspect > targetAspect ? 1 : targetAspect / mediaAspect
 
     this.mediaMesh = new Mesh(fullSurfaceGeometry, this.mediaMaterial)
     this.mediaMesh.scale.set(coverScaleX, coverScaleY, 1)
@@ -140,8 +142,7 @@ export class HomeIntroScreenContentRenderer {
     const videoMaterialNeedsUpdate =
       this.lastVideoTexture !== activeVideoTexture
     this.videoMaterial.map = activeVideoTexture
-    this.videoMaterial.opacity =
-      activeVideoTexture ? videoMediaOpacity : 0
+    this.videoMaterial.opacity = activeVideoTexture ? videoMediaOpacity : 0
     if (videoMaterialNeedsUpdate) {
       this.videoMaterial.needsUpdate = true
     }

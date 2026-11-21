@@ -1,8 +1,8 @@
 ---
 import { getCollection } from 'astro:content'
-import { Icon } from 'astro-icon/components'
 import Markdown from '@components/misc/Markdown.astro'
 import MainGridLayout from '@layouts/MainGridLayout.astro'
+import { Icon } from 'astro-icon/components'
 import MerkinMedia from '../../components/merkin/MerkinMedia.astro'
 import MerkinShareActions from '../../components/merkin/MerkinShareActions.svelte'
 import { publicCollectionFilter } from '../../contracts/content'
@@ -36,7 +36,10 @@ const olderEntry =
 const entryDescription = entry.data.description ?? entry.data.caption
 const entryImage = getMerkinOgImage(entry)
 const entryHref = getMerkinHref(entry)
-const absoluteEntryUrl = new URL(entryHref, Astro.site ?? Astro.url.origin).toString()
+const absoluteEntryUrl = new URL(
+  entryHref,
+  Astro.site ?? Astro.url.origin,
+).toString()
 const pagePost = {
   slug: entry.slug,
   data: {

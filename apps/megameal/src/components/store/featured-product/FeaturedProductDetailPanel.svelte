@@ -20,9 +20,17 @@ type WarningKind = 'prohibition' | 'hazard' | 'caution' | 'notice'
 
 function warningKind(label: string): WarningKind {
   const l = label.toLowerCase()
-  if (l.includes('bleed') || l.includes('hazard') || l.includes('biohazard')) return 'hazard'
-  if (l.includes('children') || l.includes('pets') || l.includes('age')) return 'caution'
-  if (l.includes('feeding') || l.includes('handling') || l.includes('misuse') || l.includes('warning')) return 'prohibition'
+  if (l.includes('bleed') || l.includes('hazard') || l.includes('biohazard'))
+    return 'hazard'
+  if (l.includes('children') || l.includes('pets') || l.includes('age'))
+    return 'caution'
+  if (
+    l.includes('feeding') ||
+    l.includes('handling') ||
+    l.includes('misuse') ||
+    l.includes('warning')
+  )
+    return 'prohibition'
   return 'notice'
 }
 

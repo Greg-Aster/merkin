@@ -17,16 +17,19 @@ export type TimelinePortalEvent = {
   }
 }
 
-export type TimelinePortalEraConfig = Record<string, {
-  displayName?: string
-  startYear?: number
-  endYear?: number
-  zoomLevel?: number
-  panToYear?: number
-  backgroundImage?: string
-  backgroundVideo?: string
-  backgroundVideoPlaybackRate?: number
-}>
+export type TimelinePortalEraConfig = Record<
+  string,
+  {
+    displayName?: string
+    startYear?: number
+    endYear?: number
+    zoomLevel?: number
+    panToYear?: number
+    backgroundImage?: string
+    backgroundVideo?: string
+    backgroundVideoPlaybackRate?: number
+  }
+>
 
 export type TimelineCarouselInput = {
   x: number
@@ -103,7 +106,10 @@ export function getTimelineSideMargin(width: number) {
   return Math.min(52, Math.max(10.5, width * 0.04))
 }
 
-export function getSelectedCardWidth(sideLaneWidth: number, sideMargin: number) {
+export function getSelectedCardWidth(
+  sideLaneWidth: number,
+  sideMargin: number,
+) {
   const availableWidth = sideLaneWidth - sideMargin - 16
   return Math.max(136, Math.min(280, availableWidth))
 }
@@ -119,10 +125,13 @@ export function getActiveTimelineEraSegment(
 ) {
   const mainSegments = eraSegments.filter(segment => !segment.isOverlapping)
   return (
-    mainSegments.find(segment => position >= segment.startIndex && position <= segment.endIndex) ??
+    mainSegments.find(
+      segment => position >= segment.startIndex && position <= segment.endIndex,
+    ) ??
     mainSegments.reduce(
       (nearest, segment) =>
-        Math.abs(segment.centerIndex - position) < Math.abs(nearest.centerIndex - position)
+        Math.abs(segment.centerIndex - position) <
+        Math.abs(nearest.centerIndex - position)
           ? segment
           : nearest,
       mainSegments[0],
@@ -164,7 +173,8 @@ export function advanceTimelineTargetFlight({
     Math.max(minimumSpeed, Math.abs(distance) * approachRate),
   )
   const velocityEase = 1 - Math.exp(-delta * velocityEaseRate)
-  const nextVelocity = velocity + (direction * targetSpeed - velocity) * velocityEase
+  const nextVelocity =
+    velocity + (direction * targetSpeed - velocity) * velocityEase
   const nextPosition = position + nextVelocity * delta
   const remainingDistance = targetPosition - nextPosition
   const crossedTarget = Math.sign(remainingDistance) !== direction
@@ -191,20 +201,27 @@ export function getEraMarkerColor(eraKey: string) {
 }
 
 export function sortTimelinePortalEvents(events: TimelinePortalEvent[]) {
-  return [...events].sort((a, b) => a.year - b.year || a.slug.localeCompare(b.slug))
+  return [...events].sort(
+    (a, b) => a.year - b.year || a.slug.localeCompare(b.slug),
+  )
 }
 
 function isFiniteEraRange(startYear?: number, endYear?: number) {
-  return Number.isFinite(startYear) && Number.isFinite(endYear) && Number(startYear) < Number(endYear)
+  return (
+    Number.isFinite(startYear) &&
+    Number.isFinite(endYear) &&
+    Number(startYear) < Number(endYear)
+  )
 }
 
 function getEraEntries(eraConfig: TimelinePortalEraConfig) {
   return Object.entries(eraConfig)
-    .filter(([key, config]) =>
-      key !== 'all-time' &&
-      key !== 'all-eras' &&
-      key !== 'unknown' &&
-      isFiniteEraRange(config.startYear, config.endYear),
+    .filter(
+      ([key, config]) =>
+        key !== 'all-time' &&
+        key !== 'all-eras' &&
+        key !== 'unknown' &&
+        isFiniteEraRange(config.startYear, config.endYear),
     )
     .sort(([keyA, configA], [keyB, configB]) => {
       const startDelta = Number(configA.startYear) - Number(configB.startYear)
@@ -225,18 +242,23 @@ export function getTimelinePortalEraForYear(
   for (const eraKey of mainTimelineEraOrder) {
     const config = eraConfig[eraKey]
     if (!config || !isFiniteEraRange(config.startYear, config.endYear)) continue
-    if (year >= Number(config.startYear) && year <= Number(config.endYear)) return eraKey
+    if (year >= Number(config.startYear) && year <= Number(config.endYear))
+      return eraKey
   }
 
   for (const [eraKey, config] of getEraEntries(eraConfig)) {
     if (mainTimelineEraOrder.includes(eraKey)) continue
-    if (year >= Number(config.startYear) && year <= Number(config.endYear)) return eraKey
+    if (year >= Number(config.startYear) && year <= Number(config.endYear))
+      return eraKey
   }
 
   return 'unknown'
 }
 
-function getEventEra(event: TimelinePortalEvent, eraConfig: TimelinePortalEraConfig) {
+function getEventEra(
+  event: TimelinePortalEvent,
+  eraConfig: TimelinePortalEraConfig,
+) {
   if (event.era && eraConfig[event.era]) return event.era
   return getTimelinePortalEraForYear(event.year, eraConfig)
 }
@@ -260,19 +282,27 @@ export function createTimelinePortalModel(
   eraConfig: TimelinePortalEraConfig,
 ): TimelinePortalModel {
   const sortedEvents = sortTimelinePortalEvents(events)
-  const screens = sortedEvents.map(event => createTimelineCarouselScreen(event, eraConfig))
-  const eventsByEra = sortedEvents.reduce<Record<string, TimelinePortalEvent[]>>((groups, event) => {
+  const screens = sortedEvents.map(event =>
+    createTimelineCarouselScreen(event, eraConfig),
+  )
+  const eventsByEra = sortedEvents.reduce<
+    Record<string, TimelinePortalEvent[]>
+  >((groups, event) => {
     const eraKey = getEventEra(event, eraConfig)
     groups[eraKey] ??= []
     groups[eraKey].push(event)
     return groups
   }, {})
 
-  const eventIndexBySlug = new Map(sortedEvents.map((event, index) => [event.slug, index]))
+  const eventIndexBySlug = new Map(
+    sortedEvents.map((event, index) => [event.slug, index]),
+  )
   const eraSegments = getEraEntries(eraConfig).map(([key, config]) => {
     const startYear = Number(config.startYear)
     const endYear = Number(config.endYear)
-    const eventsInRange = sortedEvents.filter(event => event.year >= startYear && event.year <= endYear)
+    const eventsInRange = sortedEvents.filter(
+      event => event.year >= startYear && event.year <= endYear,
+    )
     const matchingIndices = eventsInRange
       .map(event => eventIndexBySlug.get(event.slug))
       .filter((index): index is number => typeof index === 'number')
@@ -314,7 +344,8 @@ export function createTimelineCarouselScreen(
   eraConfig: TimelinePortalEraConfig,
 ): TimelineCarouselScreen {
   const era = getEventEra(event, eraConfig)
-  const eraDetails = eraConfig[era] ?? eraConfig['all-eras'] ?? eraConfig['all-time']
+  const eraDetails =
+    eraConfig[era] ?? eraConfig['all-eras'] ?? eraConfig['all-time']
   const collection = event.contentType || event.sourceCollection || 'entry'
   const sourceLabel = collection.replaceAll('-', ' ').replaceAll('_', ' ')
   const eraLabel = eraDetails?.displayName || era.replaceAll('-', ' ')
@@ -328,7 +359,8 @@ export function createTimelineCarouselScreen(
       event.bannerData?.background ||
       eraDetails?.backgroundImage ||
       '/assets/banner/home-intro-stills/timeline.webp',
-    videoSrc: event.bannerData?.backgroundVideo || eraDetails?.backgroundVideo || '',
+    videoSrc:
+      event.bannerData?.backgroundVideo || eraDetails?.backgroundVideo || '',
     eraKey: era,
     year: event.year,
     isKeyEvent: Boolean(event.isKeyEvent),

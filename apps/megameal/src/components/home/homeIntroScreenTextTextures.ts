@@ -128,10 +128,8 @@ function wrapRetroComputerText(
   maxWidth: number,
   scale = retroComputerTextScale,
 ) {
-  return wrapMeasuredText(
-    value,
-    maxWidth,
-    line => measureRetroComputerText(line, scale),
+  return wrapMeasuredText(value, maxWidth, line =>
+    measureRetroComputerText(line, scale),
   )
 }
 
@@ -203,11 +201,13 @@ export function createScreenTextTexture({
     context.lineWidth = 5
     context.font = '800 24px "JetBrains Mono", ui-monospace, monospace'
     const kickerText = (kicker || stat || 'PORTAL').toUpperCase()
-    wrapCanvasText(context, kickerText, maxWidth).slice(0, 2).forEach(line => {
-      context.strokeText(line, x, y)
-      context.fillText(line, x, y)
-      y += 38
-    })
+    wrapCanvasText(context, kickerText, maxWidth)
+      .slice(0, 2)
+      .forEach(line => {
+        context.strokeText(line, x, y)
+        context.fillText(line, x, y)
+        y += 38
+      })
 
     y += 44
     context.fillStyle = 'rgb(248 250 252 / 0.96)'

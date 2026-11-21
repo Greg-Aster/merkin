@@ -1,9 +1,7 @@
 ---
 import { getCollection } from 'astro:content'
 import ReaderPage from '../../../components/reader/ReaderPage.astro'
-import {
-  sortFirstContactManualEntries,
-} from '../../../utils/reader'
+import { sortFirstContactManualEntries } from '../../../utils/reader'
 
 const readerEntries = await getCollection('reader')
 const entries = sortFirstContactManualEntries(readerEntries)

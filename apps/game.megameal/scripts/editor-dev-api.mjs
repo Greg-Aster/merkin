@@ -2925,14 +2925,6 @@ function validatePlayerAvatarDefinition(value, path, errors) {
 		`${path}.renderable`,
 		errors,
 	);
-
-	if (value.physicsRig !== undefined) {
-		validatePlayerAvatarPhysicsRig(
-			value.physicsRig,
-			`${path}.physicsRig`,
-			errors,
-		);
-	}
 }
 
 function validatePlayerAvatarRenderable(value, path, errors) {
@@ -2970,18 +2962,6 @@ function validatePlayerAvatarRenderable(value, path, errors) {
 	if (value.scale !== undefined) {
 		validateNumberTuple(value.scale, 3, `${path}.scale`, errors);
 	}
-}
-
-function validatePlayerAvatarPhysicsRig(value, path, errors) {
-	if (!isObject(value)) {
-		errors.push(`${path} must be an object.`);
-		return;
-	}
-
-	if (value.kind !== "articulated-physics-rig") {
-		errors.push(`${path}.kind must be articulated-physics-rig.`);
-	}
-	validateId(value.rigId, `${path}.rigId`, errors);
 }
 
 function validatePlayerAssets(value, errors) {

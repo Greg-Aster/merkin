@@ -17,7 +17,8 @@ import ImageWrapper from '../../misc/ImageWrapper.astro'
     <div className="horror-rupture__sigil void-hole">
       <AnimatedMedia
         webmSrc="/posts/Mega-Meal-Explained/gif/logo3.webm"
-        fallbackSrc="/posts/Mega-Meal-Explained/gif/logo3.gif"
+        poster="/posts/Mega-Meal-Explained/gif/logo3-poster.webp"
+        fallbackSrc="/posts/Mega-Meal-Explained/gif/logo3-poster.webp"
         alt="The damaged Mega Meal sigil"
         class="horror-rupture__sigil-media"
       />
@@ -111,7 +112,13 @@ import ImageWrapper from '../../misc/ImageWrapper.astro'
   <section className="horror-rupture__interference" aria-label="Broken montage">
     <div className="horror-rupture__impact corrupted-border">
       <p className="glitch-text">IT SCREAMS ACROSS DIMENSIONS</p>
-      <ImageWrapper src="/posts/Mega-Meal-Explained/gif/Cheeseburger.gif" alt="The screaming relic" class="horror-rupture__impact-image" />
+      <AnimatedMedia
+        webmSrc="/posts/Mega-Meal-Explained/gif/Cheeseburger.webm"
+        poster="/posts/Mega-Meal-Explained/gif/Cheeseburger-poster.webp"
+        fallbackSrc="/posts/Mega-Meal-Explained/gif/Cheeseburger-poster.webp"
+        alt="The screaming relic"
+        class="horror-rupture__impact-image"
+      />
     </div>
 
     <div className="horror-rupture__filmstrip">
@@ -139,7 +146,13 @@ import ImageWrapper from '../../misc/ImageWrapper.astro'
 
   <section className="horror-rupture__collapse" aria-label="Final visual collapse">
     <div className="horror-rupture__run void-hole">
-      <ImageWrapper src="/posts/Mega-Meal-Explained/gif/running_720p.gif" alt="The final run through dimensional wreckage" class="horror-rupture__run-image" />
+      <AnimatedMedia
+        webmSrc="/posts/Mega-Meal-Explained/gif/running_720p.webm"
+        poster="/posts/Mega-Meal-Explained/gif/running_720p-poster.webp"
+        fallbackSrc="/posts/Mega-Meal-Explained/gif/running_720p-poster.webp"
+        alt="The final run through dimensional wreckage"
+        class="horror-rupture__run-image"
+      />
     </div>
 
     <div className="horror-rupture__mosaic" aria-label="Image debris">
@@ -163,8 +176,20 @@ import ImageWrapper from '../../misc/ImageWrapper.astro'
   <section className="horror-rupture__choice void-hole">
     <p className="dimensional-text">DIMENSIONAL FRIES / COSMIC ONION RINGS</p>
     <div>
-      <ImageWrapper src="/posts/Mega-Meal-Explained/gif/fries1.gif" alt="Dimensional fries" class="horror-choice__image" />
-      <ImageWrapper src="/posts/Mega-Meal-Explained/gif/orings1.gif" alt="Cosmic onion rings" class="horror-choice__image" />
+      <AnimatedMedia
+        webmSrc="/posts/Mega-Meal-Explained/gif/fries1.webm"
+        poster="/posts/Mega-Meal-Explained/gif/fries1-poster.webp"
+        fallbackSrc="/posts/Mega-Meal-Explained/gif/fries1-poster.webp"
+        alt="Dimensional fries"
+        class="horror-choice__image"
+      />
+      <AnimatedMedia
+        webmSrc="/posts/Mega-Meal-Explained/gif/orings1.webm"
+        poster="/posts/Mega-Meal-Explained/gif/orings1-poster.webp"
+        fallbackSrc="/posts/Mega-Meal-Explained/gif/orings1-poster.webp"
+        alt="Cosmic onion rings"
+        class="horror-choice__image"
+      />
     </div>
     <span className="glitch-text">choose quietly. the speaker is listening.</span>
   </section>

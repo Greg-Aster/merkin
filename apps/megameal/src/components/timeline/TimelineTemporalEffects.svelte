@@ -61,23 +61,30 @@ function clamp01(value: number) {
 
 function getWarpRing(index: number) {
   const count = portraitMobile ? 8 : warpRingIndexes.length
-  const progress = ((index / count) + temporalTime * (0.12 + currentStrength * 0.16)) % 1
+  const progress =
+    (index / count + temporalTime * (0.12 + currentStrength * 0.16)) % 1
   const radius = (2.2 + progress * 3.2) * (portraitMobile ? 0.78 : 1)
   return {
     position: [
-      cameraPosition[0] + Math.sin(index * 1.7 + temporalTime * 0.32) * progress * 0.28,
-      cameraPosition[1] + Math.cos(index * 1.3 + temporalTime * 0.26) * progress * 0.2,
+      cameraPosition[0] +
+        Math.sin(index * 1.7 + temporalTime * 0.32) * progress * 0.28,
+      cameraPosition[1] +
+        Math.cos(index * 1.3 + temporalTime * 0.26) * progress * 0.2,
       cameraPosition[2] - 3.8 - progress * 38,
     ] as Position,
     scale: [radius, radius, 1] as Position,
     rotation: index * 0.47 + temporalTime * (index % 2 === 0 ? 0.11 : -0.08),
-    opacity: currentStrength * Math.sin(progress * Math.PI) * (index % 3 === 0 ? 0.12 : 0.065),
-    color: index % 3 === 0 ? eraAccent : index % 2 === 0 ? '#67e8f9' : '#c084fc',
+    opacity:
+      currentStrength *
+      Math.sin(progress * Math.PI) *
+      (index % 3 === 0 ? 0.12 : 0.065),
+    color:
+      index % 3 === 0 ? eraAccent : index % 2 === 0 ? '#67e8f9' : '#c084fc',
   }
 }
 
 function getTimeEcho(index: number) {
-  const progress = ((temporalTime * 0.24) + index / timeEchoIndexes.length) % 1
+  const progress = (temporalTime * 0.24 + index / timeEchoIndexes.length) % 1
   const radius = (target?.scale ?? 1) * (1.25 + progress * 2.4)
   return {
     position: targetWorldPosition
@@ -105,9 +112,16 @@ function getEraRift(index: number) {
   const progress = clamp01(eraRiftProgress - index * 0.12)
   const radius = 1.8 + progress * (portraitMobile ? 9 : 14)
   return {
-    position: [cameraPosition[0], cameraPosition[1], cameraPosition[2] - 7 - index * 0.8] as Position,
+    position: [
+      cameraPosition[0],
+      cameraPosition[1],
+      cameraPosition[2] - 7 - index * 0.8,
+    ] as Position,
     scale: [radius, radius, 1] as Position,
-    opacity: Math.sin(progress * Math.PI) * (1 - progress) * (index === 0 ? 0.34 : 0.18),
+    opacity:
+      Math.sin(progress * Math.PI) *
+      (1 - progress) *
+      (index === 0 ? 0.34 : 0.18),
   }
 }
 
@@ -128,25 +142,30 @@ function getBackgroundFlare(index: number) {
   }
 }
 
-useTask(delta => {
-  const frameDelta = Math.min(delta, 0.05)
-  const targetStrength = motionEnabled && viewMode === 'travel'
-    ? clamp01(effectStrength)
-    : 0
-  const strengthEase = 1 - Math.exp(-frameDelta * 5.6)
-  currentStrength += (targetStrength - currentStrength) * strengthEase
-  if (currentStrength < 0.001 && targetStrength === 0) currentStrength = 0
-  if (currentStrength > 0) temporalTime += frameDelta
-  if (arrivalProgress < 1) arrivalProgress = clamp01(arrivalProgress + frameDelta / 1.65)
-  if (eraRiftProgress < 1) eraRiftProgress = clamp01(eraRiftProgress + frameDelta / 2.05)
+useTask(
+  delta => {
+    const frameDelta = Math.min(delta, 0.05)
+    const targetStrength =
+      motionEnabled && viewMode === 'travel' ? clamp01(effectStrength) : 0
+    const strengthEase = 1 - Math.exp(-frameDelta * 5.6)
+    currentStrength += (targetStrength - currentStrength) * strengthEase
+    if (currentStrength < 0.001 && targetStrength === 0) currentStrength = 0
+    if (currentStrength > 0) temporalTime += frameDelta
+    if (arrivalProgress < 1)
+      arrivalProgress = clamp01(arrivalProgress + frameDelta / 1.65)
+    if (eraRiftProgress < 1)
+      eraRiftProgress = clamp01(eraRiftProgress + frameDelta / 2.05)
 
-  if (
-    currentStrength > 0 ||
-    Math.abs(targetStrength - currentStrength) > 0.002 ||
-    arrivalProgress < 1 ||
-    eraRiftProgress < 1
-  ) invalidate()
-}, { autoInvalidate: false })
+    if (
+      currentStrength > 0 ||
+      Math.abs(targetStrength - currentStrength) > 0.002 ||
+      arrivalProgress < 1 ||
+      eraRiftProgress < 1
+    )
+      invalidate()
+  },
+  { autoInvalidate: false },
+)
 </script>
 
 {#if viewMode === 'travel' && motionEnabled}

@@ -4,11 +4,14 @@ export const timelineVisitedRecordsStorageKey =
 function normalizeVisitedSlugs(value: unknown) {
   if (!Array.isArray(value)) return []
 
-  return [...new Set(
-    value.filter((slug): slug is string =>
-      typeof slug === 'string' && slug.trim().length > 0,
+  return [
+    ...new Set(
+      value.filter(
+        (slug): slug is string =>
+          typeof slug === 'string' && slug.trim().length > 0,
+      ),
     ),
-  )]
+  ]
 }
 
 export function loadTimelineVisitedSlugs() {

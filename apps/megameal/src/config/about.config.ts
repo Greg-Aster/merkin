@@ -33,7 +33,7 @@ export const aboutConfig: AboutConfig = {
     enabled: true,
     title: 'Get In Touch',
     description:
-      "Have questions, ideas, or want to collaborate? ! Please Email", // Match original text
+      'Have questions, ideas, or want to collaborate? ! Please Email', // Match original text
     contactInfo: {
       email: 'Greg@megameal.org', // Match the original email
     },

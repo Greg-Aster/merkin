@@ -4,12 +4,12 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 import {
+  type ProceduralModelViewerVariant,
   addViewerLighting,
   configureViewerShadowMap,
   createViewerFloor,
   getViewerToneMappingExposure,
   positionViewerFloorForObject,
-  type ProceduralModelViewerVariant,
 } from './proceduralModelLighting'
 export let label = '3D product preview'
 export let variant: ProceduralModelViewerVariant = 'generic'

@@ -26,8 +26,8 @@ export function getMerkinOgImage(entry: MerkinEntry) {
   const { media } = entry.data
   const imagePath =
     media.type === 'video'
-      ? (media.thumbnail ?? media.poster ?? '/posts/timeline/merkin.png')
-      : (media.thumbnail ?? media.src)
+      ? media.thumbnail ?? media.poster ?? '/posts/timeline/merkin.png'
+      : media.thumbnail ?? media.src
 
   return resolveMerkinAsset(imagePath)
 }
@@ -53,7 +53,9 @@ export function getPublishableMerkinEntries(
   todayKey = getMerkinTodayKey(),
 ) {
   return entries
-    .filter(entry => isPublicContentData(entry.data) && entry.data.date <= todayKey)
+    .filter(
+      entry => isPublicContentData(entry.data) && entry.data.date <= todayKey,
+    )
     .sort(compareMerkinEntries)
 }
 

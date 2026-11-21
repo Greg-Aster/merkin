@@ -1,13 +1,13 @@
 ---
 import type { CollectionEntry } from 'astro:content'
-import { Icon } from 'astro-icon/components'
-import MainGridLayout from '@layouts/MainGridLayout.astro'
 import Markdown from '@components/misc/Markdown.astro'
+import MainGridLayout from '@layouts/MainGridLayout.astro'
+import { Icon } from 'astro-icon/components'
+import { routeStyleHref } from '../../styles/routeStyleBundles'
 import {
   FIRST_CONTACT_MANUAL_TITLE,
   firstContactManualHref,
 } from '../../utils/reader'
-import { routeStyleHref } from '../../styles/routeStyleBundles'
 import ReaderBanner from './ReaderBanner.astro'
 
 interface Props {

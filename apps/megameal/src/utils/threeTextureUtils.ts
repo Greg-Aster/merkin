@@ -1,8 +1,4 @@
-import {
-  LinearFilter,
-  SRGBColorSpace,
-  type Texture,
-} from 'three'
+import { LinearFilter, SRGBColorSpace, type Texture } from 'three'
 
 export function configureGeneratedCanvasTexture<TTexture extends Texture>(
   texture: TTexture,

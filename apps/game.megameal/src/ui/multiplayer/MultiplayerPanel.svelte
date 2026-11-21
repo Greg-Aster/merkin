@@ -33,10 +33,9 @@ function sendChat(): void {
 }
 
 function playerCount(snapshot: MultiplayerSnapshot): number {
-	return Math.max(
-		snapshot.connectedPeers.length,
-		snapshot.remotePlayers.length,
-	) + 1;
+	return (
+		Math.max(snapshot.connectedPeers.length, snapshot.remotePlayers.length) + 1
+	);
 }
 </script>
 

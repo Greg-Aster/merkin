@@ -10,17 +10,17 @@ import {
 	PLAYER_STABLE_ID,
 	playerAssets,
 	playerAvatarAssets,
-	playerAvatarPhysicsRigs,
 	playerAvatars,
 	playerPackageConfig,
 	playerPrefab,
 	selectedPlayerAvatar,
-	selectedPlayerAvatarPhysicsRig,
 } from "../src/levels/player/index.js";
 import portalArenaData from "../src/levels/portal-arena/data.json";
 import { portalArenaLevelPackage } from "../src/levels/portal-arena/package.js";
 import prototypeData from "../src/levels/prototype-arena/data.json";
 import { prototypeArenaLevelPackage } from "../src/levels/prototype-arena/package.js";
+import v2LabData from "../src/levels/v2-lab/data.json";
+import { v2LabLevelPackage } from "../src/levels/v2-lab/package.js";
 
 const playerAssetIds = new Set<string>(PLAYER_REQUIRED_ASSET_IDS);
 const playerAudioAssetIds = new Set<string>([
@@ -83,6 +83,10 @@ const packages = [
 	{
 		raw: mirandaData as RawLevelPackageData,
 		resolved: mirandaDeckLevelPackage,
+	},
+	{
+		raw: v2LabData as RawLevelPackageData,
+		resolved: v2LabLevelPackage,
 	},
 ] as const;
 
@@ -309,16 +313,6 @@ assertEqual(
 	playerAvatars.some((avatar) => avatar.id === selectedPlayerAvatar.id),
 	true,
 	"Selected player avatar must exist in the player avatar catalog.",
-);
-assertEqual(
-	selectedPlayerAvatarPhysicsRig,
-	undefined,
-	"Selected player avatar must not activate a removed avatar physics rig.",
-);
-assertEqual(
-	playerAvatarPhysicsRigs.length,
-	0,
-	"Player avatar package must not export removed avatar physics rigs.",
 );
 assertSourceIncludes(
 	editorDevApiSource,

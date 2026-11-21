@@ -2,12 +2,7 @@
 import { siteSfxManager } from '@/utils/site-sfx'
 import { useTask, useThrelte } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
-import {
-  Color,
-  HalfFloatType,
-  ShaderMaterial,
-  WebGLRenderTarget,
-} from 'three'
+import { Color, HalfFloatType, ShaderMaterial, WebGLRenderTarget } from 'three'
 import type { Object3D } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass.js'
 import { createHomeIntroRenderCadence } from './homeIntroMotionCadence'
@@ -95,16 +90,8 @@ export let backgroundReady = false
 export let portalVisible = true
 export let effectsEnabled = true
 
-const {
-  advance,
-  autoRender,
-  camera,
-  dpr,
-  renderStage,
-  renderer,
-  scene,
-  size,
-} = useThrelte()
+const { advance, autoRender, camera, dpr, renderStage, renderer, scene, size } =
+  useThrelte()
 
 let logoRenderTarget: WebGLRenderTarget | null = null
 let glitchMaterial: ShaderMaterial | null = null
@@ -152,9 +139,8 @@ function scheduleNextIdleBurst(now: number, soon = false) {
         sceneQuality === 'high' ? 4.6 : 6.2,
         sceneQuality === 'high' ? 10.5 : 13.8,
       )
-  const occasionalLongPause = !quickFollowUp && Math.random() > 0.86
-    ? randomRange(4, 9)
-    : 0
+  const occasionalLongPause =
+    !quickFollowUp && Math.random() > 0.86 ? randomRange(4, 9) : 0
 
   nextIdleBurstAt = now + baseDelay + occasionalLongPause
 }
@@ -177,11 +163,12 @@ function setGlitchNoiseWidth() {
   if (!glitchMaterial) return
 
   const uniforms = glitchMaterial.uniforms as GlitchUniforms
-  const colorSplit = sceneQuality === 'high'
-    ? 0.011
-    : sceneQuality === 'balanced'
-      ? 0.008
-      : 0.006
+  const colorSplit =
+    sceneQuality === 'high'
+      ? 0.011
+      : sceneQuality === 'balanced'
+        ? 0.008
+        : 0.006
 
   if (uniforms.colorOffset) {
     uniforms.colorOffset.value = colorSplit
@@ -265,26 +252,27 @@ function getLogoGlitchTarget() {
   if (logoGlitchTarget?.parent) return logoGlitchTarget
 
   logoGlitchTarget = null
-  logoGlitchTarget = scene.children.find(child => {
-    const sceneObject = child as SceneObject
-    if (
-      sceneObject.isCamera ||
-      sceneObject.isLight ||
-      child.children.length !== 1
-    ) {
-      return false
-    }
-
-    let hasMesh = false
-    child.traverse(descendant => {
-      const descendantObject = descendant as SceneObject
-      if (descendantObject.isMesh || descendantObject.isSkinnedMesh) {
-        hasMesh = true
+  logoGlitchTarget =
+    scene.children.find(child => {
+      const sceneObject = child as SceneObject
+      if (
+        sceneObject.isCamera ||
+        sceneObject.isLight ||
+        child.children.length !== 1
+      ) {
+        return false
       }
-    })
 
-    return hasMesh
-  }) ?? null
+      let hasMesh = false
+      child.traverse(descendant => {
+        const descendantObject = descendant as SceneObject
+        if (descendantObject.isMesh || descendantObject.isSkinnedMesh) {
+          hasMesh = true
+        }
+      })
+
+      return hasMesh
+    }) ?? null
 
   return logoGlitchTarget
 }
@@ -408,14 +396,17 @@ function getGlitchStrength() {
   }
 
   const bursting = canGlitch && now < burstUntil
-  const burstProgress = bursting && burstDuration > 0
-    ? Math.min(1, Math.max(0, (now - burstStartedAt) / burstDuration))
-    : 1
+  const burstProgress =
+    bursting && burstDuration > 0
+      ? Math.min(1, Math.max(0, (now - burstStartedAt) / burstDuration))
+      : 1
   const burstEnvelope = bursting
     ? Math.sin((1 - burstProgress) * Math.PI * 0.5)
     : 0
   const strength = dragging
-    ? sceneQuality === 'lean' ? 0.32 : 0.58
+    ? sceneQuality === 'lean'
+      ? 0.32
+      : 0.58
     : burstEnvelope * burstIntensity
 
   setGlitchNoiseWidth()
@@ -497,7 +488,10 @@ useTask(renderScheduledFrame, {
 })
 
 onDestroy(() => {
-  reducedMotionQuery?.removeEventListener('change', updateReducedMotionPreference)
+  reducedMotionQuery?.removeEventListener(
+    'change',
+    updateReducedMotionPreference,
+  )
   reducedMotionQuery = null
   glitchQuad?.dispose()
   glitchMaterial?.dispose()

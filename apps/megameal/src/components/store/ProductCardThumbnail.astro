@@ -24,13 +24,8 @@ interface Props {
   thumbnail: CardThumbnail | null
 }
 
-const {
-  availabilityClasses,
-  availabilityLabel,
-  mediaItems,
-  name,
-  thumbnail,
-} = Astro.props
+const { availabilityClasses, availabilityLabel, mediaItems, name, thumbnail } =
+  Astro.props
 ---
 
 <div class="block overflow-hidden relative product-card-thumb">

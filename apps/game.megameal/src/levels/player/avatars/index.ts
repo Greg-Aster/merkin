@@ -23,11 +23,6 @@ export const selectedPlayerAvatar = selectedAvatarFrom(
 	playerAvatarPackageConfig,
 );
 
-export const playerAvatarPhysicsRigs = [] as const;
-
-export const selectedPlayerAvatarPhysicsRig =
-	selectedRigFrom(selectedPlayerAvatar);
-
 function selectedAvatarFrom(
 	config: PlayerAvatarPackageConfig,
 ): PlayerAvatarDefinition {
@@ -42,14 +37,4 @@ function selectedAvatarFrom(
 	}
 
 	return avatar;
-}
-
-function selectedRigFrom(avatar: PlayerAvatarDefinition) {
-	if (!avatar.physicsRig) {
-		return undefined;
-	}
-
-	throw new Error(
-		`Player avatar "${avatar.id}" references unknown physics rig "${avatar.physicsRig.rigId}".`,
-	);
 }

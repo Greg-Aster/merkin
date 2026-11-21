@@ -21,9 +21,9 @@ type SourceConfig = {
 	readonly mode: "automatic-glb" | "manual-collision-glb";
 	readonly settings: {
 		readonly profile: StaticEnvironmentCollisionProfile;
-			readonly chunkSizeMeters: number;
-			readonly sampleSpacingMeters: number;
-			readonly walkableSlopeDegrees: number;
+		readonly chunkSizeMeters: number;
+		readonly sampleSpacingMeters: number;
+		readonly walkableSlopeDegrees: number;
 	};
 };
 
@@ -182,8 +182,7 @@ function serializedCollisionProductForCheck(value: unknown): string {
 	if (!isRecord(value)) {
 		throw new Error("Static environment collision product is invalid.");
 	}
-	const comparable = { ...value };
-	delete comparable.generatedAt;
+	const { generatedAt: _generatedAt, ...comparable } = value;
 	return `${JSON.stringify(sortValue(comparable), null, "\t")}\n`;
 }
 

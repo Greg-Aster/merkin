@@ -45,43 +45,18 @@ import { isVideoBannerData } from './banners/video'
 export function getDynamicBackgroundImage(
   backgroundImage?: string | null,
 ): string | null {
-  // 1. Check for explicit "none" or empty string
   if (backgroundImage === 'none' || backgroundImage === '') {
     return null
   }
 
-  // 2. Use explicit backgroundImage prop if provided
   if (backgroundImage) {
-    if (import.meta.env.DEV) {
-    }
     return backgroundImage
   }
 
-  // 3. Use imported siteConfig (primary method)
   if (siteConfig?.banner?.enable && siteConfig?.banner?.src) {
-    if (import.meta.env.DEV) {
-    }
     return siteConfig.banner.src
   }
 
-  // 4. Fallback: Check window object for client-side compatibility
-  if (
-    typeof window !== 'undefined' &&
-    (window as any).siteConfig?.banner?.enable &&
-    (window as any).siteConfig?.banner?.src
-  ) {
-    if (import.meta.env.DEV) {
-      console.log(
-        'Using window.siteConfig background image:',
-        (window as any).siteConfig.banner.src,
-      )
-    }
-    return (window as any).siteConfig.banner.src
-  }
-
-  console.warn(
-    'No background image found - check siteConfig.banner configuration',
-  )
   return null
 }
 
@@ -89,25 +64,7 @@ export function getShouldShowParallaxBackground(
   backgroundImage?: string | null,
 ): boolean {
   const currentBackgroundImage = getDynamicBackgroundImage(backgroundImage)
-  const isParallaxEnabled = bannerConfig.parallax.enabled
-
-  const shouldShow = !!(currentBackgroundImage && isParallaxEnabled)
-
-  // Debug logging for development
-  if (
-    import.meta.env.DEV &&
-    typeof window !== 'undefined' &&
-    window.location.hostname === 'localhost'
-  ) {
-    console.log('Input backgroundImage prop:', backgroundImage)
-    console.log('Resolved currentBackgroundImage:', currentBackgroundImage)
-    console.log('Parallax enabled in config:', isParallaxEnabled)
-    console.log('Should show parallax background:', shouldShow)
-    console.log('siteConfig.banner:', siteConfig?.banner)
-    console.log('================================')
-  }
-
-  return shouldShow
+  return Boolean(currentBackgroundImage && bannerConfig.parallax.enabled)
 }
 
 // =====================================================================
@@ -336,14 +293,14 @@ function wantsNoArticleBanner(post: any): boolean {
   return !bannerType || !articlePostBannerTypes.has(bannerType)
 }
 
-export function isFullscreenModeActive(): boolean {
+function isFullscreenModeActive(): boolean {
   if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
     return false
   }
   return localStorage.getItem('fullscreenBannerOverride') === 'true'
 }
 
-export function getBannerDataFromPost(post: any): PostBannerData | null {
+function getBannerDataFromPost(post: any): PostBannerData | null {
   if (!post?.data) return null
 
   return {
@@ -359,7 +316,7 @@ export function getBannerDataFromPost(post: any): PostBannerData | null {
   }
 }
 
-export function determineBannerType(
+function determineBannerType(
   post: any,
   postData: PostBannerData | null,
 ): BannerDeterminationResult {
@@ -439,14 +396,14 @@ export function determineBannerType(
       : hasTimelineBanner
         ? 'timeline'
         : hasCookbookBanner
-            ? 'cookbook'
-            : hasArchiveBanner
-              ? 'archive'
-              : hasReaderBanner
-                ? 'reader'
-                : hasStandardBanner
-                  ? 'standard'
-                  : 'none'
+          ? 'cookbook'
+          : hasArchiveBanner
+            ? 'archive'
+            : hasReaderBanner
+              ? 'reader'
+              : hasStandardBanner
+                ? 'standard'
+                : 'none'
 
   return {
     hasTimelineBanner,
@@ -462,7 +419,7 @@ export function determineBannerType(
   }
 }
 
-export function getBannerDataSources(
+function getBannerDataSources(
   bannerType: BannerDeterminationResult,
   post: any,
 ) {
@@ -477,8 +434,7 @@ export function getBannerDataSources(
 
   let resolvedImageBannerData: any = null
   if (hasImageBanner) {
-    const postImageUrl =
-      post?.data?.bannerData?.imageUrl || post?.data?.image
+    const postImageUrl = post?.data?.bannerData?.imageUrl || post?.data?.image
 
     if (typeof postImageUrl === 'string' && postImageUrl.trim()) {
       resolvedImageBannerData = { imageUrl: postImageUrl }
@@ -531,21 +487,14 @@ export function getBannerDataSources(
  */
 export function determineBannerConfiguration(
   post: any,
-  pageType: string,
+  _pageType: string,
   defaultBannerLink = '',
 ) {
-  // ⭐ NEW: Check user's saved banner type preference
-  if (
-    typeof window !== 'undefined' &&
-    localStorage.getItem('defaultBannerType')
-  ) {
+  if (typeof window !== 'undefined') {
     const savedType = localStorage.getItem('defaultBannerType')
-    if (import.meta.env.DEV) {
+    if (savedType) {
+      bannerConfig.defaultBannerType = savedType as BannerType
     }
-    bannerConfig.defaultBannerType = savedType as BannerType
-    if (import.meta.env.DEV) {
-    }
-  } else if (import.meta.env.DEV) {
   }
 
   if (isFullscreenModeActive()) {
@@ -648,24 +597,10 @@ export function getBannerAnimationSettings(): BannerAnimationConfig {
   return bannerConfig.standardBannerConfig.getBannerAnimationSettings()
 }
 
-// 🎯 THE FUNCTION THAT CONTROLS OVERLAP! - RESTORED
 export function getPanelTopPosition(bannerType: BannerType): string {
   return resolveBannerLayout(bannerType, {
     profiles: bannerConfig.layoutProfiles,
   }).panelTop
-}
-
-export function getPageSpecificOverlap(pageType: string): string {
-  // This function is no longer used but kept for compatibility
-  return '0'
-}
-
-export function getNavbarHeight(): string {
-  return bannerConfig.navbar.height
-}
-
-export function getMainContentOffset(): string {
-  return bannerConfig.layoutProfiles.standard.contentTop.desktop
 }
 
 export function getBannerLink(index: number): string | null {
@@ -690,27 +625,12 @@ export function getIconSVG(iconName: string): string {
   return bannerConfig.standardBannerConfig.getIconSVG(iconName)
 }
 
-// =====================================================================
-// DEPRECATED FUNCTIONS - KEPT FOR BACKWARDS COMPATIBILITY
-// =====================================================================
-
-/** @deprecated Use getPanelTopPosition instead */
-export function calculateBannerLayout() {
-  console.warn(
-    'calculateBannerLayout is deprecated, using working system instead',
-  )
-}
-
 // Re-export type guards and configurations
 export {
   isVideoBannerData,
   isImageBannerData,
   isTimelineBannerData,
   isNoneBannerData,
-}
-
-export function isStandardBannerData(data: any): data is any {
-  return data && typeof data === 'object' && Object.keys(data).length === 0
 }
 
 export {
@@ -730,5 +650,8 @@ export type {
   LinkPreviewInfo,
   BannerAnimationConfig,
 } from './banners/types'
-export type { BannerLayoutProfile, ResolvedBannerLayout } from './banners/layout'
+export type {
+  BannerLayoutProfile,
+  ResolvedBannerLayout,
+} from './banners/layout'
 export { bannerLayoutProfiles, resolveBannerLayout } from './banners/layout'

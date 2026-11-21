@@ -388,7 +388,7 @@ importers:
         version: 0.9.6(prettier@3.8.1)(typescript@5.9.3)
       '@astrojs/mdx':
         specifier: ^4.1.0
-        version: 4.3.13(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))
+        version: 4.3.13(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))
       '@astrojs/rss':
         specifier: ^4.0.11
         version: 4.0.15
@@ -397,10 +397,10 @@ importers:
         version: 3.7.0
       '@astrojs/svelte':
         specifier: 7.2.5
-        version: 7.2.5(@types/node@25.3.0)(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(jiti@1.21.7)(lightningcss@1.30.2)(stylus@0.63.0)(svelte@5.26.2)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+        version: 7.2.5(@types/node@25.3.0)(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(jiti@1.21.7)(lightningcss@1.32.0)(stylus@0.63.0)(svelte@5.26.2)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       '@astrojs/tailwind':
         specifier: ^5.1.5
-        version: 5.1.5(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@3.4.19(tsx@4.21.0)(yaml@2.8.2))
+        version: 5.1.5(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@3.4.19(tsx@4.21.0)(yaml@2.8.2))
       '@fontsource-variable/jetbrains-mono':
         specifier: ^5.1.2
         version: 5.2.8
@@ -436,7 +436,7 @@ importers:
         version: 0.5.19(tailwindcss@3.4.19(tsx@4.21.0)(yaml@2.8.2))
       astro:
         specifier: 5.18.0
-        version: 5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+        version: 5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       astro-compress:
         specifier: ^2.3.6
         version: 2.3.9(@types/node@25.3.0)(jiti@1.21.7)(rollup@4.58.0)(stylus@0.63.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -573,9 +573,6 @@ importers:
       '@dimforge/rapier3d-compat':
         specifier: 0.17.3
         version: 0.17.3
-      '@merkin/megameal-engine':
-        specifier: workspace:*
-        version: link:../../packages/megameal-engine
       astro:
         specifier: 5.18.0
         version: 5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -618,7 +615,7 @@ importers:
         version: 0.9.6(prettier@3.8.1)(typescript@5.9.3)
       '@astrojs/mdx':
         specifier: ^4.1.0
-        version: 4.3.13(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))
+        version: 4.3.13(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))
       '@astrojs/rss':
         specifier: ^4.0.11
         version: 4.0.15
@@ -627,10 +624,10 @@ importers:
         version: 3.7.0
       '@astrojs/svelte':
         specifier: 7.2.5
-        version: 7.2.5(@types/node@25.3.0)(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(jiti@1.21.7)(lightningcss@1.32.0)(stylus@0.63.0)(svelte@5.26.2)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+        version: 7.2.5(@types/node@25.3.0)(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(jiti@1.21.7)(lightningcss@1.30.2)(stylus@0.63.0)(svelte@5.26.2)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       '@astrojs/tailwind':
         specifier: ^5.1.5
-        version: 5.1.5(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@3.4.19(tsx@4.21.0)(yaml@2.8.2))
+        version: 5.1.5(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@3.4.19(tsx@4.21.0)(yaml@2.8.2))
       '@fontsource-variable/jetbrains-mono':
         specifier: ^5.1.2
         version: 5.2.8
@@ -682,24 +679,15 @@ importers:
       '@threlte/core':
         specifier: 8.1.3
         version: 8.1.3(svelte@5.26.2)(three@0.178.0)
-      '@types/chart.js':
-        specifier: ^4.0.1
-        version: 4.0.1
       astro:
         specifier: 5.18.0
-        version: 5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+        version: 5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       astro-compress:
         specifier: ^2.3.6
         version: 2.3.9(@types/node@25.3.0)(jiti@1.21.7)(rollup@4.58.0)(stylus@0.63.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       astro-icon:
         specifier: ^1.1.5
         version: 1.1.5
-      astro-seo:
-        specifier: ^0.8.4
-        version: 0.8.4(prettier@3.8.1)(typescript@5.9.3)
-      chart.js:
-        specifier: ^4.5.0
-        version: 4.5.1
       hastscript:
         specifier: ^9.0.0
         version: 9.0.1
@@ -712,9 +700,6 @@ importers:
       markdown-it:
         specifier: ^14.1.0
         version: 14.1.1
-      marked:
-        specifier: ^15.0.7
-        version: 15.0.12
       mdast-util-to-string:
         specifier: ^4.0.0
         version: 4.0.0
@@ -724,9 +709,6 @@ importers:
       pagefind:
         specifier: ^1.3.0
         version: 1.4.0
-      peerjs:
-        specifier: ^1.5.5
-        version: 1.5.5
       photoswipe:
         specifier: ^5.4.4
         version: 5.4.4
@@ -803,18 +785,12 @@ importers:
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
-      '@types/peerjs':
-        specifier: ^1.1.0
-        version: 1.1.0
       '@types/sanitize-html':
         specifier: ^2.13.0
         version: 2.16.0
       '@types/three':
         specifier: ^0.176.0
         version: 0.176.0
-      ktx2tools:
-        specifier: 1.1.0
-        version: 1.1.0
       postcss:
         specifier: 8.5.6
         version: 8.5.6
@@ -824,9 +800,6 @@ importers:
       postcss-nesting:
         specifier: ^13.0.1
         version: 13.0.2(postcss@8.5.6)
-      svelte-preprocess:
-        specifier: ^6.0.3
-        version: 6.0.3(@babel/core@7.29.0)(postcss-load-config@6.0.1(jiti@1.21.7)(postcss@8.5.6)(tsx@4.21.0)(yaml@2.8.2))(postcss@8.5.6)(stylus@0.63.0)(svelte@5.26.2)(typescript@5.9.3)
 
   apps/travel:
     dependencies:
@@ -2023,9 +1996,6 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@kurkle/color@0.3.4':
-    resolution: {integrity: sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==}
-
   '@mdx-js/mdx@3.1.1':
     resolution: {integrity: sha512-f6ZO2ifpwAQIpzGWaBQT2TXxPv6z3RBzQKpVftEWN78Vl/YweF1uwussDx8ECAXVtr3Rs89fKyG9YlzUs9DyGQ==}
 
@@ -2283,10 +2253,6 @@ packages:
   '@types/braces@3.0.5':
     resolution: {integrity: sha512-SQFof9H+LXeWNz8wDe7oN5zu7ket0qwMu5vZubW4GCJ8Kkeh6nBWUz87+KTz/G3Kqsrp0j/W253XJb3KMEeg3w==}
 
-  '@types/chart.js@4.0.1':
-    resolution: {integrity: sha512-OwXJ6Eg14eFpCsTG6sljiGnvVpit5R9rapG7nwDnQlljsdplVIOYVuCSwy07IduCtihrOwvOnbhXKLyp3nvPcw==}
-    deprecated: This is a stub types definition. chart.js provides its own type definitions, so you do not need this installed.
-
   '@types/css-tree@2.3.11':
     resolution: {integrity: sha512-aEokibJOI77uIlqoBOkVbaQGC9zII0A+JH1kcTNKW2CwyYWD8KM6qdo+4c77wD3wZOQfJuNWAr9M4hdk+YhDIg==}
 
@@ -2463,10 +2429,6 @@ packages:
 
   '@types/node@25.3.0':
     resolution: {integrity: sha512-4K3bqJpXpqfg2XKGK9bpDTc6xO/xoUP/RBWS7AtRMug6zZFaRekiLzjVtAoZMquxoAbzBvy5nxQ7veS5eYzf8A==}
-
-  '@types/peerjs@1.1.0':
-    resolution: {integrity: sha512-dVocsfYFg5QQuUB9OAxfrSvz4br4pyX+7M61ZJSRiYtE3NdayShk1p1Y8b9TmCj724TwHskVraeF7wyPl0rYcg==}
-    deprecated: This is a stub types definition. peerjs provides its own type definitions, so you do not need this installed.
 
   '@types/prompts@2.4.9':
     resolution: {integrity: sha512-qTxFi6Buiu8+50/+3DGIWLHM6QuWsEKugJnnP6iv2Mc4ncxE4A/OJkjuVOA+5X0X1S/nq5VJRa8Lu+nwcvbrKA==}
@@ -2770,10 +2732,6 @@ packages:
 
   character-reference-invalid@2.0.1:
     resolution: {integrity: sha512-iBZ4F4wRbyORVsu0jPV7gXkOsGYjGHPmAyv+HiHG8gi5PtC9KI2j1+v8/tlibRvjoWX027ypmG/n0HtO5t7unw==}
-
-  chart.js@4.5.1:
-    resolution: {integrity: sha512-GIjfiT9dbmHRiYi6Nl2yFCq7kkwdkp1W/lp2J99rX0yo9tgJGn3lKQATztIjb5tVtevcBtIdICNWqlq5+E8/Pw==}
-    engines: {pnpm: '>=8'}
 
   cheerio-select@2.1.0:
     resolution: {integrity: sha512-9v9kG0LvzrlcungtnJtpGNxY+fzECQKhK4EGJX2vByejiMX84MFNQw4UxPJl3bFbTMw+Dfs37XaIkCwTZfLh4g==}
@@ -3862,10 +3820,6 @@ packages:
 
   ktx-parse@1.1.0:
     resolution: {integrity: sha512-mKp3y+FaYgR7mXWAbyyzpa/r1zDWeaunH+INJO4fou3hb45XuNSwar+7llrRyvpMWafxSIi99RNFJ05MHedaJQ==}
-
-  ktx2tools@1.1.0:
-    resolution: {integrity: sha512-M2Hv/LG4lzIMbSI0/9/p2Jkt9efy6Z0Cc7ZLIfQkDt3Bq2UIv+RxBJtm+66qYS+gSEqP9mAbTuNh3E8c3u5DRA==}
-    hasBin: true
 
   kuler@2.0.0:
     resolution: {integrity: sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==}
@@ -6652,8 +6606,6 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@kurkle/color@0.3.4': {}
-
   '@mdx-js/mdx@3.1.1':
     dependencies:
       '@types/estree': 1.0.8
@@ -6915,10 +6867,6 @@ snapshots:
 
   '@types/braces@3.0.5': {}
 
-  '@types/chart.js@4.0.1':
-    dependencies:
-      chart.js: 4.5.1
-
   '@types/css-tree@2.3.11': {}
 
   '@types/csso@5.0.4':
@@ -7120,10 +7068,6 @@ snapshots:
   '@types/node@25.3.0':
     dependencies:
       undici-types: 7.18.2
-
-  '@types/peerjs@1.1.0':
-    dependencies:
-      peerjs: 1.5.5
 
   '@types/prompts@2.4.9':
     dependencies:
@@ -7781,10 +7725,6 @@ snapshots:
   character-entities@2.0.2: {}
 
   character-reference-invalid@2.0.1: {}
-
-  chart.js@4.5.1:
-    dependencies:
-      '@kurkle/color': 0.3.4
 
   cheerio-select@2.1.0:
     dependencies:
@@ -9018,8 +8958,6 @@ snapshots:
 
   ktx-parse@1.1.0: {}
 
-  ktx2tools@1.1.0: {}
-
   kuler@2.0.0: {}
 
   language-subtag-registry@0.3.23: {}
@@ -10078,16 +10016,6 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.8.2
 
-  postcss-load-config@6.0.1(jiti@1.21.7)(postcss@8.5.6)(tsx@4.21.0)(yaml@2.8.2):
-    dependencies:
-      lilconfig: 3.1.3
-    optionalDependencies:
-      jiti: 1.21.7
-      postcss: 8.5.6
-      tsx: 4.21.0
-      yaml: 2.8.2
-    optional: true
-
   postcss-nested@6.2.0(postcss@8.5.15):
     dependencies:
       postcss: 8.5.15
@@ -10752,16 +10680,6 @@ snapshots:
       '@babel/core': 7.29.0
       postcss: 8.5.15
       postcss-load-config: 6.0.1(jiti@1.21.7)(postcss@8.5.15)(tsx@4.21.0)(yaml@2.8.2)
-      stylus: 0.63.0
-      typescript: 5.9.3
-
-  svelte-preprocess@6.0.3(@babel/core@7.29.0)(postcss-load-config@6.0.1(jiti@1.21.7)(postcss@8.5.6)(tsx@4.21.0)(yaml@2.8.2))(postcss@8.5.6)(stylus@0.63.0)(svelte@5.26.2)(typescript@5.9.3):
-    dependencies:
-      svelte: 5.26.2
-    optionalDependencies:
-      '@babel/core': 7.29.0
-      postcss: 8.5.6
-      postcss-load-config: 6.0.1(jiti@1.21.7)(postcss@8.5.6)(tsx@4.21.0)(yaml@2.8.2)
       stylus: 0.63.0
       typescript: 5.9.3
 

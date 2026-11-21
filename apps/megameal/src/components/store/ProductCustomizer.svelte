@@ -38,7 +38,10 @@ function formatCurrency(value: number) {
   }).format(value)
 }
 
-function selectOption(step: ProductCustomizerStep, option: ProductCustomizerOption) {
+function selectOption(
+  step: ProductCustomizerStep,
+  option: ProductCustomizerOption,
+) {
   const nextSelections = {
     ...selectedOptionIds,
     [step.id]: option.id,
@@ -46,7 +49,9 @@ function selectOption(step: ProductCustomizerStep, option: ProductCustomizerOpti
   selectedOptionIds = nextSelections
   feedback = null
 
-  const nextIncompleteStep = config.steps.findIndex(item => !nextSelections[item.id])
+  const nextIncompleteStep = config.steps.findIndex(
+    item => !nextSelections[item.id],
+  )
   if (nextIncompleteStep >= 0) {
     activeStepIndex = nextIncompleteStep
   }

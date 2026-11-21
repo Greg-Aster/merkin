@@ -9,6 +9,7 @@ import {
 } from "../../modules/input/index.js";
 
 export * from "./audio.js";
+export * from "./robotAudio.js";
 
 export type AnimationFrameHandle = number;
 

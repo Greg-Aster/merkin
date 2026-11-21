@@ -2,8 +2,8 @@
 import { firstContactManualRedirects } from '../../../utils/reader'
 
 export function getStaticPaths() {
-  const firstContactSlugs = Object.keys(firstContactManualRedirects()).map(slug =>
-    slug.replace(/^timelines\//, ''),
+  const firstContactSlugs = Object.keys(firstContactManualRedirects()).map(
+    slug => slug.replace(/^timelines\//, ''),
   )
   return [
     ...firstContactSlugs,

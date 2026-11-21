@@ -11,6 +11,11 @@ export default defineConfig({
 	trailingSlash: "always",
 	integrations: [svelte()],
 	vite: {
+		server: {
+			watch: {
+				ignored: ["**/public/**"],
+			},
+		},
 		plugins: [megamealEditorDevApi()],
 	},
 });

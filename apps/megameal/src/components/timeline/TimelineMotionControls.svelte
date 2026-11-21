@@ -9,8 +9,8 @@ export let isBoosting = false
 export let boostDisabled = false
 
 const dispatch = createEventDispatcher<{
-  autopilottoggle: void
-  boosttoggle: void
+  autopilottoggle: undefined
+  boosttoggle: undefined
 }>()
 const baseButtonClass =
   'inline-flex h-8 min-w-0 flex-1 shrink-0 items-center justify-center gap-1.5 rounded-md border border-cyan-100/25 bg-cyan-950/60 px-2 font-mono text-[0.56rem] font-black uppercase leading-none tracking-[0.08em] text-cyan-100 shadow-[0_0_0.9rem_rgba(8,145,178,0.18)] transition hover:border-cyan-100/50 hover:bg-cyan-900/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200 disabled:cursor-not-allowed disabled:opacity-40 md:flex-none'
@@ -25,11 +25,12 @@ $: boostButtonClass = isBoosting
 $: autopilotIcon = autopilotEnabled
   ? 'material-symbols:pause-rounded'
   : 'material-symbols:route-rounded'
-$: autopilotStateLabel = autopilotPhase === 'dwell'
-  ? 'holding at destination'
-  : autopilotPhase === 'travel'
-    ? 'flying to destination'
-    : 'manual flight'
+$: autopilotStateLabel =
+  autopilotPhase === 'dwell'
+    ? 'holding at destination'
+    : autopilotPhase === 'travel'
+      ? 'flying to destination'
+      : 'manual flight'
 $: boostDisabledLabel = autopilotEnabled
   ? 'Boost is unavailable while holding at a destination'
   : 'Boost is unavailable when reduced motion is enabled'

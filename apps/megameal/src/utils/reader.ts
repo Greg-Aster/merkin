@@ -49,17 +49,13 @@ export function isFirstContactManualEntry(entry: ReaderEntry) {
   )
 }
 
-export function sortFirstContactManualEntries(
-  entries: ReaderEntry[],
-) {
-  return entries
-    .filter(isFirstContactManualEntry)
-    .sort((a, b) => {
-      const sortDelta =
-        firstContactManualSortKey(a.slug) - firstContactManualSortKey(b.slug)
+export function sortFirstContactManualEntries(entries: ReaderEntry[]) {
+  return entries.filter(isFirstContactManualEntry).sort((a, b) => {
+    const sortDelta =
+      firstContactManualSortKey(a.slug) - firstContactManualSortKey(b.slug)
 
-      return sortDelta || a.slug.localeCompare(b.slug)
-    })
+    return sortDelta || a.slug.localeCompare(b.slug)
+  })
 }
 
 export function firstContactManualHref(
@@ -84,9 +80,11 @@ export function firstContactManualRouteParam(entry: ReaderEntry) {
 
 export function firstContactManualRedirects() {
   return Object.fromEntries(
-    Object.entries(firstContactLegacyPostSlugs).map(([postSlug, readerSlug]) => [
-      postSlug,
-      firstContactManualHref(readerSlug),
-    ]),
+    Object.entries(firstContactLegacyPostSlugs).map(
+      ([postSlug, readerSlug]) => [
+        postSlug,
+        firstContactManualHref(readerSlug),
+      ],
+    ),
   )
 }

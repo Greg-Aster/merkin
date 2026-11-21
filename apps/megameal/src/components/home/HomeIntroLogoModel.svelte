@@ -168,10 +168,8 @@ function ensurePlanarUvAttribute(mesh: THREE.Mesh) {
     const baseU = (position.getX(index) - uvBounds.min.x) / sizeX
     const baseV = (position.getY(index) - uvBounds.min.y) / sizeY
 
-    uvs[index * 2] =
-      (baseU - 0.5) * animatedAtlasUvScaleX + 0.5
-    uvs[index * 2 + 1] =
-      (baseV - 0.5) * animatedAtlasUvScaleY + 0.5
+    uvs[index * 2] = (baseU - 0.5) * animatedAtlasUvScaleX + 0.5
+    uvs[index * 2 + 1] = (baseV - 0.5) * animatedAtlasUvScaleY + 0.5
   }
 
   geometry.setAttribute('uv', new BufferAttribute(uvs, 2))

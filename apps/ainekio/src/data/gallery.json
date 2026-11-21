@@ -2,30 +2,270 @@
   {
     "id": "v3-armored-three-quarter",
     "kind": "design",
-    "title": "Ainekio V3 heavy-equipment armored CAD (front three-quarter)",
-    "caption": "Blender CAD (v3-2.blend, Scene 'v3', expanded to 608 visible meshes): 436.3 × 236.5 × 381.4 mm neutral CAD envelope (with whip antenna), hinged ROPS bull-bar service hood, recessed 2.8-inch MSP2807 vault display, dual brow camera pods, LED worklights, and 12 waterproof DS3235 crawler legs.",
-    "date": "2026-11-16",
+    "title": "Ainekio V3 heavy-equipment armored CAD with Option A-1 5-link crawler legs (front three-quarter)",
+    "caption": "November 20 Blender CAD (v3-2.blend, Scene 'v3', 537 active meshes): 402.0 × 236.5 × 343.1 mm neutral CAD envelope (with whip antenna), Option A-1 compact 5-link pantograph legs (54/22/46/56/135 mm, +120% lift, 0.93:1 dual-servo balance), recessed AINEKIO V-003 badging, symmetric front fender arches, 2.8-inch MSP2807 Cyclops eye, and 12 waterproof DS3235 actuators.",
+    "date": "2026-11-20",
     "sourceFile": "v3_hero_three_quarter.png",
-    "sourceBytes": 1583732,
-    "sourceSha256": "e2e2cef5973ab88e91758057120f726d7b32bffe19d7c93245567f60edab5659",
+    "sourceBytes": 1944087,
+    "sourceSha256": "49b31e6f3e05dd387512080c36a974334640d2d7a019f4f6c22e207b19cef665",
     "variants": [
       {
         "src": "/gallery/v3-armored-three-quarter-480.webp",
         "width": 480,
-        "height": 300,
-        "bytes": 10720
+        "height": 330,
+        "bytes": 12074
       },
       {
         "src": "/gallery/v3-armored-three-quarter-960.webp",
         "width": 960,
-        "height": 600,
-        "bytes": 33058
+        "height": 660,
+        "bytes": 29750
       },
       {
         "src": "/gallery/v3-armored-three-quarter-1600.webp",
         "width": 1600,
+        "height": 1100,
+        "bytes": 54296
+      }
+    ]
+  },
+  {
+    "id": "megameal-v2-lab-simulator",
+    "kind": "design",
+    "title": "game.megameal 3D virtual robot lab: Ainekio V2 in the 1:1 browser simulator (alpha PoC)",
+    "caption": "Live browser WebGL capture from game.megameal (?scene=v2_lab_runtime) showing the 12-servo Ainekio V2 quadruped in the 1:1 cable-and-obstacle arena alongside the interactive MuJoCo-parity HUD (virtual OV5647 chin-camera feed, ST7789 face mirror, Free/Follow/POV cameras, force-wrench perturbations, and J0–J11 servo pin/jam controls).",
+    "date": "2026-11-20",
+    "sourceFile": "megameal_v2_lab_simulator.png",
+    "sourceBytes": 205546,
+    "sourceSha256": "6ffd9771d20aa6504d282eb1901973d84a9fd921a9666a83330eba15d3986582",
+    "variants": [
+      {
+        "src": "/gallery/megameal-v2-lab-simulator-480.webp",
+        "width": 480,
+        "height": 300,
+        "bytes": 7454
+      },
+      {
+        "src": "/gallery/megameal-v2-lab-simulator-960.webp",
+        "width": 960,
+        "height": 600,
+        "bytes": 20008
+      },
+      {
+        "src": "/gallery/megameal-v2-lab-simulator-1600.webp",
+        "width": 1600,
         "height": 1000,
-        "bytes": 66952
+        "bytes": 40062
+      }
+    ]
+  },
+  {
+    "id": "v1-clockspring-open-deck",
+    "kind": "design",
+    "title": "Ainekio V1 open-deck CAD: concentric under-arm 4-wire clock-springs & ESP32-P4 layout",
+    "caption": "Overhead cutaway with the Frame8 enclosure cap hidden, exposing all four hip-coaxial rotary clock-springs (33.9 mm under-arm rotor cups, stationary servo-snout stators, and 4-wire coiled harnesses), Waveshare ESP32-P4-WIFI6, Adafruit PCA9685, and dual 2S 14500 battery bays.",
+    "date": "2026-11-20",
+    "sourceFile": "v1_clockspring_open_deck.png",
+    "sourceBytes": 2191030,
+    "sourceSha256": "29a773fcca39400aa0b8ba557ba2cc4e94709c422ab082942c182c0adac78c2b",
+    "variants": [
+      {
+        "src": "/gallery/v1-clockspring-open-deck-480.webp",
+        "width": 480,
+        "height": 330,
+        "bytes": 15828
+      },
+      {
+        "src": "/gallery/v1-clockspring-open-deck-960.webp",
+        "width": 960,
+        "height": 660,
+        "bytes": 38408
+      },
+      {
+        "src": "/gallery/v1-clockspring-open-deck-1600.webp",
+        "width": 1600,
+        "height": 1100,
+        "bytes": 69730
+      }
+    ]
+  },
+  {
+    "id": "v1-sculpted-leg-parity",
+    "kind": "design",
+    "title": "Ainekio V1 unified sculpted spiked lower leg (21,216 verts) parity comparison",
+    "caption": "Three-panel studio comparison of V1’s bio-mechanical cobalt-blue spiked lower leg (39.30 × 5.30 × 79.17 mm) with recessed MG90S servo-horn pocket and mounting screw clearances.",
+    "date": "2026-11-19",
+    "sourceFile": "v1_sculpted_leg_parity.png",
+    "sourceBytes": 675520,
+    "sourceSha256": "908e18caa12216962b2a9f1c3bad7199ac149f44a3943eafa2b38bf96dc7541e",
+    "variants": [
+      {
+        "src": "/gallery/v1-sculpted-leg-parity-480.webp",
+        "width": 480,
+        "height": 340,
+        "bytes": 15344
+      },
+      {
+        "src": "/gallery/v1-sculpted-leg-parity-960.webp",
+        "width": 960,
+        "height": 680,
+        "bytes": 35438
+      },
+      {
+        "src": "/gallery/v1-sculpted-leg-parity-1600.webp",
+        "width": 1572,
+        "height": 1114,
+        "bytes": 62134
+      }
+    ]
+  },
+  {
+    "id": "v3-opt-a1-rear-three-quarter",
+    "kind": "design",
+    "title": "Ainekio V3 rear three-quarter CAD: Option A-1 legs, AINEKIO V-003 hull & sloped rear tray",
+    "caption": "Rear-left three-quarter Blender render of Ainekio V3 standing on all four compact Option A-1 5-link crawler legs (-48.6 mm shorter rear overhang), showing the 40° sloped F688ZZ rear bearing undertray, ribbed cargo trunk, and recessed AINEKIO V-003 badging.",
+    "date": "2026-11-20",
+    "sourceFile": "v3_opt_a1_rear_three_quarter.png",
+    "sourceBytes": 801100,
+    "sourceSha256": "48d33327b56aeeff6000450442641bd275cfc5f29b99d991fcb57088b36bee95",
+    "variants": [
+      {
+        "src": "/gallery/v3-opt-a1-rear-three-quarter-480.webp",
+        "width": 480,
+        "height": 320,
+        "bytes": 13470
+      },
+      {
+        "src": "/gallery/v3-opt-a1-rear-three-quarter-960.webp",
+        "width": 960,
+        "height": 640,
+        "bytes": 36418
+      },
+      {
+        "src": "/gallery/v3-opt-a1-rear-three-quarter-1600.webp",
+        "width": 960,
+        "height": 640,
+        "bytes": 36418
+      }
+    ]
+  },
+  {
+    "id": "v3-opt-a1-workspaces",
+    "kind": "diagram",
+    "title": "Ainekio V3 5-link leg kinematic & 270° foot workspace point-cloud study",
+    "caption": "Four-panel sagittal workspace comparison across >5,000 evaluated geometries: Baseline V3 (red fender collision zone) vs. Option A compact angled pantograph, Option B zero-tail tucked bellcrank, and Option C symmetric parallel diamond 5-bar.",
+    "date": "2026-11-20",
+    "sourceFile": "v3_opt_a1_workspaces.png",
+    "sourceBytes": 731612,
+    "sourceSha256": "bc6462678540e76349fe7c5bfd6887f225e45dc7acfa76a2dab740d82536a3e5",
+    "variants": [
+      {
+        "src": "/gallery/v3-opt-a1-workspaces-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 21472
+      },
+      {
+        "src": "/gallery/v3-opt-a1-workspaces-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 65374
+      },
+      {
+        "src": "/gallery/v3-opt-a1-workspaces-1600.webp",
+        "width": 1600,
+        "height": 1200,
+        "bytes": 136470
+      }
+    ]
+  },
+  {
+    "id": "v3-opt-a1-torque-charts",
+    "kind": "diagram",
+    "title": "Ainekio V3 DS3235 torque bottleneck, 270° travel utilization & peak motor power study",
+    "caption": "Engineering plots showing how Option A-1 halves peak servo moment arms (shifting bounding load from 84% stall zone to the 46% peak mechanical power zone for +120% vertical lift and +116% running thrust).",
+    "date": "2026-11-20",
+    "sourceFile": "v3_opt_a1_torque_charts.png",
+    "sourceBytes": 355157,
+    "sourceSha256": "b6653e812adb9c6895dfbacf22ed06e049d33685056602b84924cc233808810a",
+    "variants": [
+      {
+        "src": "/gallery/v3-opt-a1-torque-charts-480.webp",
+        "width": 480,
+        "height": 360,
+        "bytes": 18884
+      },
+      {
+        "src": "/gallery/v3-opt-a1-torque-charts-960.webp",
+        "width": 960,
+        "height": 720,
+        "bytes": 53418
+      },
+      {
+        "src": "/gallery/v3-opt-a1-torque-charts-1600.webp",
+        "width": 1600,
+        "height": 1200,
+        "bytes": 104510
+      }
+    ]
+  },
+  {
+    "id": "v3-fender-ainekio-v003",
+    "kind": "design",
+    "title": "Ainekio V3 symmetric front fender arches & blocky AINEKIO V-003 FDM badging",
+    "caption": "Four-panel left/right elevation and front-3/4 CAD inspection of V3’s extended planar front fender brows, angled yellow side sponsons, hazard stripes, and 79 × 16.4 mm recessed AINEKIO / V-003 Field Companion Unit lettering.",
+    "date": "2026-11-20",
+    "sourceFile": "v3_fender_ainekio_v003_sym.png",
+    "sourceBytes": 2314996,
+    "sourceSha256": "5a008b89f58bb1527de225d1621de9595eba956bf184ec201112d45b0b540f41",
+    "variants": [
+      {
+        "src": "/gallery/v3-fender-ainekio-v003-480.webp",
+        "width": 480,
+        "height": 301,
+        "bytes": 23480
+      },
+      {
+        "src": "/gallery/v3-fender-ainekio-v003-960.webp",
+        "width": 960,
+        "height": 601,
+        "bytes": 62962
+      },
+      {
+        "src": "/gallery/v3-fender-ainekio-v003-1600.webp",
+        "width": 1600,
+        "height": 1002,
+        "bytes": 116072
+      }
+    ]
+  },
+  {
+    "id": "v3-clamshell-clip26-latch",
+    "kind": "design",
+    "title": "Ainekio V3 functional Clip 26 leaf-spring clamshell latch & M3 anchor cross-section",
+    "caption": "Four-panel CAD section and exterior view of V3’s Clip 26 service-hood latch: hidden M3 anchor foot, 1.8 mm stress-relieved leaf-spring neck, molded 45° striker catch bar, and upper thumb-pull release lip.",
+    "date": "2026-11-19",
+    "sourceFile": "v3_functional_clamshell_clip26.png",
+    "sourceBytes": 48361,
+    "sourceSha256": "3755be3efe58fab7613659a2eb16e747d151ab715ffb7d01276c82bae207c303",
+    "variants": [
+      {
+        "src": "/gallery/v3-clamshell-clip26-latch-480.webp",
+        "width": 480,
+        "height": 332,
+        "bytes": 12212
+      },
+      {
+        "src": "/gallery/v3-clamshell-clip26-latch-960.webp",
+        "width": 960,
+        "height": 665,
+        "bytes": 29428
+      },
+      {
+        "src": "/gallery/v3-clamshell-clip26-latch-1600.webp",
+        "width": 1560,
+        "height": 1080,
+        "bytes": 51860
       }
     ]
   },
@@ -242,30 +482,30 @@
   {
     "id": "v1-blender-three-quarter",
     "kind": "design",
-    "title": "Ainekio V1 modernized CAD (Scene 'v1'): seated Frame8 cap, 683ZZ bearings & coaxial wiring",
-    "caption": "Three-quarter 3D CAD view of the modernized eight-servo Ainekio V1 assembly (196.7 × 186.5 × 78.1 mm) showing the seated matte-charcoal Frame8 enclosure cap, cyan-blue serrated 2-DOF spider legs, 8× 683ZZ counter-bearings, tucked coaxial Hip-Z 4-wire harnesses, ventilated dual 2S 14500 flank battery bays, and 0.96-inch SSD1306 OLED bracket eyes + Arducam B0066 chin camera.",
-    "date": "2026-11-18",
+    "title": "Ainekio V1 modernized CAD: vertical-knee arm setup, under-arm clock-springs & sculpted spiked legs",
+    "caption": "November 20 Scene 'v1' CAD (174.8 × 155.5 × 84.1 mm, 174 active meshes): 36.17 × 36.17 × 37.50 mm R2V10 upper arms with vertical knee MG90S servos, 3-part concentric under-arm 4-wire clock-springs (rotor cup + snout stator + spiral harness), Frame8 clock-spring bays, 21,216-vert cobalt-blue spiked lower legs, and 0.96-inch SSD1306 OLED eyes.",
+    "date": "2026-11-20",
     "sourceFile": "v1_clean_three_quarter.png",
-    "sourceBytes": 402845,
-    "sourceSha256": "4a6251751807b5ac50bd2ef214e47280d460c5a66b0ee34ea459f7695b505b05",
+    "sourceBytes": 1893922,
+    "sourceSha256": "ddd7b098766b930ad94d199323d137cf69f2bf6c666e1684b135a90b0fe2f0a1",
     "variants": [
       {
         "src": "/gallery/v1-blender-three-quarter-480.webp",
         "width": 480,
-        "height": 300,
-        "bytes": 6854
+        "height": 330,
+        "bytes": 7618
       },
       {
         "src": "/gallery/v1-blender-three-quarter-960.webp",
         "width": 960,
-        "height": 600,
-        "bytes": 25562
+        "height": 660,
+        "bytes": 18658
       },
       {
         "src": "/gallery/v1-blender-three-quarter-1600.webp",
         "width": 1600,
-        "height": 1000,
-        "bytes": 53698
+        "height": 1100,
+        "bytes": 34994
       }
     ]
   },

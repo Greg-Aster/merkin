@@ -52,10 +52,6 @@ export function publicProductCollectionFilter({ data }: ProductEntry) {
   return isPublicContentData(data)
 }
 
-export function labPrototypeProductFilter({ data }: ProductEntry) {
-  return data.draft === true && typeof data.sceneWeight === 'number'
-}
-
 export function resolveStoreAsset(path: string | undefined) {
   if (!path) return undefined
   return path.startsWith('/') ? url(path) : path
@@ -115,7 +111,9 @@ function isGalleryMediaType(type: string): type is MediaGalleryItem['type'] {
   return type === 'image' || type === 'video' || type === 'youtube'
 }
 
-export function getProductMediaItems(product: ProductEntry): MediaGalleryItem[] {
+export function getProductMediaItems(
+  product: ProductEntry,
+): MediaGalleryItem[] {
   const { additionalImages, image, media, name } = product.data
 
   return Array.isArray(media) && media.length > 0
@@ -193,7 +191,8 @@ export function getAvailabilityCounts(products: ProductEntry[]) {
       availability,
       label,
       count: products.filter(
-        product => (product.data.availability ?? 'coming_soon') === availability,
+        product =>
+          (product.data.availability ?? 'coming_soon') === availability,
       ).length,
     }),
   )

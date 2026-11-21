@@ -25,10 +25,6 @@ export type PlayerAvatarDefinition = {
 	readonly id: string;
 	readonly name: string;
 	readonly renderable: PlayerAvatarRenderable;
-	readonly physicsRig?: {
-		readonly kind: "articulated-physics-rig";
-		readonly rigId: string;
-	};
 };
 
 export type PlayerAvatarPackageConfig = {

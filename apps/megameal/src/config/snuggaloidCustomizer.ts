@@ -42,20 +42,23 @@ export function buildSnuggaloidCustomizerConfig({
           {
             id: 'reactor-blue',
             label: 'Reactor Blue Bloom',
-            description: 'Cool blue fur with faint containment-lab personality.',
+            description:
+              'Cool blue fur with faint containment-lab personality.',
             cartValue: 'Reactor blue bloom',
           },
           {
             id: 'hazard-carnival',
             label: 'Hazard Carnival',
-            description: 'Aggressive multicolor fur suitable for warning labels.',
+            description:
+              'Aggressive multicolor fur suitable for warning labels.',
             priceDelta: 12,
             cartValue: 'Hazard carnival multicolor fur',
           },
           {
             id: 'night-fog',
             label: 'Night Fog Variant',
-            description: 'Dark plush body with low-visibility hallway behavior.',
+            description:
+              'Dark plush body with low-visibility hallway behavior.',
             priceDelta: 8,
             cartValue: 'Night fog dark fur',
           },
@@ -93,7 +96,8 @@ export function buildSnuggaloidCustomizerConfig({
         id: 'interior',
         kicker: 'Internal keepsake matrix',
         title: 'Embedded Interior',
-        prompt: 'Pick the sealed payload the household will never fully verify.',
+        prompt:
+          'Pick the sealed payload the household will never fully verify.',
         options: [
           {
             id: 'memory-foam',
@@ -111,7 +115,8 @@ export function buildSnuggaloidCustomizerConfig({
           {
             id: 'puzzle-cache',
             label: 'Puzzle Piece Cache',
-            description: 'A small rattle of missing pieces and bad implications.',
+            description:
+              'A small rattle of missing pieces and bad implications.',
             priceDelta: 10,
             cartValue: 'Puzzle piece cache',
           },
@@ -159,7 +164,8 @@ export function buildSnuggaloidCustomizerConfig({
           {
             id: 'scent-glands',
             label: 'Mystery Scent Glands',
-            description: 'Subtle environmental storytelling with no refund path.',
+            description:
+              'Subtle environmental storytelling with no refund path.',
             priceDelta: 16,
             cartValue: 'Mystery scent glands',
           },

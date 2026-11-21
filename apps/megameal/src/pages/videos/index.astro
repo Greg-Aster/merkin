@@ -1,8 +1,8 @@
 ---
 import { getCollection } from 'astro:content'
+import MainGridLayout from '@layouts/MainGridLayout.astro'
 import { Icon } from 'astro-icon/components'
 import { publicCollectionFilter } from '../../contracts/content'
-import MainGridLayout from '@layouts/MainGridLayout.astro'
 import { routeStyleHref } from '../../styles/routeStyleBundles'
 
 const videos = (await getCollection('videos', publicCollectionFilter)).sort(

@@ -170,11 +170,13 @@ function collectImports(files) {
   ]
   const bundleSourcePatterns = [
     {
-      pattern: /\bappStyle\(\s*['"]([^'"]+\.(?:css|styl|pcss|postcss))['"]\s*\)/g,
+      pattern:
+        /\bappStyle\(\s*['"]([^'"]+\.(?:css|styl|pcss|postcss))['"],?\s*\)/g,
       root: path.join(srcRoot, 'styles'),
     },
     {
-      pattern: /\bblogCoreStyle\(\s*['"]([^'"]+\.(?:css|styl|pcss|postcss))['"]\s*\)/g,
+      pattern:
+        /\bblogCoreStyle\(\s*['"]([^'"]+\.(?:css|styl|pcss|postcss))['"],?\s*\)/g,
       root: path.join(repoRoot, 'packages', 'blog-core', 'src', 'styles'),
     },
   ]

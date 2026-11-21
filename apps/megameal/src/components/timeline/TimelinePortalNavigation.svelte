@@ -5,11 +5,11 @@ import TimelineCameraPanControls from './TimelineCameraPanControls.svelte'
 import TimelineMotionControls from './TimelineMotionControls.svelte'
 import TimelinePositionSlider from './TimelinePositionSlider.svelte'
 import TimelineViewModeButton from './TimelineViewModeButton.svelte'
-import type { TimelineAutopilotPhase } from './timelinePortalFlight'
 import type {
   TimelinePortalEraSegment,
   TimelinePortalEvent,
 } from './timelinePortalCarouselModel'
+import type { TimelineAutopilotPhase } from './timelinePortalFlight'
 
 type TimelineViewMode = 'travel' | 'map'
 
@@ -33,10 +33,10 @@ const dispatch = createEventDispatcher<{
   pan: { x: number; y: number }
   zoom: { multiplier: number }
   orbit: { x: number; y: number }
-  reset: void
+  reset: undefined
   viewmode: TimelineViewMode
-  autopilottoggle: void
-  boosttoggle: void
+  autopilottoggle: undefined
+  boosttoggle: undefined
   position: number
 }>()
 </script>

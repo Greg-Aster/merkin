@@ -62,18 +62,18 @@
   z-index: 1;
 }
 
-/* Product-widget slides need a taller full-width banner frame.
-   The HTML slide stays mounted in the rotation stack, so size the portal
-   banner for the richer storefront layout rather than per-frame switching. */
-#banner-container:has(.featured-product-shell) .banner-aspect-container {
-  height: clamp(48rem, 84vh, 60rem) !important;
+#banner-container.has-cookbook-banner .banner-aspect-container {
+  height: clamp(32rem, 42vw, 38.5rem) !important;
 }
 
-#banner-container:has(.featured-product-shell) .banner-content-wrapper,
-#banner-container:has(.featured-product-shell) #standard-banner-container,
-#banner-container:has(.featured-product-shell) .banner-slide,
-#banner-container:has(.featured-product-shell) .banner-media-layer[data-banner-media-type="unknown"] {
-  height: 100%;
+@media (max-width: 767px) {
+  #banner-container.has-cookbook-banner {
+    margin-top: calc(4.75rem + env(safe-area-inset-top, 0px)) !important;
+  }
+
+  #banner-container.has-cookbook-banner .banner-aspect-container {
+    height: clamp(456px, 56svh, 480px) !important;
+  }
 }
 
 #standard-banner-container .banner-billboard {

@@ -68,8 +68,7 @@ export const defaultAboutConfig: AboutConfig = {
   contact: {
     enabled: true,
     title: 'Get In Touch',
-    description:
-      "Have questions, ideas, or want to collaborate? ",
+    description: 'Have questions, ideas, or want to collaborate? ',
     contactInfo: {
       email: 'contact@example.com',
     },

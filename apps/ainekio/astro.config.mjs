@@ -265,6 +265,11 @@ export default defineConfig({
     ],
   },
   vite: {
+    server: {
+      watch: {
+        ignored: ['**/public/**', '**/media-originals/**'],
+      },
+    },
     ssr: {
       noExternal: [/^@fontsource/, 'katex'],
     },

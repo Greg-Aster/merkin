@@ -57,15 +57,15 @@ import { isImageBannerItem, isVideoBannerItem } from './types'
 // BANNER IMAGE IMPORTS (for images and video fallbacks)
 // =====================================================================
 
-import banner3Fallback from '@/assets/banner/posters/cookbook-poster.webp'
+import starObservatoryFallback from '@/assets/banner/game.webp'
 //import banner1 from '@/assets/banner/main-title.png'
 import banner1Fallback from '@/assets/banner/main-title.png' // Fallback for your video
-import starObservatoryFallback from '@/assets/banner/game.webp'
-import storefrontBanner from '@/assets/banner/store-page.webp'
-import firstContactManualBanner from '@/assets/site/posts/timeline/dont.png'
-import archiveDispatchesBanner from '@/assets/site/posts/timeline/archive.png'
+import banner3Fallback from '@/assets/banner/posters/cookbook-poster.webp'
 import communityChannelsBanner from '@/assets/banner/posters/golden-era-poster.webp'
 import timelineMapFallback from '@/assets/banner/posters/universe-poster.webp'
+import storefrontBanner from '@/assets/banner/store-page.webp'
+import archiveDispatchesBanner from '@/assets/site/posts/timeline/archive.png'
+import firstContactManualBanner from '@/assets/site/posts/timeline/dont.png'
 
 type BannerEntry = {
   item: BannerItem

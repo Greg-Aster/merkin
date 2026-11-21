@@ -32,13 +32,16 @@ const {
   class: className = '',
 } = Astro.props
 
-const toneClasses: Record<Tone, {
-  panel: string
-  iconSoft: string
-  iconSolid: string
-  title: string
-  subtitle: string
-}> = {
+const toneClasses: Record<
+  Tone,
+  {
+    panel: string
+    iconSoft: string
+    iconSolid: string
+    title: string
+    subtitle: string
+  }
+> = {
   blue: {
     panel: 'border-blue-500/50 bg-blue-900/15',
     iconSoft: 'bg-blue-500/20 text-blue-400',

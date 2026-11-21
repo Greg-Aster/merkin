@@ -100,13 +100,16 @@ export function createTimelineFlightController(
 
     const currentIndex = Math.round(options.getPosition())
     const previousTarget = get(state).autopilotTargetIndex
-    const candidates = Array.from({ length: maximumIndex + 1 }, (_, index) => index)
-      .filter(index => index !== currentIndex && index !== previousTarget)
+    const candidates = Array.from(
+      { length: maximumIndex + 1 },
+      (_, index) => index,
+    ).filter(index => index !== currentIndex && index !== previousTarget)
     const fallbackCandidates = Array.from(
       { length: maximumIndex + 1 },
       (_, index) => index,
     ).filter(index => index !== currentIndex)
-    const availableTargets = candidates.length > 0 ? candidates : fallbackCandidates
+    const availableTargets =
+      candidates.length > 0 ? candidates : fallbackCandidates
     const randomIndex = Math.min(
       availableTargets.length - 1,
       Math.floor(Math.random() * availableTargets.length),
@@ -177,8 +180,12 @@ export function createTimelineFlightController(
       return
     }
 
-    const minimumFrameInterval = 1000 / (options.getIsPortraitMobile() ? 20 : 30)
-    if (lastFlightFrameAt && timestamp - lastFlightFrameAt < minimumFrameInterval) {
+    const minimumFrameInterval =
+      1000 / (options.getIsPortraitMobile() ? 20 : 30)
+    if (
+      lastFlightFrameAt &&
+      timestamp - lastFlightFrameAt < minimumFrameInterval
+    ) {
       flightFrame = window.requestAnimationFrame(runFlightFrame)
       return
     }
@@ -221,12 +228,14 @@ export function createTimelineFlightController(
       !current.autopilotEnabled ||
       options.getIsMapMode() ||
       options.getMaxPosition() <= 0
-    ) return
+    )
+      return
 
     clearAutopilotDwell()
     clearFrame()
     const targetIndex =
-      preferredTargetIndex >= 0 && preferredTargetIndex <= options.getMaxPosition()
+      preferredTargetIndex >= 0 &&
+      preferredTargetIndex <= options.getMaxPosition()
         ? preferredTargetIndex
         : getRandomTargetIndex()
     options.selectTarget(targetIndex)
@@ -290,7 +299,8 @@ export function createTimelineFlightController(
       options.getIsMapMode() ||
       options.getPrefersReducedMotion() ||
       (current.autopilotEnabled && current.autopilotPhase !== 'travel')
-    ) return false
+    )
+      return false
 
     const boostLatched = !current.boostLatched
     patchState({

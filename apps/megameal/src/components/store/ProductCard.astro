@@ -1,12 +1,12 @@
 ---
 import type { CollectionEntry } from 'astro:content'
+import { communityConfig } from '../../config/community.config'
 import {
   getAvailabilityBadge,
   getProductCardThumbnail,
   getProductHref,
   getProductMediaItems,
 } from '../../contracts/products'
-import { communityConfig } from '../../config/community.config'
 import ProductCardClient from './ProductCardClient.astro'
 import ProductCardDetails from './ProductCardDetails.astro'
 import ProductCardSummary from './ProductCardSummary.astro'

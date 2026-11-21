@@ -15,7 +15,8 @@ export async function getStaticPaths() {
 const { entry } = Astro.props
 const quiz = entry.data
 const { Content } = await entry.render()
-const hasQuizBody = typeof entry.body === 'string' && entry.body.trim().length > 0
+const hasQuizBody =
+  typeof entry.body === 'string' && entry.body.trim().length > 0
 ---
 <QuizLayout entry={entry}>
   <h1 class="text-4xl font-bold mb-2 text-center" style="color: var(--primary)">{quiz.title}</h1>

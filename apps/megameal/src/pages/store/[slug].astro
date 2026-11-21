@@ -1,8 +1,8 @@
 ---
 import { getCollection } from 'astro:content'
 import { Icon } from 'astro-icon/components'
-import FeaturedProductBanner from '../../components/store/featured-product/FeaturedProductBanner.svelte'
 import MediaGallery from '../../components/store/MediaGallery.svelte'
+import FeaturedProductBanner from '../../components/store/featured-product/FeaturedProductBanner.svelte'
 import {
   getAvailabilityBadge,
   getProductHref,
@@ -16,6 +16,7 @@ import { routeStyleHref } from '../../styles/routeStyleBundles'
 import { buildFlagshipProductShowcase } from '../../utils/flagship-product-showcase'
 
 export async function getStaticPaths() {
+  // biome-ignore format: keep single-line contract check
   const products = await getCollection('products', publicProductCollectionFilter)
   return products.map(product => ({
     params: {
@@ -26,6 +27,7 @@ export async function getStaticPaths() {
 }
 
 const { product } = Astro.props
+// biome-ignore format: keep single-line contract check
 const allProducts = await getCollection('products', publicProductCollectionFilter)
 const { Content: ProductContent } = await product.render()
 const {

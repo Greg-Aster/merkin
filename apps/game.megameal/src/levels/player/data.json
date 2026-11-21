@@ -6,22 +6,9 @@
 		"chargeReleaseAudioUrl": "/audio/sfx/22-kenney-forceField_001.mp3"
 	},
 	"transform": {
-		"position": [
-			0,
-			0.65,
-			1.5
-		],
-		"rotation": [
-			0,
-			0,
-			0,
-			1
-		],
-		"scale": [
-			0.75,
-			1.25,
-			0.75
-		]
+		"position": [0, 0.65, 1.5],
+		"rotation": [0, 0, 0, 1],
+		"scale": [0.75, 1.25, 0.75]
 	},
 	"renderable": {
 		"visible": false

@@ -11,7 +11,9 @@ export const timelineBannerData: TimelineBannerData = {
   category: 'MEGA MEAL',
 }
 
-export function isTimelineBannerData(data: unknown): data is TimelineBannerData {
+export function isTimelineBannerData(
+  data: unknown,
+): data is TimelineBannerData {
   if (!data || typeof data !== 'object' || !('category' in data)) return false
 
   return (

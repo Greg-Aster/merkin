@@ -78,7 +78,10 @@ function applyEnvironment() {
 function clearEnvironment() {
   const scene = threlte.scene
 
-  if (environmentInitialized && scene?.environment === reflectionTarget.texture) {
+  if (
+    environmentInitialized &&
+    scene?.environment === reflectionTarget.texture
+  ) {
     scene.environment = previousEnvironment
   }
 
@@ -187,7 +190,13 @@ onMount(() => {
 })
 
 function updateReflectionProbeIfNeeded() {
-  if (!mounted || !texture || !probeNeedsUpdate || !portalVisible || !motionEnabled) {
+  if (
+    !mounted ||
+    !texture ||
+    !probeNeedsUpdate ||
+    !portalVisible ||
+    !motionEnabled
+  ) {
     return
   }
 

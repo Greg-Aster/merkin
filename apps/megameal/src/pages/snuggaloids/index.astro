@@ -9,9 +9,9 @@ import { publicProductCollectionFilter } from '../../contracts/products'
 import StoreLayout from '../../layouts/store/StoreLayout.astro'
 import { routeStyleHref } from '../../styles/routeStyleBundles'
 
-const units = (
-  await getCollection('snuggaloids', publicCollectionFilter)
-).sort((a, b) => a.data.unitId.localeCompare(b.data.unitId))
+const units = (await getCollection('snuggaloids', publicCollectionFilter)).sort(
+  (a, b) => a.data.unitId.localeCompare(b.data.unitId),
+)
 const products = await getCollection('products', publicProductCollectionFilter)
 const snuggaloidsProduct = products.find(product => {
   const slug = product.data.slug ?? product.id.replace(/\.(md|mdx)$/, '')

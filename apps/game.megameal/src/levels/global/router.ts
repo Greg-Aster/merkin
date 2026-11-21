@@ -4,6 +4,7 @@ import { mirandaDeckLevelBundle } from "../miranda-deck/index.js";
 import { observatoryLevelBundle } from "../observatory/index.js";
 import { portalArenaLevelBundle } from "../portal-arena/index.js";
 import { prototypeArenaLevelBundle } from "../prototype-arena/index.js";
+import { v2LabLevelBundle } from "../v2-lab/index.js";
 import { levelPackageSettings } from "./settings.js";
 
 type LevelPackageEntry = {
@@ -17,6 +18,7 @@ export const levelPackageEntries = [
 	prototypeArenaLevelBundle,
 	mirandaDeckLevelBundle,
 	observatoryLevelBundle,
+	v2LabLevelBundle,
 ] satisfies readonly LevelPackageEntry[];
 
 export const defaultRuntimeSceneManifests = levelPackageEntries.map(

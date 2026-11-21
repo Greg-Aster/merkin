@@ -127,10 +127,6 @@ type PlayerPackageDraft = {
 type PlayerAvatarDraft = {
 	readonly id: string;
 	readonly name: string;
-	readonly physicsRig?: {
-		readonly kind: "articulated-physics-rig";
-		readonly rigId: string;
-	};
 };
 
 type PlayerAvatarPackageDraft = {
@@ -1521,13 +1517,6 @@ function formatLiveCollectibles(state: LiveGameState): string {
 												<option value={avatar.id}>{avatar.name}</option>
 											{/each}
 										</select>
-									</label>
-									<label>
-										<span>Physics Rig</span>
-										<input
-											value={selectedPlayerAvatarDraft?.physicsRig?.rigId ?? "none"}
-											disabled
-										/>
 									</label>
 								</div>
 								<div class="settings-actions">

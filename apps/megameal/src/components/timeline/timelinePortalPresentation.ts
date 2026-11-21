@@ -1,13 +1,9 @@
+import { ACESFilmicToneMapping, SRGBColorSpace, WebGLRenderer } from 'three'
 import type {
   TimelineCarouselInput,
   TimelineCarouselScreen,
 } from './timelinePortalCarouselModel'
 import { clamp } from './timelinePortalCarouselModel'
-import {
-  ACESFilmicToneMapping,
-  SRGBColorSpace,
-  WebGLRenderer,
-} from 'three'
 
 export type TimelineConstellationLine = {
   id: string

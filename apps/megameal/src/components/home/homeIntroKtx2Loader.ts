@@ -19,7 +19,9 @@ export function releaseHomeIntroKtx2Loader() {
   sharedRenderer = null
 }
 
-export function getHomeIntroKtx2Loader(renderer: WebGLRenderer | null | undefined) {
+export function getHomeIntroKtx2Loader(
+  renderer: WebGLRenderer | null | undefined,
+) {
   if (typeof window === 'undefined' || !renderer) return null
 
   sharedLoader ??= new KTX2Loader()

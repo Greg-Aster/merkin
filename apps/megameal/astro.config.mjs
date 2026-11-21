@@ -56,12 +56,10 @@ function manualVendorChunks(id) {
 
   if (normalizedId.includes('node_modules')) {
     if (normalizedId.includes('photoswipe')) return 'vendor-photoswipe';
-    if (normalizedId.includes('marked') || normalizedId.includes('markdown-it')) return 'vendor-markdown';
+    if (normalizedId.includes('markdown-it')) return 'vendor-markdown';
     if (normalizedId.includes('katex')) return 'vendor-katex';
     if (normalizedId.includes('overlayscrollbars')) return 'vendor-overlayscrollbars';
     if (normalizedId.includes('howler')) return 'vendor-audio';
-    if (normalizedId.includes('chart.js')) return 'vendor-chart';
-    if (normalizedId.includes('peerjs')) return 'vendor-realtime';
     if (normalizedId.includes('three/examples')) return 'vendor-3d-extras';
     if (normalizedId.includes('/node_modules/three/')) return 'vendor-3d-core';
     if (normalizedId.includes('@threlte')) return 'vendor-3d-extras';
@@ -80,9 +78,9 @@ export default defineConfig({
     tailwind(),
     icon({
       include: {
-        "fa6-brands": ["*"],
-        "fa6-regular": ["*"],
-        "fa6-solid": ["*"],
+        "fa6-brands": ["bluesky", "creative-commons", "discord", "github"],
+        "fa6-regular": ["address-card"],
+        "fa6-solid": ["arrow-up-right-from-square", "compress", "expand", "link"],
       },
     }),
     svelte(),
@@ -112,6 +110,9 @@ export default defineConfig({
         },
       },
       Image: false,
+      JavaScript: false,
+      JSON: false,
+      SVG: false,
     }),
     mdx(),
   ],

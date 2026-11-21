@@ -1,8 +1,4 @@
 @media (max-width: 768px) {
-  #banner-container:has(.featured-product-shell) .banner-aspect-container {
-    height: min(72rem, calc(100dvh - 6rem)) !important;
-  }
-
   #standard-banner-container .banner-slide {
     transform: scale(1.02) translate3d(0, 0.35rem, 0);
     filter: saturate(0.88) brightness(0.82) blur(6px);

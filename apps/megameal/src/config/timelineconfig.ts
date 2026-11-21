@@ -1,9 +1,9 @@
 import {
-  defaultTimelineViewConfig,
   type EraConfig,
   type EraConfigMap,
   type TimelineEvent,
   type TimelineViewConfig,
+  defaultTimelineViewConfig,
 } from '@merkin/blog-core/services/TimelineConfig'
 
 export { defaultTimelineViewConfig }
@@ -27,7 +27,7 @@ export const defaultEraDisplayNames: { [key: string]: string } = {
 export const defaultEraConfig: EraConfigMap = {
   'all-time': {
     displayName: 'All-Time',
-    startYear: 1e0,
+    startYear: 1,
     endYear: 1e100,
     zoomLevel: 1,
     panToYear: 2.5e4,
@@ -37,7 +37,7 @@ export const defaultEraConfig: EraConfigMap = {
   },
   'all-eras': {
     displayName: 'All-Eras',
-    startYear: 1e0,
+    startYear: 1,
     endYear: 1e100,
     zoomLevel: 1.3,
     panToYear: 2.5e4,
@@ -47,10 +47,10 @@ export const defaultEraConfig: EraConfigMap = {
   },
   'ancient-epoch': {
     displayName: 'The Ancient Epoch',
-    startYear: 1e0,
+    startYear: 1,
     endYear: 5e3,
     zoomLevel: 3,
-    panToYear: 1e0,
+    panToYear: 1,
     backgroundImage: '/posts/timeline/singularity-conflict.png',
   },
   'awakening-era': {

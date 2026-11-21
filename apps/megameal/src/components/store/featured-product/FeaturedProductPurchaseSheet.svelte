@@ -28,29 +28,37 @@ const preferredFactLabels = new Set([
   'interior',
 ])
 
-function formatRegistryCount(value: number | null | undefined, fallback: string) {
+function formatRegistryCount(
+  value: number | null | undefined,
+  fallback: string,
+) {
   return typeof value === 'number' ? value.toLocaleString() : fallback
 }
 
 function factLabelKey(label: string) {
-  return label.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+  return label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
 }
 
 $: availableUnitsText = formatRegistryCount(
   product.stockRegistry?.unitsAvailable,
   'N/A',
 )
-$: unitsSoldText = formatRegistryCount(product.stockRegistry?.unitsSold, 'No Data')
+$: unitsSoldText = formatRegistryCount(
+  product.stockRegistry?.unitsSold,
+  'No Data',
+)
 $: displaySpecs = product.specifications.filter(
   spec => !spec.label.toLowerCase().includes('warning'),
 )
 $: preferredFacts = displaySpecs.filter(spec =>
   preferredFactLabels.has(factLabelKey(spec.label)),
 )
-$: productFacts = (preferredFacts.length > 0 ? preferredFacts : displaySpecs).slice(
-  0,
-  6,
-)
+$: productFacts = (
+  preferredFacts.length > 0 ? preferredFacts : displaySpecs
+).slice(0, 6)
 $: productActions = [
   product.alternateAction,
   ...(product.alternateActions ?? []),

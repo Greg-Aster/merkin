@@ -91,7 +91,9 @@ export function getArchiveRecordsByTaxonomy({
     }
 
     if (normalizedCategories.size > 0) {
-      const recordCategory = normalizeArchiveTaxonomyValue(record.category ?? '')
+      const recordCategory = normalizeArchiveTaxonomyValue(
+        record.category ?? '',
+      )
       if (!normalizedCategories.has(recordCategory)) return false
     }
 

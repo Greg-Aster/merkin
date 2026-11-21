@@ -6,13 +6,13 @@ import SiteAudioRuntime from '@components/client/SiteAudioRuntime.svelte'
 import SiteSfxBridge from '@components/client/SiteSfxBridge.svelte'
 import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
 import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
+import { routeStyleHref } from '../styles/routeStyleBundles'
+import { siteStyleHref } from '../styles/site'
 import {
   isContentPostPage,
   postUsesArchiveBanner,
   resolvePostOneColumn,
 } from '../utils/mainGridLayout.server'
-import { routeStyleHref } from '../styles/routeStyleBundles'
-import { siteStyleHref } from '../styles/site'
 
 interface Props {
   title?: string
@@ -64,7 +64,8 @@ const TimelineBanner = usesTimelinePostBanner
   ? (await import('@components/timeline/TimelineBanner.astro')).default
   : null
 const timelineBannerData = layoutPost?.data?.bannerData ?? {}
-const rendersTimelineBanner = hasTimelineBannerContent || Boolean(TimelineBanner)
+const rendersTimelineBanner =
+  hasTimelineBannerContent || Boolean(TimelineBanner)
 const hasPortalDemoContent = Astro.slots.has('portal-demo-content')
 const sharedProps: Omit<Props, 'homeLayout'> & {
   homeLayout?: 'default' | 'portal'

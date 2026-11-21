@@ -28,6 +28,8 @@ import type {
 	SpriteRenderableComponent,
 } from "../../modules/rendering/index.js";
 
+export * from "./virtualRobotRig.js";
+
 export type ThreeAdapterBoundary = {
 	readonly kind: "three";
 };
@@ -1120,6 +1122,7 @@ export class ThreeRendererAdapter
 	readonly scene: ThreeSceneLike;
 	readonly camera: ThreeCameraLike;
 	readonly renderer: ThreeRendererLike;
+	#beforeRenderHook: (() => void) | undefined;
 
 	readonly #three: ThreeRuntime;
 	readonly #fallbackColor: string | number;
@@ -1506,8 +1509,13 @@ export class ThreeRendererAdapter
 		this.#objects.delete(entity);
 	}
 
+	setBeforeRenderHook(hook: (() => void) | undefined): void {
+		this.#beforeRenderHook = hook;
+	}
+
 	render(interpolation: number): void {
 		void interpolation;
+		this.#beforeRenderHook?.();
 		this.#updateDynamicCaptures();
 		this.renderer.render(this.scene, this.camera);
 	}

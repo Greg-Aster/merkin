@@ -12,6 +12,8 @@ type LineupTarget = 'v2' | 'v1' | 'both'
 export let initialModel: ViewerMode = 'v2'
 export let allowModelSwitch = true
 export let compact = false
+export let eager = false
+export let heroEmbed = false
 export let caption = ''
 export let pageGeneration: 'v1' | 'v2' | 'v3' | '' = ''
 
@@ -127,16 +129,16 @@ const ROBOTS: Record<RobotId, RobotMeta> = {
     id: 'v1',
     shortLabel: 'V1 (Active 8-Servo)',
     title: 'Ainekio V1 · Active 8-Servo Quadruped',
-    badge: 'Active Floor Robot + P4 Upgrade · 8 DOF',
+    badge: 'Active Floor Robot + Clock-Spring Arms · 8 DOF',
     glbPath: '/models/ainekio-v1.glb',
     motionPath: '/models/ainekio-v1-motions.json',
     clipCount: 38,
-    envelope: '196.7 × 186.5 × 78.1 mm',
-    actuators: '8× 4th-Wire MG90S · 683ZZ Bearings',
+    envelope: '174.8 × 155.5 × 84.1 mm',
+    actuators: '8× 4th-Wire MG90S · Under-Arm Clock-Springs',
     compute: 'ESP32-P4 + PCA9685 · 0.96" OLED (59 faces)',
     guideHref: '/posts/ainekio-v1/',
     guideLabel: 'V1 Systems Guide',
-    lineupX: -0.323,
+    lineupX: -0.305,
   },
   v2: {
     id: 'v2',
@@ -148,7 +150,7 @@ const ROBOTS: Record<RobotId, RobotMeta> = {
     clipCount: 47,
     envelope: '244.9 × 141.5 × 103.4 mm',
     actuators: '12× 4th-Wire Feedback MG90S',
-    compute: 'ESP32-P4 (50 Hz L2 RL) · 1.9" LCD',
+    compute: 'ESP32-P4 (50 Hz RL + NeuralPose v8) · 1.9" LCD',
     guideHref: '/posts/ainekio-v2/',
     guideLabel: 'V2 Hardware Guide',
     lineupX: -0.058,
@@ -157,15 +159,15 @@ const ROBOTS: Record<RobotId, RobotMeta> = {
     id: 'v3',
     shortLabel: 'V3 (Armored CAD)',
     title: 'Ainekio V3 · Heavy-Equipment DS3235 CAD',
-    badge: 'In Development · 12 DOF',
+    badge: 'In Development · Option A-1 5-Link · 12 DOF',
     glbPath: '/models/ainekio-v3.glb',
     clipCount: 0,
-    envelope: '436.3 × 236.5 × 381.4 mm (w/ whip)',
-    actuators: '12× Waterproof DS3235 (~35 kg·cm)',
+    envelope: '402.0 × 236.5 × 343.1 mm (w/ whip)',
+    actuators: '12× Waterproof DS3235 · Option A-1 5-Link',
     compute: 'Radxa Dragon Q6A + ESP32-P4 · 2.8" Vault TFT',
     guideHref: '/posts/ainekio-v3-preview/',
     guideLabel: 'V3 Armored CAD Guide',
-    lineupX: 0.288,
+    lineupX: 0.278,
   },
 }
 
@@ -1185,6 +1187,11 @@ onMount(() => {
     (navigator.maxTouchPoints ?? 0) > 0
   document.addEventListener('visibilitychange', handleVisibilityChange)
 
+  if (eager) {
+    isInViewport = true
+    void activateMode(activeMode, true)
+  }
+
   intersectionObserver = new IntersectionObserver(
     entries => {
       const entry = entries[0]
@@ -1252,6 +1259,7 @@ onDestroy(() => {
   bind:this={rootEl}
   class="robot-viewer not-prose"
   class:is-compact={compact}
+  class:is-hero-embed={heroEmbed}
   class:has-motion-open={motionOpen}
   aria-label="Interactive 3D Ainekio CAD model viewer"
   data-robot-viewer
@@ -1361,6 +1369,7 @@ onDestroy(() => {
         <canvas
           bind:this={canvasEl}
           class="rv-canvas"
+          class:is-touch-interactive={touchInteractive}
           class:is-scroll-passthrough={isTouchDevice && !touchInteractive}
         ></canvas>
 
@@ -1407,9 +1416,9 @@ onDestroy(() => {
         <!-- Lineup Labels Overlay -->
         {#if activeMode === 'lineup' && !isLoading && !loadError}
           <div class="rv-lineup-legend" aria-hidden="true">
-            <span><strong>Left:</strong> V1 (197 mm)</span>
+            <span><strong>Left:</strong> V1 (175 mm · Clock-Spring)</span>
             <span><strong>Center:</strong> V2 (245 mm · 650 g)</span>
-            <span><strong>Right:</strong> V3 (436 mm · DS3235)</span>
+            <span><strong>Right:</strong> V3 (402 mm · Opt A-1 DS3235)</span>
           </div>
         {/if}
 
@@ -1864,6 +1873,16 @@ onDestroy(() => {
     color: #e2e8f0;
   }
 
+  .robot-viewer.is-hero-embed {
+    margin: 0;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+    border-top: 1px solid color-mix(in srgb, #38bdf8 22%, rgb(255 255 255 / 0.08));
+    box-shadow: none;
+  }
+
   .rv-topbar {
     display: flex;
     flex-wrap: wrap;
@@ -2021,6 +2040,13 @@ onDestroy(() => {
     touch-action: pan-y !important;
     pointer-events: none;
     cursor: default;
+  }
+
+  @media (pointer: coarse) {
+    .rv-canvas:not(.is-touch-interactive) {
+      touch-action: pan-y;
+      pointer-events: none;
+    }
   }
 
   .rv-canvas:active {

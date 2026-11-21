@@ -1,3 +1,4 @@
+import AnimatedMedia from '../../misc/AnimatedMedia.astro'
 import ImageWrapper from '../../misc/ImageWrapper.astro'
 
 <article className="review-essay review-essay--mega" aria-labelledby="mega-review-title">
@@ -103,7 +104,13 @@ import ImageWrapper from '../../misc/ImageWrapper.astro'
 
   <section className="review-essay__impact">
     <p>It is screaming.</p>
-    <ImageWrapper src="/posts/Mega-Meal-Explained/gif/Cheeseburger.gif" alt="A screaming cheeseburger" class="review-essay__image review-essay__image--wide" />
+    <AnimatedMedia
+      webmSrc="/posts/Mega-Meal-Explained/gif/Cheeseburger.webm"
+      poster="/posts/Mega-Meal-Explained/gif/Cheeseburger-poster.webp"
+      fallbackSrc="/posts/Mega-Meal-Explained/gif/Cheeseburger-poster.webp"
+      alt="A screaming cheeseburger"
+      class="review-essay__image review-essay__image--wide"
+    />
     <p>This is the film's best tonal pivot. Just when it appears to have resolved itself into a stupid little heist victory, it remembers it is stranger than that. The cut is not elegant, but it is effective: the joke hardens into dread before the audience has time to negotiate.</p>
   </section>
 
@@ -172,8 +179,10 @@ import ImageWrapper from '../../misc/ImageWrapper.astro'
       <p>The flood beat is abrupt in the way dreams are abrupt. The streets fill, the Hamburgler is gone, and the film lets the absence hang there just long enough to feel like a punchline and a threat at the same time. Perhaps it was all a dream? The movie refuses to answer because answering would only make it smaller.</p>
       <p>Back on the rooftop, the frame finally gives her forward momentum. She dives into the action, literally falling and falling, and falling and falling, and falling. Reality shifts around her. The recurring leg motif returns, now faster, now purposeful. It is simple visual grammar, but it gives the ending a pulse.</p>
     </div>
-    <ImageWrapper
-      src="/posts/Mega-Meal-Explained/gif/running_720p.gif"
+    <AnimatedMedia
+      webmSrc="/posts/Mega-Meal-Explained/gif/running_720p.webm"
+      poster="/posts/Mega-Meal-Explained/gif/running_720p-poster.webp"
+      fallbackSrc="/posts/Mega-Meal-Explained/gif/running_720p-poster.webp"
       alt="Final action shot"
       class="review-essay__image review-essay__image--wide"
     />

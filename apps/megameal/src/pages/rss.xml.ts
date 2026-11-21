@@ -1,13 +1,13 @@
 // src/pages/rss.xml.ts
 import { siteConfig } from '@/config/config'
 import rss from '@astrojs/rss'
+import { googleDocBlocksToMarkdown } from '@merkin/docs-editor-bridge'
 import { getSortedPosts } from '@utils/content-utils'
 import type { APIContext } from 'astro'
 import MarkdownIt from 'markdown-it'
 import sanitizeHtml from 'sanitize-html'
 import { createCORSResponse, handleCORS } from '../middleware/cors'
 import { loadGoogleDocSnapshot } from '../utils/googleDocContent.server'
-import { googleDocBlocksToMarkdown } from '@merkin/docs-editor-bridge'
 
 const parser = new MarkdownIt()
 
@@ -23,12 +23,15 @@ export async function GET(context: APIContext) {
     blog.map(async post => {
       const contentMarkdown = post.data.googleDoc
         ? googleDocBlocksToMarkdown(
-            (await loadGoogleDocSnapshot(post.data.googleDoc.documentId)).blocks,
+            (await loadGoogleDocSnapshot(post.data.googleDoc.documentId))
+              .blocks,
           )
         : post.body
 
       if (typeof contentMarkdown !== 'string' || !contentMarkdown.trim()) {
-        throw new Error(`Post ${post.slug} does not have readable feed content.`)
+        throw new Error(
+          `Post ${post.slug} does not have readable feed content.`,
+        )
       }
 
       return {

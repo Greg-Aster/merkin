@@ -1,10 +1,10 @@
 import { existsSync } from 'node:fs'
-import type { MarkdownHeading } from 'astro'
 import {
+  type GoogleDocBlock,
   fetchGoogleDocBlocks,
   googleDocBlocksToPlainText,
-  type GoogleDocBlock,
 } from '@merkin/docs-editor-bridge'
+import type { MarkdownHeading } from 'astro'
 import getReadingTime from 'reading-time'
 
 // Preview builds fetch each document once, with bounded retries for transient
@@ -13,7 +13,10 @@ const IS_DEV_PREVIEW = process.env.MERKIN_DEV_PREVIEW === 'true'
 const GOOGLE_DOC_FETCH_TIMEOUT_MS = IS_DEV_PREVIEW ? 30_000 : 10_000
 const previewSnapshots = new Map<string, Promise<GoogleDocSnapshot>>()
 const GOOGLE_DOC_STYLE_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-const GOOGLE_DOC_STYLES_DIRECTORY = new URL('../../public/styles/', import.meta.url)
+const GOOGLE_DOC_STYLES_DIRECTORY = new URL(
+  '../../public/styles/',
+  import.meta.url,
+)
 
 export interface GoogleDocSnapshot {
   blocks: GoogleDocBlock[]
@@ -46,7 +49,7 @@ export async function loadGoogleDocSnapshot(
 
   let snapshot = previewSnapshots.get(documentId)
   if (!snapshot) {
-    snapshot = fetchPreviewSnapshot(documentId).catch((error) => {
+    snapshot = fetchPreviewSnapshot(documentId).catch(error => {
       previewSnapshots.delete(documentId)
       throw error
     })
@@ -55,19 +58,23 @@ export async function loadGoogleDocSnapshot(
   return snapshot
 }
 
-async function fetchPreviewSnapshot(documentId: string): Promise<GoogleDocSnapshot> {
+async function fetchPreviewSnapshot(
+  documentId: string,
+): Promise<GoogleDocSnapshot> {
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       return await fetchGoogleDocSnapshot(documentId)
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       const transient =
-        /did not respond within|fetch failed|export failed with (429|5\d\d)/.test(message)
+        /did not respond within|fetch failed|export failed with (429|5\d\d)/.test(
+          message,
+        )
       if (!transient || attempt === 3) throw error
       console.warn(
         `Retrying Google Doc ${documentId} after transient failure (${attempt}/3).`,
       )
-      await new Promise((resolve) => setTimeout(resolve, attempt * 1_000))
+      await new Promise(resolve => setTimeout(resolve, attempt * 1_000))
     }
   }
   throw new Error(`Google Doc ${documentId} could not be loaded.`)
@@ -87,7 +94,7 @@ async function fetchGoogleDocSnapshot(
       signal: abortController.signal,
     })
     const pageHeading = blocks.find(
-      (block) => block.type === 'heading' && block.depth === 1,
+      block => block.type === 'heading' && block.depth === 1,
     )
 
     if (pageHeading) {
@@ -100,7 +107,7 @@ async function fetchGoogleDocSnapshot(
 
     return {
       blocks,
-      headings: blocks.flatMap((block) =>
+      headings: blocks.flatMap(block =>
         block.type === 'heading'
           ? [{ depth: block.depth, slug: block.id, text: block.text }]
           : [],

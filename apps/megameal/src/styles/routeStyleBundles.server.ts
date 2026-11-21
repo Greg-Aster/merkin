@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import path from 'node:path'
+import type { APIRoute } from 'astro'
 import postcss from 'postcss'
 import postcssImport from 'postcss-import'
 import postcssNesting from 'postcss-nesting'
 import tailwindcss from 'tailwindcss'
-import type { APIRoute } from 'astro'
 import type { RouteStyleBundleName } from './routeStyleBundles'
 
 const require = createRequire(import.meta.url)
@@ -41,16 +41,6 @@ const bundles: Record<RouteStyleBundleName, RouteStyleBundle> = {
       appStyle('features/facts-widget/core.css'),
       appStyle('features/facts-widget/overlay.css'),
       appStyle('features/facts-widget/motion-responsive.css'),
-    ],
-  },
-  'featured-product-lab': {
-    sources: [
-      appStyle('features/store/featured-product/featured-product-commerce.css'),
-      appStyle('features/store/featured-product/featured-product-hero-slide.css'),
-      appStyle('features/store/featured-product/featured-product-panels.css'),
-      appStyle('features/store/featured-product/featured-product-related-modal.css'),
-      appStyle('features/store/featured-product/featured-product-shell.css'),
-      appStyle('features/store/featured-product/procedural-model-viewer.css'),
     ],
   },
   home: {
@@ -90,7 +80,9 @@ const bundles: Record<RouteStyleBundleName, RouteStyleBundle> = {
       appStyle('features/store/featured-product/featured-product-commerce.css'),
       appStyle('features/store/featured-product/featured-product-panels.css'),
       appStyle('features/store/featured-product/featured-product-shell.css'),
-      appStyle('features/store/featured-product/featured-product-related-modal.css'),
+      appStyle(
+        'features/store/featured-product/featured-product-related-modal.css',
+      ),
       appStyle('features/store/featured-product/procedural-model-viewer.css'),
     ],
   },

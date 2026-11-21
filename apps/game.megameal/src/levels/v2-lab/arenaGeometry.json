@@ -1,0 +1,62 @@
+{
+	"schemaVersion": 1,
+	"id": "megameal_v2_lab",
+	"description": "Shared 1:1 metric collision & visual geometry for Ainekio V2 MuJoCo + Megameal testing (canonical MuJoCo axes: +X fwd, +Y left, +Z up).",
+	"friction": 0.85,
+	"geoms": [
+		{
+			"id": "cable_strip_near",
+			"label": "15mm Floor Cable Strip (Near)",
+			"kind": "box",
+			"position_m": [0.65, 0.0, 0.0075],
+			"size_m": [0.015, 0.75, 0.0075],
+			"rpy_deg": [0, 0, 0],
+			"color": "#f59e0b"
+		},
+		{
+			"id": "cable_strip_far",
+			"label": "16mm Floor Cable Strip (Far)",
+			"kind": "box",
+			"position_m": [1.25, 0.0, 0.008],
+			"size_m": [0.016, 0.75, 0.008],
+			"rpy_deg": [0, 0, 0],
+			"color": "#f97316"
+		},
+		{
+			"id": "corridor_curb_right",
+			"label": "Low Obstacle Block (Corridor Brake Test)",
+			"kind": "box",
+			"position_m": [0.95, -0.75, 0.09],
+			"size_m": [0.14, 0.24, 0.09],
+			"rpy_deg": [0, 0, 0],
+			"color": "#ef4444"
+		},
+		{
+			"id": "landmark_pillar_north",
+			"label": "Visual Landmark North (+X)",
+			"kind": "box",
+			"position_m": [2.2, 0.0, 0.35],
+			"size_m": [0.15, 0.35, 0.35],
+			"rpy_deg": [0, 0, 0],
+			"color": "#20cfff"
+		},
+		{
+			"id": "landmark_pillar_west",
+			"label": "Visual Landmark Left (+Y)",
+			"kind": "box",
+			"position_m": [0.3, 1.85, 0.3],
+			"size_m": [0.25, 0.15, 0.3],
+			"rpy_deg": [0, 0, 0],
+			"color": "#33efcb"
+		},
+		{
+			"id": "landmark_pillar_east",
+			"label": "Visual Landmark Right (-Y)",
+			"kind": "box",
+			"position_m": [-0.4, -1.85, 0.3],
+			"size_m": [0.25, 0.15, 0.3],
+			"rpy_deg": [0, 0, 0],
+			"color": "#a855f7"
+		}
+	]
+}

@@ -54,7 +54,7 @@ export const navBarConfig: NavBarConfig = {
       name: 'Videos',
       url: '/videos/',
     },
-/*     {
+    /*     {
       name: 'Game',
       url: 'https://game.megameal.org/',
       external: true,
@@ -68,11 +68,11 @@ export const navBarConfig: NavBarConfig = {
           name: 'Archive',
           url: '/archive/',
         },
-/*         {
+        /*         {
           name: 'Cookbook',
           url: '/cookbook/',
         }, */
-/*         {
+        /*         {
           name: 'First Contact Manual',
           url: '/reader/first-contact-manual/',
         }, */

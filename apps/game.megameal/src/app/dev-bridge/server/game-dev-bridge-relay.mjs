@@ -4,10 +4,13 @@ import { readFile } from "node:fs/promises";
 export const GAME_DEV_BRIDGE_RELAY_PATH = "/__megameal-dev-bridge";
 
 const WS_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-const MAX_FRAME_BYTES = 1024 * 1024;
+const MAX_FRAME_BYTES = 4 * 1024 * 1024;
+const BRIDGE_ENABLED_CACHE_TTL_MS = 1000;
+const bridgeEnabledCache = new Map();
 const roles = {
 	game: new Set(),
 	controller: new Set(),
+	"robot-sim": new Set(),
 };
 
 export function installGameDevBridgeRelay(server, options) {
@@ -62,10 +65,38 @@ async function bridgeEnabled(settingsFilePath) {
 		const source = await readFile(settingsFilePath, "utf8");
 		const devBridgeMatch = /devBridge\s*:\s*\{([\s\S]*?)\n\s*\}/m.exec(source);
 		const sourceToCheck = devBridgeMatch?.[1] ?? "";
-		return /enabled\s*:\s*true\b/.test(sourceToCheck);
+		const enabled = /enabled\s*:\s*true\b/.test(sourceToCheck);
+		bridgeEnabledCache.set(settingsFilePath, {
+			enabled,
+			checkedAt: Date.now(),
+			refreshing: false,
+		});
+		return enabled;
 	} catch {
+		bridgeEnabledCache.set(settingsFilePath, {
+			enabled: false,
+			checkedAt: Date.now(),
+			refreshing: false,
+		});
 		return false;
 	}
+}
+
+function isBridgeEnabledCached(settingsFilePath) {
+	const entry = bridgeEnabledCache.get(settingsFilePath);
+	const now = Date.now();
+	if (!entry) {
+		void bridgeEnabled(settingsFilePath);
+		return true;
+	}
+	if (
+		!entry.refreshing &&
+		now - entry.checkedAt >= BRIDGE_ENABLED_CACHE_TTL_MS
+	) {
+		entry.refreshing = true;
+		void bridgeEnabled(settingsFilePath);
+	}
+	return entry.enabled;
 }
 
 function websocketAcceptKey(key) {
@@ -96,12 +127,21 @@ function createRelaySocket(socket) {
 		role: undefined,
 		sessionId: undefined,
 		buffer: Buffer.alloc(0),
+		fragmentOpcode: 0,
+		fragmentChunks: [],
+		fragmentBytes: 0,
 		closed: false,
 		send(message) {
 			if (this.closed || socket.destroyed) {
 				return;
 			}
 			socket.write(encodeTextFrame(JSON.stringify(message)));
+		},
+		sendBinary(payload) {
+			if (this.closed || socket.destroyed) {
+				return;
+			}
+			socket.write(encodeFrame(0x2, payload));
 		},
 		close() {
 			if (this.closed) {
@@ -119,31 +159,69 @@ function createRelaySocket(socket) {
 
 function registerSocket(client, settingsFilePath) {
 	client.socket.on("data", (chunk) => {
-		void bridgeEnabled(settingsFilePath).then((enabled) => {
-			if (!enabled) {
-				client.close();
-				removeClient(client);
-				return;
-			}
+		if (!isBridgeEnabledCached(settingsFilePath)) {
+			client.close();
+			removeClient(client);
+			return;
+		}
 
-			try {
-				client.buffer = Buffer.concat([client.buffer, chunk]);
-				for (;;) {
-					const frame = decodeFrame(client.buffer);
-					if (!frame) {
-						break;
-					}
-					client.buffer = client.buffer.subarray(frame.bytesRead);
-					handleFrame(client, frame);
+		try {
+			client.buffer = Buffer.concat([client.buffer, chunk]);
+			for (;;) {
+				const frame = decodeFrame(client.buffer);
+				if (!frame) {
+					break;
 				}
-			} catch {
-				client.close();
-				removeClient(client);
+				client.buffer = client.buffer.subarray(frame.bytesRead);
+				handleRawFrame(client, frame);
 			}
-		});
+		} catch {
+			client.close();
+			removeClient(client);
+		}
 	});
 	client.socket.on("close", () => removeClient(client));
 	client.socket.on("error", () => removeClient(client));
+}
+
+function handleRawFrame(client, frame) {
+	// Control frames (close/ping/pong) may be interleaved between fragments.
+	if (frame.opcode >= 0x8) {
+		handleFrame(client, frame);
+		return;
+	}
+
+	if (frame.opcode === 0x0) {
+		if (client.fragmentOpcode === 0) {
+			throw new Error("Unexpected continuation WebSocket frame.");
+		}
+		client.fragmentBytes += frame.payload.length;
+		if (client.fragmentBytes > MAX_FRAME_BYTES) {
+			throw new Error("Fragmented WebSocket message is too large.");
+		}
+		client.fragmentChunks.push(frame.payload);
+		if (frame.fin) {
+			const opcode = client.fragmentOpcode;
+			const payload = Buffer.concat(
+				client.fragmentChunks,
+				client.fragmentBytes,
+			);
+			client.fragmentOpcode = 0;
+			client.fragmentChunks = [];
+			client.fragmentBytes = 0;
+			handleFrame(client, { fin: true, opcode, payload });
+		}
+		return;
+	}
+
+	if (!frame.fin) {
+		client.fragmentOpcode = frame.opcode;
+		client.fragmentChunks = [frame.payload];
+		client.fragmentBytes = frame.payload.length;
+		return;
+	}
+
+	handleFrame(client, frame);
 }
 
 function handleFrame(client, frame) {
@@ -154,6 +232,15 @@ function handleFrame(client, frame) {
 	}
 	if (frame.opcode === 0x9) {
 		client.socket.write(encodeFrame(0xa, frame.payload));
+		return;
+	}
+	if (frame.opcode === 0x2) {
+		// Binary media routing between robot-sim (face/speaker) and game (camera/mic).
+		if (client.role === "robot-sim") {
+			broadcastBinary(roles.game, frame.payload);
+		} else if (client.role === "game") {
+			broadcastBinary(roles["robot-sim"], frame.payload);
+		}
 		return;
 	}
 	if (frame.opcode !== 0x1) {
@@ -178,7 +265,9 @@ function handleMessage(client, message) {
 				? "game"
 				: message.role === "controller"
 					? "controller"
-					: "";
+					: message.role === "robot-sim"
+						? "robot-sim"
+						: "";
 		if (!role) {
 			client.send({ type: "bridge:error", message: "Invalid bridge role." });
 			return;
@@ -196,12 +285,26 @@ function handleMessage(client, message) {
 			gameSessions: [...roles.game]
 				.map((game) => game.sessionId)
 				.filter(Boolean),
+			robotSimSessions: [...roles["robot-sim"]]
+				.map((sim) => sim.sessionId)
+				.filter(Boolean),
 		});
 		return;
 	}
 
-	if (client.role === "game" && isGameMessage(message)) {
-		broadcast(roles.controller, message);
+	if (client.role === "game") {
+		if (isGameMessage(message)) {
+			broadcast(roles.controller, message);
+			return;
+		}
+		if (isRobotClientOutboundMessage(message)) {
+			broadcast(roles["robot-sim"], message);
+			return;
+		}
+	}
+
+	if (client.role === "robot-sim" && isRobotSimMessage(message)) {
+		broadcast(roles.game, message);
 		return;
 	}
 
@@ -229,6 +332,23 @@ function isGameMessage(message) {
 	);
 }
 
+function isRobotSimMessage(message) {
+	return (
+		message?.type === "robot:state" ||
+		message?.type === "robot:camera-request" ||
+		message?.type === "robot:audio-stop" ||
+		message?.type === "robot:arena-meta"
+	);
+}
+
+function isRobotClientOutboundMessage(message) {
+	return (
+		typeof message?.type === "string" &&
+		(message.type.startsWith("robot:interact:") ||
+			message.type.startsWith("robot:record:"))
+	);
+}
+
 function isControllerMessage(message) {
 	return (
 		message?.type === "controller:command" &&
@@ -246,6 +366,12 @@ function broadcast(clients, message) {
 			continue;
 		}
 		client.send(message);
+	}
+}
+
+function broadcastBinary(clients, payload) {
+	for (const client of clients) {
+		client.sendBinary(payload);
 	}
 }
 
@@ -302,6 +428,7 @@ function decodeFrame(buffer) {
 	}
 
 	return {
+		fin: (first & 0x80) !== 0,
 		opcode: first & 0x0f,
 		payload,
 		bytesRead,

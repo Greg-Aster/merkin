@@ -4,7 +4,6 @@ export const routeStyleBundleNames = [
   'banner',
   'community',
   'facts-widget',
-  'featured-product-lab',
   'home',
   'listing',
   'post',

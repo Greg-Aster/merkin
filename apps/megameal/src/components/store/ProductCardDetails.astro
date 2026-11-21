@@ -51,7 +51,8 @@ const {
 } = Astro.props
 
 const safeProductId = productId.replace(/\./g, '-')
-const hasAnyDetails = description || hasSpecifications || hasQandA || hasPreWrittenReviews
+const hasAnyDetails =
+  description || hasSpecifications || hasQandA || hasPreWrittenReviews
 ---
 
 <div class="expandable-details overflow-hidden max-h-0 opacity-0 bg-slate-800/30 dark:bg-slate-900/50">

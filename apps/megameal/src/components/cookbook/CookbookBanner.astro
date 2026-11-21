@@ -28,7 +28,9 @@ const activeEntry =
 const recipeCount = navigationEntries.length
 
 function cookbookHrefForEntry(entry: CookbookEntry) {
-  return entry.slug === 'cookbook-index' ? '/cookbook/' : `/cookbook/${entry.slug}/`
+  return entry.slug === 'cookbook-index'
+    ? '/cookbook/'
+    : `/cookbook/${entry.slug}/`
 }
 
 const sectionGroups = navigationEntries.reduce<
@@ -206,19 +208,3 @@ const sectionGroups = navigationEntries.reduce<
     </nav>
   </div>
 </section>
-
-<style is:global>
-  #banner-container.has-cookbook-banner .banner-aspect-container {
-    height: clamp(32rem, 42vw, 38.5rem) !important;
-  }
-
-  @media (max-width: 767px) {
-    #banner-container.has-cookbook-banner {
-      margin-top: calc(4.75rem + env(safe-area-inset-top, 0px)) !important;
-    }
-
-    #banner-container.has-cookbook-banner .banner-aspect-container {
-      height: clamp(456px, 56svh, 480px) !important;
-    }
-  }
-</style>

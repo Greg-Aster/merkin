@@ -18,12 +18,20 @@ export type AdaptiveCanvasDprController = {
 const defaultDprSteps = [1, 1.25, 1.5, 1.75, 2]
 
 function getStepForDpr(dpr: number, minDpr: number) {
-  return defaultDprSteps.find(step => step >= dpr && step >= minDpr) ?? defaultDprSteps[0]
+  return (
+    defaultDprSteps.find(step => step >= dpr && step >= minDpr) ??
+    defaultDprSteps[0]
+  )
 }
 
 function getBestStep(maxDpr: number, minDpr: number) {
-  const allowedSteps = defaultDprSteps.filter(step => step <= maxDpr && step >= minDpr)
-  return allowedSteps.at(-1) ?? Math.max(minDpr, Math.min(maxDpr, defaultDprSteps[0]))
+  const allowedSteps = defaultDprSteps.filter(
+    step => step <= maxDpr && step >= minDpr,
+  )
+  return (
+    allowedSteps.at(-1) ??
+    Math.max(minDpr, Math.min(maxDpr, defaultDprSteps[0]))
+  )
 }
 
 function getNextLowerStep(currentDpr: number, minDpr: number) {
@@ -35,7 +43,10 @@ function getNextLowerStep(currentDpr: number, minDpr: number) {
 }
 
 function getNextHigherStep(currentDpr: number, maxDpr: number) {
-  return defaultDprSteps.find(step => step > currentDpr + 0.01 && step <= maxDpr) ?? currentDpr
+  return (
+    defaultDprSteps.find(step => step > currentDpr + 0.01 && step <= maxDpr) ??
+    currentDpr
+  )
 }
 
 export function createAdaptiveCanvasDprController({

@@ -1,12 +1,13 @@
 ---
 import { getCollection } from 'astro:content'
 import ProductCard from '../../../components/store/ProductCard.astro'
-import { publicProductCollectionFilter } from '../../../contracts/products'
 import StorePagination from '../../../components/store/StorePagination.astro'
+import { publicProductCollectionFilter } from '../../../contracts/products'
 import StoreLayout from '../../../layouts/store/StoreLayout.astro'
 
 export async function getStaticPaths() {
   // Removed { paginate } as it's not used
+  // biome-ignore format: keep single-line contract check
   const products = await getCollection('products', publicProductCollectionFilter)
   // Using a fixed PRODUCTS_PER_PAGE here. Ideally, this would be a shared constant.
   const PRODUCTS_PER_PAGE = 5
@@ -32,6 +33,7 @@ export async function getStaticPaths() {
 }
 
 const PRODUCTS_PER_PAGE = 5
+// biome-ignore format: keep single-line contract check
 const allProducts = await getCollection('products', publicProductCollectionFilter)
 
 const { page } = Astro.params

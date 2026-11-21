@@ -4,11 +4,8 @@ import { onMount } from 'svelte'
 import '../../styles/features/layout-toggle.css'
 
 // Appearance configuration
-export let position:
-  | 'top-right'
-  | 'top-left'
-  | 'bottom-right'
-  | 'bottom-left' = 'top-right'
+export let position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' =
+  'top-right'
 export let variant: 'full' | 'minimal' = 'full' // Controls appearance
 export let showLabels = true // Only applies to 'full' variant
 export let size: 'sm' | 'md' | 'lg' = 'md' // Only applies to 'minimal' variant

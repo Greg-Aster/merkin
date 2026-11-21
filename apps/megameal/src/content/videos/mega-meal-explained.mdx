@@ -28,6 +28,7 @@ related:
     image: "/posts/timeline/universe.png"
 ---
 
+import AnimatedMedia from '../../components/misc/AnimatedMedia.astro'
 import ImageWrapper from '../../components/misc/ImageWrapper.astro'
 import MegaMealReviewSlider from '../../components/MegaMealReviewSlider.astro'
 import KiddieMode from '../../components/review-modes/megameal-explained/kiddie.mdx'
@@ -79,7 +80,7 @@ import HorrorMode from '../../components/review-modes/megameal-explained/horror.
       <video
         className="absolute inset-0 h-full w-full object-cover"
         src="/posts/Mega-Meal-Explained/gif/logo3.webm"
-        poster="/posts/Mega-Meal-Explained/gif/logo3.gif"
+        poster="/posts/Mega-Meal-Explained/gif/logo3-poster.webp"
         autoplay
         muted
         loop
@@ -124,8 +125,10 @@ import HorrorMode from '../../components/review-modes/megameal-explained/horror.
     data-sfx-hover="hover-soft"
     data-sfx-click="soft"
   >
-    <ImageWrapper
-      src="/posts/Mega-Meal-Explained/gif/fries1.gif"
+    <AnimatedMedia
+      webmSrc="/posts/Mega-Meal-Explained/gif/fries1.webm"
+      poster="/posts/Mega-Meal-Explained/gif/fries1-poster.webp"
+      fallbackSrc="/posts/Mega-Meal-Explained/gif/fries1-poster.webp"
       alt="Animated fries"
       class="mb-4 aspect-video rounded-xl"
     />
@@ -142,8 +145,10 @@ import HorrorMode from '../../components/review-modes/megameal-explained/horror.
     data-sfx-hover="hover-soft"
     data-sfx-click="soft"
   >
-    <ImageWrapper
-      src="/posts/Mega-Meal-Explained/gif/orings1.gif"
+    <AnimatedMedia
+      webmSrc="/posts/Mega-Meal-Explained/gif/orings1.webm"
+      poster="/posts/Mega-Meal-Explained/gif/orings1-poster.webp"
+      fallbackSrc="/posts/Mega-Meal-Explained/gif/orings1-poster.webp"
       alt="Animated onion rings"
       class="mb-4 aspect-video rounded-xl"
     />

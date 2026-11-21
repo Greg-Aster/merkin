@@ -8,21 +8,20 @@ export async function getStaticPaths() {
     publicDownloadableCollectionFilter,
   )
 
-  return entries
-    .flatMap(entry => [
-      {
-        params: { slug: entry.slug },
-        props: { entry, recipeMode: 'terrestrial' },
-      },
-      {
-        params: { slug: `${entry.slug}/terrestrial` },
-        props: { entry, recipeMode: 'terrestrial' },
-      },
-      {
-        params: { slug: `${entry.slug}/original` },
-        props: { entry, recipeMode: 'original' },
-      },
-    ])
+  return entries.flatMap(entry => [
+    {
+      params: { slug: entry.slug },
+      props: { entry, recipeMode: 'terrestrial' },
+    },
+    {
+      params: { slug: `${entry.slug}/terrestrial` },
+      props: { entry, recipeMode: 'terrestrial' },
+    },
+    {
+      params: { slug: `${entry.slug}/original` },
+      props: { entry, recipeMode: 'original' },
+    },
+  ])
 }
 
 const { entry, recipeMode = 'terrestrial' } = Astro.props

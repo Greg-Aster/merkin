@@ -6,12 +6,12 @@ import {
   getAddToCartRefusalQuirk,
   getPriceDriftQuirk,
 } from '../../../utils/product-banner-quirks'
-import FeaturedProductZoomModal from './FeaturedProductZoomModal.svelte'
 import FeaturedProductDetailPanel from './FeaturedProductDetailPanel.svelte'
 import FeaturedProductMediaStage from './FeaturedProductMediaStage.svelte'
 import FeaturedProductPurchaseSheet from './FeaturedProductPurchaseSheet.svelte'
 import FeaturedProductRelatedRail from './FeaturedProductRelatedRail.svelte'
 import FeaturedProductTopBar from './FeaturedProductTopBar.svelte'
+import FeaturedProductZoomModal from './FeaturedProductZoomModal.svelte'
 import type {
   AvailabilityTone,
   FeaturedProduct,
@@ -100,12 +100,12 @@ $: previewTitle =
       : activePanel === 'qanda'
         ? 'Questions & Answers'
         : activePanel === 'reviews'
-        ? 'Field Reviews'
-        : activePanel === 'assurance'
-          ? 'Assurance'
-          : activePanel === 'warnings'
-            ? 'Warnings'
-            : null
+          ? 'Field Reviews'
+          : activePanel === 'assurance'
+            ? 'Assurance'
+            : activePanel === 'warnings'
+              ? 'Warnings'
+              : null
 $: priceDriftQuirk = getPriceDriftQuirk(product.quirks, product.price)
 $: addToCartRefusalQuirk = getAddToCartRefusalQuirk(product.quirks)
 $: currentTone =

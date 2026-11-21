@@ -12,7 +12,8 @@ import ImageWrapper from '../../misc/ImageWrapper.astro'
     <figure className="review-cosmic__sigil">
       <AnimatedMedia
         webmSrc="/posts/Mega-Meal-Explained/gif/logo3.webm"
-        fallbackSrc="/posts/Mega-Meal-Explained/gif/logo3.gif"
+        poster="/posts/Mega-Meal-Explained/gif/logo3-poster.webp"
+        fallbackSrc="/posts/Mega-Meal-Explained/gif/logo3-poster.webp"
         alt="The Mega Meal sigil"
         class="review-cosmic__sigil-media"
       />
@@ -126,7 +127,13 @@ import ImageWrapper from '../../misc/ImageWrapper.astro'
       <h3>It Screams Across Dimensions</h3>
       <p>Just when the movie seems fully committed to carnival nonsense, the relic expresses pain. Or hunger. Or authorship. The effect is funny for half a second, then devastating in the way a wrong sound can be devastating: not because it is realistic, but because it seems to come from the place realism cannot reach.</p>
     </div>
-    <ImageWrapper src="/posts/Mega-Meal-Explained/gif/Cheeseburger.gif" alt="The screaming cheeseburger" class="review-cosmic__image review-cosmic__image--wide" />
+    <AnimatedMedia
+      webmSrc="/posts/Mega-Meal-Explained/gif/Cheeseburger.webm"
+      poster="/posts/Mega-Meal-Explained/gif/Cheeseburger-poster.webp"
+      fallbackSrc="/posts/Mega-Meal-Explained/gif/Cheeseburger-poster.webp"
+      alt="The screaming cheeseburger"
+      class="review-cosmic__image review-cosmic__image--wide"
+    />
   </section>
 
   <section className="review-cosmic__chapter review-cosmic__chapter--reverse">
@@ -174,7 +181,13 @@ import ImageWrapper from '../../misc/ImageWrapper.astro'
       <h3>Heroism, If That Word Still Applies</h3>
       <p>When <span className="review-cosmic__designation">[DESIGNATION EXPUNGED]</span> surveys the metropolis from above, the image borrows heroic grammar and poisons it. The shot asks us to believe in a protagonist while the world suggests protagonists are stories reality tells itself before digestion. Then she runs. The movement should be triumphant. Instead, it feels unbearably lonely, as if the movie has discovered that motion is the only prayer left.</p>
     </div>
-    <ImageWrapper src="/posts/Mega-Meal-Explained/gif/running_720p.gif" alt="The final run through dimensional space" class="review-cosmic__image review-cosmic__image--wide" />
+    <AnimatedMedia
+      webmSrc="/posts/Mega-Meal-Explained/gif/running_720p.webm"
+      poster="/posts/Mega-Meal-Explained/gif/running_720p-poster.webp"
+      fallbackSrc="/posts/Mega-Meal-Explained/gif/running_720p-poster.webp"
+      alt="The final run through dimensional space"
+      class="review-cosmic__image review-cosmic__image--wide"
+    />
   </section>
 
   <section className="review-cosmic__closing">
@@ -203,11 +216,23 @@ import ImageWrapper from '../../misc/ImageWrapper.astro'
     </div>
     <div className="review-cosmic__offering-grid">
       <figure>
-        <ImageWrapper src="/posts/Mega-Meal-Explained/gif/fries1.gif" alt="Dimensional fries" class="review-cosmic__image review-cosmic__image--square" />
+        <AnimatedMedia
+          webmSrc="/posts/Mega-Meal-Explained/gif/fries1.webm"
+          poster="/posts/Mega-Meal-Explained/gif/fries1-poster.webp"
+          fallbackSrc="/posts/Mega-Meal-Explained/gif/fries1-poster.webp"
+          alt="Dimensional fries"
+          class="review-cosmic__image review-cosmic__image--square"
+        />
         <figcaption>Dimensional Fries</figcaption>
       </figure>
       <figure>
-        <ImageWrapper src="/posts/Mega-Meal-Explained/gif/orings1.gif" alt="Cosmic onion rings" class="review-cosmic__image review-cosmic__image--square" />
+        <AnimatedMedia
+          webmSrc="/posts/Mega-Meal-Explained/gif/orings1.webm"
+          poster="/posts/Mega-Meal-Explained/gif/orings1-poster.webp"
+          fallbackSrc="/posts/Mega-Meal-Explained/gif/orings1-poster.webp"
+          alt="Cosmic onion rings"
+          class="review-cosmic__image review-cosmic__image--square"
+        />
         <figcaption>Cosmic Onion Rings</figcaption>
       </figure>
     </div>

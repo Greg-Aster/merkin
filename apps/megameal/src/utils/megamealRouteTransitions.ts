@@ -111,7 +111,9 @@ function getFallbackRect() {
 }
 
 function ensureOverlay() {
-  const existing = document.querySelector<HTMLElement>('.megameal-route-transition')
+  const existing = document.querySelector<HTMLElement>(
+    '.megameal-route-transition',
+  )
   if (existing) return existing
 
   const overlay = document.createElement('div')
@@ -125,13 +127,19 @@ function ensureOverlay() {
   return overlay
 }
 
-function setOverlayStart(overlay: HTMLElement, rect: DOMRect, previewSrc?: string) {
+function setOverlayStart(
+  overlay: HTMLElement,
+  rect: DOMRect,
+  previewSrc?: string,
+) {
   overlay.style.setProperty('--megameal-route-left', `${rect.left}px`)
   overlay.style.setProperty('--megameal-route-top', `${rect.top}px`)
   overlay.style.setProperty('--megameal-route-width', `${rect.width}px`)
   overlay.style.setProperty('--megameal-route-height', `${rect.height}px`)
 
-  const frame = overlay.querySelector<HTMLElement>('.megameal-route-transition__frame')
+  const frame = overlay.querySelector<HTMLElement>(
+    '.megameal-route-transition__frame',
+  )
   if (!frame) return
 
   if (previewSrc) {
@@ -170,7 +178,8 @@ function waitForRouteReady(url: URL) {
       const timelineBannerWrapper = document.querySelector<HTMLElement>(
         '[data-timeline-banner-wrapper="true"]',
       )
-      const timelineShellReady = timelineShell?.dataset.timelineInitialized === 'true'
+      const timelineShellReady =
+        timelineShell?.dataset.timelineInitialized === 'true'
       const timelineBannerReady =
         !timelineBannerWrapper ||
         timelineBannerWrapper.dataset.timelineBannerInitialized === 'true'
@@ -180,8 +189,9 @@ function waitForRouteReady(url: URL) {
 
     const checkVisualReady = () => {
       const containers = getRouteReadyContainers()
-      const pendingAnimation = containers.some(container =>
-        !!container.querySelector('.onload-animation:not(.loaded)'),
+      const pendingAnimation = containers.some(
+        container =>
+          !!container.querySelector('.onload-animation:not(.loaded)'),
       )
 
       return containers.length > 0 && !pendingAnimation
@@ -310,7 +320,9 @@ function consumeHardNavigationArrival() {
   })
 }
 
-export function navigateWithMegamealTransition(options: MegamealRouteTransitionOptions) {
+export function navigateWithMegamealTransition(
+  options: MegamealRouteTransitionOptions,
+) {
   if (typeof window === 'undefined') return
 
   const url = getInternalUrl(options.href)
@@ -370,7 +382,9 @@ function handleDocumentClick(event: MouseEvent) {
 
   navigateWithMegamealTransition({
     href: link.href,
-    type: (link.dataset.megamealTransition as MegamealRouteTransitionKind) || 'default',
+    type:
+      (link.dataset.megamealTransition as MegamealRouteTransitionKind) ||
+      'default',
     previewSrc: link.dataset.megamealTransitionPreview,
     sourceRect: link.getBoundingClientRect(),
     event,
@@ -378,7 +392,10 @@ function handleDocumentClick(event: MouseEvent) {
 }
 
 export function initMegamealRouteTransitions() {
-  if (typeof window === 'undefined' || window.__megamealRouteTransitionsInitialized) {
+  if (
+    typeof window === 'undefined' ||
+    window.__megamealRouteTransitionsInitialized
+  ) {
     return
   }
 

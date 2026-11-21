@@ -6,6 +6,7 @@ import { type GameHudState, MOBILE_TOUCH_ACTION_IDS } from "../game/index.js";
 import type { MultiplayerSnapshot } from "../multiplayer/index.js";
 import MobileControls from "../ui/MobileControls.svelte";
 import RuntimeHud from "../ui/RuntimeHud.svelte";
+import VirtualRobotPanel from "../ui/VirtualRobotPanel.svelte";
 import MultiplayerPanel from "../ui/multiplayer/MultiplayerPanel.svelte";
 import { createBrowserGameClient } from "./browserGameClient";
 import { runtimeSettings } from "./levelPackageDiscovery.js";
@@ -13,6 +14,10 @@ import {
 	type BrowserMultiplayerClient,
 	createBrowserMultiplayerClient,
 } from "./multiplayerClient";
+import {
+	type VirtualRobotBridgeClient,
+	createVirtualRobotBridgeClient,
+} from "./virtual-robot/virtualRobotBridgeClient.js";
 
 const defaultGameState: GameHudState = {
 	playerAlive: false,
@@ -46,6 +51,7 @@ let mobileControls: MobileInputControlsPort | undefined = $state();
 let dispatchCommand: ((command: Command) => void) | undefined = $state();
 let multiplayerClient: BrowserMultiplayerClient | undefined = $state();
 let multiplayerSnapshot: MultiplayerSnapshot | undefined = $state();
+let virtualRobotBridge: VirtualRobotBridgeClient | undefined = $state();
 let disposeClient: (() => void) | undefined;
 let devBridge: RuntimeBridgeEndpoint | undefined;
 // biome-ignore lint/style/useConst: Svelte event callbacks mutate this focus flag.
@@ -103,6 +109,14 @@ async function initializeClient(): Promise<void> {
 			});
 		}
 
+		const robotBridge = createVirtualRobotBridgeClient({
+			renderer: client.threeRenderer,
+		});
+		virtualRobotBridge = robotBridge;
+		client.threeRenderer.setBeforeRenderHook(() => {
+			robotBridge.applyCameraOverride();
+		});
+
 		let lastBridgeRuntimeSceneKey = "";
 		const unsubscribe = client.api.observeRuntime((value) => {
 			snapshot = value;
@@ -139,6 +153,8 @@ async function initializeClient(): Promise<void> {
 		disposeClient = () => {
 			unsubscribe();
 			unsubscribeMultiplayer();
+			client.threeRenderer.setBeforeRenderHook(undefined);
+			robotBridge.dispose();
 			devBridge?.dispose();
 			client.setUiCapturingInput(false);
 			client.dispose();
@@ -147,6 +163,7 @@ async function initializeClient(): Promise<void> {
 			dispatchCommand = undefined;
 			multiplayerClient = undefined;
 			multiplayerSnapshot = undefined;
+			virtualRobotBridge = undefined;
 			devBridge = undefined;
 		};
 	} catch (error) {
@@ -193,6 +210,12 @@ function selectedRoomName() {
 	<MultiplayerPanel
 		client={multiplayerClient}
 		snapshot={multiplayerSnapshot}
+		onInputFocusChange={(focused) => {
+			uiCapturingInput = focused;
+		}}
+	/>
+	<VirtualRobotPanel
+		bridge={virtualRobotBridge}
 		onInputFocusChange={(focused) => {
 			uiCapturingInput = focused;
 		}}

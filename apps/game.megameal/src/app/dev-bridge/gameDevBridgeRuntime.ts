@@ -1,6 +1,5 @@
 import type { RuntimeSnapshot } from "../../engine/client-api/index.js";
 import type { BrowserGameClient } from "../browserGameClient";
-import { runtimeSettings } from "../levelPackageDiscovery.js";
 import type { BrowserMultiplayerClient } from "../multiplayerClient";
 import {
 	type GameDevBridgeGameEndpoint,
@@ -105,35 +104,6 @@ export function createGameDevBridgeRuntimeEndpoint(
 			return {
 				accepted: true,
 				message: "Touch controls cleared.",
-			};
-		},
-		submitMotionEvent: (event) => {
-			client.submitMotionEvent(event);
-
-			return {
-				accepted: true,
-				message: `Motion event ${event.robot}:${event.sequence}:${event.command} submitted.`,
-			};
-		},
-		submitMotionTestEvent: (motionTestId) => {
-			const event =
-				runtimeSettings.createPlayerAvatarMotionTestEvent(motionTestId);
-
-			if (!event) {
-				return {
-					accepted: false,
-					message: `Motion test event "${motionTestId}" is not registered.`,
-				};
-			}
-
-			client.submitMotionEvent(event);
-
-			return {
-				accepted: true,
-				motionRobot: event.robot,
-				motionSequence: event.sequence,
-				motionCommand: event.command,
-				message: `Motion test event ${motionTestId} submitted.`,
 			};
 		},
 	});

@@ -11,28 +11,7 @@ import {
   isSiteAudioActivationGesture,
   markSiteAudioUnlocked,
 } from './site-audio-activation'
-
-declare global {
-  interface Window {
-    YT?: {
-      Player: new (
-        element: string | HTMLIFrameElement,
-        options: {
-          events?: {
-            onStateChange?: (event: { data: number }) => void
-          }
-        },
-      ) => unknown
-      PlayerState: {
-        PLAYING: number
-        PAUSED: number
-        ENDED: number
-        CUED: number
-      }
-    }
-    onYouTubeIframeAPIReady?: () => void
-  }
-}
+import { SiteAudioYouTubeBridge } from './site-audio-youtube'
 
 export interface SiteAudioState {
   enabled: boolean
@@ -50,20 +29,8 @@ type SiteAudioListener = (state: SiteAudioState) => void
 type SiteAudioSyncOptions = {
   forceRescore?: boolean
 }
-type YouTubeEngagementAction = 'play' | 'pause' | 'ended' | 'cued'
 type PageAmbientTrackConfig = Omit<SiteAudioTrackConfig, 'routes'> & {
   routes?: string[]
-}
-type VideoAnalyticsWindow = Window & {
-  plausible?: (
-    eventName: string,
-    options?: { props?: Record<string, string> },
-  ) => void
-  gtag?: (
-    command: 'event',
-    eventName: string,
-    params: Record<string, string>,
-  ) => void
 }
 type NavigatorWithUserActivation = Navigator & {
   userActivation?: {
@@ -133,13 +100,10 @@ class SiteAudioManager {
   private suspended = false
   private suspensionReason: string | null = null
   private activeAudibleMedia = new Set<HTMLMediaElement>()
-  private activeYouTubePlayers = new Set<string>()
   private suspendedHowl: Howl | null = null
-  private youtubeApiPromise: Promise<void> | null = null
-  private boundYouTubeFrames = new WeakSet<HTMLIFrameElement>()
-  private youtubeFrameIds = new WeakMap<HTMLIFrameElement, string>()
-  private youtubeMutationObserver: MutationObserver | null = null
-  private youtubeFrameCounter = 0
+  private youtubeBridge = new SiteAudioYouTubeBridge(() => {
+    this.syncEmbeddedMediaSuspension()
+  })
 
   initialize(): void {
     if (this.initialized || typeof window === 'undefined') return
@@ -158,7 +122,7 @@ class SiteAudioManager {
     this.pendingPathname = window.location.pathname
     this.bindMediaLifecycle()
     this.bindSuspensionEvents()
-    this.bindYouTubeEmbeds()
+    this.youtubeBridge.bind()
     this.emit()
   }
 
@@ -733,7 +697,7 @@ class SiteAudioManager {
             element instanceof HTMLMediaElement && this.isMediaAudible(element),
         ),
       )
-      this.activeYouTubePlayers.clear()
+      this.youtubeBridge.clearActivePlayers()
       this.syncEmbeddedMediaSuspension()
     }
 
@@ -791,322 +755,12 @@ class SiteAudioManager {
 
   private syncEmbeddedMediaSuspension(): void {
     const hasActiveEmbeddedMedia =
-      this.activeAudibleMedia.size > 0 || this.activeYouTubePlayers.size > 0
+      this.activeAudibleMedia.size > 0 || this.youtubeBridge.hasActivePlayers()
 
     if (hasActiveEmbeddedMedia) {
       this.suspendAmbience('embedded-media')
     } else if (this.suspended && this.suspensionReason === 'embedded-media') {
       this.resumeAmbience('embedded-media')
-    }
-  }
-
-  private bindYouTubeEmbeds(): void {
-    const bindFrames = () => {
-      const frames = this.getYouTubeFrames(document)
-
-      if (frames.length === 0) return
-
-      void this.ensureYouTubeIframeApi().then(() => {
-        frames.forEach(frame => this.attachYouTubePlayer(frame))
-      })
-    }
-
-    bindFrames()
-    document.addEventListener('astro:page-load', bindFrames)
-
-    if (this.youtubeMutationObserver || !document.body) return
-
-    this.youtubeMutationObserver = new MutationObserver(mutations => {
-      const addedFrames: HTMLIFrameElement[] = []
-      let removedActiveFrame = false
-
-      for (const mutation of mutations) {
-        mutation.addedNodes.forEach(node => {
-          addedFrames.push(...this.getYouTubeFrames(node))
-        })
-
-        mutation.removedNodes.forEach(node => {
-          for (const frame of this.getYouTubeFrames(node)) {
-            const frameId = this.youtubeFrameIds.get(frame) ?? frame.id
-            if (frameId && this.activeYouTubePlayers.delete(frameId)) {
-              removedActiveFrame = true
-            }
-          }
-        })
-      }
-
-      if (addedFrames.length > 0) {
-        void this.ensureYouTubeIframeApi().then(() => {
-          addedFrames.forEach(frame => this.attachYouTubePlayer(frame))
-        })
-      }
-
-      if (removedActiveFrame) {
-        this.syncEmbeddedMediaSuspension()
-      }
-    })
-
-    this.youtubeMutationObserver.observe(document.body, {
-      childList: true,
-      subtree: true,
-    })
-  }
-
-  private getYouTubeFrames(root: ParentNode | Node): HTMLIFrameElement[] {
-    const frames: HTMLIFrameElement[] = []
-
-    if (root instanceof HTMLIFrameElement && this.isYouTubeEmbed(root)) {
-      frames.push(root)
-    }
-
-    const queryableRoot = root as {
-      querySelectorAll?: unknown
-    }
-    if (typeof queryableRoot.querySelectorAll === 'function') {
-      frames.push(
-        ...Array.from(queryableRoot.querySelectorAll('iframe')).filter(
-          (frame): frame is HTMLIFrameElement =>
-            frame instanceof HTMLIFrameElement && this.isYouTubeEmbed(frame),
-        ),
-      )
-    }
-
-    return frames
-  }
-
-  private async ensureYouTubeIframeApi(): Promise<void> {
-    if (typeof window === 'undefined') return
-    if (window.YT?.Player) return
-
-    if (!this.youtubeApiPromise) {
-      this.youtubeApiPromise = new Promise<void>((resolve, reject) => {
-        const existingScript = document.querySelector<HTMLScriptElement>(
-          'script[data-megameal-youtube-api="true"], script[src*="youtube.com/iframe_api"]',
-        )
-        const previousReady = window.onYouTubeIframeAPIReady
-        let waitTimeout: number | null = null
-        let remainingChecks = 200
-        let settled = false
-
-        const cleanup = () => {
-          if (waitTimeout !== null) {
-            window.clearTimeout(waitTimeout)
-            waitTimeout = null
-          }
-
-          if (window.onYouTubeIframeAPIReady === handleReady) {
-            window.onYouTubeIframeAPIReady = previousReady
-          }
-        }
-
-        const settle = (callback: () => void) => {
-          if (settled) return
-
-          settled = true
-          cleanup()
-          callback()
-        }
-
-        const waitForPlayer = () => {
-          if (waitTimeout !== null) {
-            window.clearTimeout(waitTimeout)
-            waitTimeout = null
-          }
-
-          if (window.YT?.Player) {
-            settle(resolve)
-            return
-          }
-
-          remainingChecks -= 1
-          if (remainingChecks <= 0) {
-            settle(() =>
-              reject(new Error('Timed out waiting for YouTube iframe API')),
-            )
-            return
-          }
-
-          waitTimeout = window.setTimeout(waitForPlayer, 50)
-        }
-
-        const handleReady = () => {
-          previousReady?.()
-          waitForPlayer()
-        }
-
-        window.onYouTubeIframeAPIReady = handleReady
-
-        if (existingScript) {
-          waitForPlayer()
-          return
-        }
-
-        const script = document.createElement('script')
-        script.src = 'https://www.youtube.com/iframe_api'
-        script.async = true
-        script.dataset.megamealYoutubeApi = 'true'
-        script.onerror = () =>
-          settle(() => reject(new Error('Failed to load YouTube iframe API')))
-        document.head.appendChild(script)
-        waitForPlayer()
-      }).catch(error => {
-        this.youtubeApiPromise = null
-        console.warn('Unable to initialize YouTube iframe API:', error)
-      })
-    }
-
-    await this.youtubeApiPromise
-  }
-
-  private attachYouTubePlayer(frame: HTMLIFrameElement): void {
-    const youtubeApi = window.YT
-    if (this.boundYouTubeFrames.has(frame) || !youtubeApi?.Player) return
-
-    if (!this.hasNormalizedYouTubeSrc(frame.src)) {
-      const normalizedSrc = this.normalizeYouTubeSrc(frame.src)
-      frame.src = normalizedSrc
-    }
-
-    if (!frame.id) {
-      this.youtubeFrameCounter += 1
-      frame.id = `megameal-youtube-${this.youtubeFrameCounter}`
-    }
-
-    this.boundYouTubeFrames.add(frame)
-    this.youtubeFrameIds.set(frame, frame.id)
-
-    new youtubeApi.Player(frame, {
-      events: {
-        onStateChange: (event: { data: number }) => {
-          if (event.data === youtubeApi.PlayerState.PLAYING) {
-            this.activeYouTubePlayers.add(frame.id)
-            this.emitYouTubeEngagement(frame, 'play')
-          } else if (
-            event.data === youtubeApi.PlayerState.PAUSED ||
-            event.data === youtubeApi.PlayerState.ENDED ||
-            event.data === youtubeApi.PlayerState.CUED
-          ) {
-            this.activeYouTubePlayers.delete(frame.id)
-            if (event.data === youtubeApi.PlayerState.PAUSED) {
-              this.emitYouTubeEngagement(frame, 'pause')
-            } else if (event.data === youtubeApi.PlayerState.ENDED) {
-              this.emitYouTubeEngagement(frame, 'ended')
-            } else {
-              this.emitYouTubeEngagement(frame, 'cued')
-            }
-          }
-
-          this.syncEmbeddedMediaSuspension()
-        },
-      },
-    })
-  }
-
-  private isYouTubeEmbed(frame: HTMLIFrameElement): boolean {
-    try {
-      const url = new URL(frame.src, window.location.origin)
-      return (
-        (url.hostname === 'www.youtube.com' ||
-          url.hostname === 'www.youtube-nocookie.com') &&
-        url.pathname.startsWith('/embed/')
-      )
-    } catch {
-      return false
-    }
-  }
-
-  private normalizeYouTubeSrc(src: string): string {
-    try {
-      const url = new URL(src, window.location.origin)
-      if (
-        url.hostname !== 'www.youtube.com' &&
-        url.hostname !== 'www.youtube-nocookie.com'
-      ) {
-        return src
-      }
-
-      url.searchParams.set('enablejsapi', '1')
-      url.searchParams.set('playsinline', '1')
-      url.searchParams.set('origin', window.location.origin)
-      return url.toString()
-    } catch {
-      return src
-    }
-  }
-
-  private hasNormalizedYouTubeSrc(src: string): boolean {
-    try {
-      const url = new URL(src, window.location.origin)
-      if (
-        url.hostname !== 'www.youtube.com' &&
-        url.hostname !== 'www.youtube-nocookie.com'
-      ) {
-        return true
-      }
-
-      return (
-        url.searchParams.get('enablejsapi') === '1' &&
-        url.searchParams.get('playsinline') === '1' &&
-        url.searchParams.get('origin') === window.location.origin
-      )
-    } catch {
-      return true
-    }
-  }
-
-  private emitYouTubeEngagement(
-    frame: HTMLIFrameElement,
-    action: YouTubeEngagementAction,
-  ): void {
-    if (typeof window === 'undefined') return
-
-    const detail = {
-      action,
-      videoId: this.extractYouTubeVideoId(frame.src),
-      title: frame.title.replace(/\s+-\s+YouTube video player$/, ''),
-      src: frame.src,
-      pagePath: window.location.pathname,
-      source:
-        frame.dataset.videoBannerIframe === 'true'
-          ? 'video-banner'
-          : 'youtube-embed',
-    }
-
-    window.dispatchEvent(
-      new CustomEvent('megameal:youtube-engagement', { detail }),
-    )
-
-    this.trackVideoAnalytics(`youtube_${action}`, {
-      action: detail.action,
-      video_id: detail.videoId,
-      video_title: detail.title,
-      page_path: detail.pagePath,
-      source: detail.source,
-    })
-  }
-
-  private trackVideoAnalytics(
-    eventName: string,
-    props: Record<string, string>,
-  ): void {
-    const analyticsWindow = window as VideoAnalyticsWindow
-
-    try {
-      analyticsWindow.plausible?.(eventName, { props })
-      analyticsWindow.gtag?.('event', eventName, props)
-    } catch {
-      // Analytics providers must never block media playback.
-    }
-  }
-
-  private extractYouTubeVideoId(src: string): string {
-    try {
-      const url = new URL(src, window.location.origin)
-      if (!url.pathname.startsWith('/embed/')) return ''
-
-      return url.pathname.split('/embed/')[1]?.split('/')[0] ?? ''
-    } catch {
-      return ''
     }
   }
 

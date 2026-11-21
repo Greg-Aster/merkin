@@ -114,13 +114,16 @@ export const homeIntroBannerSceneHoldRadius = 0.3
 export const homeIntroScreenCount = homeIntroScreens.length
 export const homeIntroFinalScreenGraceScreens = 0.85
 export const homeIntroStandardBannerPhaseScreens = 1.1
-export function homeIntroMaxWheelForOffset(offsetScreens = homeIntroIntroOffsetScreens) {
+export function homeIntroMaxWheelForOffset(
+  offsetScreens = homeIntroIntroOffsetScreens,
+) {
   return (
-    homeIntroScreenCount -
-    1 +
-    offsetScreens +
-    homeIntroFinalScreenGraceScreens
-  ) / homeIntroWheelToScreenRatio
+    (homeIntroScreenCount -
+      1 +
+      offsetScreens +
+      homeIntroFinalScreenGraceScreens) /
+    homeIntroWheelToScreenRatio
+  )
 }
 
 export function clampHomeIntroScreenIndex(value: number) {
@@ -139,9 +142,15 @@ export function getHomeIntroRestedScreenIndex(selectedIndex: number) {
 
 export function getHomeIntroBannerSyncState(selectedIndex: number) {
   const clampedSelectedIndex = clampHomeIntroScreenIndex(selectedIndex)
-  const lowerScreenIndex = clampHomeIntroScreenIndex(Math.floor(clampedSelectedIndex))
-  const upperScreenIndex = clampHomeIntroScreenIndex(Math.ceil(clampedSelectedIndex))
-  const activeIndex = clampHomeIntroScreenIndex(Math.round(clampedSelectedIndex))
+  const lowerScreenIndex = clampHomeIntroScreenIndex(
+    Math.floor(clampedSelectedIndex),
+  )
+  const upperScreenIndex = clampHomeIntroScreenIndex(
+    Math.ceil(clampedSelectedIndex),
+  )
+  const activeIndex = clampHomeIntroScreenIndex(
+    Math.round(clampedSelectedIndex),
+  )
   const distanceToActive = Math.abs(clampedSelectedIndex - activeIndex)
 
   if (

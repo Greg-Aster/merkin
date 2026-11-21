@@ -13,16 +13,16 @@ import PostMetadata from '../../components/PostMeta.astro'
 import ImageWrapper from '../../components/misc/ImageWrapper.astro'
 import { licenseConfig } from '../../config/config'
 import { profileConfig, siteConfig } from '../../config/config'
-import { publicCollectionFilter } from '../../contracts/content'
 import { SERIES_CONFIG } from '../../config/seriesConfig'
+import { publicCollectionFilter } from '../../contracts/content'
+import { routeStyleHref } from '../../styles/routeStyleBundles'
 import { getPostsBySeries } from '../../utils/content-utils'
 import { formatDateToYYYYMMDD } from '../../utils/date-utils'
-import { firstContactManualRedirects } from '../../utils/reader'
 import {
   loadGoogleDocSnapshot,
   resolveGoogleDocStylesheet,
 } from '../../utils/googleDocContent.server'
-import { routeStyleHref } from '../../styles/routeStyleBundles'
+import { firstContactManualRedirects } from '../../utils/reader'
 
 import DocsEditorBridge from '@merkin/docs-editor-bridge/DocsEditorBridge.svelte'
 import LayoutToggle from '../../components/client/LayoutToggle.svelte'
@@ -35,32 +35,34 @@ export async function getStaticPaths() {
       new Date(a.data.published).getTime(),
   )
 
-  return Promise.all(sortedPosts.map(async (post, index) => {
-    const newerPost = index > 0 ? sortedPosts[index - 1] : null
-    const olderPost =
-      index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null
-    const googleDocSnapshot = post.data.googleDoc
-      ? await loadGoogleDocSnapshot(post.data.googleDoc.documentId)
-      : null
-    const googleDocStylesheetHref = post.data.googleDoc
-      ? resolveGoogleDocStylesheet(post.data.googleDoc.style)
-      : null
+  return Promise.all(
+    sortedPosts.map(async (post, index) => {
+      const newerPost = index > 0 ? sortedPosts[index - 1] : null
+      const olderPost =
+        index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null
+      const googleDocSnapshot = post.data.googleDoc
+        ? await loadGoogleDocSnapshot(post.data.googleDoc.documentId)
+        : null
+      const googleDocStylesheetHref = post.data.googleDoc
+        ? resolveGoogleDocStylesheet(post.data.googleDoc.style)
+        : null
 
-    return {
-      params: { slug: post.slug },
-      props: {
-        post,
-        googleDocSnapshot,
-        googleDocStylesheetHref,
-        previousPost: newerPost
-          ? { slug: newerPost.slug, title: newerPost.data.title }
-          : null,
-        nextPost: olderPost
-          ? { slug: olderPost.slug, title: olderPost.data.title }
-          : null,
-      },
-    }
-  }))
+      return {
+        params: { slug: post.slug },
+        props: {
+          post,
+          googleDocSnapshot,
+          googleDocStylesheetHref,
+          previousPost: newerPost
+            ? { slug: newerPost.slug, title: newerPost.data.title }
+            : null,
+          nextPost: olderPost
+            ? { slug: olderPost.slug, title: olderPost.data.title }
+            : null,
+        },
+      }
+    }),
+  )
 }
 
 const {
@@ -112,7 +114,8 @@ const {
 } = await post.render()
 const headings = googleDocSnapshot?.headings ?? localHeadings
 const postWords = googleDocSnapshot?.words ?? remarkPluginFrontmatter.words
-const postMinutes = googleDocSnapshot?.minutes ?? remarkPluginFrontmatter.minutes
+const postMinutes =
+  googleDocSnapshot?.minutes ?? remarkPluginFrontmatter.minutes
 const contentOwnsPageHeading = headings.some(heading => heading.depth === 1)
 const postTitleClass = `transition w-full block font-bold mb-3
                     text-2xl md:text-[2.25rem]/[2.75rem]
