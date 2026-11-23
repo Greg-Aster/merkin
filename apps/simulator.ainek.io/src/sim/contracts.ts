@@ -768,3 +768,286 @@ export function decodeProtocolBinaryFrame(buffer: ArrayBuffer):
 		payload: new Uint8Array(buffer, 5),
 	};
 }
+
+export type SimulatorMultiplayerLaunchMode = "solo" | "host" | "join";
+
+export type BodyControlLaunchBundle = {
+	readonly bc?: string;
+	readonly robotId?: string;
+	readonly token?: string;
+	readonly model?: RobotModelId;
+	readonly level?: SimulatorLevelId;
+	readonly mp?: SimulatorMultiplayerLaunchMode;
+	readonly room?: string;
+	readonly name?: string;
+};
+
+export type SimulatorLaunchConfig = BodyControlLaunchBundle & {
+	readonly shouldScrubHash: boolean;
+};
+
+const VALID_ROBOT_MODELS = new Set<RobotModelId>(["v1", "v2", "v3"]);
+const VALID_LEVEL_IDS = new Set<SimulatorLevelId>([
+	"v2_lab",
+	"observatory",
+	"yggdrasil",
+	"miranda",
+	"solitude",
+	"sci-fi-room",
+]);
+
+function isPrivateOrLoopbackHost(hostname: string): boolean {
+	const h = hostname.toLowerCase();
+	if (h === "localhost" || h === "127.0.0.1" || h === "::1" || h === "[::1]") {
+		return true;
+	}
+	if (h.startsWith("10.") || h.startsWith("192.168.")) {
+		return true;
+	}
+	const m = /^172\.(\d{1,3})\./.exec(h);
+	if (m) {
+		const second = Number(m[1]);
+		return second >= 16 && second <= 31;
+	}
+	return false;
+}
+
+/**
+ * Normalize a user-supplied or launched Body Control endpoint into a canonical
+ * `ws://.../robot` or `wss://.../robot` WebSocket URL.
+ */
+export function normalizeBodyControlUrl(rawInput: string): string {
+	const trimmed = rawInput.trim();
+	if (!trimmed) {
+		return "";
+	}
+	let candidate = trimmed;
+	if (candidate.startsWith("http://")) {
+		candidate = `ws://${candidate.slice("http://".length)}`;
+	} else if (candidate.startsWith("https://")) {
+		candidate = `wss://${candidate.slice("https://".length)}`;
+	} else if (
+		!candidate.startsWith("ws://") &&
+		!candidate.startsWith("wss://")
+	) {
+		const slashIdx = candidate.indexOf("/");
+		const authority = slashIdx >= 0 ? candidate.slice(0, slashIdx) : candidate;
+		const rest = slashIdx >= 0 ? candidate.slice(slashIdx) : "";
+		const hostOnly = authority.replace(/:\d+$/, "");
+		const hasPort = /:\d+$/.test(authority);
+		if (isPrivateOrLoopbackHost(hostOnly)) {
+			candidate = `ws://${hasPort ? authority : `${authority}:8790`}${rest}`;
+		} else {
+			candidate = `wss://${authority}${rest}`;
+		}
+	}
+	try {
+		const parsed = new URL(candidate);
+		if (parsed.protocol !== "ws:" && parsed.protocol !== "wss:") {
+			return trimmed;
+		}
+		if (!parsed.pathname || parsed.pathname === "/") {
+			parsed.pathname = "/robot";
+		}
+		return parsed.toString();
+	} catch {
+		return trimmed;
+	}
+}
+
+function fromBase64UrlUtf8(encoded: string): string | undefined {
+	try {
+		const padded = encoded
+			.replace(/-/g, "+")
+			.replace(/_/g, "/")
+			.padEnd(Math.ceil(encoded.length / 4) * 4, "=");
+		if (typeof Buffer !== "undefined") {
+			return Buffer.from(padded, "base64").toString("utf-8");
+		}
+		const bin = globalThis.atob(padded);
+		const bytes = new Uint8Array(bin.length);
+		for (let i = 0; i < bin.length; i += 1) {
+			bytes[i] = bin.charCodeAt(i);
+		}
+		return new TextDecoder().decode(bytes);
+	} catch {
+		return undefined;
+	}
+}
+
+export function encodeBodyControlPairingCode(
+	bundle: BodyControlLaunchBundle,
+): string {
+	const json = JSON.stringify(bundle);
+	let b64: string;
+	if (typeof Buffer !== "undefined") {
+		b64 = Buffer.from(json, "utf-8").toString("base64");
+	} else {
+		const bytes = new TextEncoder().encode(json);
+		let bin = "";
+		for (const byte of bytes) {
+			bin += String.fromCharCode(byte);
+		}
+		b64 = globalThis.btoa(bin);
+	}
+	const urlSafe = b64
+		.replace(/\+/g, "-")
+		.replace(/\//g, "_")
+		.replace(/=+$/, "");
+	return `ainekio-pair:${urlSafe}`;
+}
+
+function sanitizeBundleRecord(
+	raw: Record<string, unknown>,
+): BodyControlLaunchBundle {
+	const bc =
+		typeof raw.bc === "string" && raw.bc.trim()
+			? normalizeBodyControlUrl(raw.bc)
+			: undefined;
+	const robotId =
+		typeof raw.robotId === "string" && raw.robotId.trim()
+			? raw.robotId.trim().slice(0, 64)
+			: undefined;
+	const token =
+		typeof raw.token === "string" && raw.token.trim()
+			? raw.token.trim()
+			: undefined;
+	const model =
+		typeof raw.model === "string" &&
+		VALID_ROBOT_MODELS.has(raw.model as RobotModelId)
+			? (raw.model as RobotModelId)
+			: undefined;
+	const level =
+		typeof raw.level === "string" &&
+		VALID_LEVEL_IDS.has(raw.level as SimulatorLevelId)
+			? (raw.level as SimulatorLevelId)
+			: undefined;
+	const mpRaw = typeof raw.mp === "string" ? raw.mp.trim().toLowerCase() : "";
+	const mp: SimulatorMultiplayerLaunchMode | undefined =
+		mpRaw === "host" || mpRaw === "join" || mpRaw === "solo"
+			? mpRaw
+			: undefined;
+	const room =
+		typeof raw.room === "string" && raw.room.trim()
+			? raw.room.trim()
+			: undefined;
+	const name =
+		typeof raw.name === "string" && raw.name.trim()
+			? raw.name.trim().slice(0, 24)
+			: undefined;
+
+	return {
+		...(bc ? { bc } : {}),
+		...(robotId ? { robotId } : {}),
+		...(token ? { token } : {}),
+		...(model ? { model } : {}),
+		...(level ? { level } : {}),
+		...(mp ? { mp } : {}),
+		...(room ? { room } : {}),
+		...(name ? { name } : {}),
+	};
+}
+
+/**
+ * Decode either an `ainekio-pair:<base64url>` string OR a full simulator launch
+ * URL containing `#bc=...&token=...` / `?bc=...`.
+ */
+export function decodeBodyControlPairingCode(
+	input: string,
+): BodyControlLaunchBundle | undefined {
+	const trimmed = input.trim();
+	if (!trimmed) {
+		return undefined;
+	}
+	if (trimmed.startsWith("ainekio-pair:")) {
+		const decoded = fromBase64UrlUtf8(trimmed.slice("ainekio-pair:".length));
+		if (!decoded) {
+			return undefined;
+		}
+		try {
+			const parsed = JSON.parse(decoded) as unknown;
+			if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+				return undefined;
+			}
+			const clean = sanitizeBundleRecord(parsed as Record<string, unknown>);
+			return Object.keys(clean).length > 0 ? clean : undefined;
+		} catch {
+			return undefined;
+		}
+	}
+	if (
+		trimmed.startsWith("http://") ||
+		trimmed.startsWith("https://") ||
+		trimmed.startsWith("#")
+	) {
+		try {
+			if (trimmed.startsWith("#")) {
+				const cfg = parseSimulatorLaunchParams("", trimmed);
+				const { shouldScrubHash: _scrub, ...rest } = cfg;
+				return Object.keys(rest).length > 0 ? rest : undefined;
+			}
+			const u = new URL(trimmed);
+			const cfg = parseSimulatorLaunchParams(u.search, u.hash);
+			const { shouldScrubHash: _scrub, ...rest } = cfg;
+			return Object.keys(rest).length > 0 ? rest : undefined;
+		} catch {
+			return undefined;
+		}
+	}
+	return undefined;
+}
+
+export function parseSimulatorLaunchParams(
+	search: string,
+	hash: string,
+): SimulatorLaunchConfig {
+	const qParams = new URLSearchParams(
+		search.startsWith("?") ? search.slice(1) : search,
+	);
+	const hParams = new URLSearchParams(
+		hash.startsWith("#") ? hash.slice(1) : hash,
+	);
+
+	const merged: Record<string, unknown> = {};
+	const pairFromQuery = qParams.get("pair");
+	const pairFromHash = hParams.get("pair");
+	for (const pairCode of [pairFromQuery, pairFromHash]) {
+		if (pairCode) {
+			const decoded = decodeBodyControlPairingCode(
+				pairCode.startsWith("ainekio-pair:")
+					? pairCode
+					: `ainekio-pair:${pairCode}`,
+			);
+			if (decoded) {
+				Object.assign(merged, decoded);
+			}
+		}
+	}
+
+	for (const params of [qParams, hParams]) {
+		for (const key of [
+			"bc",
+			"robotId",
+			"token",
+			"model",
+			"level",
+			"mp",
+			"room",
+			"name",
+		]) {
+			const val = params.get(key);
+			if (val !== null && val.trim() !== "") {
+				merged[key] = val;
+			}
+		}
+	}
+
+	const clean = sanitizeBundleRecord(merged);
+	const shouldScrubHash = Boolean(
+		hParams.has("token") || hParams.has("pair") || hParams.has("bc"),
+	);
+	return {
+		...clean,
+		shouldScrubHash,
+	};
+}

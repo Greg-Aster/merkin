@@ -10,7 +10,9 @@ import {
 	type SimulatorLevelId,
 	type SimulatorUiSnapshot,
 	V2_FACE_EXPRESSIONS,
+	decodeBodyControlPairingCode,
 	getRobotModelDescriptor,
+	normalizeBodyControlUrl,
 } from "../sim/contracts";
 import { SIMULATOR_LEVELS } from "../sim/levels";
 import {
@@ -38,6 +40,8 @@ const ui = $state<{
 	bcRobotId: string;
 	bcToken: string;
 	bcAutoReconnect: boolean;
+	bcPairingCode: string;
+	bcPairingError: string;
 	rolloutLabel: string;
 	joyX: number;
 	joyY: number;
@@ -109,6 +113,8 @@ const ui = $state<{
 	bcRobotId: "ainekio-v2-sim",
 	bcToken: "",
 	bcAutoReconnect: true,
+	bcPairingCode: "",
+	bcPairingError: "",
 	rolloutLabel: "ainekio_v2_rollout",
 	joyX: 0,
 	joyY: 0,
@@ -298,6 +304,9 @@ onMount(() => {
 	ui.bcUrl = savedBc.url;
 	ui.bcRobotId = savedBc.robotId;
 	ui.bcAutoReconnect = savedBc.autoReconnect;
+	if (savedBc.token) {
+		ui.bcToken = savedBc.token;
+	}
 
 	// Expose clean debug hook for browser verification & power users
 	(
@@ -566,12 +575,35 @@ function toggleBalance(): void {
 }
 
 function handleConnectBodyControl(): void {
+	ui.bcPairingError = "";
+	ui.bcUrl = normalizeBodyControlUrl(ui.bcUrl);
 	controller?.connectBodyControl(
 		ui.bcUrl,
 		ui.bcRobotId,
 		ui.bcToken,
 		ui.bcAutoReconnect,
 	);
+}
+
+function handleApplyPairingCode(): void {
+	ui.bcPairingError = "";
+	const bundle = decodeBodyControlPairingCode(ui.bcPairingCode);
+	if (!bundle || (!bundle.bc && !bundle.token)) {
+		ui.bcPairingError =
+			"Paste a valid Pairing Code (ainekio-pair:...) or Launch Link from Body Control.";
+		return;
+	}
+	if (bundle.bc) {
+		ui.bcUrl = bundle.bc;
+	}
+	if (bundle.robotId) {
+		ui.bcRobotId = bundle.robotId;
+	}
+	if (bundle.token) {
+		ui.bcToken = bundle.token;
+	}
+	ui.bcPairingCode = "";
+	void controller?.applyPairingBundle(bundle, true);
 }
 
 function handleDisconnectBodyControl(): void {
@@ -1049,6 +1081,32 @@ const neuralMotionButtons = $derived(
 					WebSocket — identical to a physical robot, with no local Python bridge required.
 				</p>
 
+				<div class="field-group">
+					<label for="bc-pair-code">Quick Pair Code or Launch Link (from Body Control)</label>
+					<div class="field-row">
+						<input
+							id="bc-pair-code"
+							data-testid="bc-pair-input"
+							type="text"
+							bind:value={ui.bcPairingCode}
+							placeholder="Paste ainekio-pair:... or simulator launch link"
+						/>
+						<button
+							type="button"
+							class="btn primary"
+							data-testid="bc-pair-apply-btn"
+							disabled={!ui.bcPairingCode.trim()}
+							onclick={handleApplyPairingCode}
+						>
+							Apply &amp; Link
+						</button>
+					</div>
+				</div>
+
+				{#if ui.bcPairingError}
+					<div class="error-banner">{ui.bcPairingError}</div>
+				{/if}
+
 				<div class="bc-presets">
 					<button
 						type="button"
@@ -1069,13 +1127,13 @@ const neuralMotionButtons = $derived(
 				</div>
 
 				<div class="field-group">
-					<label for="bc-url">Body Control WebSocket URL</label>
+					<label for="bc-url">Body Control Host or WebSocket URL</label>
 					<input
 						id="bc-url"
 						data-testid="bc-url-input"
 						type="text"
 						bind:value={ui.bcUrl}
-						placeholder="ws://127.0.0.1:8790/robot or wss://robot-gateway.ainek.io/robot"
+						placeholder="robot-gateway.ainek.io or ws://127.0.0.1:8790/robot"
 					/>
 				</div>
 

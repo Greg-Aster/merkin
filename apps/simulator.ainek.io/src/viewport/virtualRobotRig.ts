@@ -110,13 +110,14 @@ const V1_LEG_DEFS: readonly {
 	},
 ];
 
-// Exact V3 Option A-1 54-22-46-56 four-bar linkage constants matching geometry.json
+// Exact V3 Option A-1 54-22-46-56 four-bar + double-parallelogram ankle constants matching geometry.json
 const V3_CARRIER_MM = 54.0;
 const V3_CRANK_MM = 22.0;
 const V3_PICKUP_MM = 46.0;
 const V3_ROD_MM = 56.0;
 const V3_A0 = -2.202809465985;
 const V3_T0 = 3.055204643652;
+const V3_ANKLE_LIMIT_RAD = 0.48;
 
 type V3LegNodes = {
 	readonly shoulder: THREE.Object3D;
@@ -124,6 +125,10 @@ type V3LegNodes = {
 	readonly crank: THREE.Object3D;
 	readonly knee: THREE.Object3D;
 	readonly rod: THREE.Object3D;
+	readonly ankle?: THREE.Object3D;
+	readonly ankleS1?: THREE.Object3D;
+	readonly ankleIdler?: THREE.Object3D;
+	readonly ankleK2?: THREE.Object3D;
 	readonly restKneePos: THREE.Vector3;
 	readonly restRodPos: THREE.Vector3;
 	readonly jointBase: number;
@@ -406,6 +411,10 @@ export class ThreeVirtualRobotV2Rig {
 						`Missing V3 leg nodes (${def.cadLeg}) in ${modelUrl}.`,
 					);
 				}
+				const ankle = group.getObjectByName(`V3_${def.cadLeg}_Ankle`);
+				const ankleS1 = group.getObjectByName(`V3_${def.cadLeg}_AnkleS1`);
+				const ankleIdler = group.getObjectByName(`V3_${def.cadLeg}_AnkleIdler`);
+				const ankleK2 = group.getObjectByName(`V3_${def.cadLeg}_AnkleK2`);
 				const n0 = solveV3FourBar(def.ox, def.oz, def.cx, def.cz, V3_A0, V3_T0);
 				v3Legs.push({
 					shoulder,
@@ -413,6 +422,10 @@ export class ThreeVirtualRobotV2Rig {
 					crank,
 					knee,
 					rod,
+					...(ankle ? { ankle } : {}),
+					...(ankleS1 ? { ankleS1 } : {}),
+					...(ankleIdler ? { ankleIdler } : {}),
+					...(ankleK2 ? { ankleK2 } : {}),
 					restKneePos: knee.position.clone(),
 					restRodPos: rod.position.clone(),
 					jointBase: def.jointBase,
@@ -570,12 +583,29 @@ export class ThreeVirtualRobotV2Rig {
 					leg.restRodPos.z + 0.001 * (sol.px - leg.px0),
 				);
 				leg.rod.rotation.set(-(sol.gamma - leg.gamma0), 0, 0);
+				const kneePitchDelta = sol.beta - leg.beta0;
 				leg.knee.position.set(
 					leg.restKneePos.x,
 					leg.restKneePos.y + 0.001 * (sol.dz - leg.dz0),
 					leg.restKneePos.z + 0.001 * (sol.dx - leg.dx0),
 				);
-				leg.knee.rotation.set(-(sol.beta - leg.beta0), 0, 0);
+				leg.knee.rotation.set(-kneePitchDelta, 0, 0);
+				if (leg.ankle) {
+					const anklePitch = Math.max(
+						-V3_ANKLE_LIMIT_RAD,
+						Math.min(V3_ANKLE_LIMIT_RAD, kneePitchDelta),
+					);
+					leg.ankle.rotation.set(anklePitch, 0, 0);
+				}
+				if (leg.ankleS1) {
+					leg.ankleS1.rotation.set(-(a - V3_A0), 0, 0);
+				}
+				if (leg.ankleIdler) {
+					leg.ankleIdler.rotation.set(kneePitchDelta, 0, 0);
+				}
+				if (leg.ankleK2) {
+					leg.ankleK2.rotation.set(-kneePitchDelta, 0, 0);
+				}
 			}
 			return;
 		}
@@ -856,6 +886,10 @@ export function bindArticulatedRobotClone(
 			if (!shoulder || !carrier || !crank || !knee || !rod) {
 				return undefined;
 			}
+			const ankle = group.getObjectByName(`V3_${def.cadLeg}_Ankle`);
+			const ankleS1 = group.getObjectByName(`V3_${def.cadLeg}_AnkleS1`);
+			const ankleIdler = group.getObjectByName(`V3_${def.cadLeg}_AnkleIdler`);
+			const ankleK2 = group.getObjectByName(`V3_${def.cadLeg}_AnkleK2`);
 			const n0 = solveV3FourBar(def.ox, def.oz, def.cx, def.cz, V3_A0, V3_T0);
 			v3Legs.push({
 				shoulder,
@@ -863,6 +897,10 @@ export function bindArticulatedRobotClone(
 				crank,
 				knee,
 				rod,
+				...(ankle ? { ankle } : {}),
+				...(ankleS1 ? { ankleS1 } : {}),
+				...(ankleIdler ? { ankleIdler } : {}),
+				...(ankleK2 ? { ankleK2 } : {}),
 				restKneePos: knee.position.clone(),
 				restRodPos: rod.position.clone(),
 				jointBase: def.jointBase,
@@ -995,12 +1033,29 @@ export function applyArticulatedRobotThreePose(
 					leg.restRodPos.z + 0.001 * (sol.px - leg.px0),
 				);
 				leg.rod.rotation.set(-(sol.gamma - leg.gamma0), 0, 0);
+				const kneePitchDelta = sol.beta - leg.beta0;
 				leg.knee.position.set(
 					leg.restKneePos.x,
 					leg.restKneePos.y + 0.001 * (sol.dz - leg.dz0),
 					leg.restKneePos.z + 0.001 * (sol.dx - leg.dx0),
 				);
-				leg.knee.rotation.set(-(sol.beta - leg.beta0), 0, 0);
+				leg.knee.rotation.set(-kneePitchDelta, 0, 0);
+				if (leg.ankle) {
+					const anklePitch = Math.max(
+						-V3_ANKLE_LIMIT_RAD,
+						Math.min(V3_ANKLE_LIMIT_RAD, kneePitchDelta),
+					);
+					leg.ankle.rotation.set(anklePitch, 0, 0);
+				}
+				if (leg.ankleS1) {
+					leg.ankleS1.rotation.set(-(a - V3_A0), 0, 0);
+				}
+				if (leg.ankleIdler) {
+					leg.ankleIdler.rotation.set(kneePitchDelta, 0, 0);
+				}
+				if (leg.ankleK2) {
+					leg.ankleK2.rotation.set(-kneePitchDelta, 0, 0);
+				}
 			}
 		}
 		return;

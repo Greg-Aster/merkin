@@ -74,9 +74,76 @@ out_npz = Path(sys.argv[sys.argv.index("--") + 1])
 out_meta = Path(sys.argv[sys.argv.index("--") + 2])
 
 sc = bpy.data.scenes["v3"]
+bpy.context.window.scene = sc
 vl = sc.view_layers[0]
 orig = sc.objects["V3 | Robot Origin"]
-inv_orig = orig.matrix_world.inverted()
+
+# Force all 4 legs to exact CAD neutral (h_deg=0, alpha_deg=0, theta_deg=0)
+# while keeping active COPY_ROTATION constraints so all 4 legs' double-parallelogram
+# ankle linkages align cleanly at CAD neutral.
+for leg_key in ("RL", "RR", "FL", "FR"):
+    for obj_name in (f"V3 | {leg_key} | Shoulder Origin", f"V3 | {leg_key} | Linkage Calculation"):
+        obj = bpy.data.objects.get(obj_name)
+        if obj is not None:
+            for prop in ("h_deg", "alpha_deg", "theta_deg"):
+                if prop in obj:
+                    obj[prop] = 0.0
+            obj.update_tag()
+    for cname in (
+        f"V3 | {leg_key} | Ankle Axis (F)",
+        f"V3 | {leg_key} | AnkleLink - S1 Pivot",
+        f"V3 | {leg_key} | AnkleLink - Knee Idler Axis (D)",
+        f"V3 | {leg_key} | AnkleLink - K2 Pivot",
+    ):
+        co = bpy.data.objects.get(cname)
+        if co is not None:
+            for c in co.constraints:
+                c.mute = False
+            co.update_tag()
+
+sc.frame_set(sc.frame_current)
+vl.update()
+deps = bpy.context.evaluated_depsgraph_get()
+orig_eval = orig.evaluated_get(deps)
+inv_orig = orig_eval.matrix_world.inverted()
+
+# Record exact neutral robot-frame positions of optional ankle & double-parallelogram pivots
+# plus any residual ankle rest-pitch offset so neutral crawler soles sit 100% flat on z=-40.93mm.
+pivots = {}
+ankle_level_rad = {}
+for leg_key in ("RL", "RR", "FL", "FR"):
+    leg_pivots = {}
+    for pkey, pname in (
+        ("ankle", f"V3 | {leg_key} | Ankle Axis (F)"),
+        ("ankleS1", f"V3 | {leg_key} | AnkleLink - S1 Pivot"),
+        ("ankleIdler", f"V3 | {leg_key} | AnkleLink - Knee Idler Axis (D)"),
+        ("ankleK2", f"V3 | {leg_key} | AnkleLink - K2 Pivot"),
+    ):
+        po = bpy.data.objects.get(pname)
+        if po is not None:
+            m_rob = inv_orig @ po.evaluated_get(deps).matrix_world
+            leg_pivots[pkey] = [float(v) for v in m_rob.translation]
+    pivots[leg_key] = leg_pivots
+
+    # Measure flat crawler sole normal at neutral; if COPY_ROTATION rest reference tilts the sole,
+    # record the exact Y-pitch leveling correction around the ankle pivot.
+    foot_obj = bpy.data.objects.get(f"V3 | {leg_key} | Komatsu - Sloped Split-Toe Crawler Foot")
+    if foot_obj is not None and "ankle" in leg_pivots:
+        fe = foot_obj.evaluated_get(deps)
+        fm = fe.to_mesh()
+        m_rob = inv_orig @ fe.matrix_world
+        best_a = 0.0
+        best_n = None
+        for poly in fm.polygons:
+            n = (m_rob.to_3x3() @ poly.normal).normalized()
+            if n.z < -0.7 and poly.area > best_a:
+                best_a = poly.area
+                best_n = n
+        fe.to_mesh_clear()
+        if best_n is not None:
+            pitch = math.atan2(float(best_n.x), float(-best_n.z))
+            if abs(pitch) > math.radians(0.5):
+                ankle_level_rad[f"V3_{leg_key}_Ankle"] = (pitch, leg_pivots["ankle"])
 
 # Collect truly visible objects under 'V3 | DSSERVO Robot' collection (excludes archived/hidden backups)
 def collect_col_objs(lc, under_v3=False):
@@ -97,7 +164,7 @@ vis_objs = collect_col_objs(vl.layer_collection, False)
 SKIP_TOKENS = (
     "board -", "radxa", "pca9685", "esp32", "lsm6ds3", "cd74hc4067",
     "battery -", "power -", "mini560", "hiletgo", "flex route", "circuit island",
-    "screw", "hex nut", "m2.6", "m3x", "m3 ", "25t spline", "shim",
+    "screw", "hex nut", "m2.6", "m3x", "m3 ", "m2.5", "25t spline", "shim",
     "bearing 683zz", "presep_", "preartpass_", "preclip_", "prelapjoint_",
     "premid", "preouter", "prepod", "prerear", "preisogrid", "wire grommet",
     "msp2807_pcb", "msp2807_rear", "6-pin header",
@@ -115,6 +182,16 @@ def classify_node(obj) -> str:
         chain.append(cur.name)
         cur = cur.parent
     for leg in ("RL", "RR", "FL", "FR"):
+        if any(f"V3 | {leg} | Ankle Axis (F)" == n for n in chain):
+            return f"V3_{leg}_Ankle"
+        if obj.name == f"V3 | {leg} | Komatsu - Sloped Split-Toe Crawler Foot":
+            return f"V3_{leg}_Ankle"
+        if any(f"V3 | {leg} | AnkleLink - K2 Pivot" == n for n in chain):
+            return f"V3_{leg}_AnkleK2"
+        if any(f"V3 | {leg} | AnkleLink - Knee Idler Axis (D)" == n for n in chain):
+            return f"V3_{leg}_AnkleIdler"
+        if any(f"V3 | {leg} | AnkleLink - S1 Pivot" == n for n in chain):
+            return f"V3_{leg}_AnkleS1"
         if any(f"V3 | {leg} | Knee Axis (D)" == n for n in chain):
             return f"V3_{leg}_Knee"
         if any(f"V3 | {leg} | Rod Input Axis (P)" == n for n in chain):
@@ -127,11 +204,11 @@ def classify_node(obj) -> str:
             return f"V3_{leg}_Shoulder"
     return "V3_RobotRoot"
 
-def extract_mat_props(obj):
-    m = obj.active_material
-    col = [0.22, 0.24, 0.27, 1.0]
-    metal = 0.25
-    rough = 0.50
+def extract_mat_props_from_material(m):
+    col = [0.085, 0.095, 0.108, 1.0]
+    metal = 0.35
+    rough = 0.48
+    emissive = None
     if m is not None:
         col = [float(c) for c in m.diffuse_color[:4]]
         metal = float(m.metallic)
@@ -143,40 +220,35 @@ def extract_mat_props(obj):
                     col = [float(bc[0]), float(bc[1]), float(bc[2]), 1.0]
                     metal = float(n.inputs["Metallic"].default_value)
                     rough = float(n.inputs["Roughness"].default_value)
+                    if "Emission Color" in n.inputs and "Emission Strength" in n.inputs:
+                        es = float(n.inputs["Emission Strength"].default_value)
+                        if es > 0.01:
+                            ec = n.inputs["Emission Color"].default_value
+                            scale = min(1.0, es)
+                            emissive = [
+                                min(1.0, float(ec[0]) * scale),
+                                min(1.0, float(ec[1]) * scale),
+                                min(1.0, float(ec[2]) * scale),
+                            ]
                     break
-        # Linear Blender color -> crisp sRGB for glTF baseColorFactor
-        def lin_to_srgb(v):
-            v = max(0.0, min(1.0, v))
-            return 12.92 * v if v <= 0.0031308 else 1.055 * (v ** (1.0 / 2.4)) - 0.055
-        # Keep metallic / dark iron readable in studio WebGL lighting
+        # glTF 2.0 baseColorFactor and emissiveFactor are linear RGB, matching Blender Principled BSDF.
+        # Apply gentle studio-readability tuning only where needed (e.g. glowing LED emitters / very dark metals).
         low_m = m.name.lower()
-        if "safety yellow" in low_m:
-            col = [0.95, 0.62, 0.06, 1.0]
-            metal, rough = 0.10, 0.36
+        if "ws2812" in low_m and "emitter" in low_m:
+            emissive = [0.96, 0.88, 0.58]
+        elif "amber beacon" in low_m:
+            emissive = [1.0, 0.38, 0.02]
         elif "cast gunmetal" in low_m:
-            col = [0.22, 0.24, 0.28, 1.0]
-            metal, rough = 0.55, 0.42
+            # Lift dark gunmetal slightly so metallic bevels stay distinct from Dark Iron under WebGL studio lights
+            col = [0.13, 0.145, 0.165, 1.0]
+            metal, rough = 0.58, 0.42
         elif "dark iron" in low_m:
-            col = [0.12, 0.13, 0.15, 1.0]
-            metal, rough = 0.38, 0.52
-        elif "blue anodized" in low_m:
-            col = [0.10, 0.44, 0.85, 1.0]
-            metal, rough = 0.78, 0.28
-        elif "black housing" in low_m or "hazard black" in low_m:
-            col = [0.09, 0.10, 0.11, 1.0]
-            metal, rough = 0.10, 0.48
-        elif "aluminum" in low_m or "stainless" in low_m:
-            col = [0.78, 0.80, 0.84, 1.0]
-            metal, rough = 0.82, 0.26
-        else:
-            col = [lin_to_srgb(col[0]), lin_to_srgb(col[1]), lin_to_srgb(col[2]), 1.0]
-    return col, metal, rough
-
-# Evaluate depsgraph in scene 'v3'
-deps = vl.depsgraph if hasattr(vl, "depsgraph") else bpy.context.evaluated_depsgraph_get()
-# Switch active scene to 'v3' so evaluated_depsgraph_get matches scene 'v3'
-bpy.context.window.scene = sc
-deps = bpy.context.evaluated_depsgraph_get()
+            col = [0.055, 0.060, 0.068, 1.0]
+            metal, rough = 0.40, 0.52
+        elif "hazard black" in low_m or "black housing" in low_m:
+            col = [0.022, 0.024, 0.028, 1.0]
+            metal, rough = 0.05, 0.58
+    return col, metal, rough, emissive
 
 arrays = {}
 meta = []
@@ -184,7 +256,7 @@ idx = 0
 for obj in sorted(vis_objs, key=lambda o: o.name):
     if obj.type != "MESH" or should_skip(obj.name):
         continue
-    # Ensure it is part of V3 | Robot Origin hierarchy
+    # Ensure it is part of V3 | Robot Origin hierarchy (or unparented V3 fender liner)
     cur = obj
     under_orig = False
     while cur is not None:
@@ -192,7 +264,7 @@ for obj in sorted(vis_objs, key=lambda o: o.name):
             under_orig = True
             break
         cur = cur.parent
-    if not under_orig:
+    if not under_orig and not (obj.parent is None and obj.name.startswith("V3 | ")):
         continue
 
     eval_obj = obj.evaluated_get(deps)
@@ -205,31 +277,56 @@ for obj in sorted(vis_objs, key=lambda o: o.name):
     bmesh.ops.triangulate(bm, faces=bm.faces[:])
     # Transform vertices directly into V3 | Robot Origin coordinates (mm)
     m_rob = inv_orig @ eval_obj.matrix_world
-    verts = np.array([(m_rob @ v.co)[:] for v in bm.verts], dtype=np.float32)
-    faces = np.array([[v.index for v in f.verts] for f in bm.faces], dtype=np.int32)
-    bm.free()
-    eval_obj.to_mesh_clear()
-    if len(faces) == 0:
-        continue
+    all_verts = np.array([(m_rob @ v.co)[:] for v in bm.verts], dtype=np.float32)
 
     node = classify_node(obj)
-    rgba, metal, rough = extract_mat_props(obj)
-    key = f"m{idx:03d}"
-    arrays[f"{key}_v"] = verts
-    arrays[f"{key}_f"] = faces
-    meta.append({
-        "key": key,
-        "name": obj.name,
-        "node": node,
-        "rgba": rgba,
-        "metallic": metal,
-        "roughness": rough,
-    })
-    idx += 1
+    if node in ankle_level_rad:
+        pitch, piv = ankle_level_rad[node]
+        cp, sp = math.cos(pitch), math.sin(pitch)
+        px, py, pz = piv
+        dx = all_verts[:, 0] - px
+        dz = all_verts[:, 2] - pz
+        all_verts[:, 0] = px + cp * dx + sp * dz
+        all_verts[:, 2] = pz - sp * dx + cp * dz
+
+    # Split faces by per-polygon material_index so multi-material CAD meshes retain EVERY color!
+    faces_by_mat = {}
+    for f in bm.faces:
+        mi = int(f.material_index)
+        faces_by_mat.setdefault(mi, []).append([v.index for v in f.verts])
+    bm.free()
+    eval_obj.to_mesh_clear()
+
+    slots = obj.material_slots
+    for mi, f_list in sorted(faces_by_mat.items()):
+        if not f_list:
+            continue
+        mat = slots[mi].material if (0 <= mi < len(slots) and slots[mi].material is not None) else obj.active_material
+        # Skip the static Blender placeholder screen texture faces (replaced by live animated V3_FaceDisplay)
+        if mat is not None and "komatsu chest screen" in mat.name.lower():
+            continue
+        f_arr = np.array(f_list, dtype=np.int32)
+        used_v, inv_v = np.unique(f_arr, return_inverse=True)
+        sub_verts = all_verts[used_v]
+        sub_faces = inv_v.reshape(-1, 3).astype(np.int32)
+        rgba, metal, rough, emissive = extract_mat_props_from_material(mat)
+        key = f"m{idx:04d}"
+        arrays[f"{key}_v"] = sub_verts
+        arrays[f"{key}_f"] = sub_faces
+        meta.append({
+            "key": key,
+            "name": f"{obj.name}[slot{mi}:{mat.name if mat else 'none'}]",
+            "node": node,
+            "rgba": rgba,
+            "metallic": metal,
+            "roughness": rough,
+            "emissive": emissive,
+        })
+        idx += 1
 
 np.savez_compressed(str(out_npz), **arrays)
-out_meta.write_text(json.dumps(meta, indent=2), encoding="utf-8")
-print(f"Blender dumped {len(meta)} visible V3 meshes -> {out_npz}")
+out_meta.write_text(json.dumps({"meshes": meta, "pivots": pivots}, indent=2), encoding="utf-8")
+print(f"Blender dumped {len(meta)} visible V3 material sub-meshes -> {out_npz}")
 """
 
 
@@ -303,10 +400,12 @@ def export_v3_glb(out_glb: Path, geo: dict[str, Any]) -> None:
             if "Blender dumped" in line:
                 print(f"  {line}")
 
-        meta = json.loads(dump_meta.read_text(encoding="utf-8"))
+        raw_dump = json.loads(dump_meta.read_text(encoding="utf-8"))
+        meta = raw_dump["meshes"]
+        pivots = raw_dump.get("pivots", {})
         npz = np.load(dump_npz)
 
-        # Build exact Option A-1 4-bar neutral node origins in V3_RobotRoot frame (mm, z shifted by -140 mm!)
+        # Build exact Option A-1 4-bar + double-parallelogram ankle neutral node origins in V3_RobotRoot frame (mm, z shifted by -140 mm!)
         lk = geo["linkage_mm"]
         L_crk = float(lk["crank"])
         t0 = float(lk["theta_zero_rad"])
@@ -320,6 +419,7 @@ def export_v3_glb(out_glb: Path, geo: dict[str, Any]) -> None:
         for phys_name in V3_LEGS:
             lg = geo["legs"][phys_name]
             cad_leg = lg["cad_leg"]
+            leg_pivots = pivots.get(cad_leg, {})
             sh_rob = np.array(lg["shoulder_in_robot_mm"], dtype=np.float64)
             sh_body = np.array([sh_rob[0], sh_rob[1], sh_rob[2] - SH_Z_ROBOT_MM], dtype=np.float64)
             car_sh = np.array(lg["carrier_in_shoulder_mm"], dtype=np.float64)
@@ -330,26 +430,64 @@ def export_v3_glb(out_glb: Path, geo: dict[str, Any]) -> None:
                 dtype=np.float64,
             )
 
+            # Ankle pivot in robot-oriented Knee frame (rotate ankle_pivot_in_knee_mm by knee_neutral_rot_y_deg)
+            if "ankle" in leg_pivots:
+                ank_body = np.array(leg_pivots["ankle"], dtype=np.float64)
+                ank_body[2] -= SH_Z_ROBOT_MM
+                ank_in_knee_body = ank_body - (sh_body + knee_sh)
+            else:
+                ank_k = np.array(lg["ankle_pivot_in_knee_mm"], dtype=np.float64)
+                ky = math.radians(float(lg["knee_neutral_rot_y_deg"]))
+                cy, sy = math.cos(ky), math.sin(ky)
+                ank_in_knee_body = np.array(
+                    [cy * ank_k[0] + sy * ank_k[2], ank_k[1], -sy * ank_k[0] + cy * ank_k[2]],
+                    dtype=np.float64,
+                )
+                ank_body = sh_body + knee_sh + ank_in_knee_body
+
             sh_node = f"V3_{cad_leg}_Shoulder"
             car_node = f"V3_{cad_leg}_Carrier"
             crk_node = f"V3_{cad_leg}_Crank"
             knee_node = f"V3_{cad_leg}_Knee"
             rod_node = f"V3_{cad_leg}_Rod"
+            ank_node = f"V3_{cad_leg}_Ankle"
 
             node_origin_body_mm[sh_node] = sh_body
             node_origin_body_mm[car_node] = sh_body + car_sh
             node_origin_body_mm[crk_node] = sh_body + crk_sh
             node_origin_body_mm[knee_node] = sh_body + knee_sh
             node_origin_body_mm[rod_node] = sh_body + rod_sh
+            node_origin_body_mm[ank_node] = ank_body
 
             scene.graph.update(frame_from="V3_RobotRoot", frame_to=sh_node, matrix=_trans_mat4(_mj_vec_mm_to_three_m(sh_body.tolist())))
             scene.graph.update(frame_from=sh_node, frame_to=car_node, matrix=_trans_mat4(_mj_vec_mm_to_three_m(car_sh.tolist())))
             scene.graph.update(frame_from=sh_node, frame_to=crk_node, matrix=_trans_mat4(_mj_vec_mm_to_three_m(crk_sh.tolist())))
             scene.graph.update(frame_from=sh_node, frame_to=knee_node, matrix=_trans_mat4(_mj_vec_mm_to_three_m(knee_sh.tolist())))
             scene.graph.update(frame_from=sh_node, frame_to=rod_node, matrix=_trans_mat4(_mj_vec_mm_to_three_m(rod_sh.tolist())))
+            scene.graph.update(frame_from=knee_node, frame_to=ank_node, matrix=_trans_mat4(_mj_vec_mm_to_three_m(ank_in_knee_body.tolist())))
 
-        # Bucket meshes by (parent_node, rounded color & metallic/roughness) for tiny draw-call count!
-        buckets: dict[tuple[str, tuple[int, int, int, int]], tuple[list[np.ndarray], list[np.ndarray], list[float], float, float]] = {}
+            # Optional 2-stage double-parallelogram linkage nodes (present on FR prototype & future mirrored legs)
+            if "ankleS1" in leg_pivots:
+                s1_body = np.array(leg_pivots["ankleS1"], dtype=np.float64)
+                s1_body[2] -= SH_Z_ROBOT_MM
+                s1_node = f"V3_{cad_leg}_AnkleS1"
+                node_origin_body_mm[s1_node] = s1_body
+                scene.graph.update(frame_from=sh_node, frame_to=s1_node, matrix=_trans_mat4(_mj_vec_mm_to_three_m((s1_body - sh_body).tolist())))
+            if "ankleIdler" in leg_pivots:
+                id_body = np.array(leg_pivots["ankleIdler"], dtype=np.float64)
+                id_body[2] -= SH_Z_ROBOT_MM
+                id_node = f"V3_{cad_leg}_AnkleIdler"
+                node_origin_body_mm[id_node] = id_body
+                scene.graph.update(frame_from=knee_node, frame_to=id_node, matrix=_trans_mat4(_mj_vec_mm_to_three_m((id_body - (sh_body + knee_sh)).tolist())))
+                if "ankleK2" in leg_pivots:
+                    k2_body = np.array(leg_pivots["ankleK2"], dtype=np.float64)
+                    k2_body[2] -= SH_Z_ROBOT_MM
+                    k2_node = f"V3_{cad_leg}_AnkleK2"
+                    node_origin_body_mm[k2_node] = k2_body
+                    scene.graph.update(frame_from=id_node, frame_to=k2_node, matrix=_trans_mat4(_mj_vec_mm_to_three_m((k2_body - id_body).tolist())))
+
+        # Bucket meshes by (parent_node, rounded color, metallic, roughness, emissive) for tiny draw-call count!
+        buckets: dict[tuple[str, tuple[int, int, int, int, int, int, int, int]], tuple[list[np.ndarray], list[np.ndarray], list[float], float, float, list[float] | None]] = {}
         raw_tris = 0
         for item in meta:
             node = item["node"]
@@ -365,60 +503,72 @@ def export_v3_glb(out_glb: Path, geo: dict[str, Any]) -> None:
             rgba = item["rgba"]
             metal = float(item["metallic"])
             rough = float(item["roughness"])
+            emissive = item.get("emissive")
+            er, eg, eb = emissive if emissive else (0.0, 0.0, 0.0)
             ckey = (
                 int(round(rgba[0] * 255)),
                 int(round(rgba[1] * 255)),
                 int(round(rgba[2] * 255)),
-                int(round(metal * 10)),
+                int(round(metal * 20)),
+                int(round(rough * 20)),
+                int(round(er * 255)),
+                int(round(eg * 255)),
+                int(round(eb * 255)),
             )
             bkey = (node, ckey)
             if bkey not in buckets:
-                buckets[bkey] = ([], [], rgba, metal, rough)
-            v_list, f_list, _, _, _ = buckets[bkey]
+                buckets[bkey] = ([], [], rgba, metal, rough, emissive)
+            v_list, f_list, _, _, _, _ = buckets[bkey]
             v_off = sum(len(v) for v in v_list)
             v_list.append(verts_three)
             f_list.append(faces + v_off)
             raw_tris += len(faces)
 
         final_tris = 0
-        for idx, ((parent_node, _ckey), (v_list, f_list, rgba, metal, rough)) in enumerate(sorted(buckets.items())):
+        for idx, ((parent_node, _ckey), (v_list, f_list, rgba, metal, rough, emissive)) in enumerate(sorted(buckets.items())):
             verts = np.vstack(v_list).astype(np.float32)
             faces = np.vstack(f_list).astype(np.int32)
             verts, faces = _simplify_cad_mesh(verts, faces, cell_m=0.0011)
             if len(faces) == 0:
                 continue
             final_tris += len(faces)
-            mat = trimesh.visual.material.PBRMaterial(
-                name=f"v3_mat_{idx}",
-                baseColorFactor=[rgba[0], rgba[1], rgba[2], 1.0],
-                metallicFactor=metal,
-                roughnessFactor=rough,
-            )
+            mat_kwargs: dict[str, Any] = {
+                "name": f"v3_mat_{idx}",
+                "baseColorFactor": [rgba[0], rgba[1], rgba[2], 1.0],
+                "metallicFactor": metal,
+                "roughnessFactor": rough,
+            }
+            if emissive:
+                mat_kwargs["emissiveFactor"] = emissive
+            mat = trimesh.visual.material.PBRMaterial(**mat_kwargs)
             mesh = trimesh.Trimesh(vertices=verts, faces=faces, process=False)
             mesh.visual = trimesh.visual.TextureVisuals(material=mat)
             gname = f"geom_{parent_node}_{idx}"
             scene.add_geometry(mesh, node_name=gname, geom_name=gname, parent_node_name=parent_node)
 
-        # Add dedicated V3_FaceDisplay textured quad flush in front of the 2.8in MSP2807 TFT glass!
-        # MSP2807 glass in robot coords: x=188.6 mm, y in [-35.1, +34.1], z in [107.0, 157.0]
-        # Active 2.8in window ~60 x 38 mm centered at (y=0, z_robot=132 -> z_body=-8 mm), proud at x=189.6 mm!
-        x_front = 189.6
-        hw_y = 29.0
-        z_mid = 132.0 - SH_Z_ROBOT_MM  # -8.0 mm
-        hh_z = 17.0
-        # Viewer facing robot sees -Y_body on viewer-left (u=0) and +Y_body on viewer-right (u=1)
+        # Add dedicated V3_FaceDisplay textured quad cleanly framed inside the Display Bezel aperture!
+        # Display Bezel inner aperture: x=194.7..196.4 mm, y in [-26.3, +26.3] (52.6 mm), z in [119.5, 147.9] (28.4 mm).
+        # Aspect ratio 52.0 x 27.8 mm (1.871) matches the 320x170 (1.882) live Ainekio face canvas with zero clipping!
+        x_front = 195.0
+        hw_y = 26.0
+        z_mid = 133.7 - SH_Z_ROBOT_MM  # -6.3 mm (vertical center of bezel aperture 119.5..147.9)
+        hh_z = 13.9
+        # Viewer facing robot (+Z_three -> -Z_three): -Y_robot (-X_three) is viewer-left (u=0),
+        # +Y_robot (+X_three) is viewer-right (u=1).
+        # Note: trimesh flips v -> 1 - v on GLB export, so passing v=1 at top and v=0 at bottom
+        # produces raw glTF TEXCOORD_0 v=0 at top and v=1 at bottom (right-side up with flipY=false)!
         corners_body = np.array(
             [
-                [x_front, -hw_y, z_mid + hh_z],  # top-left (u=0, v=0)
-                [x_front, +hw_y, z_mid + hh_z],  # top-right (u=1, v=0)
-                [x_front, +hw_y, z_mid - hh_z],  # bot-right (u=1, v=1)
-                [x_front, -hw_y, z_mid - hh_z],  # bot-left (u=0, v=1)
+                [x_front, -hw_y, z_mid + hh_z],  # top-left (glTF u=0, v=0)
+                [x_front, +hw_y, z_mid + hh_z],  # top-right (glTF u=1, v=0)
+                [x_front, +hw_y, z_mid - hh_z],  # bot-right (glTF u=1, v=1)
+                [x_front, -hw_y, z_mid - hh_z],  # bot-left (glTF u=0, v=1)
             ],
             dtype=np.float64,
         )
         corners_three = _mj_mm_to_three_m(corners_body)
         face_tris = np.array([[0, 3, 2], [0, 2, 1]], dtype=np.int32)
-        uvs = np.array([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]], dtype=np.float32)
+        uvs = np.array([[0.0, 1.0], [1.0, 1.0], [1.0, 0.0], [0.0, 0.0]], dtype=np.float32)
         face_mat = trimesh.visual.material.PBRMaterial(
             name="V3_FaceDisplay_Mat",
             baseColorFactor=[0.04, 0.06, 0.10, 1.0],
@@ -492,6 +642,7 @@ def export_v3_mujoco_and_config(sim_dir: Path, geo: dict[str, Any]) -> None:
         "gyroSensorAdr": int(model.sensor_adr[model.sensor("imu_gyro").id]),
         "accelSensorAdr": int(model.sensor_adr[model.sensor("imu_accel").id]),
         "linkageMm": geo["linkage_mm"],
+        "legMechanics": geo.get("leg_mechanics"),
         "legs": {
             leg: {
                 "cadLeg": geo["legs"][leg]["cad_leg"],
@@ -506,6 +657,7 @@ def export_v3_mujoco_and_config(sim_dir: Path, geo: dict[str, Any]) -> None:
                 "gammaZeroRad": geo["legs"][leg]["gamma_zero_rad"],
                 "soleCenterInKneeMm": geo["legs"][leg]["sole_center_in_knee_mm"],
                 "soleCenterInRobotMm": geo["legs"][leg]["sole_center_in_robot_mm"],
+                "anklePivotInKneeMm": geo["legs"][leg].get("ankle_pivot_in_knee_mm"),
             }
             for leg in V3_LEGS
         },

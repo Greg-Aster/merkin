@@ -16,10 +16,14 @@ import {
 	PROTOCOL_BIN_SPEAKER_PCM,
 	cameraResolutionDimensions,
 	computeOrbitCameraPose,
+	decodeBodyControlPairingCode,
 	decodeProtocolBinaryFrame,
+	encodeBodyControlPairingCode,
 	encodeProtocolBinaryFrame,
 	mujocoPositionToThree,
 	mujocoQuaternionToThreeXyzw,
+	normalizeBodyControlUrl,
+	parseSimulatorLaunchParams,
 	threePositionToMujoco,
 } from "../src/sim/contracts";
 import { SIMULATOR_LEVELS, getSimulatorLevel } from "../src/sim/levels";
@@ -729,6 +733,81 @@ function testMultiplayerSessionAndGameCompat(): void {
 	assert.equal(simClient.snapshot().remotePlayers.length, 0);
 }
 
+function testBodyControlLaunchAndPairingContracts(): void {
+	assert.equal(
+		normalizeBodyControlUrl("robot-gateway.ainek.io"),
+		"wss://robot-gateway.ainek.io/robot",
+	);
+	assert.equal(
+		normalizeBodyControlUrl("https://robot-gateway.ainek.io/"),
+		"wss://robot-gateway.ainek.io/robot",
+	);
+	assert.equal(
+		normalizeBodyControlUrl("127.0.0.1"),
+		"ws://127.0.0.1:8790/robot",
+	);
+	assert.equal(
+		normalizeBodyControlUrl("192.168.0.44:8790"),
+		"ws://192.168.0.44:8790/robot",
+	);
+	assert.equal(
+		normalizeBodyControlUrl("http://192.168.0.44:8790"),
+		"ws://192.168.0.44:8790/robot",
+	);
+
+	const code = encodeBodyControlPairingCode({
+		bc: "robot-gateway.ainek.io",
+		robotId: "ainekio-v3-sim",
+		token: "secret-tok-123",
+		model: "v3",
+		level: "observatory",
+		mp: "host",
+		room: "wander-world",
+		name: "Ainekio V3",
+	});
+	assert.ok(code.startsWith("ainekio-pair:"));
+	const decoded = decodeBodyControlPairingCode(code);
+	assert.deepEqual(decoded, {
+		bc: "wss://robot-gateway.ainek.io/robot",
+		robotId: "ainekio-v3-sim",
+		token: "secret-tok-123",
+		model: "v3",
+		level: "observatory",
+		mp: "host",
+		room: "wander-world",
+		name: "Ainekio V3",
+	});
+
+	const fromUrl = decodeBodyControlPairingCode(
+		"https://simulator.ainek.io/#bc=127.0.0.1:8790&robotId=ainekio-v2-sim&token=tok99&model=v2&mp=join&room=lab-room",
+	);
+	assert.deepEqual(fromUrl, {
+		bc: "ws://127.0.0.1:8790/robot",
+		robotId: "ainekio-v2-sim",
+		token: "tok99",
+		model: "v2",
+		mp: "join",
+		room: "lab-room",
+	});
+
+	const launch = parseSimulatorLaunchParams(
+		"?room=public-room",
+		"#bc=ws://127.0.0.1:8790/robot&robotId=ainekio-v1-sim&token=abc&model=v1&level=yggdrasil&mp=host",
+	);
+	assert.equal(launch.shouldScrubHash, true);
+	assert.equal(launch.bc, "ws://127.0.0.1:8790/robot");
+	assert.equal(launch.robotId, "ainekio-v1-sim");
+	assert.equal(launch.token, "abc");
+	assert.equal(launch.model, "v1");
+	assert.equal(launch.level, "yggdrasil");
+	assert.equal(launch.mp, "host");
+	assert.equal(launch.room, "public-room");
+
+	const roomOnly = parseSimulatorLaunchParams("?room=public-room", "");
+	assert.equal(roomOnly.shouldScrubHash, false);
+	assert.equal(roomOnly.room, "public-room");
+}
+
 testCoordinateTransforms();
 testOrbitCameraLookUpAndContinuity();
 testProtocolBinaryCodecs();
@@ -736,6 +815,7 @@ testCameraResolutions();
 testDetachedLevelsAndAssets();
 testNeuralPoliciesAndManifoldParity();
 testMultiplayerSessionAndGameCompat();
+testBodyControlLaunchAndPairingContracts();
 console.log(
-	"All simulator.ainek.io contract, asset, multiplayer, Neural Gait, Neural Pose, and PoseManifold parity checks passed.",
+	"All simulator.ainek.io contract, asset, multiplayer, Body Control launch/pairing, Neural Gait, Neural Pose, and PoseManifold parity checks passed.",
 );

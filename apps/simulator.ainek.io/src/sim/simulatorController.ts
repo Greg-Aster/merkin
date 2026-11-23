@@ -21,6 +21,7 @@ import { BrowserRobotAudioAdapter } from "../viewport/robotAudio";
 import { SimulatorViewport } from "../viewport/simulatorViewport";
 import { WorldAudioEngine } from "../viewport/worldAudio";
 import {
+	type BodyControlLaunchBundle,
 	type LocomotionEngineMode,
 	type NeuralMotionCatalogItem,
 	PROTOCOL_BIN_CAMERA_JPEG,
@@ -29,6 +30,7 @@ import {
 	type RobotModelId,
 	type RobotTelemetryState,
 	type SimulatorCameraMode,
+	type SimulatorLaunchConfig,
 	type SimulatorLevelId,
 	type SimulatorUiSnapshot,
 	V2_CLIP_ACTIONS,
@@ -41,6 +43,8 @@ import {
 	getRobotModelDescriptor,
 	mujocoPositionToThree,
 	mujocoQuaternionToThreeXyzw,
+	normalizeBodyControlUrl,
+	parseSimulatorLaunchParams,
 } from "./contracts";
 import { getSimulatorLevel, loadSimulatorLevel } from "./levels";
 
@@ -181,6 +185,10 @@ export class AinekioSimulatorController {
 	#lastFaceHeight = 0;
 	#lastFaceRgba?: Uint8Array;
 	#lastStateUiEmitMs = 0;
+	readonly #launchConfig: SimulatorLaunchConfig | undefined;
+	readonly #seenMpChatIds = new Set<string>();
+	#wasMpConnected = false;
+	#launchAutoConnected = false;
 	#disposed = false;
 
 	constructor(
@@ -192,6 +200,41 @@ export class AinekioSimulatorController {
 		this.#bcUrl = saved.url;
 		this.#bcRobotId = saved.robotId;
 		this.#bcAutoReconnect = saved.autoReconnect;
+
+		if (typeof window !== "undefined") {
+			const launch = parseSimulatorLaunchParams(
+				window.location.search,
+				window.location.hash,
+			);
+			this.#launchConfig = launch;
+			if (launch.shouldScrubHash && window.location.hash) {
+				try {
+					window.history.replaceState(
+						null,
+						"",
+						`${window.location.pathname}${window.location.search}`,
+					);
+				} catch {
+					// Ignore restricted history contexts
+				}
+			}
+			if (launch.model) {
+				this.#robotModel = launch.model;
+			}
+			if (launch.level) {
+				this.#levelId = launch.level;
+			}
+			if (launch.bc) {
+				this.#bcUrl = launch.bc;
+			}
+			if (launch.robotId) {
+				this.#bcRobotId = launch.robotId;
+			}
+			if (launch.token) {
+				this.#bcToken = launch.token;
+			}
+		}
+
 		this.#viewport = new SimulatorViewport(viewportContainer);
 		this.#worldAudio = new WorldAudioEngine(() => this.#emitSnapshot());
 		this.#multiplayer = createBrowserMultiplayerClient();
@@ -199,23 +242,62 @@ export class AinekioSimulatorController {
 		this.#unsubscribeMultiplayer = this.#multiplayer.subscribe((mpSnap) => {
 			this.#multiplayerSnapshot = mpSnap;
 			this.#viewport.syncRemotePeers(mpSnap.remotePlayers, this.#levelId);
+			this.#forwardRemoteRoomChats(mpSnap);
 			this.#emitSnapshot();
 		});
 		this.#emitSnapshot();
 	}
 
-	getSavedBodyControlSettings(): SavedBodyControlSettings {
+	getSavedBodyControlSettings(): SavedBodyControlSettings & {
+		readonly token?: string;
+	} {
 		return {
 			url: this.#bcUrl,
 			robotId: this.#bcRobotId,
 			autoReconnect: this.#bcAutoReconnect,
+			...(this.#bcToken ? { token: this.#bcToken } : {}),
 		};
+	}
+
+	#forwardRemoteRoomChats(mpSnap: MultiplayerSnapshot): void {
+		if (mpSnap.status !== "connected") {
+			this.#wasMpConnected = false;
+			return;
+		}
+		if (!this.#wasMpConnected) {
+			this.#wasMpConnected = true;
+			for (const msg of mpSnap.chatMessages) {
+				this.#seenMpChatIds.add(msg.id);
+			}
+			return;
+		}
+		for (const msg of mpSnap.chatMessages) {
+			if (this.#seenMpChatIds.has(msg.id)) {
+				continue;
+			}
+			this.#seenMpChatIds.add(msg.id);
+			if (mpSnap.localPeerId && msg.senderId === mpSnap.localPeerId) {
+				continue;
+			}
+			if (this.#controlMode === "body-control" && this.#bcConnected) {
+				this.#sendBodyControlJson({
+					t: "event",
+					name: "room_chat",
+					id: msg.id,
+					room: mpSnap.roomName ?? "",
+					sender_id: msg.senderId,
+					sender: msg.senderName || msg.senderId.slice(0, 8),
+					text: msg.text,
+				});
+			}
+		}
 	}
 
 	async start(): Promise<void> {
 		const initialLevel = await loadSimulatorLevel(this.#levelId);
+		const initialRobotDesc = getRobotModelDescriptor(this.#robotModel);
 		this.#worldAudio.setLevelAudio(initialLevel.audio);
-		this.#loadingMessage = "Loading Ainekio V2 CAD rig & arena...";
+		this.#loadingMessage = `Loading ${initialRobotDesc.name} CAD rig & arena...`;
 		this.#emitSnapshot();
 
 		// Boot worker in parallel with Three.js GLB & arena loading
@@ -239,23 +321,26 @@ export class AinekioSimulatorController {
 			collidersMj: initialLevel.collidersMj,
 			hfield: initialLevel.hfield,
 			useDefaultFloorPlane: initialLevel.useDefaultFloorPlane,
-			spawnMj: initialLevel.robotSpawnMj,
+			spawnMj: this.#robotSpawnForLevel(initialLevel.robotSpawnMj),
 		});
 
 		await Promise.all([
-			this.#viewport.loadRobot("/assets/robots/ainekio-v2.glb", "v2"),
+			this.#viewport.loadRobot(initialRobotDesc.glbUrl, this.#robotModel),
 			this.#viewport.loadLevel(initialLevel),
 		]);
 
-		// Auto-join multiplayer room if opened via ?room=<name> invite link
-		try {
-			const params = new URLSearchParams(window.location.search);
-			const roomParam = normalizeRoomName(params.get("room") ?? "");
-			if (roomParam.length >= 3) {
-				void this.joinMultiplayerRoom(roomParam);
-			}
-		} catch {
-			// Ignore malformed URL query
+		// Auto-host or auto-join multiplayer room from launch config or ?room=<name>
+		const launchRoom = normalizeRoomName(this.#launchConfig?.room ?? "");
+		const launchMp = this.#launchConfig?.mp;
+		const launchDisplayName =
+			this.#launchConfig?.name ||
+			(launchMp === "host" && this.#launchConfig?.token
+				? `Ainekio ${initialRobotDesc.shortName}`
+				: undefined);
+		if (launchMp === "host" && launchRoom.length >= 3) {
+			void this.hostMultiplayerRoom(launchRoom, launchDisplayName);
+		} else if (launchMp !== "solo" && launchRoom.length >= 3) {
+			void this.joinMultiplayerRoom(launchRoom, launchDisplayName);
 		}
 
 		// Keep standalone admission alive with 1 Hz protocol-v1 heartbeat
@@ -873,20 +958,20 @@ export class AinekioSimulatorController {
 		this.#bcAutoReconnect = autoReconnect;
 		this.#bcReconnectAttempts = 0;
 		this.#bcReconnecting = false;
-		const trimmedUrl = url.trim();
+		const normalizedUrl = normalizeBodyControlUrl(url);
 		const trimmedId = robotId.trim() || DEFAULT_ROBOT_ID;
 		const trimmedToken = token.trim();
-		this.#bcUrl = trimmedUrl;
+		this.#bcUrl = normalizedUrl;
 		this.#bcRobotId = trimmedId;
 		this.#bcToken = trimmedToken;
 		saveBodyControlSettings({
-			url: trimmedUrl,
+			url: normalizedUrl,
 			robotId: trimmedId,
 			autoReconnect,
 		});
 		if (!trimmedToken) {
 			this.#bcError =
-				"Robot Auth Token is required (copy your robot token from Body Control's robot-tokens.json).";
+				"Robot Auth Token is required (paste a Pairing Code from Body Control or enter your robot token).";
 			this.#bcConnected = false;
 			this.#bcReconnecting = false;
 			this.#controlMode = "standalone";
@@ -894,6 +979,57 @@ export class AinekioSimulatorController {
 			return;
 		}
 		this.#openBodyControlSocket();
+	}
+
+	async applyPairingBundle(
+		bundle: BodyControlLaunchBundle,
+		autoConnect = true,
+	): Promise<void> {
+		if (bundle.level && bundle.level !== this.#levelId) {
+			await this.setLevel(bundle.level);
+		}
+		if (bundle.model && bundle.model !== this.#robotModel) {
+			await this.setRobotModel(bundle.model);
+		}
+		const nextUrl = bundle.bc
+			? normalizeBodyControlUrl(bundle.bc)
+			: this.#bcUrl;
+		const nextId = bundle.robotId ?? this.#bcRobotId;
+		const nextToken = bundle.token ?? this.#bcToken;
+		this.#bcUrl = nextUrl;
+		this.#bcRobotId = nextId;
+		if (bundle.token) {
+			this.#bcToken = bundle.token;
+		}
+		if (autoConnect && nextUrl && nextToken) {
+			this.connectBodyControl(nextUrl, nextId, nextToken, true);
+		} else {
+			this.#emitSnapshot();
+		}
+		const normRoom = normalizeRoomName(bundle.room ?? "");
+		if (normRoom.length >= 3) {
+			if (bundle.mp === "host") {
+				await this.hostMultiplayerRoom(normRoom, bundle.name);
+			} else if (bundle.mp !== "solo") {
+				await this.joinMultiplayerRoom(normRoom, bundle.name);
+			}
+		}
+	}
+
+	#maybeCompleteLaunchAutoConnect(): void {
+		if (this.#launchAutoConnected) {
+			return;
+		}
+		this.#launchAutoConnected = true;
+		const launch = this.#launchConfig;
+		if (launch?.bc && launch?.token) {
+			this.connectBodyControl(
+				launch.bc,
+				launch.robotId || DEFAULT_ROBOT_ID,
+				launch.token,
+				true,
+			);
+		}
 	}
 
 	#openBodyControlSocket(): void {
@@ -1075,6 +1211,13 @@ export class AinekioSimulatorController {
 			this.#emitSnapshot();
 			return;
 		}
+		if (msgType === "event" && parsed.name === "assistant_text") {
+			const text = typeof parsed.text === "string" ? parsed.text.trim() : "";
+			if (text && this.#multiplayerSnapshot.status === "connected") {
+				this.#multiplayer.sendChat(text);
+			}
+			return;
+		}
 		this.#postWorker({
 			type: "protocol-rx",
 			wire,
@@ -1138,6 +1281,24 @@ export class AinekioSimulatorController {
 				}
 				this.#lastCommandLog = `Neural Gait (${this.#neuralGaitModelId}) + Neural Pose (${this.#neuralPoseModelId}) online`;
 				this.#emitSnapshot();
+				if (this.#robotModel !== "v2") {
+					void loadSimulatorLevel(this.#levelId).then((level) => {
+						if (this.#disposed) {
+							return;
+						}
+						this.#postWorker({
+							type: "set-robot",
+							robotModel: this.#robotModel,
+							obstaclesMj: level.obstaclesMj,
+							collidersMj: level.collidersMj,
+							hfield: level.hfield,
+							useDefaultFloorPlane: level.useDefaultFloorPlane,
+							spawnMj: this.#robotSpawnForLevel(level.robotSpawnMj),
+						});
+					});
+				} else {
+					this.#maybeCompleteLaunchAutoConnect();
+				}
 				break;
 			}
 			case "robot-ready": {
@@ -1150,6 +1311,7 @@ export class AinekioSimulatorController {
 				const desc = getRobotModelDescriptor(msg.robotModel);
 				this.#lastCommandLog = `${desc.name} online (${this.#neuralGaitModelId} + ${this.#neuralPoseModelId})`;
 				this.#emitSnapshot();
+				this.#maybeCompleteLaunchAutoConnect();
 				if (
 					this.#bcRehandshakeOnRobotReady &&
 					this.#controlMode === "body-control"

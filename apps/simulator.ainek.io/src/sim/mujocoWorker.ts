@@ -147,6 +147,7 @@ type FirmwareWasm = {
 		cap: number,
 	): number;
 	_virtual_body_events(buf: number, cap: number): number;
+	_virtual_body_set_face_style?(style: number): void;
 	_virtual_body_set_media_state(
 		cameraReady: number,
 		microphoneReady: number,
@@ -809,6 +810,8 @@ async function handleSetRobot(
 		await ensureV3AssetsLoaded();
 	}
 	activeRobotModel = robotModel;
+	fw?._virtual_body_set_face_style?.(robotModel === "v3" ? 1 : 0);
+	lastFaceHash = 0;
 	await loadMujocoModel(
 		obstacles,
 		spawnMj,
@@ -2287,6 +2290,19 @@ function stepV1ControlFrame(): void {
 	);
 	if (fw && nowWallMs - lastFaceRenderMs >= 50) {
 		lastFaceRenderMs = nowWallMs;
+		fw._virtual_body_set_media_state(
+			mediaCameraReady ? 1 : 0,
+			1,
+			1,
+			1,
+			1,
+			mediaCapturing ? 1 : 0,
+			mediaTalking ? 1 : 0,
+			mediaTalking ? 1 : 0,
+			mediaMicRms,
+			mediaMicPeak,
+			batteryVoltage,
+		);
 		fw._virtual_body_tick(nowUs, tickOutPtr);
 		const ok = fw._virtual_body_face_frame(
 			nowUs / 1000n,
@@ -2743,6 +2759,19 @@ function stepV3ControlFrame(): void {
 	);
 	if (fw && nowWallMs - lastFaceRenderMs >= 50) {
 		lastFaceRenderMs = nowWallMs;
+		fw._virtual_body_set_media_state(
+			mediaCameraReady ? 1 : 0,
+			1,
+			1,
+			1,
+			1,
+			mediaCapturing ? 1 : 0,
+			mediaTalking ? 1 : 0,
+			mediaTalking ? 1 : 0,
+			mediaMicRms,
+			mediaMicPeak,
+			batteryVoltage,
+		);
 		fw._virtual_body_tick(nowUs, tickOutPtr);
 		const ok = fw._virtual_body_face_frame(
 			nowUs / 1000n,
@@ -3608,17 +3637,34 @@ self.addEventListener(
 				fw._free(tokPtr);
 				if (n > 0) {
 					let wire = fw.UTF8ToString(textBufPtr, n);
-					if (activeRobotModel === "v1" || activeRobotModel === "v3") {
-						try {
-							const hello = JSON.parse(wire) as Record<string, unknown>;
+					try {
+						const hello = JSON.parse(wire) as Record<string, unknown>;
+						const baseFeatures = Array.isArray(hello.features)
+							? hello.features.filter((f): f is string => typeof f === "string")
+							: [];
+						const v2OnlyFeatures = new Set([
+							"walk_nominal_v1",
+							"motion_targets_v1",
+							"motion_curves_v1",
+							"body_calibration_v2",
+						]);
+						const filteredFeatures =
+							activeRobotModel === "v1" || activeRobotModel === "v3"
+								? baseFeatures.filter((f) => !v2OnlyFeatures.has(f))
+								: baseFeatures;
+						if (!filteredFeatures.includes("room_chat_v1")) {
+							filteredFeatures.push("room_chat_v1");
+						}
+						hello.features = filteredFeatures;
+						if (activeRobotModel === "v1" || activeRobotModel === "v3") {
 							hello.model =
 								activeRobotModel === "v1" ? "v1-8servo" : "v3-12servo";
 							hello.fw =
 								activeRobotModel === "v1" ? "virtual-v1-sim" : "virtual-v3-sim";
-							wire = JSON.stringify(hello);
-						} catch {
-							// fall back to base hello string
 						}
+						wire = JSON.stringify(hello);
+					} catch {
+						// fall back to base hello string
 					}
 					post({ type: "hello", wire });
 				}
@@ -3751,10 +3797,7 @@ self.addEventListener(
 								if (!emitProtocolTx) {
 									return;
 								}
-							} else if (
-								!emitProtocolTx &&
-								(parsed.t === "ping" || parsed.t === "balance")
-							) {
+							} else if (!emitProtocolTx && parsed.t === "balance") {
 								return;
 							}
 						}
