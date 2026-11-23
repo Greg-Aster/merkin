@@ -1,6 +1,5 @@
 packages:
   - 'apps/game.megameal'
-  - 'apps/simulator.ainek.io'
   - 'apps/megameal'
   - 'apps/ainekio'
   - 'apps/docs-editor-bridge'

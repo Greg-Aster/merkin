@@ -568,8 +568,8 @@ importers:
   apps/game.megameal:
     dependencies:
       '@ainekio/engine':
-        specifier: github:Greg-Aster/ainekio-engine#v0.1.0
-        version: https://codeload.github.com/Greg-Aster/ainekio-engine/tar.gz/caf28fdc4e1bf0d5b21b1a2208cb07656cb9ff63(@dimforge/rapier3d-compat@0.17.3)(peerjs@1.5.5)(three@0.178.0)
+        specifier: github:Greg-Aster/ainekio-engine#v0.2.1
+        version: https://codeload.github.com/Greg-Aster/ainekio-engine/tar.gz/19539e9a70814dfb15756e1b2c484c7078a42ca0(@dimforge/rapier3d-compat@0.17.3)(peerjs@1.5.5)(three@0.178.0)
       '@astrojs/svelte':
         specifier: 7.2.5
         version: 7.2.5(@types/node@25.3.0)(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(jiti@1.21.7)(lightningcss@1.32.0)(stylus@0.63.0)(svelte@5.26.2)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -804,46 +804,6 @@ importers:
         specifier: ^13.0.1
         version: 13.0.2(postcss@8.5.6)
 
-  apps/simulator.ainek.io:
-    dependencies:
-      '@astrojs/svelte':
-        specifier: 7.2.5
-        version: 7.2.5(@types/node@25.3.0)(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(jiti@1.21.7)(lightningcss@1.32.0)(stylus@0.63.0)(svelte@5.26.2)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
-      astro:
-        specifier: 5.18.0
-        version: 5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
-      mujoco-js:
-        specifier: 0.0.7
-        version: 0.0.7
-      peerjs:
-        specifier: ^1.5.5
-        version: 1.5.5
-      svelte:
-        specifier: 5.26.2
-        version: 5.26.2
-      three:
-        specifier: 0.178.0
-        version: 0.178.0
-    devDependencies:
-      '@astrojs/check':
-        specifier: ^0.9.4
-        version: 0.9.6(prettier@3.8.1)(typescript@5.9.3)
-      '@biomejs/biome':
-        specifier: 1.8.3
-        version: 1.8.3
-      '@types/node':
-        specifier: 25.3.0
-        version: 25.3.0
-      '@types/three':
-        specifier: 0.176.0
-        version: 0.176.0
-      tsx:
-        specifier: 4.21.0
-        version: 4.21.0
-      typescript:
-        specifier: ^5.7.3
-        version: 5.9.3
-
   packages/blog-core:
     dependencies:
       '@fontsource-variable/jetbrains-mono':
@@ -926,9 +886,9 @@ packages:
   '@adobe/css-tools@4.3.3':
     resolution: {integrity: sha512-rE0Pygv0sEZ4vBWHlAgJLGDU7Pm8xoO6p3wsEceb7GYAjScrOHpEo8KK/eVkAcnSM+slAEtXjA2JpdjLp4fJQQ==}
 
-  '@ainekio/engine@https://codeload.github.com/Greg-Aster/ainekio-engine/tar.gz/caf28fdc4e1bf0d5b21b1a2208cb07656cb9ff63':
-    resolution: {tarball: https://codeload.github.com/Greg-Aster/ainekio-engine/tar.gz/caf28fdc4e1bf0d5b21b1a2208cb07656cb9ff63}
-    version: 0.1.0
+  '@ainekio/engine@https://codeload.github.com/Greg-Aster/ainekio-engine/tar.gz/19539e9a70814dfb15756e1b2c484c7078a42ca0':
+    resolution: {tarball: https://codeload.github.com/Greg-Aster/ainekio-engine/tar.gz/19539e9a70814dfb15756e1b2c484c7078a42ca0}
+    version: 0.2.1
     peerDependencies:
       '@dimforge/rapier3d-compat': '>=0.17.0'
       peerjs: '>=1.5.0'
@@ -4186,10 +4146,6 @@ packages:
   muggle-string@0.4.1:
     resolution: {integrity: sha512-VNTrAak/KhO2i8dqqnqnAHOa3cYBwXEZe9h+D5h/1ZqFSTEFHdM65lR7RoIqq3tBBYavsOXV84NoHXZ0AkPyqQ==}
 
-  mujoco-js@0.0.7:
-    resolution: {integrity: sha512-MXCudYo+QCncFEQVxDy9GjELOGRNKsSucKpHgz9hNeRSWXP01xhtZr5GNvY30Rvs/mtfV/jPb3uIsiYXPJ2V2g==}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
-
   mz@2.7.0:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
 
@@ -5529,7 +5485,7 @@ snapshots:
 
   '@adobe/css-tools@4.3.3': {}
 
-  '@ainekio/engine@https://codeload.github.com/Greg-Aster/ainekio-engine/tar.gz/caf28fdc4e1bf0d5b21b1a2208cb07656cb9ff63(@dimforge/rapier3d-compat@0.17.3)(peerjs@1.5.5)(three@0.178.0)':
+  '@ainekio/engine@https://codeload.github.com/Greg-Aster/ainekio-engine/tar.gz/19539e9a70814dfb15756e1b2c484c7078a42ca0(@dimforge/rapier3d-compat@0.17.3)(peerjs@1.5.5)(three@0.178.0)':
     optionalDependencies:
       '@dimforge/rapier3d-compat': 0.17.3
       peerjs: 1.5.5
@@ -9623,8 +9579,6 @@ snapshots:
   ms@2.1.3: {}
 
   muggle-string@0.4.1: {}
-
-  mujoco-js@0.0.7: {}
 
   mz@2.7.0:
     dependencies:
