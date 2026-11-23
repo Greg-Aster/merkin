@@ -8,6 +8,7 @@
 		"@astrojs/svelte": "7.2.5",
 		"astro": "5.18.0",
 		"mujoco-js": "0.0.7",
+		"peerjs": "^1.5.5",
 		"svelte": "5.26.2",
 		"three": "0.178.0"
 	},

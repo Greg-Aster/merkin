@@ -17,6 +17,7 @@ import {
 	AinekioSimulatorController,
 	type WalkGaitMode,
 } from "../sim/simulatorController";
+import MultiplayerMenu from "./MultiplayerMenu.svelte";
 
 type MobileTab = "drive" | "poses" | "servos" | "sandbox" | "none";
 
@@ -31,6 +32,8 @@ const ui = $state<{
 	rightTab: "telemetry" | "sandbox";
 	showConnectModal: boolean;
 	showAudioMenu: boolean;
+	showMultiplayerMenu: boolean;
+	mpSeenChatCount: number;
 	bcUrl: string;
 	bcRobotId: string;
 	bcToken: string;
@@ -68,6 +71,16 @@ const ui = $state<{
 			footstepsEnabled: true,
 			activeTrackLabel: "Portal Deck",
 		},
+		multiplayer: {
+			enabled: true,
+			mode: "idle",
+			status: "idle",
+			displayName: "",
+			connectedPeers: [],
+			remotePlayers: [],
+			chatMessages: [],
+			logs: [],
+		},
 		lastCommandLog: "Booting simulator...",
 		availableClips: [
 			"stand",
@@ -90,6 +103,8 @@ const ui = $state<{
 	rightTab: "telemetry",
 	showConnectModal: false,
 	showAudioMenu: false,
+	showMultiplayerMenu: false,
+	mpSeenChatCount: 0,
 	bcUrl: "ws://127.0.0.1:8790/robot",
 	bcRobotId: "ainekio-v2-sim",
 	bcToken: "",
@@ -270,6 +285,9 @@ onMount(() => {
 	const ctrl = new AinekioSimulatorController(viewportEl, {
 		onSnapshot: (snap) => {
 			ui.snapshot = snap;
+			if (ui.showMultiplayerMenu) {
+				ui.mpSeenChatCount = snap.multiplayer.chatMessages.length;
+			}
 		},
 		onFaceRgba: (w, h, rgba) => {
 			paintFaceToHud(w, h, rgba);
@@ -408,6 +426,24 @@ function handleLevelChange(event: Event): void {
 	selectEl.blur();
 	void controller?.setLevel(value);
 }
+
+function toggleMultiplayerMenu(): void {
+	ui.showMultiplayerMenu = !ui.showMultiplayerMenu;
+	if (ui.showMultiplayerMenu) {
+		ui.showAudioMenu = false;
+		ui.mpSeenChatCount = ui.snapshot.multiplayer.chatMessages.length;
+	}
+}
+
+const mpUnreadChat = $derived(
+	Math.max(0, ui.snapshot.multiplayer.chatMessages.length - ui.mpSeenChatCount),
+);
+const mpPeerTotal = $derived(
+	Math.max(
+		ui.snapshot.multiplayer.connectedPeers.length,
+		ui.snapshot.multiplayer.remotePlayers.length,
+	) + 1,
+);
 
 function setCamera(mode: SimulatorCameraMode): void {
 	if (mode === "orbit") {
@@ -749,7 +785,12 @@ const neuralMotionButtons = $derived(
 						data-testid="audio-mixer-btn"
 						title="Audio mixer (music, SFX, footsteps)"
 						aria-expanded={ui.showAudioMenu}
-						onclick={() => (ui.showAudioMenu = !ui.showAudioMenu)}
+						onclick={() => {
+							ui.showAudioMenu = !ui.showAudioMenu;
+							if (ui.showAudioMenu) {
+								ui.showMultiplayerMenu = false;
+							}
+						}}
 					>
 						▾
 					</button>
@@ -806,6 +847,51 @@ const neuralMotionButtons = $derived(
 						</div>
 					{/if}
 				</div>
+
+				{#if ui.snapshot.multiplayer.enabled}
+					<div class="mp-control">
+						<button
+							type="button"
+							class="mp-menu-btn"
+							class:connected={ui.snapshot.multiplayer.status === "connected"}
+							class:connecting={ui.snapshot.multiplayer.status === "connecting"}
+							data-testid="multiplayer-menu-btn"
+							aria-expanded={ui.showMultiplayerMenu}
+							title="Multiplayer rooms (Create or Join a P2P room)"
+							onclick={toggleMultiplayerMenu}
+						>
+							<span class="mp-dot" aria-hidden="true"></span>
+							{#if ui.snapshot.multiplayer.status === "connected"}
+								<span class="mp-btn-label">
+									{ui.snapshot.multiplayer.roomName} · {mpPeerTotal}
+								</span>
+							{:else if ui.snapshot.multiplayer.status === "connecting"}
+								<span class="mp-btn-label">Joining…</span>
+							{:else}
+								<span class="mp-btn-label">Multiplayer</span>
+							{/if}
+							{#if mpUnreadChat > 0 && !ui.showMultiplayerMenu}
+								<span class="mp-unread-badge">{mpUnreadChat}</span>
+							{/if}
+							<span class="mp-caret" aria-hidden="true">▾</span>
+						</button>
+						{#if ui.showMultiplayerMenu}
+							<MultiplayerMenu
+								snapshot={ui.snapshot.multiplayer}
+								localLevelId={ui.snapshot.levelId}
+								isMobile={false}
+								onCreateRoom={(room, name) =>
+									void controller?.hostMultiplayerRoom(room, name)}
+								onJoinRoom={(room, name) =>
+									void controller?.joinMultiplayerRoom(room, name)}
+								onLeaveRoom={() => controller?.leaveMultiplayerRoom()}
+								onSendChat={(text) => controller?.sendMultiplayerChat(text)}
+								onSwitchLevel={(lvl) => void controller?.setLevel(lvl)}
+								onClose={() => (ui.showMultiplayerMenu = false)}
+							/>
+						{/if}
+					</div>
+				{/if}
 
 				<button
 					type="button"
@@ -900,7 +986,41 @@ const neuralMotionButtons = $derived(
 						♪
 					{/if}
 				</button>
+
+				{#if ui.snapshot.multiplayer.enabled}
+					<button
+						type="button"
+						class="mobile-top-btn icon mp-mobile-btn"
+						class:active={ui.snapshot.multiplayer.status === "connected" || ui.showMultiplayerMenu}
+						class:mp-live={ui.snapshot.multiplayer.status === "connected"}
+						data-testid="multiplayer-menu-btn"
+						aria-expanded={ui.showMultiplayerMenu}
+						title="Multiplayer rooms"
+						aria-label="Multiplayer rooms"
+						onclick={toggleMultiplayerMenu}
+					>
+						👥
+						{#if mpUnreadChat > 0 && !ui.showMultiplayerMenu}
+							<span class="mp-mobile-dot"></span>
+						{/if}
+					</button>
+				{/if}
 			</div>
+			{#if ui.showMultiplayerMenu && ui.snapshot.multiplayer.enabled}
+				<MultiplayerMenu
+					snapshot={ui.snapshot.multiplayer}
+					localLevelId={ui.snapshot.levelId}
+					isMobile={true}
+					onCreateRoom={(room, name) =>
+						void controller?.hostMultiplayerRoom(room, name)}
+					onJoinRoom={(room, name) =>
+						void controller?.joinMultiplayerRoom(room, name)}
+					onLeaveRoom={() => controller?.leaveMultiplayerRoom()}
+					onSendChat={(text) => controller?.sendMultiplayerChat(text)}
+					onSwitchLevel={(lvl) => void controller?.setLevel(lvl)}
+					onClose={() => (ui.showMultiplayerMenu = false)}
+				/>
+			{/if}
 		{/if}
 	</header>
 
@@ -2376,6 +2496,90 @@ const neuralMotionButtons = $derived(
 		font-size: 11px;
 		color: #cbd5e1;
 		cursor: pointer;
+	}
+	.mp-control {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+	}
+	.mp-menu-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		height: 30px;
+		padding: 0 10px;
+		border-radius: 8px;
+		border: 1px solid rgba(148, 163, 184, 0.24);
+		background: rgba(15, 23, 42, 0.72);
+		color: #cbd5e1;
+		font-size: 11px;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.mp-menu-btn:hover {
+		background: rgba(56, 189, 248, 0.14);
+		border-color: rgba(56, 189, 248, 0.4);
+	}
+	.mp-menu-btn.connecting {
+		border-color: rgba(56, 189, 248, 0.45);
+		color: #7dd3fc;
+	}
+	.mp-menu-btn.connected {
+		border-color: rgba(34, 197, 94, 0.52);
+		background: rgba(21, 128, 61, 0.28);
+		color: #bbf7d0;
+	}
+	.mp-dot {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: #64748b;
+	}
+	.mp-menu-btn.connecting .mp-dot {
+		background: #38bdf8;
+	}
+	.mp-menu-btn.connected .mp-dot {
+		background: #22c55e;
+		box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
+	}
+	.mp-btn-label {
+		max-width: 124px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.mp-unread-badge {
+		min-width: 16px;
+		height: 16px;
+		padding: 0 4px;
+		border-radius: 999px;
+		background: #0ea5e9;
+		color: #04121f;
+		font-size: 10px;
+		font-weight: 800;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.mp-caret {
+		color: #94a3b8;
+		font-size: 10px;
+	}
+	.mp-mobile-btn {
+		position: relative;
+	}
+	.mp-mobile-btn.mp-live {
+		border-color: rgba(34, 197, 94, 0.55);
+		background: rgba(21, 128, 61, 0.3);
+	}
+	.mp-mobile-dot {
+		position: absolute;
+		top: 3px;
+		right: 3px;
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: #38bdf8;
 	}
 	.connect-pill {
 		display: inline-flex;

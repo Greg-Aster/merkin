@@ -507,7 +507,7 @@ export class WorldAudioEngine {
 		const element = new Audio();
 		element.src = src;
 		element.loop = true;
-		element.preload = "auto";
+		element.preload = "none";
 		element.volume = 0;
 		const channel: MusicChannel = {
 			src,
@@ -666,6 +666,12 @@ export class WorldAudioEngine {
 		try {
 			const raw = window.localStorage.getItem(STORAGE_KEY);
 			if (!raw) {
+				const nav = navigator as Navigator & {
+					connection?: { saveData?: boolean };
+				};
+				if (nav.connection?.saveData) {
+					this.#enabled = false;
+				}
 				return;
 			}
 			const parsed = JSON.parse(raw) as PersistedAudioPrefs;

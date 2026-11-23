@@ -11,6 +11,12 @@
  *        Body Control (/robot) speaking native protocol-v1 JSON + binary frames.
  */
 
+import {
+	type BrowserMultiplayerClient,
+	type MultiplayerSnapshot,
+	createBrowserMultiplayerClient,
+	normalizeRoomName,
+} from "../multiplayer/index.js";
 import { BrowserRobotAudioAdapter } from "../viewport/robotAudio";
 import { SimulatorViewport } from "../viewport/simulatorViewport";
 import { WorldAudioEngine } from "../viewport/worldAudio";
@@ -33,6 +39,8 @@ import {
 	decodeProtocolBinaryFrame,
 	encodeProtocolBinaryFrame,
 	getRobotModelDescriptor,
+	mujocoPositionToThree,
+	mujocoQuaternionToThreeXyzw,
 } from "./contracts";
 import { getSimulatorLevel, loadSimulatorLevel } from "./levels";
 
@@ -114,8 +122,13 @@ export class AinekioSimulatorController {
 	readonly #viewport: SimulatorViewport;
 	readonly #audio = new BrowserRobotAudioAdapter();
 	readonly #worldAudio: WorldAudioEngine;
+	readonly #multiplayer: BrowserMultiplayerClient;
+	readonly #unsubscribeMultiplayer: () => void;
 	readonly #callbacks: SimulatorControllerCallbacks;
 	#worker?: Worker;
+	#multiplayerSnapshot: MultiplayerSnapshot;
+	#lastMpPoseBroadcastMs = 0;
+	#mpPoseTick = 0;
 
 	#ready = false;
 	#loadingMessage = "Booting MuJoCo WASM + ESP32-P4 firmware...";
@@ -181,6 +194,13 @@ export class AinekioSimulatorController {
 		this.#bcAutoReconnect = saved.autoReconnect;
 		this.#viewport = new SimulatorViewport(viewportContainer);
 		this.#worldAudio = new WorldAudioEngine(() => this.#emitSnapshot());
+		this.#multiplayer = createBrowserMultiplayerClient();
+		this.#multiplayerSnapshot = this.#multiplayer.snapshot();
+		this.#unsubscribeMultiplayer = this.#multiplayer.subscribe((mpSnap) => {
+			this.#multiplayerSnapshot = mpSnap;
+			this.#viewport.syncRemotePeers(mpSnap.remotePlayers, this.#levelId);
+			this.#emitSnapshot();
+		});
 		this.#emitSnapshot();
 	}
 
@@ -226,6 +246,17 @@ export class AinekioSimulatorController {
 			this.#viewport.loadRobot("/assets/robots/ainekio-v2.glb", "v2"),
 			this.#viewport.loadLevel(initialLevel),
 		]);
+
+		// Auto-join multiplayer room if opened via ?room=<name> invite link
+		try {
+			const params = new URLSearchParams(window.location.search);
+			const roomParam = normalizeRoomName(params.get("room") ?? "");
+			if (roomParam.length >= 3) {
+				void this.joinMultiplayerRoom(roomParam);
+			}
+		} catch {
+			// Ignore malformed URL query
+		}
 
 		// Keep standalone admission alive with 1 Hz protocol-v1 heartbeat
 		this.#standalonePingTimer = window.setInterval(() => {
@@ -364,8 +395,94 @@ export class AinekioSimulatorController {
 		}
 		this.#worldAudio.setLevelAudio(level.audio);
 		this.#worldAudio.playSfx("open");
+		this.#viewport.syncRemotePeers(
+			this.#multiplayerSnapshot.remotePlayers,
+			this.#levelId,
+		);
 		this.#lastCommandLog = `Active world: ${level.name}`;
 		this.#emitSnapshot();
+	}
+
+	// ---- PeerJS Multiplayer Room controls (lazy-loaded on demand) ----
+
+	setMultiplayerDisplayName(name: string): void {
+		this.#multiplayer.setDisplayName(name);
+	}
+
+	async hostMultiplayerRoom(
+		roomName: string,
+		displayName?: string,
+	): Promise<void> {
+		if (displayName !== undefined) {
+			this.#multiplayer.setDisplayName(displayName);
+		}
+		this.#worldAudio.playSfx("portal-activate");
+		await this.#multiplayer.hostRoom(roomName);
+		if (this.#multiplayerSnapshot.status === "connected") {
+			this.#worldAudio.playSfx("open");
+			this.#lastCommandLog = `Hosting room "${this.#multiplayerSnapshot.roomName ?? roomName}"`;
+			this.#publishMultiplayerPose(true);
+			this.#emitSnapshot();
+		}
+	}
+
+	async joinMultiplayerRoom(
+		roomName: string,
+		displayName?: string,
+	): Promise<void> {
+		if (displayName !== undefined) {
+			this.#multiplayer.setDisplayName(displayName);
+		}
+		this.#worldAudio.playSfx("portal-activate");
+		await this.#multiplayer.joinRoom(roomName);
+		if (this.#multiplayerSnapshot.status === "connected") {
+			this.#worldAudio.playSfx("open");
+			this.#lastCommandLog = `Joined room "${this.#multiplayerSnapshot.roomName ?? roomName}"`;
+			this.#publishMultiplayerPose(true);
+			this.#emitSnapshot();
+		}
+	}
+
+	leaveMultiplayerRoom(): void {
+		this.#worldAudio.playSfx("back");
+		this.#multiplayer.disconnect();
+		this.#viewport.syncRemotePeers([], this.#levelId);
+		this.#lastCommandLog = "Left multiplayer room";
+		this.#emitSnapshot();
+	}
+
+	sendMultiplayerChat(text: string): void {
+		this.#multiplayer.sendChat(text);
+	}
+
+	#publishMultiplayerPose(force = false): void {
+		if (this.#multiplayerSnapshot.status !== "connected" || !this.#state) {
+			return;
+		}
+		const now = performance.now();
+		if (!force && now - this.#lastMpPoseBroadcastMs < 100) {
+			return;
+		}
+		this.#lastMpPoseBroadcastMs = now;
+		this.#mpPoseTick += 1;
+
+		const [tx, ty, tz] = mujocoPositionToThree(this.#state.rootPosMj);
+		const [qx, qy, qz, qw] = mujocoQuaternionToThreeXyzw(
+			this.#state.rootQuatMjWxyz,
+		);
+		const round3 = (n: number) => Math.round(n * 1000) / 1000;
+		const round4 = (n: number) => Math.round(n * 10000) / 10000;
+		const round1 = (n: number) => Math.round(n * 10) / 10;
+
+		this.#multiplayer.publishLocalPose({
+			position: [round3(tx), round3(ty), round3(tz)],
+			rotation: [round4(qx), round4(qy), round4(qz), round4(qw)],
+			tick: this.#mpPoseTick,
+			robotModel: this.#robotModel,
+			jointsDeg: this.#state.jointsDeg.map(round1),
+			levelId: this.#levelId,
+			faceName: this.#state.face.name,
+		});
 	}
 
 	setCameraMode(mode: SimulatorCameraMode): void {
@@ -1069,6 +1186,7 @@ export class AinekioSimulatorController {
 					msg.state.footContacts,
 					isMoving,
 				);
+				this.#publishMultiplayerPose(false);
 				const now = performance.now();
 				if (now - this.#lastStateUiEmitMs >= 50) {
 					this.#lastStateUiEmitMs = now;
@@ -1261,6 +1379,7 @@ export class AinekioSimulatorController {
 			micActive: this.#audio.micActive,
 			micSupported: this.#audio.micSupported,
 			audio: this.#worldAudio.getState(),
+			multiplayer: this.#multiplayerSnapshot,
 			lastCommandLog: this.#lastCommandLog,
 			availableClips: this.#availableClips,
 			lastError: this.#lastError,
@@ -1282,6 +1401,8 @@ export class AinekioSimulatorController {
 			window.clearTimeout(this.#speakerTalkingTimer);
 		}
 		this.disconnectBodyControl(false);
+		this.#unsubscribeMultiplayer();
+		this.#multiplayer.disconnect();
 		this.#worker?.terminate();
 		this.#audio.dispose();
 		this.#worldAudio.dispose();

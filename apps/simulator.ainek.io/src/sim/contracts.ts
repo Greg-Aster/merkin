@@ -1,3 +1,5 @@
+import type { MultiplayerSnapshot } from "../multiplayer/messages.js";
+
 /**
  * Canonical pure-TypeScript contracts, coordinate transforms, and protocol-v1
  * binary codecs for the standalone Ainekio V2 MuJoCo WASM Simulator.
@@ -470,6 +472,7 @@ export type SimulatorUiSnapshot = {
 	readonly micActive: boolean;
 	readonly micSupported: boolean;
 	readonly audio: SimulatorAudioState;
+	readonly multiplayer: MultiplayerSnapshot;
 	readonly lastCommandLog: string;
 	readonly availableClips: readonly string[];
 	readonly lastError?: string | undefined;

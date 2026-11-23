@@ -779,3 +779,276 @@ export class ThreeVirtualRobotV2Rig {
 		ctx.fill();
 	}
 }
+
+export type ArticulatedRemoteRobotHandle = {
+	readonly modelId: RobotModelId;
+	readonly group: THREE.Group;
+	readonly root: THREE.Object3D;
+	readonly v1Legs?: readonly V1LegNodes[];
+	readonly v2Legs?: Record<"FL" | "FR" | "RL" | "RR", V2LegNodes>;
+	readonly v3Legs?: readonly V3LegNodes[];
+};
+
+/**
+ * Bind a cloned V1/V2/V3 robot GLB scene for remote multiplayer peers using
+ * the exact same four-bar kinematic solver as the local robot.
+ */
+export function bindArticulatedRobotClone(
+	group: THREE.Group,
+	modelId: RobotModelId,
+	faceTexture: THREE.Texture,
+): ArticulatedRemoteRobotHandle | undefined {
+	if (modelId === "v1") {
+		const root = group.getObjectByName("V1_RobotRoot");
+		if (!root) {
+			return undefined;
+		}
+		const v1Legs: V1LegNodes[] = [];
+		for (const def of V1_LEG_DEFS) {
+			const hip = group.getObjectByName(`${def.name}_hip_node`);
+			const knee = group.getObjectByName(`${def.name}_knee_node`);
+			if (!hip || !knee) {
+				return undefined;
+			}
+			v1Legs.push({
+				hip,
+				knee,
+				hipJointIdx: def.hipJointIdx,
+				kneeJointIdx: def.kneeJointIdx,
+				neutralYawDeg: def.neutralYawDeg,
+				hipSign: def.hipSign,
+			});
+		}
+		group.traverse((obj) => {
+			if (!(obj instanceof THREE.Mesh)) {
+				return;
+			}
+			obj.castShadow = true;
+			obj.receiveShadow = true;
+			const isFaceMesh =
+				obj.name === "V1_FaceDisplay" ||
+				(obj.material &&
+					!Array.isArray(obj.material) &&
+					obj.material.name === "V1_FaceDisplay_Mat");
+			if (isFaceMesh) {
+				obj.material = new THREE.MeshBasicMaterial({
+					map: faceTexture,
+					toneMapped: false,
+					side: THREE.DoubleSide,
+				});
+			}
+		});
+		return { modelId, group, root, v1Legs };
+	}
+
+	if (modelId === "v3") {
+		const root = group.getObjectByName("V3_RobotRoot");
+		if (!root) {
+			return undefined;
+		}
+		const v3Legs: V3LegNodes[] = [];
+		for (const def of V3_LEG_DEFS) {
+			const shoulder = group.getObjectByName(`V3_${def.cadLeg}_Shoulder`);
+			const carrier = group.getObjectByName(`V3_${def.cadLeg}_Carrier`);
+			const crank = group.getObjectByName(`V3_${def.cadLeg}_Crank`);
+			const knee = group.getObjectByName(`V3_${def.cadLeg}_Knee`);
+			const rod = group.getObjectByName(`V3_${def.cadLeg}_Rod`);
+			if (!shoulder || !carrier || !crank || !knee || !rod) {
+				return undefined;
+			}
+			const n0 = solveV3FourBar(def.ox, def.oz, def.cx, def.cz, V3_A0, V3_T0);
+			v3Legs.push({
+				shoulder,
+				carrier,
+				crank,
+				knee,
+				rod,
+				restKneePos: knee.position.clone(),
+				restRodPos: rod.position.clone(),
+				jointBase: def.jointBase,
+				rollSign: def.rollSign,
+				ox: def.ox,
+				oz: def.oz,
+				cx: def.cx,
+				cz: def.cz,
+				dx0: n0.dx,
+				dz0: n0.dz,
+				px0: n0.px,
+				pz0: n0.pz,
+				beta0: n0.beta,
+				gamma0: n0.gamma,
+			});
+		}
+		group.traverse((obj) => {
+			if (!(obj instanceof THREE.Mesh)) {
+				return;
+			}
+			obj.castShadow = true;
+			obj.receiveShadow = true;
+			const isFaceMesh =
+				obj.name === "V3_FaceDisplay" ||
+				(obj.material &&
+					!Array.isArray(obj.material) &&
+					obj.material.name === "V3_FaceDisplay_Mat");
+			if (isFaceMesh) {
+				obj.material = new THREE.MeshBasicMaterial({
+					map: faceTexture,
+					toneMapped: false,
+					side: THREE.DoubleSide,
+				});
+			}
+		});
+		return { modelId, group, root, v3Legs };
+	}
+
+	const root = group.getObjectByName("RobotRoot");
+	if (!root) {
+		return undefined;
+	}
+	const v2Legs = {} as Record<"FL" | "FR" | "RL" | "RR", V2LegNodes>;
+	for (const legKey of ["FL", "FR", "RL", "RR"] as const) {
+		const shoulder = group.getObjectByName(`${legKey}_Shoulder`);
+		const primary = group.getObjectByName(`${legKey}_Primary`);
+		const input = group.getObjectByName(`${legKey}_Input`);
+		const rod = group.getObjectByName(`${legKey}_Rod`);
+		const foot = group.getObjectByName(`${legKey}_Foot`);
+		if (!shoulder || !primary || !input || !rod || !foot) {
+			return undefined;
+		}
+		v2Legs[legKey] = {
+			shoulder,
+			primary,
+			input,
+			rod,
+			foot,
+			restRodPos: rod.position.clone(),
+			restFootPos: foot.position.clone(),
+			rollSign: legKey === "FL" || legKey === "RL" ? -1 : 1,
+		};
+	}
+	group.traverse((obj) => {
+		if (!(obj instanceof THREE.Mesh)) {
+			return;
+		}
+		obj.castShadow = true;
+		obj.receiveShadow = true;
+		const isFaceMesh =
+			obj.name === "Int_Tex_RobotRoot_00" ||
+			(obj.material &&
+				!Array.isArray(obj.material) &&
+				obj.material.name === "Mat_Tex_000");
+		if (isFaceMesh) {
+			obj.material = new THREE.MeshBasicMaterial({
+				map: faceTexture,
+				toneMapped: false,
+			});
+		}
+	});
+	return { modelId: "v2", group, root, v2Legs };
+}
+
+/**
+ * Apply Three.js world position, xyzw quaternion, and optional joint angles
+ * (degrees) to a bound remote robot clone.
+ */
+export function applyArticulatedRobotThreePose(
+	handle: ArticulatedRemoteRobotHandle,
+	positionThree: THREE.Vector3,
+	rotationXyzw: THREE.Quaternion,
+	jointsDeg?: readonly number[],
+): void {
+	if (handle.modelId === "v1") {
+		handle.root.position.copy(positionThree);
+		handle.root.quaternion.copy(rotationXyzw);
+		if (handle.v1Legs && jointsDeg && jointsDeg.length >= 8) {
+			for (const leg of handle.v1Legs) {
+				const hDeg = jointsDeg[leg.hipJointIdx] ?? 0;
+				const kDeg = jointsDeg[leg.kneeJointIdx] ?? 0;
+				leg.hip.rotation.set(
+					0,
+					(leg.neutralYawDeg + leg.hipSign * hDeg) * DEG2RAD,
+					0,
+				);
+				leg.knee.rotation.set(-kDeg * DEG2RAD, 0, 0);
+			}
+		}
+		return;
+	}
+
+	if (handle.modelId === "v3") {
+		handle.root.position.copy(positionThree);
+		handle.root.quaternion.copy(rotationXyzw);
+		if (handle.v3Legs && jointsDeg && jointsDeg.length >= 12) {
+			for (const leg of handle.v3Legs) {
+				const hDeg = jointsDeg[leg.jointBase] ?? 0;
+				const aDeg = jointsDeg[leg.jointBase + 1] ?? 0;
+				const tDeg = jointsDeg[leg.jointBase + 2] ?? 0;
+				leg.shoulder.rotation.set(0, 0, leg.rollSign * hDeg * DEG2RAD);
+				const a = V3_A0 + aDeg * DEG2RAD;
+				const t = V3_T0 + tDeg * DEG2RAD;
+				const sol = solveV3FourBar(leg.ox, leg.oz, leg.cx, leg.cz, a, t);
+				leg.carrier.rotation.set(-(a - V3_A0), 0, 0);
+				leg.crank.rotation.set(-(t - V3_T0), 0, 0);
+				leg.rod.position.set(
+					leg.restRodPos.x,
+					leg.restRodPos.y + 0.001 * (sol.pz - leg.pz0),
+					leg.restRodPos.z + 0.001 * (sol.px - leg.px0),
+				);
+				leg.rod.rotation.set(-(sol.gamma - leg.gamma0), 0, 0);
+				leg.knee.position.set(
+					leg.restKneePos.x,
+					leg.restKneePos.y + 0.001 * (sol.dz - leg.dz0),
+					leg.restKneePos.z + 0.001 * (sol.dx - leg.dx0),
+				);
+				leg.knee.rotation.set(-(sol.beta - leg.beta0), 0, 0);
+			}
+		}
+		return;
+	}
+
+	handle.root.position.set(
+		positionThree.x,
+		positionThree.y - V2_GLB_BASE_HEIGHT_M,
+		positionThree.z,
+	);
+	handle.root.quaternion.copy(rotationXyzw);
+	if (handle.v2Legs && jointsDeg && jointsDeg.length >= 12) {
+		for (const [legKey, base] of V2_LEG_JOINT_ORDER) {
+			const leg = handle.v2Legs[legKey];
+			const hDeg = jointsDeg[base] ?? 0;
+			const aDeg = jointsDeg[base + 1] ?? 0;
+			const tDeg = jointsDeg[base + 2] ?? 0;
+			leg.shoulder.rotation.set(0, 0, leg.rollSign * hDeg * DEG2RAD);
+			const a = V2_A0 + aDeg * DEG2RAD;
+			const t = V2_T0 + tDeg * DEG2RAD;
+			const dx = 62.58781342006688 + 35 * Math.cos(a);
+			const dz = 69.71182170125783 + 35 * Math.sin(a);
+			const px = 50.08774121717073 + 20 * Math.cos(t);
+			const pz = 81.2118481681196 + 20 * Math.sin(t);
+			const wx = px - dx;
+			const wz = pz - dz;
+			const d = Math.max(1e-9, Math.hypot(wx, wz));
+			const along = Math.min(28, Math.max(-28, (784 - 1444 + d * d) / (2 * d)));
+			const height = Math.sqrt(Math.max(0, 784 - along * along));
+			const ex = dx + (along * wx - height * wz) / d;
+			const ez = dz + (along * wz + height * wx) / d;
+			const beta = Math.atan2(ez - dz, ex - dx);
+			const phi = Math.atan2(ez - pz, ex - px);
+
+			leg.primary.rotation.set(-(a - V2_A0), 0, 0);
+			leg.input.rotation.set(-(t - V2_T0), 0, 0);
+			leg.rod.position.set(
+				leg.restRodPos.x,
+				leg.restRodPos.y + 0.001 * (pz - V2_PZ0),
+				leg.restRodPos.z + 0.001 * (px - V2_PX0),
+			);
+			leg.rod.rotation.set(-(phi - V2_PHI0), 0, 0);
+			leg.foot.position.set(
+				leg.restFootPos.x,
+				leg.restFootPos.y + 0.001 * (dz - V2_DZ0),
+				leg.restFootPos.z + 0.001 * (dx - V2_DX0),
+			);
+			leg.foot.rotation.set(-(beta - V2_BETA0), 0, 0);
+		}
+	}
+}

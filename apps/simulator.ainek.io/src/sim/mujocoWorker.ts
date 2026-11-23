@@ -210,7 +210,11 @@ let activeRobotModel: RobotModelId = "v2";
 let v1BaseXml = "";
 let v1Config: V1PhysicsConfig | undefined;
 let v1GaitPolicy: V1NeuralGaitPolicy | undefined;
+let v1PoseManifest: V1NeuralPoseManifest | undefined;
 let v1PosePolicy: V1NeuralPosePolicy | undefined;
+let v1PosePolicyLoadPromise:
+	| Promise<V1NeuralPosePolicy | undefined>
+	| undefined;
 const v1GaitHistory = new V1GaitObservationHistory();
 const v1PoseHistory = new V1PoseObservationHistory();
 let v1ActiveRole: "idle" | "gait" | "pose" | "native" = "idle";
@@ -243,7 +247,11 @@ const V1_CLIP_ACTIONS: readonly string[] = [
 let v3BaseXml = "";
 let v3Config: V3PhysicsConfig | undefined;
 let v3GaitPolicy: V3NeuralGaitPolicy | undefined;
+let v3PoseManifest: V3NeuralPoseManifest | undefined;
 let v3PosePolicy: V3NeuralPosePolicy | undefined;
+let v3PosePolicyLoadPromise:
+	| Promise<V3NeuralPosePolicy | undefined>
+	| undefined;
 const v3GaitHistory = new V3GaitObservationHistory();
 const v3PoseHistory = new V3PoseObservationHistory();
 let v3ActiveRole: "idle" | "gait" | "pose" | "native" = "idle";
@@ -316,7 +324,10 @@ const batteryVoltage = 8.15;
 // Embedded production Neural Gait (MicroDuck) & Neural Pose (v7-hysteresis) runtime
 let engineMode: LocomotionEngineMode = "neural";
 let gaitPolicy: NeuralGaitPolicy | undefined;
+let poseManifest: NeuralPoseManifest | undefined;
 let posePolicy: NeuralPosePolicy | undefined;
+let posePolicyLoadPromise: Promise<NeuralPosePolicy | undefined> | undefined;
+let poseRequestSeq = 0;
 let poseManifold: PoseManifoldRuntime | undefined;
 let poseLibrary: NeuralPoseLibrary | undefined;
 const gaitHistory = new NeuralGaitObservationHistory();
@@ -568,46 +579,170 @@ async function loadMujocoModel(
 	resetRobotPose(spawnMj);
 }
 
+async function ensureV2PosePolicyLoaded(): Promise<
+	NeuralPosePolicy | undefined
+> {
+	if (posePolicy) {
+		return posePolicy;
+	}
+	if (posePolicyLoadPromise) {
+		return posePolicyLoadPromise;
+	}
+	const prefix = workerBaseUrl;
+	posePolicyLoadPromise = (async () => {
+		const [manifest, binResp] = await Promise.all([
+			poseManifest
+				? Promise.resolve(poseManifest)
+				: fetch(`${prefix}/sim/policies/neural-pose.json`).then((r) => {
+						if (!r.ok) {
+							throw new Error(`Failed to fetch neural-pose.json (${r.status})`);
+						}
+						return r.json() as Promise<NeuralPoseManifest>;
+					}),
+			fetch(`${prefix}/sim/policies/neural-pose.bin`),
+		]);
+		if (!binResp.ok) {
+			throw new Error(`Failed to fetch neural-pose.bin (${binResp.status})`);
+		}
+		poseManifest = manifest;
+		const buf = await binResp.arrayBuffer();
+		posePolicy = new NeuralPosePolicy(manifest, new Float32Array(buf));
+		return posePolicy;
+	})().catch((err) => {
+		posePolicyLoadPromise = undefined;
+		post({
+			type: "error",
+			message:
+				err instanceof Error
+					? err.message
+					: "Failed to lazy-load V2 Neural Pose weights.",
+		});
+		return undefined;
+	});
+	return posePolicyLoadPromise;
+}
+
+async function ensureV1PosePolicyLoaded(): Promise<
+	V1NeuralPosePolicy | undefined
+> {
+	if (v1PosePolicy) {
+		return v1PosePolicy;
+	}
+	if (v1PosePolicyLoadPromise) {
+		return v1PosePolicyLoadPromise;
+	}
+	const prefix = workerBaseUrl;
+	v1PosePolicyLoadPromise = (async () => {
+		const [manifest, binResp] = await Promise.all([
+			v1PoseManifest
+				? Promise.resolve(v1PoseManifest)
+				: fetch(`${prefix}/sim/policies/v1-neural-pose.json`).then((r) => {
+						if (!r.ok) {
+							throw new Error(
+								`Failed to fetch v1-neural-pose.json (${r.status})`,
+							);
+						}
+						return r.json() as Promise<V1NeuralPoseManifest>;
+					}),
+			fetch(`${prefix}/sim/policies/v1-neural-pose.bin`),
+		]);
+		if (!binResp.ok) {
+			throw new Error(`Failed to fetch v1-neural-pose.bin (${binResp.status})`);
+		}
+		v1PoseManifest = manifest;
+		const buf = await binResp.arrayBuffer();
+		v1PosePolicy = new V1NeuralPosePolicy(manifest, new Float32Array(buf));
+		return v1PosePolicy;
+	})().catch((err) => {
+		v1PosePolicyLoadPromise = undefined;
+		post({
+			type: "error",
+			message:
+				err instanceof Error
+					? err.message
+					: "Failed to lazy-load V1 Neural Pose weights.",
+		});
+		return undefined;
+	});
+	return v1PosePolicyLoadPromise;
+}
+
+async function ensureV3PosePolicyLoaded(): Promise<
+	V3NeuralPosePolicy | undefined
+> {
+	if (v3PosePolicy) {
+		return v3PosePolicy;
+	}
+	if (v3PosePolicyLoadPromise) {
+		return v3PosePolicyLoadPromise;
+	}
+	const prefix = workerBaseUrl;
+	v3PosePolicyLoadPromise = (async () => {
+		const [manifest, binResp] = await Promise.all([
+			v3PoseManifest
+				? Promise.resolve(v3PoseManifest)
+				: fetch(`${prefix}/sim/policies/v3-neural-pose.json`).then((r) => {
+						if (!r.ok) {
+							throw new Error(
+								`Failed to fetch v3-neural-pose.json (${r.status})`,
+							);
+						}
+						return r.json() as Promise<V3NeuralPoseManifest>;
+					}),
+			fetch(`${prefix}/sim/policies/v3-neural-pose.bin`),
+		]);
+		if (!binResp.ok) {
+			throw new Error(`Failed to fetch v3-neural-pose.bin (${binResp.status})`);
+		}
+		v3PoseManifest = manifest;
+		const buf = await binResp.arrayBuffer();
+		v3PosePolicy = new V3NeuralPosePolicy(manifest, new Float32Array(buf));
+		return v3PosePolicy;
+	})().catch((err) => {
+		v3PosePolicyLoadPromise = undefined;
+		post({
+			type: "error",
+			message:
+				err instanceof Error
+					? err.message
+					: "Failed to lazy-load V3 Neural Pose weights.",
+		});
+		return undefined;
+	});
+	return v3PosePolicyLoadPromise;
+}
+
 async function ensureV1AssetsLoaded(): Promise<void> {
-	if (v1Config && v1BaseXml && v1GaitPolicy && v1PosePolicy) {
+	if (v1Config && v1BaseXml && v1GaitPolicy && v1PoseManifest) {
 		return;
 	}
 	const prefix = workerBaseUrl;
-	const [
-		cfgResp,
-		xmlResp,
-		gaitJsonResp,
-		gaitBinResp,
-		poseJsonResp,
-		poseBinResp,
-	] = await Promise.all([
-		fetch(`${prefix}/sim/v1-physics-config.json`),
-		fetch(`${prefix}/sim/ainekio-v1-locomotion.xml`),
-		fetch(`${prefix}/sim/policies/v1-neural-gait.json`),
-		fetch(`${prefix}/sim/policies/v1-neural-gait.bin`),
-		fetch(`${prefix}/sim/policies/v1-neural-pose.json`),
-		fetch(`${prefix}/sim/policies/v1-neural-pose.bin`),
-	]);
+	const [cfgResp, xmlResp, gaitJsonResp, gaitBinResp, poseJsonResp] =
+		await Promise.all([
+			fetch(`${prefix}/sim/v1-physics-config.json`),
+			fetch(`${prefix}/sim/ainekio-v1-locomotion.xml`),
+			fetch(`${prefix}/sim/policies/v1-neural-gait.json`),
+			fetch(`${prefix}/sim/policies/v1-neural-gait.bin`),
+			fetch(`${prefix}/sim/policies/v1-neural-pose.json`),
+		]);
 	if (
 		!cfgResp.ok ||
 		!xmlResp.ok ||
 		!gaitJsonResp.ok ||
 		!gaitBinResp.ok ||
-		!poseJsonResp.ok ||
-		!poseBinResp.ok
+		!poseJsonResp.ok
 	) {
 		throw new Error(
 			"Failed to fetch Ainekio V1 physics or neural policy assets.",
 		);
 	}
-	const [cfgData, xmlText, gaitManifest, gaitBuf, poseManifest, poseBuf] =
+	const [cfgData, xmlText, gaitManifest, gaitBuf, loadedPoseManifest] =
 		await Promise.all([
 			cfgResp.json() as Promise<V1PhysicsConfig>,
 			xmlResp.text(),
 			gaitJsonResp.json() as Promise<V1NeuralGaitManifest>,
 			gaitBinResp.arrayBuffer(),
 			poseJsonResp.json() as Promise<V1NeuralPoseManifest>,
-			poseBinResp.arrayBuffer(),
 		]);
 	v1Config = cfgData;
 	v1BaseXml = xmlText;
@@ -615,52 +750,40 @@ async function ensureV1AssetsLoaded(): Promise<void> {
 		gaitManifest,
 		new Float32Array(gaitBuf),
 	);
-	v1PosePolicy = new V1NeuralPosePolicy(
-		poseManifest,
-		new Float32Array(poseBuf),
-	);
+	v1PoseManifest = loadedPoseManifest;
 }
 
 async function ensureV3AssetsLoaded(): Promise<void> {
-	if (v3Config && v3BaseXml && v3GaitPolicy && v3PosePolicy) {
+	if (v3Config && v3BaseXml && v3GaitPolicy && v3PoseManifest) {
 		return;
 	}
 	const prefix = workerBaseUrl;
-	const [
-		cfgResp,
-		xmlResp,
-		gaitJsonResp,
-		gaitBinResp,
-		poseJsonResp,
-		poseBinResp,
-	] = await Promise.all([
-		fetch(`${prefix}/sim/v3-physics-config.json`),
-		fetch(`${prefix}/sim/ainekio-v3-locomotion.xml`),
-		fetch(`${prefix}/sim/policies/v3-neural-gait.json`),
-		fetch(`${prefix}/sim/policies/v3-neural-gait.bin`),
-		fetch(`${prefix}/sim/policies/v3-neural-pose.json`),
-		fetch(`${prefix}/sim/policies/v3-neural-pose.bin`),
-	]);
+	const [cfgResp, xmlResp, gaitJsonResp, gaitBinResp, poseJsonResp] =
+		await Promise.all([
+			fetch(`${prefix}/sim/v3-physics-config.json`),
+			fetch(`${prefix}/sim/ainekio-v3-locomotion.xml`),
+			fetch(`${prefix}/sim/policies/v3-neural-gait.json`),
+			fetch(`${prefix}/sim/policies/v3-neural-gait.bin`),
+			fetch(`${prefix}/sim/policies/v3-neural-pose.json`),
+		]);
 	if (
 		!cfgResp.ok ||
 		!xmlResp.ok ||
 		!gaitJsonResp.ok ||
 		!gaitBinResp.ok ||
-		!poseJsonResp.ok ||
-		!poseBinResp.ok
+		!poseJsonResp.ok
 	) {
 		throw new Error(
 			"Failed to fetch Ainekio V3 physics or neural policy assets.",
 		);
 	}
-	const [cfgData, xmlText, gaitManifest, gaitBuf, poseManifest, poseBuf] =
+	const [cfgData, xmlText, gaitManifest, gaitBuf, loadedPoseManifest] =
 		await Promise.all([
 			cfgResp.json() as Promise<V3PhysicsConfig>,
 			xmlResp.text(),
 			gaitJsonResp.json() as Promise<V3NeuralGaitManifest>,
 			gaitBinResp.arrayBuffer(),
 			poseJsonResp.json() as Promise<V3NeuralPoseManifest>,
-			poseBinResp.arrayBuffer(),
 		]);
 	v3Config = cfgData;
 	v3BaseXml = xmlText;
@@ -668,10 +791,7 @@ async function ensureV3AssetsLoaded(): Promise<void> {
 		gaitManifest,
 		new Float32Array(gaitBuf),
 	);
-	v3PosePolicy = new V3NeuralPosePolicy(
-		poseManifest,
-		new Float32Array(poseBuf),
-	);
+	v3PoseManifest = loadedPoseManifest;
 }
 
 async function handleSetRobot(
@@ -682,6 +802,7 @@ async function handleSetRobot(
 	hfield?: ArenaHeightfield,
 	useDefaultFloorPlane = true,
 ): Promise<void> {
+	poseRequestSeq += 1;
 	if (robotModel === "v1") {
 		await ensureV1AssetsLoaded();
 	} else if (robotModel === "v3") {
@@ -695,35 +816,37 @@ async function handleSetRobot(
 		hfield,
 		useDefaultFloorPlane,
 	);
-	if (robotModel === "v1" && v1GaitPolicy && v1PosePolicy) {
-		const neuralMotions: NeuralMotionCatalogItem[] =
-			v1PosePolicy.manifest.motions.map((m) => ({
+	if (robotModel === "v1" && v1GaitPolicy && v1PoseManifest) {
+		const neuralMotions: NeuralMotionCatalogItem[] = v1PoseManifest.motions.map(
+			(m) => ({
 				id: m.id,
 				label: m.label,
 				sourceTitle: `V1 Neural Pose (${m.label})`,
-			}));
+			}),
+		);
 		post({
 			type: "robot-ready",
 			robotModel: "v1",
 			neuralGaitModelId: v1GaitPolicy.manifest.modelId,
-			neuralPoseModelId: v1PosePolicy.manifest.modelId,
+			neuralPoseModelId: v1PoseManifest.modelId,
 			neuralMotions,
 			availableClips: V1_CLIP_ACTIONS,
 		});
 		return;
 	}
-	if (robotModel === "v3" && v3GaitPolicy && v3PosePolicy) {
-		const neuralMotions: NeuralMotionCatalogItem[] =
-			v3PosePolicy.manifest.motions.map((m) => ({
+	if (robotModel === "v3" && v3GaitPolicy && v3PoseManifest) {
+		const neuralMotions: NeuralMotionCatalogItem[] = v3PoseManifest.motions.map(
+			(m) => ({
 				id: m.id,
 				label: m.label,
 				sourceTitle: `V3 Neural Pose (${m.label})`,
-			}));
+			}),
+		);
 		post({
 			type: "robot-ready",
 			robotModel: "v3",
 			neuralGaitModelId: v3GaitPolicy.manifest.modelId,
-			neuralPoseModelId: v3PosePolicy.manifest.modelId,
+			neuralPoseModelId: v3PoseManifest.modelId,
 			neuralMotions,
 			availableClips: V3_CLIP_ACTIONS,
 		});
@@ -741,7 +864,9 @@ async function handleSetRobot(
 		robotModel: "v2",
 		neuralGaitModelId: gaitPolicy?.manifest.modelId ?? "microduck-v19-snag-p4",
 		neuralPoseModelId:
-			posePolicy?.manifest.modelId ?? "neural-pose-v7-hysteresis",
+			posePolicy?.manifest.modelId ??
+			poseManifest?.modelId ??
+			"neural-pose-v7-hysteresis",
 		neuralMotions: v2Motions,
 		availableClips: V2_CLIP_ACTIONS,
 	});
@@ -2280,7 +2405,10 @@ function stepV1ControlFrame(): void {
 		neural: {
 			engine: engineMode,
 			gaitModelId: v1GaitPolicy?.manifest.modelId ?? "v1-microduck-p4",
-			poseModelId: v1PosePolicy?.manifest.modelId ?? "neural_pose_v1",
+			poseModelId:
+				v1PosePolicy?.manifest.modelId ??
+				v1PoseManifest?.modelId ??
+				"neural_pose_v1",
 			activeRole: v1ActiveRole,
 			activeMotionId: v1ActiveMotionId,
 			activeTwist:
@@ -2733,7 +2861,10 @@ function stepV3ControlFrame(): void {
 		neural: {
 			engine: engineMode,
 			gaitModelId: v3GaitPolicy?.manifest.modelId ?? "v3-microduck-p4",
-			poseModelId: v3PosePolicy?.manifest.modelId ?? "neural_pose_v3",
+			poseModelId:
+				v3PosePolicy?.manifest.modelId ??
+				v3PoseManifest?.modelId ??
+				"neural_pose_v3",
 			activeRole: v3ActiveRole,
 			activeMotionId: v3ActiveMotionId,
 			activeTwist:
@@ -3082,7 +3213,8 @@ function stepControlFrame(): void {
 		neural: {
 			engine: engineMode,
 			gaitModelId: gaitPolicy?.manifest.modelId ?? "loading",
-			poseModelId: posePolicy?.manifest.modelId ?? "loading",
+			poseModelId:
+				posePolicy?.manifest.modelId ?? poseManifest?.modelId ?? "loading",
 			activeRole: activeNeuralRole,
 			activeMotionId: activePose?.motion.id,
 			activeTwist:
@@ -3184,7 +3316,6 @@ async function handleInit(
 		gaitJsonResp,
 		gaitBinResp,
 		poseJsonResp,
-		poseBinResp,
 		manifoldResp,
 		poseLibResp,
 	] = await Promise.all([
@@ -3195,7 +3326,6 @@ async function handleInit(
 		fetch(`${prefix}/sim/policies/neural-gait.json`),
 		fetch(`${prefix}/sim/policies/neural-gait.bin`),
 		fetch(`${prefix}/sim/policies/neural-pose.json`),
-		fetch(`${prefix}/sim/policies/neural-pose.bin`),
 		fetch(`${prefix}/sim/policies/pose-manifold.json`),
 		fetch(`${prefix}/sim/policies/neural-pose-library.json`),
 	]);
@@ -3213,7 +3343,6 @@ async function handleInit(
 		!gaitJsonResp.ok ||
 		!gaitBinResp.ok ||
 		!poseJsonResp.ok ||
-		!poseBinResp.ok ||
 		!manifoldResp.ok ||
 		!poseLibResp.ok
 	) {
@@ -3227,8 +3356,7 @@ async function handleInit(
 		xmlText,
 		gaitManifest,
 		gaitBuf,
-		poseManifest,
-		poseBuf,
+		loadedPoseManifest,
 		manifoldCfg,
 		poseLibData,
 	] = await Promise.all([
@@ -3237,7 +3365,6 @@ async function handleInit(
 		gaitJsonResp.json() as Promise<NeuralGaitManifest>,
 		gaitBinResp.arrayBuffer(),
 		poseJsonResp.json() as Promise<NeuralPoseManifest>,
-		poseBinResp.arrayBuffer(),
 		manifoldResp.json() as Promise<PoseManifoldConfig>,
 		poseLibResp.json() as Promise<NeuralPoseLibrary>,
 	]);
@@ -3245,7 +3372,7 @@ async function handleInit(
 	config = cfgData;
 	baseXml = xmlText;
 	gaitPolicy = new NeuralGaitPolicy(gaitManifest, new Float32Array(gaitBuf));
-	posePolicy = new NeuralPosePolicy(poseManifest, new Float32Array(poseBuf));
+	poseManifest = loadedPoseManifest;
 	poseManifold = new PoseManifoldRuntime(manifoldCfg);
 	poseLibrary = poseLibData;
 
@@ -3387,7 +3514,10 @@ async function handleInit(
 		type: "ready",
 		helloCommands,
 		neuralGaitModelId: gaitPolicy.manifest.modelId,
-		neuralPoseModelId: posePolicy.manifest.modelId,
+		neuralPoseModelId:
+			posePolicy?.manifest.modelId ??
+			poseManifest?.modelId ??
+			"neural-pose-v7-hysteresis",
 		neuralMotions,
 	});
 }
@@ -3556,10 +3686,35 @@ self.addEventListener(
 								const poseName =
 									rawPoseName === "wave" ? "wave_fr" : rawPoseName;
 								if (emitProtocolTx && engineMode === "neural") {
+									const req = ++poseRequestSeq;
 									if (activeRobotModel === "v1") {
-										startV1NeuralPoseMotion(poseName);
+										if (v1PosePolicy) {
+											startV1NeuralPoseMotion(poseName);
+										} else {
+											void ensureV1PosePolicyLoaded().then((loaded) => {
+												if (
+													loaded &&
+													req === poseRequestSeq &&
+													activeRobotModel === "v1"
+												) {
+													startV1NeuralPoseMotion(poseName);
+												}
+											});
+										}
 									} else {
-										startV3NeuralPoseMotion(poseName);
+										if (v3PosePolicy) {
+											startV3NeuralPoseMotion(poseName);
+										} else {
+											void ensureV3PosePolicyLoaded().then((loaded) => {
+												if (
+													loaded &&
+													req === poseRequestSeq &&
+													activeRobotModel === "v3"
+												) {
+													startV3NeuralPoseMotion(poseName);
+												}
+											});
+										}
 									}
 								} else if (activeRobotModel === "v1") {
 									const goal = sampleV1NativePostureDeg(poseName);
@@ -3732,6 +3887,7 @@ self.addEventListener(
 				recordingStartedAtMs = performance.now();
 				return;
 			case "set-engine":
+				poseRequestSeq += 1;
 				engineMode = msg.engine;
 				if (activeRobotModel === "v1") {
 					stopV1Motion(false);
@@ -3743,6 +3899,7 @@ self.addEventListener(
 				}
 				return;
 			case "neural-walk":
+				poseRequestSeq += 1;
 				if (activeRobotModel === "v1") {
 					startOrUpdateV1NeuralWalk(
 						msg.forward,
@@ -3766,16 +3923,56 @@ self.addEventListener(
 					);
 				}
 				return;
-			case "neural-pose":
+			case "neural-pose": {
+				const req = ++poseRequestSeq;
 				if (activeRobotModel === "v1") {
-					startV1NeuralPoseMotion(msg.motionId);
+					if (v1PosePolicy) {
+						startV1NeuralPoseMotion(msg.motionId);
+					} else {
+						void ensureV1PosePolicyLoaded().then((loaded) => {
+							if (
+								loaded &&
+								req === poseRequestSeq &&
+								activeRobotModel === "v1"
+							) {
+								startV1NeuralPoseMotion(msg.motionId);
+							}
+						});
+					}
 				} else if (activeRobotModel === "v3") {
-					startV3NeuralPoseMotion(msg.motionId);
+					if (v3PosePolicy) {
+						startV3NeuralPoseMotion(msg.motionId);
+					} else {
+						void ensureV3PosePolicyLoaded().then((loaded) => {
+							if (
+								loaded &&
+								req === poseRequestSeq &&
+								activeRobotModel === "v3"
+							) {
+								startV3NeuralPoseMotion(msg.motionId);
+							}
+						});
+					}
 				} else if (!emitProtocolTx) {
-					startNeuralPoseMotion(msg.motionId);
+					if (posePolicy) {
+						startNeuralPoseMotion(msg.motionId);
+					} else {
+						void ensureV2PosePolicyLoaded().then((loaded) => {
+							if (
+								loaded &&
+								req === poseRequestSeq &&
+								activeRobotModel === "v2" &&
+								!emitProtocolTx
+							) {
+								startNeuralPoseMotion(msg.motionId);
+							}
+						});
+					}
 				}
 				return;
+			}
 			case "neural-stop":
+				poseRequestSeq += 1;
 				if (activeRobotModel === "v1") {
 					stopV1Motion(Boolean(msg.detach));
 				} else if (activeRobotModel === "v3") {

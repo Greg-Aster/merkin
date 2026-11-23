@@ -7,15 +7,18 @@
  */
 
 import * as THREE from "three";
+import type { MultiplayerRemotePlayer } from "../multiplayer/index.js";
 import {
 	type LevelDefinition,
 	ORBIT_PITCH_MAX_RAD,
 	ORBIT_PITCH_MIN_RAD,
 	type RobotModelId,
 	type SimulatorCameraMode,
+	type SimulatorLevelId,
 	computeOrbitCameraPose,
 } from "../sim/contracts";
 import { LevelSceneBuilder } from "./levelSceneBuilder";
+import { RemotePeerManager } from "./remotePeerManager";
 import {
 	ThreeVirtualRobotV2Rig,
 	type VirtualRobotPoseInput,
@@ -28,6 +31,7 @@ export class SimulatorViewport {
 	readonly #camera: THREE.PerspectiveCamera;
 	readonly #levelBuilder: LevelSceneBuilder;
 	readonly #robotRig: ThreeVirtualRobotV2Rig;
+	readonly #remotePeers: RemotePeerManager;
 	readonly #resizeObserver: ResizeObserver;
 
 	#cameraMode: SimulatorCameraMode = "orbit";
@@ -85,6 +89,7 @@ export class SimulatorViewport {
 
 		this.#levelBuilder = new LevelSceneBuilder(this.#scene);
 		this.#robotRig = new ThreeVirtualRobotV2Rig(this.#scene, this.#renderer);
+		this.#remotePeers = new RemotePeerManager(this.#scene);
 
 		this.#bindInput();
 		this.#resizeObserver = new ResizeObserver(() => this.#handleResize());
@@ -149,6 +154,13 @@ export class SimulatorViewport {
 
 	applyRobotPose(pose: VirtualRobotPoseInput): void {
 		this.#robotRig.applyPose(pose);
+	}
+
+	syncRemotePeers(
+		remotePlayers: readonly MultiplayerRemotePlayer[],
+		localLevelId: SimulatorLevelId,
+	): void {
+		this.#remotePeers.syncPeers(remotePlayers, localLevelId);
 	}
 
 	updateFaceRgba(width: number, height: number, rgba: Uint8Array): void {
@@ -281,7 +293,12 @@ export class SimulatorViewport {
 			);
 			this.#lastFrameTime = now;
 			this.#updateCameraFrame(dt);
-			this.#levelBuilder.update(now * 0.001);
+			const focusPos =
+				this.#cameraMode === "orbit"
+					? this.#orbitTarget
+					: this.#robotRig.getWorldPosition();
+			this.#levelBuilder.update(now * 0.001, focusPos);
+			this.#remotePeers.update(dt);
 			this.#renderer.render(this.#scene, this.#camera);
 			this.#rafId = requestAnimationFrame(tick);
 		};
@@ -508,6 +525,7 @@ export class SimulatorViewport {
 		window.removeEventListener("keyup", this.#onKeyUp);
 		window.removeEventListener("blur", this.#onWindowBlur);
 		this.#robotRig.dispose();
+		this.#remotePeers.dispose();
 		this.#levelBuilder.dispose();
 		this.#renderer.dispose();
 		el.remove();

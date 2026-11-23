@@ -2,6 +2,12 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import {
+	type MultiplayerTransportPort,
+	type MultiplayerWireMessage,
+	createMultiplayerSession,
+	normalizeRoomName,
+} from "../src/multiplayer/index";
+import {
 	ORBIT_GROUND_CLEARANCE_M,
 	ORBIT_PITCH_MAX_RAD,
 	ORBIT_PITCH_MIN_RAD,
@@ -501,12 +507,235 @@ function testOrbitCameraLookUpAndContinuity(): void {
 	assert.ok(topDown.position[1] > target[1] + 0.8);
 }
 
+class MockMpHostTransport implements MultiplayerTransportPort {
+	readonly role = "host";
+	readonly clients = new Map<string, MockMpClientTransport>();
+	readonly messageListeners = new Set<
+		(message: unknown, peerId?: string) => void
+	>();
+	readonly peerListListeners = new Set<(peerIds: readonly string[]) => void>();
+
+	constructor(readonly peerId: string) {}
+
+	send(): void {}
+
+	broadcast(message: MultiplayerWireMessage): void {
+		for (const client of this.clients.values()) {
+			client.receive(message);
+		}
+	}
+
+	onMessage(listener: (message: unknown, peerId?: string) => void): () => void {
+		this.messageListeners.add(listener);
+		return () => this.messageListeners.delete(listener);
+	}
+
+	onPeerListChanged(
+		listener: (peerIds: readonly string[]) => void,
+	): () => void {
+		this.peerListListeners.add(listener);
+		listener(this.connectedPeers());
+		return () => this.peerListListeners.delete(listener);
+	}
+
+	connectedPeers(): readonly string[] {
+		return [...this.clients.keys()].sort();
+	}
+
+	connect(client: MockMpClientTransport): void {
+		this.clients.set(client.peerId, client);
+		this.notifyPeerList();
+	}
+
+	disconnectClient(peerId: string): void {
+		this.clients.delete(peerId);
+		this.notifyPeerList();
+	}
+
+	receive(message: MultiplayerWireMessage, peerId: string): void {
+		for (const listener of this.messageListeners) {
+			listener(message, peerId);
+		}
+	}
+
+	dispose(): void {
+		for (const client of this.clients.values()) {
+			client.notifyHostClosed();
+		}
+		this.clients.clear();
+		this.messageListeners.clear();
+		this.peerListListeners.clear();
+	}
+
+	private notifyPeerList(): void {
+		for (const listener of this.peerListListeners) {
+			listener(this.connectedPeers());
+		}
+	}
+}
+
+class MockMpClientTransport implements MultiplayerTransportPort {
+	readonly role = "client";
+	readonly messageListeners = new Set<
+		(message: unknown, peerId?: string) => void
+	>();
+	readonly peerListListeners = new Set<(peerIds: readonly string[]) => void>();
+	private connected = true;
+
+	constructor(
+		readonly peerId: string,
+		readonly host: MockMpHostTransport,
+	) {}
+
+	send(message: MultiplayerWireMessage): void {
+		if (this.connected) {
+			this.host.receive(message, this.peerId);
+		}
+	}
+
+	broadcast(message: MultiplayerWireMessage): void {
+		this.send(message);
+	}
+
+	onMessage(listener: (message: unknown, peerId?: string) => void): () => void {
+		this.messageListeners.add(listener);
+		return () => this.messageListeners.delete(listener);
+	}
+
+	onPeerListChanged(
+		listener: (peerIds: readonly string[]) => void,
+	): () => void {
+		this.peerListListeners.add(listener);
+		listener(this.connectedPeers());
+		return () => this.peerListListeners.delete(listener);
+	}
+
+	connectedPeers(): readonly string[] {
+		return this.connected ? [this.host.peerId] : [];
+	}
+
+	receive(message: MultiplayerWireMessage): void {
+		for (const listener of this.messageListeners) {
+			listener(message, this.host.peerId);
+		}
+	}
+
+	notifyHostClosed(): void {
+		this.connected = false;
+		for (const listener of this.peerListListeners) {
+			listener([]);
+		}
+	}
+
+	dispose(): void {
+		this.connected = false;
+		this.messageListeners.clear();
+		this.peerListListeners.clear();
+	}
+}
+
+function testMultiplayerSessionAndGameCompat(): void {
+	assert.equal(normalizeRoomName("  Ainekio Lab! 01 "), "ainekio-lab-01");
+
+	const hostSession = createMultiplayerSession({
+		displayName: "Host-V2",
+		timestamp: () => "2026-11-23T00:00:00.000Z",
+	});
+	const simClient = createMultiplayerSession({
+		displayName: "Guest-V3",
+		timestamp: () => "2026-11-23T00:00:01.000Z",
+	});
+	const gameClient = createMultiplayerSession({
+		timestamp: () => "2026-11-23T00:00:02.000Z",
+	});
+
+	const hostTransport = new MockMpHostTransport("host-peer");
+	const simTransport = new MockMpClientTransport("sim-peer", hostTransport);
+	const gameTransport = new MockMpClientTransport("game-peer", hostTransport);
+
+	hostSession.attachTransport({
+		transport: hostTransport,
+		roomName: "Shared Arena",
+	});
+	hostTransport.connect(simTransport);
+	hostTransport.connect(gameTransport);
+	simClient.attachTransport({
+		transport: simTransport,
+		roomName: "Shared Arena",
+	});
+	gameClient.attachTransport({
+		transport: gameTransport,
+		roomName: "Shared Arena",
+	});
+
+	// 1. In-session host publishes its own articulated robot pose to all clients
+	hostSession.publishLocalPose({
+		position: [0.5, 0.12, -1.2],
+		rotation: [0, 0, 0, 1],
+		tick: 1,
+		robotModel: "v2",
+		jointsDeg: [0, 10, -10, 0, 10, -10, 0, 10, -10, 0, 10, -10],
+		levelId: "v2_lab",
+	});
+	assert.equal(simClient.snapshot().remotePlayers.length, 1);
+	assert.equal(simClient.snapshot().remotePlayers[0]?.peerId, "host-peer");
+	assert.equal(simClient.snapshot().remotePlayers[0]?.pose.robotModel, "v2");
+	assert.equal(
+		simClient.snapshot().remotePlayers[0]?.pose.displayName,
+		"Host-V2",
+	);
+
+	// 2. game.megameal peer publishes a minimal pose (no robotModel) alongside simulator peer
+	gameClient.publishLocalPose({
+		position: [3, 1.5, 4],
+		rotation: [0, 0, 0, 1],
+		tick: 2,
+	});
+	simClient.publishLocalPose({
+		position: [-1, 0.18, 2],
+		rotation: [0, 0, 0, 1],
+		tick: 3,
+		robotModel: "v3",
+		jointsDeg: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+		levelId: "v2_lab",
+	});
+
+	assert.equal(hostSession.snapshot().remotePlayers.length, 2);
+	const gamePeerOnSim = simClient
+		.snapshot()
+		.remotePlayers.find((p) => p.peerId === "game-peer");
+	assert.ok(gamePeerOnSim);
+	assert.equal(gamePeerOnSim.pose.robotModel, undefined);
+	assert.deepEqual(gamePeerOnSim.pose.position, [3, 1.5, 4]);
+
+	// 3. Chat relays across host and both clients without duplication
+	simClient.sendChat("hello from V3!");
+	assert.equal(hostSession.snapshot().chatMessages.length, 1);
+	assert.equal(
+		gameClient.snapshot().chatMessages.at(-1)?.text,
+		"hello from V3!",
+	);
+	assert.equal(simClient.snapshot().chatMessages.length, 1);
+
+	// 4. Disconnecting a client prunes it from host and remaining clients
+	hostTransport.disconnectClient("game-peer");
+	assert.equal(hostSession.snapshot().remotePlayers.length, 1);
+	assert.equal(simClient.snapshot().remotePlayers.length, 1);
+	assert.equal(simClient.snapshot().remotePlayers[0]?.peerId, "host-peer");
+
+	// 5. Closing the host room transitions connected clients cleanly to disconnected
+	hostSession.disconnect();
+	assert.equal(simClient.snapshot().status, "disconnected");
+	assert.equal(simClient.snapshot().remotePlayers.length, 0);
+}
+
 testCoordinateTransforms();
 testOrbitCameraLookUpAndContinuity();
 testProtocolBinaryCodecs();
 testCameraResolutions();
 testDetachedLevelsAndAssets();
 testNeuralPoliciesAndManifoldParity();
+testMultiplayerSessionAndGameCompat();
 console.log(
-	"All simulator.ainek.io contract, asset, Neural Gait, Neural Pose, and PoseManifold parity checks passed.",
+	"All simulator.ainek.io contract, asset, multiplayer, Neural Gait, Neural Pose, and PoseManifold parity checks passed.",
 );

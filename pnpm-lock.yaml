@@ -38,7 +38,7 @@ importers:
         version: 0.9.6(prettier@3.8.1)(typescript@5.9.3)
       '@astrojs/mdx':
         specifier: ^4.1.0
-        version: 4.3.13(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))
+        version: 4.3.13(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))
       '@astrojs/rss':
         specifier: ^4.0.11
         version: 4.0.15
@@ -47,10 +47,10 @@ importers:
         version: 3.7.0
       '@astrojs/svelte':
         specifier: 7.2.5
-        version: 7.2.5(@types/node@25.3.0)(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(jiti@1.21.7)(lightningcss@1.32.0)(stylus@0.63.0)(svelte@5.26.2)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+        version: 7.2.5(@types/node@25.3.0)(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(jiti@1.21.7)(lightningcss@1.30.2)(stylus@0.63.0)(svelte@5.26.2)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       '@astrojs/tailwind':
         specifier: ^5.1.5
-        version: 5.1.5(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@3.4.19(tsx@4.21.0)(yaml@2.8.2))
+        version: 5.1.5(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@3.4.19(tsx@4.21.0)(yaml@2.8.2))
       '@fontsource-variable/jetbrains-mono':
         specifier: ^5.1.2
         version: 5.2.8
@@ -86,7 +86,7 @@ importers:
         version: 0.5.19(tailwindcss@3.4.19(tsx@4.21.0)(yaml@2.8.2))
       astro:
         specifier: 5.18.0
-        version: 5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+        version: 5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       astro-compress:
         specifier: ^2.3.6
         version: 2.3.9(@types/node@25.3.0)(jiti@1.21.7)(rollup@4.58.0)(stylus@0.63.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -615,7 +615,7 @@ importers:
         version: 0.9.6(prettier@3.8.1)(typescript@5.9.3)
       '@astrojs/mdx':
         specifier: ^4.1.0
-        version: 4.3.13(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))
+        version: 4.3.13(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))
       '@astrojs/rss':
         specifier: ^4.0.11
         version: 4.0.15
@@ -624,10 +624,10 @@ importers:
         version: 3.7.0
       '@astrojs/svelte':
         specifier: 7.2.5
-        version: 7.2.5(@types/node@25.3.0)(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(jiti@1.21.7)(lightningcss@1.30.2)(stylus@0.63.0)(svelte@5.26.2)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+        version: 7.2.5(@types/node@25.3.0)(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(jiti@1.21.7)(lightningcss@1.32.0)(stylus@0.63.0)(svelte@5.26.2)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       '@astrojs/tailwind':
         specifier: ^5.1.5
-        version: 5.1.5(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@3.4.19(tsx@4.21.0)(yaml@2.8.2))
+        version: 5.1.5(astro@5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@3.4.19(tsx@4.21.0)(yaml@2.8.2))
       '@fontsource-variable/jetbrains-mono':
         specifier: ^5.1.2
         version: 5.2.8
@@ -681,7 +681,7 @@ importers:
         version: 8.1.3(svelte@5.26.2)(three@0.178.0)
       astro:
         specifier: 5.18.0
-        version: 5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.30.2)(rollup@4.58.0)(stylus@0.63.0)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+        version: 5.18.0(@types/node@25.3.0)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@4.58.0)(stylus@0.63.0)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       astro-compress:
         specifier: ^2.3.6
         version: 2.3.9(@types/node@25.3.0)(jiti@1.21.7)(rollup@4.58.0)(stylus@0.63.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -812,6 +812,9 @@ importers:
       mujoco-js:
         specifier: 0.0.7
         version: 0.0.7
+      peerjs:
+        specifier: ^1.5.5
+        version: 1.5.5
       svelte:
         specifier: 5.26.2
         version: 5.26.2

@@ -692,6 +692,16 @@ export class LevelSceneBuilder {
 		readonly speed: number;
 		readonly depth: number;
 	}> = [];
+	#pendingChunks: Array<{
+		readonly url: string;
+		readonly centerX: number;
+		readonly centerZ: number;
+		readonly halfExtent: number;
+		readonly instances: NonNullable<LevelDefinition["glbInstances"]>;
+		loading: boolean;
+		loaded: boolean;
+	}> = [];
+	#lastChunkCheckSec = -1;
 
 	constructor(scene: THREE.Scene) {
 		this.#scene = scene;
@@ -1064,21 +1074,145 @@ export class LevelSceneBuilder {
 			// Await the nearest batch immediately so the spawn area is fully rendered
 			await loadBatch(uniqueUrls.slice(0, batchSize));
 
-			// Stream any remaining distant chunks/props smoothly in the background
+			// For large chunked worlds (e.g. Observatory 4x4 terrain grid), defer distant chunks
+			// and stream them on demand as the robot or camera moves within range instead of
+			// downloading tens of megabytes of far terrain unconditionally on mobile/desktop.
 			if (uniqueUrls.length > batchSize) {
-				void (async () => {
-					for (let i = batchSize; i < uniqueUrls.length; i += batchSize) {
-						if (generation !== this.#loadGeneration) {
-							return;
-						}
-						await loadBatch(uniqueUrls.slice(i, i + batchSize));
+				const remaining = uniqueUrls.slice(batchSize);
+				const chunkPattern = /chunk_(\d+)_(\d+)_LOD/i;
+				const allChunked = remaining.every((u) => chunkPattern.test(u));
+				if (allChunked) {
+					for (const url of remaining) {
+						const match = chunkPattern.exec(url);
+						const cx = Number(match?.[1] ?? 0);
+						const cz = Number(match?.[2] ?? 0);
+						const matchingInstances = (level.glbInstances ?? []).filter(
+							(inst) => inst.url === url,
+						);
+						const refPos = matchingInstances[0]?.pos ?? [0, 0, 0];
+						this.#pendingChunks.push({
+							url,
+							centerX: refPos[0] + (-150 + cx * 100),
+							centerZ: refPos[2] + (-150 + cz * 100),
+							halfExtent: 50,
+							instances: matchingInstances,
+							loading: false,
+							loaded: false,
+						});
 					}
-				})();
+					this.#lastChunkCheckSec = -1;
+				} else {
+					void (async () => {
+						for (let i = batchSize; i < uniqueUrls.length; i += batchSize) {
+							if (generation !== this.#loadGeneration) {
+								return;
+							}
+							await loadBatch(uniqueUrls.slice(i, i + batchSize));
+						}
+					})();
+				}
 			}
 		}
 	}
 
-	update(timeSec: number): void {
+	#streamNearbyChunks(focusPos: THREE.Vector3): void {
+		const group = this.#levelGroup;
+		if (!group || this.#pendingChunks.length === 0) {
+			return;
+		}
+		const generation = this.#loadGeneration;
+		const nav =
+			typeof navigator !== "undefined"
+				? (navigator as Navigator & {
+						connection?: { saveData?: boolean };
+					})
+				: undefined;
+		const isConstrained =
+			Boolean(nav?.connection?.saveData) ||
+			(typeof window !== "undefined" && window.innerWidth < 768);
+		const streamRadius = isConstrained ? 85 : 120;
+
+		let activeLoads = 0;
+		for (const chunk of this.#pendingChunks) {
+			if (chunk.loading) {
+				activeLoads += 1;
+			}
+		}
+		if (activeLoads >= 2) {
+			return;
+		}
+
+		for (const chunk of this.#pendingChunks) {
+			if (chunk.loaded || chunk.loading) {
+				continue;
+			}
+			const dx = Math.max(
+				0,
+				Math.abs(focusPos.x - chunk.centerX) - chunk.halfExtent,
+			);
+			const dz = Math.max(
+				0,
+				Math.abs(focusPos.z - chunk.centerZ) - chunk.halfExtent,
+			);
+			if (Math.hypot(dx, dz) > streamRadius) {
+				continue;
+			}
+			chunk.loading = true;
+			activeLoads += 1;
+			void this.#gltfLoader
+				.loadAsync(chunk.url)
+				.then((gltf) => {
+					if (
+						generation !== this.#loadGeneration ||
+						this.#levelGroup !== group
+					) {
+						disposeObject3D(gltf.scene);
+						return;
+					}
+					gltf.scene.traverse((obj) => {
+						if (obj instanceof THREE.Mesh) {
+							obj.castShadow = true;
+							obj.receiveShadow = true;
+						}
+					});
+					for (const inst of chunk.instances) {
+						const clone = gltf.scene.clone(true);
+						clone.position.set(inst.pos[0], inst.pos[1], inst.pos[2]);
+						clone.quaternion.set(
+							inst.quat[0],
+							inst.quat[1],
+							inst.quat[2],
+							inst.quat[3],
+						);
+						clone.scale.set(inst.scale[0], inst.scale[1], inst.scale[2]);
+						clone.name = inst.id;
+						group.add(clone);
+					}
+					chunk.loaded = true;
+					chunk.loading = false;
+				})
+				.catch((err) => {
+					chunk.loading = false;
+					console.warn(
+						`[simulator] Deferred chunk load warning (${chunk.url}):`,
+						err,
+					);
+				});
+			if (activeLoads >= 2) {
+				break;
+			}
+		}
+	}
+
+	update(timeSec: number, focusPos?: THREE.Vector3): void {
+		if (
+			focusPos &&
+			this.#pendingChunks.length > 0 &&
+			(this.#lastChunkCheckSec < 0 || timeSec - this.#lastChunkCheckSec >= 0.35)
+		) {
+			this.#lastChunkCheckSec = timeSec;
+			this.#streamNearbyChunks(focusPos);
+		}
 		if (this.#fireflyMeshes.length > 0 || this.#fireflyLights.length > 0) {
 			// Serene, lonely floating figure-eight drift + gentle wing flutter & golden pulse
 			const dx = Math.sin(timeSec * 0.52) * 0.26;
@@ -1148,6 +1282,8 @@ export class LevelSceneBuilder {
 		this.#fireflyLights = [];
 		this.#spaceDrifters = [];
 		this.#pulsingLights = [];
+		this.#pendingChunks = [];
+		this.#lastChunkCheckSec = -1;
 		if (this.#levelGroup) {
 			this.#scene.remove(this.#levelGroup);
 			disposeObject3D(this.#levelGroup);
