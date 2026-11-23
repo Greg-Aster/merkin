@@ -120,27 +120,81 @@ export function getRouteStyleBundleNames(): RouteStyleBundleName[] {
   return Object.keys(bundles) as RouteStyleBundleName[]
 }
 
+const compiledBundleCache = new Map<RouteStyleBundleName, Promise<string>>()
+
+function minifyCssAst(): postcss.Plugin {
+  return {
+    postcssPlugin: 'megameal-minify-css',
+    OnceExit(root) {
+      root.walkComments(comment => {
+        if (!comment.text.startsWith('!')) comment.remove()
+      })
+      root.walkDecls(decl => {
+        decl.raws.before = ''
+        decl.raws.between = ':'
+        if (decl.important) decl.raws.important = '!important'
+        decl.value = decl.value.replace(/\s*\n\s*/g, ' ').replace(/\s{2,}/g, ' ').trim()
+      })
+      root.walkRules(rule => {
+        rule.raws.before = ''
+        rule.raws.between = ''
+        rule.raws.after = ''
+        rule.raws.semicolon = false
+        rule.selector = rule.selector
+          .replace(/\s*\n\s*/g, ' ')
+          .replace(/\s*,\s*/g, ',')
+          .replace(/\s{2,}/g, ' ')
+          .trim()
+      })
+      root.walkAtRules(atRule => {
+        atRule.raws.before = ''
+        atRule.raws.between = ''
+        atRule.raws.after = ''
+        atRule.raws.semicolon = false
+        if (atRule.params) {
+          atRule.params = atRule.params
+            .replace(/\s*\n\s*/g, ' ')
+            .replace(/\s{2,}/g, ' ')
+            .trim()
+        }
+      })
+    },
+  }
+}
+
 export async function compileRouteStyleBundle(
   bundleName: RouteStyleBundleName,
 ): Promise<string> {
-  const bundle = bundles[bundleName]
-  await Promise.all(bundle.sources.map(source => fs.access(source)))
+  const useCache = import.meta.env?.PROD ?? process.env.NODE_ENV === 'production'
+  if (useCache) {
+    const cached = compiledBundleCache.get(bundleName)
+    if (cached) return cached
+  }
 
-  const entryCss = bundle.sources
-    .map(source => `@import ${JSON.stringify(source)};`)
-    .join('\n')
-  const plugins: unknown[] = [postcssImport(), postcssNesting()]
-  if (bundle.tailwind) plugins.push(tailwindcss(tailwindConfig as any))
+  const compilePromise = (async () => {
+    const bundle = bundles[bundleName]
+    await Promise.all(bundle.sources.map(source => fs.access(source)))
 
-  // Some workspace packages resolve a newer compatible PostCSS patch release,
-  // so keep the compiler boundary version-neutral instead of comparing two
-  // copies of PostCSS's recursive plugin types.
-  const result = await postcss(plugins as any).process(entryCss, {
-    from: path.join(appRoot, `.route-style-${bundleName}.css`),
-    map: false,
-  })
+    const entryCss = bundle.sources
+      .map(source => `@import ${JSON.stringify(source)};`)
+      .join('\n')
+    const plugins: unknown[] = [postcssImport(), postcssNesting()]
+    if (bundle.tailwind) plugins.push(tailwindcss(tailwindConfig as any))
+    plugins.push(minifyCssAst())
 
-  return result.css
+    // Some workspace packages resolve a newer compatible PostCSS patch release,
+    // so keep the compiler boundary version-neutral instead of comparing two
+    // copies of PostCSS's recursive plugin types.
+    const result = await postcss(plugins as any).process(entryCss, {
+      from: path.join(appRoot, `.route-style-${bundleName}.css`),
+      map: false,
+    })
+
+    return result.css
+  })()
+
+  if (useCache) compiledBundleCache.set(bundleName, compilePromise)
+  return compilePromise
 }
 
 export function createRouteStyleEndpoint(

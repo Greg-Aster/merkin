@@ -7,11 +7,15 @@ import {
 import type { MarkdownHeading } from 'astro'
 import getReadingTime from 'reading-time'
 
-// Preview builds fetch each document once, with bounded retries for transient
-// failures. Production retains its existing timeout and fetch behavior.
+// Cache each Google Doc once per static build (and preview builds) with bounded
+// retries for transient network/429 failures. Live dev server stays uncached.
 const IS_DEV_PREVIEW = process.env.MERKIN_DEV_PREVIEW === 'true'
-const GOOGLE_DOC_FETCH_TIMEOUT_MS = IS_DEV_PREVIEW ? 30_000 : 10_000
-const previewSnapshots = new Map<string, Promise<GoogleDocSnapshot>>()
+const SHOULD_CACHE_SNAPSHOTS =
+  IS_DEV_PREVIEW ||
+  Boolean(import.meta.env?.PROD) ||
+  process.env.NODE_ENV === 'production'
+const GOOGLE_DOC_FETCH_TIMEOUT_MS = IS_DEV_PREVIEW ? 30_000 : 15_000
+const buildSnapshots = new Map<string, Promise<GoogleDocSnapshot>>()
 const GOOGLE_DOC_STYLE_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const GOOGLE_DOC_STYLES_DIRECTORY = new URL(
   '../../public/styles/',
@@ -45,20 +49,20 @@ export function resolveGoogleDocStylesheet(style: string): string {
 export async function loadGoogleDocSnapshot(
   documentId: string,
 ): Promise<GoogleDocSnapshot> {
-  if (!IS_DEV_PREVIEW) return fetchGoogleDocSnapshot(documentId)
+  if (!SHOULD_CACHE_SNAPSHOTS) return fetchGoogleDocSnapshot(documentId)
 
-  let snapshot = previewSnapshots.get(documentId)
+  let snapshot = buildSnapshots.get(documentId)
   if (!snapshot) {
-    snapshot = fetchPreviewSnapshot(documentId).catch(error => {
-      previewSnapshots.delete(documentId)
+    snapshot = fetchSnapshotWithRetry(documentId).catch(error => {
+      buildSnapshots.delete(documentId)
       throw error
     })
-    previewSnapshots.set(documentId, snapshot)
+    buildSnapshots.set(documentId, snapshot)
   }
   return snapshot
 }
 
-async function fetchPreviewSnapshot(
+async function fetchSnapshotWithRetry(
   documentId: string,
 ): Promise<GoogleDocSnapshot> {
   for (let attempt = 1; attempt <= 3; attempt++) {

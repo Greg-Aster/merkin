@@ -33,7 +33,6 @@ import {
   getTimelineSelectedCardAnchor,
   getTimelineStarControlStyle,
   getVisibleTimelineConstellationLines,
-  applyTimelineCameraDrag,
   createTimelineRenderer,
   createTimelineCameraController,
   isTimelineInteractiveTarget,
@@ -43,6 +42,14 @@ import {
   type TimelineStarScreenPosition,
   updateTimelinePointer,
 } from './timelinePortalPresentation'
+import {
+  TIMELINE_CAROUSEL_CONSTANTS,
+  TIMELINE_KEY_WHEEL_STEPS,
+  bindTimelineWindowEvents,
+  createTimelineGestureController,
+  getTimelineViewModeInstructions,
+  stepTimelineWheelMomentum,
+} from './timelinePortalCarouselHelpers'
 import { createTimelineFlightController } from './timelinePortalFlight'
 
 export let events: TimelinePortalEvent[] = []
@@ -59,15 +66,7 @@ export let presentation: 'full' | 'banner' = 'full'
 
 let shell: HTMLDivElement | null = null
 let timelineBackgroundMedia: TimelineBackgroundMedia | null = null
-let panPointerId: number | null = null
-let lastPanClientX = 0
-let lastPanClientY = 0
-let panStartClientX = 0
-let panStartClientY = 0
-let hasDraggedScenePan = false
-let lastTouchCenterY: number | null = null
-let lastTouchPanClientX: number | null = null
-let lastTouchPanClientY: number | null = null
+let isPanningScene = false
 let virtualWheel = 0
 let wheelVelocity = 0
 let scrollFrame = 0
@@ -86,27 +85,27 @@ let hasInitializedBeginningPosition = false
 let hasMounted = false
 let prefersReducedMotion = false
 let runtimeActive = true
-const wheelMomentumDecay = 2.4
-const wheelMomentumImpulse = 5.2
-const wheelMomentumMaxVelocity = 4.8
-const mouseWheelSensitivity = 1.15
-const mouseWheelMomentumImpulse = 3.6
-const mouseWheelMomentumMaxVelocity = 2.8
-const keyboardWheelStep = 0.82
-const pageWheelStep = 1.64
-const clickAwayDragThreshold = 7
-const cameraPanStep = 0.2
+const {
+  wheelMomentumDecay,
+  wheelMomentumMaxVelocity,
+  mouseWheelSensitivity,
+  mouseWheelMomentumImpulse,
+  mouseWheelMomentumMaxVelocity,
+  keyboardWheelStep,
+  pageWheelStep,
+  cameraPanStep,
+  travelCameraPanLimit,
+  mapCameraPanLimit,
+  mapZoomMin,
+  mapZoomMax,
+  mapZoomStep,
+  mapOrbitLimit,
+  mapKeyboardOrbitStep,
+  backgroundVideoSrc: timelineBackgroundVideoSrc,
+  backgroundPosterSrc: timelineBackgroundPosterSrc,
+  backgroundVideoPlaybackRate: timelineBackgroundVideoPlaybackRate,
+} = TIMELINE_CAROUSEL_CONSTANTS
 const manualBoostMultiplier = 2.15
-const travelCameraPanLimit = 6.2
-const mapCameraPanLimit = 1.18
-const mapZoomMin = 0.55
-const mapZoomMax = 2.8
-const mapZoomStep = 1.16
-const mapOrbitLimit = 1
-const mapKeyboardOrbitStep = 0.18
-const timelineBackgroundVideoSrc = '/assets/banner/universbg0001-0121.webm'
-const timelineBackgroundPosterSrc = '/assets/banner/posters/universe-poster.webp'
-const timelineBackgroundVideoPlaybackRate = 0.25
 const input: TimelineCarouselInput = {
   x: 0,
   y: 0,
@@ -227,11 +226,10 @@ $: timelinePositionText = activeTimelineEvent
 $: isMapMode = viewMode === 'map'
 $: isBannerPresentation = presentation === 'banner'
 $: viewModeLabel = isMapMode ? 'Complete overview' : 'First-person chronology'
-$: viewModeInstructions = isMapMode
-  ? 'Select a star to inspect an article. Drag to rotate, scroll to zoom; use the arrow controls to pan.'
-  : autopilotEnabled
-    ? 'Autopilot is roaming between records, holding for 20 seconds at each destination. Pause or boost from the flight controls below.'
-    : 'Manual flight. Scroll, drag, or use the slider; re-enable autopilot from the flight controls below.'
+$: viewModeInstructions = getTimelineViewModeInstructions(
+  isMapMode,
+  autopilotEnabled,
+)
 $: if (!hasInitializedBeginningPosition && screens.length > 0) {
   initializeBeginningPosition()
 }
@@ -283,18 +281,14 @@ function runScrollDrivenWheelFrame(timestamp: number) {
     : 1 / 60
   lastScrollFrameAt = timestamp
 
-  if (Math.abs(wheelVelocity) > 0.001) {
-    const nextWheel = clamp(virtualWheel + wheelVelocity * delta, 0, maxWheel)
-    const hitScrollLimit =
-      nextWheel === virtualWheel &&
-      ((nextWheel <= 0 && wheelVelocity < 0) ||
-        (nextWheel >= maxWheel && wheelVelocity > 0))
-
-    virtualWheel = nextWheel
-    wheelVelocity = hitScrollLimit
-      ? 0
-      : wheelVelocity * Math.exp(-wheelMomentumDecay * delta)
-  }
+  const stepped = stepTimelineWheelMomentum({
+    virtualWheel,
+    wheelVelocity,
+    maxWheel,
+    delta,
+  })
+  virtualWheel = stepped.virtualWheel
+  wheelVelocity = stepped.wheelVelocity
 
   updateScrollDrivenWheel()
 
@@ -337,170 +331,29 @@ function applyPositionDelta(deltaY: number, wheelDistance: number) {
   scheduleScrollDrivenWheel()
 }
 
-function handleScenePointerDown(event: PointerEvent) {
-  timelineBackgroundMedia?.start()
-  if (
-    !shell ||
-    event.button !== 0 ||
-    !event.isPrimary ||
-    isTimelineInteractiveTarget(event.target)
-  ) return
-
-  pauseAutopilot({ preserveBoost: true })
-  event.preventDefault()
-  event.stopPropagation()
-  panPointerId = event.pointerId
-  lastPanClientX = event.clientX
-  lastPanClientY = event.clientY
-  panStartClientX = event.clientX
-  panStartClientY = event.clientY
-  hasDraggedScenePan = false
-  input.active = true
-  wheelVelocity = 0
-  updateTimelinePointer(input, shell, event.clientX, event.clientY)
-  shell.setPointerCapture(event.pointerId)
-}
-
-function handleScenePointerMove(event: PointerEvent) {
-  if (panPointerId !== event.pointerId) return
-
-  event.preventDefault()
-  event.stopPropagation()
-  const deltaX = event.clientX - lastPanClientX
-  const deltaY = event.clientY - lastPanClientY
-  const totalDeltaX = event.clientX - panStartClientX
-  const totalDeltaY = event.clientY - panStartClientY
-  if (Math.hypot(totalDeltaX, totalDeltaY) >= clickAwayDragThreshold) {
-    hasDraggedScenePan = true
-  }
-  lastPanClientX = event.clientX
-  lastPanClientY = event.clientY
-  updateTimelinePointer(input, shell, event.clientX, event.clientY)
-  pauseAutopilot({ preserveBoost: true })
-  applyTimelineCameraDrag(
-    input,
-    shell,
-    deltaX,
-    deltaY,
-    isMapMode,
-    isMapMode ? mapCameraPanLimit : travelCameraPanLimit,
-    mapOrbitLimit,
-  )
-}
-
-function handleScenePointerUp(event: PointerEvent) {
-  if (panPointerId !== event.pointerId) return
-
-  try {
-    shell?.releasePointerCapture(event.pointerId)
-  } catch {
-    // Pointer capture may already be released by the browser.
-  }
-  event.stopPropagation()
-  if (!hasDraggedScenePan) clearSelectedStar()
-  panPointerId = null
-  hasDraggedScenePan = false
-  input.active = false
-}
-
-function handlePointerMove(event: PointerEvent) {
-  if (event.pointerType === 'touch') return
-  updateTimelinePointer(input, shell, event.clientX, event.clientY)
-}
+const gestureController = createTimelineGestureController({
+  input,
+  getShell: () => shell,
+  getIsMapMode: () => isMapMode,
+  startMedia: () => timelineBackgroundMedia?.start(),
+  pauseAutopilotPreserveBoost: () => pauseAutopilot({ preserveBoost: true }),
+  resetWheelVelocity: () => {
+    wheelVelocity = 0
+  },
+  applyPositionDelta,
+  clearSelectedStar,
+  onPanningChange: panning => {
+    isPanningScene = panning
+  },
+})
 
 function handleTouchStart(event: TouchEvent) {
   timelineBackgroundMedia?.start()
   if (isTimelineInteractiveTarget(event.target)) return
-  if (isBannerPresentation && event.touches.length < 2) return handleTouchEnd()
-  if (isMapMode && event.touches.length === 1) {
-    const touch = event.touches[0]
-    if (!isPointInsideTimelineShell(shell, touch.clientX, touch.clientY)) return
-
-    lastTouchCenterY = null
-    lastTouchPanClientX = touch.clientX
-    lastTouchPanClientY = touch.clientY
-    input.active = true
-    wheelVelocity = 0
-    updateTimelinePointer(input, shell, touch.clientX, touch.clientY)
-    return
+  if (isBannerPresentation && event.touches.length < 2) {
+    return gestureController.handleTouchEnd()
   }
-
-  if (event.touches.length < 2) {
-    lastTouchCenterY = null
-    lastTouchPanClientX = null
-    lastTouchPanClientY = null
-    input.active = false
-    return
-  }
-
-  const [touchA, touchB] = Array.from(event.touches)
-  if (
-    !isPointInsideTimelineShell(shell, touchA.clientX, touchA.clientY) &&
-    !isPointInsideTimelineShell(shell, touchB.clientX, touchB.clientY)
-  ) return
-
-  lastTouchCenterY = (touchA.clientY + touchB.clientY) / 2
-  lastTouchPanClientX = null
-  lastTouchPanClientY = null
-  input.active = true
-  wheelVelocity = 0
-  updateTimelinePointer(input, shell, (touchA.clientX + touchB.clientX) / 2, lastTouchCenterY)
-}
-
-function handleTouchMove(event: TouchEvent) {
-  if (
-    isMapMode &&
-    event.touches.length === 1 &&
-    lastTouchPanClientX !== null &&
-    lastTouchPanClientY !== null
-  ) {
-    event.preventDefault()
-    const touch = event.touches[0]
-    const deltaX = touch.clientX - lastTouchPanClientX
-    const deltaY = touch.clientY - lastTouchPanClientY
-    lastTouchPanClientX = touch.clientX
-    lastTouchPanClientY = touch.clientY
-    updateTimelinePointer(input, shell, touch.clientX, touch.clientY)
-    pauseAutopilot({ preserveBoost: true })
-    applyTimelineCameraDrag(
-      input,
-      shell,
-      deltaX,
-      deltaY,
-      isMapMode,
-      isMapMode ? mapCameraPanLimit : travelCameraPanLimit,
-      mapOrbitLimit,
-    )
-    return
-  }
-
-  if (event.touches.length < 2 || lastTouchCenterY === null) return
-
-  event.preventDefault()
-  const [touchA, touchB] = Array.from(event.touches)
-  const touchCenterX = (touchA.clientX + touchB.clientX) / 2
-  const touchCenterY = (touchA.clientY + touchB.clientY) / 2
-  const deltaY = (touchCenterY - lastTouchCenterY) * 2.15
-  const touchWheelDistance = Math.max(220, Math.min(window.innerHeight * 0.46, 360))
-  updateTimelinePointer(input, shell, touchCenterX, touchCenterY)
-  if (isMapMode) {
-    setTimelineMapZoom(
-      input,
-      input.mapZoom * Math.exp(-deltaY * 0.0026),
-      mapZoomMin,
-      mapZoomMax,
-    )
-  } else {
-    applyPositionDelta(deltaY, touchWheelDistance)
-  }
-  lastTouchCenterY = touchCenterY
-}
-
-function handleTouchEnd() {
-  input.active = false
-  lastTouchCenterY = null
-  lastTouchPanClientX = null
-  lastTouchPanClientY = null
+  gestureController.handleTouchStart(event)
 }
 
 function handleWheel(event: WheelEvent) {
@@ -568,17 +421,7 @@ function handleKeyboardScroll(event: KeyboardEvent) {
     return
   }
 
-  const stepByKey: Record<string, number | undefined> = {
-    ArrowDown: keyboardWheelStep,
-    ArrowRight: keyboardWheelStep,
-    PageDown: pageWheelStep,
-    ' ': keyboardWheelStep,
-    Spacebar: keyboardWheelStep,
-    ArrowUp: -keyboardWheelStep,
-    ArrowLeft: -keyboardWheelStep,
-    PageUp: -pageWheelStep,
-  }
-  const step = stepByKey[event.key]
+  const step = TIMELINE_KEY_WHEEL_STEPS[event.key]
   if (step === undefined) return
 
   timelineBackgroundMedia?.start()
@@ -783,29 +626,22 @@ onMount(() => {
   if (!prefersReducedMotion && !isMapMode) timelineFlight.enableAutopilot()
   if (shell) shell.dataset.timelineInitialized = 'true'
 
-  window.addEventListener('pointermove', handlePointerMove)
-  window.addEventListener('touchstart', handleTouchStart, { passive: false })
-  window.addEventListener('touchmove', handleTouchMove, { passive: false })
-  window.addEventListener('touchend', handleTouchEnd)
-  window.addEventListener('touchcancel', handleTouchEnd)
-  window.addEventListener('wheel', handleWheel, { passive: false })
-  window.addEventListener('keydown', handleKeyboardScroll)
-  window.addEventListener('keyup', handleKeyboardUp)
-  window.addEventListener('resize', handleResize)
+  const unbindWindowEvents = bindTimelineWindowEvents({
+    onPointerMove: gestureController.handlePointerMove,
+    onTouchStart: handleTouchStart,
+    onTouchMove: gestureController.handleTouchMove,
+    onTouchEnd: gestureController.handleTouchEnd,
+    onWheel: handleWheel,
+    onKeyDown: handleKeyboardScroll,
+    onKeyUp: handleKeyboardUp,
+    onResize: handleResize,
+  })
 
   return () => {
     runtimeObserver.disconnect()
     reducedMotionQuery.removeEventListener('change', applyMotionPreference)
     document.removeEventListener('visibilitychange', syncRuntimeActivity)
-    window.removeEventListener('pointermove', handlePointerMove)
-    window.removeEventListener('touchstart', handleTouchStart)
-    window.removeEventListener('touchmove', handleTouchMove)
-    window.removeEventListener('touchend', handleTouchEnd)
-    window.removeEventListener('touchcancel', handleTouchEnd)
-    window.removeEventListener('wheel', handleWheel)
-    window.removeEventListener('keydown', handleKeyboardScroll)
-    window.removeEventListener('keyup', handleKeyboardUp)
-    window.removeEventListener('resize', handleResize)
+    unbindWindowEvents()
     if (scrollFrame) window.cancelAnimationFrame(scrollFrame)
     if (selectedGuideLineFrame) window.cancelAnimationFrame(selectedGuideLineFrame)
     selectedGuideLineFrame = 0
@@ -817,9 +653,7 @@ onMount(() => {
 })
 
 onDestroy(() => {
-  input.active = false
-  lastTouchCenterY = null
-  panPointerId = null
+  gestureController.reset()
   if (scrollFrame) window.cancelAnimationFrame(scrollFrame)
   if (selectedGuideLineFrame) window.cancelAnimationFrame(selectedGuideLineFrame)
   selectedGuideLineFrame = 0
@@ -834,7 +668,7 @@ onDestroy(() => {
   bind:this={shell}
   class={`home-intro-environment home-intro-environment--background-ready pointer-events-auto cursor-grab ${isBannerPresentation ? 'touch-pan-y' : 'touch-none'}`}
   class:home-intro-environment--screen-hover={displayedScreenIndex >= 0}
-  class:cursor-grabbing={panPointerId !== null}
+  class:cursor-grabbing={isPanningScene}
   style={`--portal-reveal-progress: 1; --timeline-era-accent: ${activeEraAccent}`}
   class:h-full={isBannerPresentation}
   class:w-full={isBannerPresentation}
@@ -848,10 +682,10 @@ onDestroy(() => {
   data-timeline-autopilot-enabled={autopilotEnabled ? 'true' : 'false'}
   data-timeline-autopilot-phase={autopilotPhase}
   data-timeline-autopilot-target={$timelineFlight.autopilotTargetIndex}
-  on:pointerdown|capture={handleScenePointerDown}
-  on:pointermove|capture={handleScenePointerMove}
-  on:pointerup|capture={handleScenePointerUp}
-  on:pointercancel|capture={handleScenePointerUp}
+  on:pointerdown|capture={gestureController.handleScenePointerDown}
+  on:pointermove|capture={gestureController.handleScenePointerMove}
+  on:pointerup|capture={gestureController.handleScenePointerUp}
+  on:pointercancel|capture={gestureController.handleScenePointerUp}
 >
   <div class="home-intro-background-curtain" aria-hidden="true"></div>
 
@@ -879,7 +713,7 @@ onDestroy(() => {
 
   <div
     class={`pointer-events-auto absolute inset-0 z-[3] cursor-grab ${isBannerPresentation ? 'touch-pan-y' : 'touch-none'}`}
-    class:cursor-grabbing={panPointerId !== null}
+    class:cursor-grabbing={isPanningScene}
     aria-hidden="true"
   ></div>
 

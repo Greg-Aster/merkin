@@ -20,11 +20,9 @@ export async function getStaticPaths() {
 }
 
 const { aboutPage } = Astro.props
-console.log('ABOUT PAGE - Processing about page:', aboutPage.slug)
 
 // â­ NEW: Extract oneColumn setting from frontmatter
 const oneColumnMode = aboutPage.data.oneColumn || false
-console.log('ABOUT PAGE - oneColumn from frontmatter:', oneColumnMode)
 
 // Extract custom author data for the layout
 const customAuthorData = {
@@ -34,7 +32,6 @@ const customAuthorData = {
   authorLink: `/about/${aboutPage.slug}/`, // Self-referential link
 }
 
-console.log('ABOUT PAGE - Custom author data:', customAuthorData)
 
 // ðŸŽ¬ NEW: Video configuration from avatarConfig (same as Profile.svelte)
 const videoConfig = avatarConfig?.videoConfig || {}
@@ -43,12 +40,6 @@ const shouldLoop = videoConfig.loop ?? true // Default to true, can be disabled
 const loopDelay = videoConfig.loopDelay || 5000 // Delay between loops in ms
 const playOnce = videoConfig.playOnce || false // Play once then stop
 
-console.log('ABOUT PAGE - Video config:', {
-  playbackRate,
-  shouldLoop,
-  loopDelay,
-  playOnce,
-})
 
 // ðŸŽ¬ NEW: Video detection helper functions (same as Profile.svelte)
 function isVideoFile(src: string): boolean {
@@ -306,14 +297,6 @@ const jsonLd = {
       const loopDelay = getIntDataAttribute(video, 'loopDelay', 5000)
       const playOnce = video.dataset.playOnce === 'true'
 
-      console.log('ðŸŽ¬ Configuring about page video:', {
-        playbackRate,
-        shouldLoop,
-        loopDelay,
-        playOnce,
-        videoSrc: video.src,
-      })
-
       // Set playback rate
       video.playbackRate = playbackRate
 
@@ -338,8 +321,8 @@ const jsonLd = {
           setTimeout(() => {
             if (video.paused) {
               video.currentTime = 0
-              video.play().catch((error: unknown) => {
-                console.log('Video play failed:', error)
+              video.play().catch(() => {
+                // Ignore browser autoplay rejection.
               })
             }
           }, loopDelay)

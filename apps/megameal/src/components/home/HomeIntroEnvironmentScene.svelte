@@ -13,8 +13,19 @@ import {
   createHomeIntroMotionStageOptions,
   homeIntroMotionStageKey,
 } from './homeIntroMotionCadence'
-import { homeIntroParticleClusters } from './homeIntroParticleClusters'
-import { hashHomeIntroUnit } from './homeIntroSceneMath'
+import {
+  HOME_INTRO_PARTICLE_COUNT,
+  HOME_INTRO_SCREEN_ANGLE_STEP,
+  HOME_INTRO_SCREEN_ORBIT_CENTER_Z,
+  HOME_INTRO_SCREEN_STEP_Y,
+  buildHomeIntroScreenDescriptors,
+  clamp01,
+  createHomeIntroParticle,
+  createHomeIntroParticles,
+  getHomeIntroBannerSelectedIndex,
+  getHomeIntroScreenOrbitTarget,
+  smoothstep,
+} from './homeIntroSceneHelpers'
 import {
   getHomeIntroBannerSyncEvent,
   getHomeIntroRestedScreenIndex,
@@ -82,17 +93,13 @@ let tentacleOrbitPhase = 0
 let logoImpactSfxIntroStartedAt = 0
 let portalIntroReadyDispatched = false
 
-const particleCount = 1250
+const particleCount = HOME_INTRO_PARTICLE_COUNT
 const particleExpansionChunk = 64
 const particleExpansionInterval = 0.14
-const particleSizeMultiplier = 2.18
-const particleClusterCount = homeIntroParticleClusters.length
 const primaryScreenIndex = 0
-const screenOrbitRadiusX = 5.25
-const screenOrbitRadiusZ = 3.75
-const screenOrbitCenterZ = -0.72
-const screenStepY = 2.24
-const screenAngleStep = 0.9
+const screenOrbitCenterZ = HOME_INTRO_SCREEN_ORBIT_CENTER_Z
+const screenStepY = HOME_INTRO_SCREEN_STEP_Y
+const screenAngleStep = HOME_INTRO_SCREEN_ANGLE_STEP
 const effectScrollStepY = screenStepY * homeIntroWheelToScreenRatio
 const particleScrollSpan = 48
 const logoEmitterOffsetY = -1.22
@@ -281,78 +288,8 @@ onMount(() => {
   }
 })
 
-function createParticle(index: number) {
-  const cluster = index % particleClusterCount
-  const clusterCenter = homeIntroParticleClusters[cluster]
-  const randomA = Math.abs(hashHomeIntroUnit(index + 1))
-  const randomB = Math.abs(hashHomeIntroUnit(index + 17))
-  const randomC = Math.abs(hashHomeIntroUnit(index + 41))
-  const randomD = Math.abs(hashHomeIntroUnit(index + 79))
-  const randomE = Math.abs(hashHomeIntroUnit(index + 131))
-  const randomF = Math.abs(hashHomeIntroUnit(index + 181))
-  const radialT = randomA ** 1.25
-  const angle = randomB * Math.PI * 2
-  const verticalAngle = (randomC - 0.5) * Math.PI
-  const strayT = randomE > 0.68 ? ((randomE - 0.68) / 0.32) ** 0.72 : 0
-  const edgeAngle = randomF * Math.PI * 2
-  const radius = clusterCenter.spread * (0.1 + radialT * (0.82 + strayT * 1.75))
-  const anchorX =
-    clusterCenter.x * (1 - strayT * 0.48) + Math.cos(edgeAngle) * strayT * 3.6
-  const anchorZ = clusterCenter.z + Math.sin(edgeAngle) * strayT * 1.6
-
-  return {
-    anchorX,
-    anchorY: clusterCenter.y,
-    anchorZ,
-    angle,
-    cluster,
-    clusterStrength: 0.26 + (1 - radialT) * 0.58,
-    height: Math.sin(verticalAngle) * clusterCenter.spread * 1.42,
-    radius,
-    phase: randomB * Math.PI * 2,
-    radialT,
-    speed: 0.038 + randomD * 0.072 + radialT * 0.032,
-    size:
-      (0.012 + (1 - radialT) * 0.024 + randomE * 0.014) *
-      (1 - strayT * 0.22) *
-      particleSizeMultiplier,
-    hueOffset: clusterCenter.hue + randomD * 0.08,
-    shape: randomE,
-    strayT,
-    zOffset:
-      Math.cos(verticalAngle) *
-      clusterCenter.spread *
-      (randomD - 0.5) *
-      (0.72 + strayT * 0.56),
-  }
-}
-
-function createParticles(count: number) {
-  return Array.from({ length: Math.min(count, particleCount) }, (_, index) =>
-    createParticle(index),
-  )
-}
-
-let particles = createParticles(introParticleLimit)
-
-const screens = Array.from({ length: screenCount }, (_, index) => {
-  return {
-    position: [0, 0, 0] as [number, number, number],
-    rotation: [0, 0, 0] as [number, number, number],
-    scale: [1, 1, 1] as [number, number, number],
-    sceneId: portalScreens[index].sceneId,
-    kicker: portalScreens[index].kicker,
-    title: portalScreens[index].title,
-    description: portalScreens[index].description,
-    stat: portalScreens[index].stat,
-    ctaLabel: portalScreens[index].ctaLabel,
-    stillSrc:
-      portalScreens[index].webglStillSrc ?? portalScreens[index].stillSrc,
-    ktx2Src: portalScreens[index].ktx2StillSrc ?? '',
-    videoSrc: portalScreens[index].videoSrc,
-    primary: index === primaryScreenIndex,
-  }
-})
+let particles = createHomeIntroParticles(introParticleLimit)
+const screens = buildHomeIntroScreenDescriptors(primaryScreenIndex)
 $: syncParticleBudget(carouselMounted ? particles.length : introParticleLimit)
 $: visibleParticles = particles
 
@@ -367,7 +304,7 @@ function syncParticleBudget(nextLimit: number) {
 
   const nextParticles = particles.slice()
   for (let index = particles.length; index < targetLimit; index += 1) {
-    nextParticles.push(createParticle(index))
+    nextParticles.push(createHomeIntroParticle(index))
   }
   particles = nextParticles
 }
@@ -394,44 +331,21 @@ function updateParticleExpansion(delta: number) {
   )
 }
 
-function clampScreenIndex(value: number) {
-  return Math.min(screenCount - 1, Math.max(0, value))
-}
+const clampScreenIndex = (value: number) =>
+  Math.min(screenCount - 1, Math.max(0, value))
 
-function clamp01(value: number) {
-  return Math.min(1, Math.max(0, value))
-}
-
-function smoothstep(value: number) {
-  const normalized = clamp01(value)
-  return normalized * normalized * (3 - normalized * 2)
-}
-
-function getIntroOffsetScreens() {
-  return Number.isFinite(input.introOffsetScreens)
+const getIntroOffsetScreens = () =>
+  Number.isFinite(input.introOffsetScreens)
     ? input.introOffsetScreens
     : homeIntroIntroOffsetScreens
-}
 
-function getSelectedScreenIndex(wheel: number) {
-  const introOffsetScreens = getIntroOffsetScreens()
+const getSelectedScreenIndex = (wheel: number) =>
+  primaryScreenIndex +
+  wheel * homeIntroWheelToScreenRatio -
+  getIntroOffsetScreens()
 
-  return (
-    primaryScreenIndex +
-    wheel * homeIntroWheelToScreenRatio -
-    introOffsetScreens
-  )
-}
-
-function getBannerSelectedScreenIndex(selectedIndex: number) {
-  const reveal = clamp01(Number.isFinite(input.reveal) ? input.reveal : 0)
-
-  if (selectedIndex < 1) {
-    return Math.max(0, Math.min(1, Math.max(selectedIndex, reveal)))
-  }
-
-  return selectedIndex
-}
+const getBannerSelectedScreenIndex = (selectedIndex: number) =>
+  getHomeIntroBannerSelectedIndex(selectedIndex, input.reveal)
 
 function syncBannerToFrontScreen(selectedIndex: number) {
   if (typeof window === 'undefined') return
@@ -484,30 +398,8 @@ function syncScreenPanelMountStates(selectedIndex: number) {
   }
 }
 
-function getScreenOrbitTarget(index: number, visualSelectedIndex: number) {
-  const offset = index - visualSelectedIndex
-  const depth = Math.abs(offset)
-  const spiral = offset * screenAngleStep
-  const orbitRadiusX = screenOrbitRadiusX * (portraitMobile ? 0.68 : 1)
-  const orbitRadiusZ = screenOrbitRadiusZ * (portraitMobile ? 0.72 : 1)
-  const stepY = screenStepY * (portraitMobile ? 0.88 : 1)
-  const x = Math.sin(spiral) * orbitRadiusX
-  const y = -offset * stepY
-  const z = screenOrbitCenterZ + Math.cos(spiral) * orbitRadiusZ - depth * 0.08
-  const outwardYaw = Math.atan2(
-    x / orbitRadiusX,
-    (z - screenOrbitCenterZ) / orbitRadiusZ,
-  )
-  const pitch = Math.sin(spiral) * -0.025
-  const roll = Math.sin(spiral) * 0.018
-  const scale = (portraitMobile ? [1.18, 1.18, 1.18] : [1.12, 1.12, 1.12]) as [
-    number,
-    number,
-    number,
-  ]
-
-  return { x, y, z, pitch, yaw: outwardYaw, roll, scale }
-}
+const getScreenOrbitTarget = (index: number, visualSelectedIndex: number) =>
+  getHomeIntroScreenOrbitTarget(index, visualSelectedIndex, portraitMobile)
 
 function primeScreenLayoutForCurrentWheel() {
   const wheel = Number.isFinite(input.wheel) ? input.wheel : effectWheel

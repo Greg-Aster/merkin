@@ -20,14 +20,14 @@ declare global {
 }
 
 const arrivalStorageKey = 'megameal:route-transition-arrival'
-const revealDurationMs = 680
-const arrivalSettleDelayMs = 260
-const hardNavigationDelayMs = 300
-const routeReadyTimeoutMs = 3000
-const visualReadyTimeoutMs = 1600
-const visibleImageDecodeTimeoutMs = 1200
-const minimumArrivalStatusMs = 650
-const arrivalStatusRevealDurationMs = 440
+const revealDurationMs = 340
+const arrivalSettleDelayMs = 40
+const hardNavigationDelayMs = 140
+const routeReadyTimeoutMs = 1800
+const visualReadyTimeoutMs = 500
+const visibleImageDecodeTimeoutMs = 600
+const minimumArrivalStatusMs = 180
+const arrivalStatusRevealDurationMs = 280
 
 let active = false
 

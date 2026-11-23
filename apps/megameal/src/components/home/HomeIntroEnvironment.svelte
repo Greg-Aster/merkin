@@ -5,16 +5,28 @@ import {
   createAdaptiveCanvasDprController,
 } from '@/utils/adaptiveCanvasDpr'
 import { navigateWithMegamealTransition } from '@/utils/megamealRouteTransitions'
-import { getRichMediaCapabilities } from '@/utils/richMediaCapabilities'
 import {
   type SiteSfxId,
   siteSfxManager,
 } from '@/utils/site-sfx'
 import { Canvas } from '@threlte/core'
 import { onDestroy, onMount } from 'svelte'
-import * as THREE from 'three'
 import HomeIntroEnvironmentScene from './HomeIntroEnvironmentScene.svelte'
 import HomeIntroPostProcessing from './HomeIntroPostProcessing.svelte'
+import {
+  type HomeSceneQuality,
+  type IntroInputState,
+  clampHomeScreenIndex,
+  clampValue,
+  createHomeIntroRenderer,
+  getHomeMaxCanvasDpr,
+  getHomeSceneQuality,
+  getPortalScreenTransitionRect,
+  isElementInViewport,
+  isPointInsideElement,
+  isPointerOverPortalScreen,
+  isPortalInteractiveTarget,
+} from './homeIntroEnvironmentHelpers'
 import {
   homeIntroFinalScreenGraceScreens,
   homeIntroIntroOffsetScreens,
@@ -25,18 +37,7 @@ import {
   homeIntroWheelToScreenRatio,
 } from './homeIntroScreens'
 
-type IntroInputState = {
-  x: number
-  y: number
-  dragX: number
-  dragY: number
-  wheel: number
-  reveal: number
-  introOffsetScreens: number
-  active: boolean
-}
-
-type SceneQuality = 'high' | 'balanced' | 'lean'
+type SceneQuality = HomeSceneQuality
 
 export let titleImageSrc = ''
 
@@ -108,21 +109,10 @@ $: hoveredScreenIndex =
       ? activeScreenIndex
       : -1
 
-const createRenderer = (canvas: HTMLCanvasElement) => {
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    alpha: true,
-    antialias: true,
-    powerPreference: 'high-performance',
-  })
-
-  renderer.outputColorSpace = THREE.SRGBColorSpace
-  renderer.toneMapping = THREE.ACESFilmicToneMapping
-  renderer.toneMappingExposure = 0.92
-  renderer.setClearColor(0x000000, 0)
-
-  return renderer
-}
+const createRenderer = createHomeIntroRenderer
+const clamp = clampValue
+const clampScreenIndex = clampHomeScreenIndex
+const isInteractiveTarget = isPortalInteractiveTarget
 
 function updatePointer(clientX: number, clientY: number) {
   if (!shell) return
@@ -135,63 +125,24 @@ function updatePointer(clientX: number, clientY: number) {
   syncPortalHoverActive(isPointerOverActiveScreen(clientX, clientY))
 }
 
-function isInsideShell(clientX: number, clientY: number) {
-  if (!shell) return false
+const isInsideShell = (clientX: number, clientY: number) =>
+  isPointInsideElement(shell, clientX, clientY)
 
-  const bounds = shell.getBoundingClientRect()
-  return (
-    clientX >= bounds.left &&
-    clientX <= bounds.right &&
-    clientY >= bounds.top &&
-    clientY <= bounds.bottom
-  )
-}
+const isPortalDemoActive = () =>
+  typeof document !== 'undefined' &&
+  document.documentElement.classList.contains(portalDemoActiveClass)
 
-function isPortalDemoActive() {
-  return (
-    typeof document !== 'undefined' &&
-    document.documentElement.classList.contains(portalDemoActiveClass)
-  )
-}
+const isStandardBannerPhaseActive = () =>
+  typeof document !== 'undefined' &&
+  document.documentElement.classList.contains(standardBannerPhaseClass)
 
-function isStandardBannerPhaseActive() {
-  return (
-    typeof document !== 'undefined' &&
-    document.documentElement.classList.contains(standardBannerPhaseClass)
-  )
-}
+const canControlPortal = () =>
+  isShellVisible() || isPortalDemoActive() || isStandardBannerPhaseActive()
 
-function canControlPortal() {
-  return isShellVisible() || isPortalDemoActive() || isStandardBannerPhaseActive()
-}
+const isPointerOverActiveScreen = (clientX: number, clientY: number) =>
+  isPointerOverPortalScreen(shell, portraitMobile, clientX, clientY)
 
-function isPointerOverActiveScreen(clientX: number, clientY: number) {
-  if (!shell || !isInsideShell(clientX, clientY)) return false
-
-  const bounds = shell.getBoundingClientRect()
-  const normalizedX = ((clientX - bounds.left) / bounds.width - 0.5) * 2
-  const normalizedY = ((clientY - bounds.top) / bounds.height - 0.5) * 2
-  const horizontalLimit = portraitMobile ? 0.7 : 0.58
-  const verticalLimit = portraitMobile ? 0.48 : 0.42
-  const verticalCenter = portraitMobile ? -0.02 : -0.04
-
-  return (
-    Math.abs(normalizedX) <= horizontalLimit &&
-    Math.abs(normalizedY - verticalCenter) <= verticalLimit
-  )
-}
-
-function isShellInViewport() {
-  if (!shell) return false
-
-  const bounds = shell.getBoundingClientRect()
-  return (
-    bounds.bottom > 0 &&
-    bounds.top < window.innerHeight &&
-    bounds.right > 0 &&
-    bounds.left < window.innerWidth
-  )
-}
+const isShellInViewport = () => isElementInViewport(shell)
 
 function isShellVisible() {
   if (!shell || !isShellInViewport()) return false
@@ -203,29 +154,20 @@ function isShellVisible() {
   return style.display !== 'none' && style.visibility !== 'hidden'
 }
 
-function isLogoEffectRangeVisible() {
-  return input.reveal < logoEffectsRevealCutoff
-}
+const isLogoEffectRangeVisible = () => input.reveal < logoEffectsRevealCutoff
 
 function syncPortalVisibility() {
   const nextInViewport = isShellInViewport()
   const nextEffectsVisible = isShellVisible()
   const nextLogoEffectsVisible =
     nextEffectsVisible && isLogoEffectRangeVisible()
-  const visibilityChanged = portalVisible !== nextInViewport
-  const effectsVisibilityChanged = portalEffectsVisible !== nextEffectsVisible
-  const logoEffectsVisibilityChanged =
-    logoEffectsVisible !== nextLogoEffectsVisible
 
-  if (visibilityChanged) {
-    portalVisible = nextInViewport
-  }
-  if (effectsVisibilityChanged) {
+  if (portalVisible !== nextInViewport) portalVisible = nextInViewport
+  if (portalEffectsVisible !== nextEffectsVisible)
     portalEffectsVisible = nextEffectsVisible
-  }
-  if (logoEffectsVisibilityChanged) {
+  if (logoEffectsVisible !== nextLogoEffectsVisible)
     logoEffectsVisible = nextLogoEffectsVisible
-  }
+
   if (!nextEffectsVisible) {
     input.active = false
     activePointerId = null
@@ -245,30 +187,8 @@ function syncPortalVisibility() {
 
 function syncViewportMode() {
   if (typeof window === 'undefined') return
-  portraitMobile = window.innerWidth <= 760 && window.innerHeight > window.innerWidth
-}
-
-function getHomeMaxCanvasDpr() {
-  if (typeof window === 'undefined') return 1
-
-  const { compactViewport, devicePixelRatio, lowMemoryDevice, reducedData } =
-    getRichMediaCapabilities()
-  const dprCap = lowMemoryDevice || reducedData ? 1 : compactViewport ? 1.5 : 2
-
-  return Math.min(devicePixelRatio, dprCap)
-}
-
-function getHomeSceneQuality(nextDpr: number): SceneQuality {
-  if (typeof window === 'undefined') return 'high'
-
-  const { compactViewport, devicePixelRatio, lowMemoryDevice, reducedData } =
-    getRichMediaCapabilities()
-
-  if (reducedData || lowMemoryDevice || compactViewport) return 'lean'
-  if (devicePixelRatio > 1.1 && nextDpr <= 1.01) return 'lean'
-  if (devicePixelRatio > 1.5 || nextDpr < 1.45) return 'balanced'
-
-  return 'high'
+  portraitMobile =
+    window.innerWidth <= 760 && window.innerHeight > window.innerWidth
 }
 
 function setCanvasDpr(nextDpr: number) {
@@ -285,17 +205,6 @@ function syncCanvasDpr() {
   }
 
   setCanvasDpr(getHomeMaxCanvasDpr())
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value))
-}
-
-function clampScreenIndex(value: number) {
-  return Math.min(
-    homeIntroScreens.length - 1,
-    Math.max(0, value),
-  )
 }
 
 function playPortalSfx(
@@ -437,15 +346,6 @@ function smoothWheelStep(
   return true
 }
 
-function isInteractiveTarget(eventTarget: EventTarget | null) {
-  return (
-    eventTarget instanceof Element &&
-    !!eventTarget.closest(
-      'a, button, input, textarea, select, [role="button"], [data-portal-demo-player]',
-    )
-  )
-}
-
 function applyDragDelta(
   clientX: number,
   clientY: number,
@@ -529,24 +429,9 @@ function navigateActiveScreen() {
   navigateWithMegamealTransition({
     href: activeScreen.href,
     type: 'portal-zoom',
-    sourceRect: getActiveScreenTransitionRect(),
+    sourceRect: getPortalScreenTransitionRect(shell, portraitMobile),
     previewSrc: activeScreen.webglStillSrc ?? activeScreen.stillSrc,
   })
-}
-
-function getActiveScreenTransitionRect() {
-  if (!shell) return null
-
-  const bounds = shell.getBoundingClientRect()
-  const horizontalLimit = portraitMobile ? 0.7 : 0.58
-  const verticalLimit = portraitMobile ? 0.48 : 0.42
-  const verticalCenter = portraitMobile ? -0.02 : -0.04
-  const width = bounds.width * horizontalLimit
-  const height = bounds.height * verticalLimit
-  const centerX = bounds.left + bounds.width * 0.5
-  const centerY = bounds.top + bounds.height * (0.5 + verticalCenter * 0.5)
-
-  return new DOMRect(centerX - width / 2, centerY - height / 2, width, height)
 }
 
 function handlePointerUp(event?: PointerEvent) {

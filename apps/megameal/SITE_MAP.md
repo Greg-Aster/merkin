@@ -7,15 +7,19 @@ This is a working map of the Astro routes in `apps/megameal/src/pages`.
 | Route | Purpose | Source |
 | --- | --- | --- |
 | `/` | Home page, production portal | `src/pages/[...page].astro` |
-| `/test-portal/` | Development/test version of the portal with the 3D overlay work | `src/pages/test-portal.astro` |
-| `/timeline/` | Timeline experience | `src/pages/timeline.astro` |
-| `/game/` | Game/observatory entry point | `src/pages/game.astro` |
+| `/timeline/` | 3D Timeline experience | `src/pages/timeline.astro` |
+| `/game/` | Redirect to `https://game.megameal.org/` | `src/pages/game.astro` |
 | `/archive/` | Story archive index | `src/pages/archive/index.astro` |
 | `/store/` | Store/catalog landing page | `src/pages/store.astro` |
+| `/videos/` | Video archive index | `src/pages/videos/index.astro` |
+| `/cookbook/` | Cookbook index | `src/pages/cookbook/index.astro` |
+| `/reader/` | Interactive reader & First Contact Manual | `src/pages/reader/index.astro` |
+| `/snuggaloids/` | Snuggaloids customizer | `src/pages/snuggaloids/index.astro` |
+| `/merkin/` | Merkin archive | `src/pages/merkin/index.astro` |
 | `/community/` | Community page | `src/pages/community.astro` |
 | `/about/` | About page | `src/pages/about.astro` |
 | `/privacy/` | Privacy page | `src/pages/privacy.astro` |
-| `/host/` | Host page | `src/pages/host.astro` |
+| `/host/` | Redirect to `https://game.megameal.org/host` | `src/pages/host.astro` |
 
 ## Content Routes
 
@@ -44,21 +48,16 @@ This is a working map of the Astro routes in `apps/megameal/src/pages`.
 | `/quiz/` | Quiz index | `src/pages/quiz/index.astro` |
 | `/quiz/[slug]/` | Quiz detail pages | `src/pages/quiz/[slug].astro` |
 
-## Admin And Local Tools
+## Retired Route Redirects
 
-| Route | Purpose | Source |
+| Route | Redirects To | Source |
 | --- | --- | --- |
-| `/login/` | Login page | `src/pages/login.astro` |
-| `/configs/` | Site configuration/admin page | `src/pages/configs.astro` |
-| `/friends/` | Friends/admin content page | `src/pages/friends.astro` |
-
-## Labs
-
-| Route | Purpose | Source |
-| --- | --- | --- |
-| `/labs/banner-stage/` | Banner stage lab | `src/pages/labs/banner-stage.astro` |
-| `/labs/featured-product-banner/` | Featured product banner lab | `src/pages/labs/featured-product-banner.astro` |
-| `/labs/store-scene-data/` | Store scene data lab | `src/pages/labs/store-scene-data.astro` |
+| `/test-portal/` | `/` | `src/pages/test-portal.astro` |
+| `/login/` | `/` | `src/pages/login.astro` |
+| `/configs/` | `/` | `src/pages/configs.astro` |
+| `/friends/` | `/community/` | `src/pages/friends.astro` |
+| `/store-placeholder/` | `/store/` | `src/pages/store-placeholder.astro` |
+| `/timeline/2d/` | `/timeline/` | `src/pages/timeline/2d.astro` |
 
 ## Feeds And Generated Files
 

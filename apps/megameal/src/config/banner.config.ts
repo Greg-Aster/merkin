@@ -293,13 +293,6 @@ function wantsNoArticleBanner(post: any): boolean {
   return !bannerType || !articlePostBannerTypes.has(bannerType)
 }
 
-function isFullscreenModeActive(): boolean {
-  if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
-    return false
-  }
-  return localStorage.getItem('fullscreenBannerOverride') === 'true'
-}
-
 function getBannerDataFromPost(post: any): PostBannerData | null {
   if (!post?.data) return null
 
@@ -494,53 +487,6 @@ export function determineBannerConfiguration(
     const savedType = localStorage.getItem('defaultBannerType')
     if (savedType) {
       bannerConfig.defaultBannerType = savedType as BannerType
-    }
-  }
-
-  if (isFullscreenModeActive()) {
-    const resolvedLayout = resolveBannerLayout('none', {
-      fullscreen: true,
-      profiles: bannerConfig.layoutProfiles,
-    })
-
-    return {
-      postData: getBannerDataFromPost(post),
-      bannerType: {
-        hasTimelineBanner: false,
-        hasVideoBanner: false,
-        hasImageBanner: false,
-        hasCookbookBanner: false,
-        hasArchiveBanner: false,
-        hasReaderBanner: false,
-        hasStandardBanner: false,
-        hasPostBanner: false,
-        isStandardPage: false,
-        currentBannerType: 'none' as BannerType,
-      },
-      bannerDataSources: {
-        videoBannerData: null,
-        imageBannerData: null,
-        timelineBannerData: null,
-        cookbookBannerData: null,
-        archiveBannerData: null,
-        readerBannerData: null,
-      },
-      layout: {
-        mainPanelTop: resolvedLayout.panelTop,
-        mainPanelTopMobile: resolvedLayout.panelTopMobile,
-        navbarSpacing: resolvedLayout.stageTop,
-        navbarSpacingMobile: resolvedLayout.stageTopMobile,
-        bannerHeight: resolvedLayout.stageHeight,
-        bannerHeightMobile: resolvedLayout.stageHeightMobile,
-        bannerAspectRatio: resolvedLayout.stageAspectRatio,
-        bannerAspectRatioMobile: resolvedLayout.stageAspectRatioMobile,
-        bannerOverlap: '0',
-        dynamicOverlap: '0',
-        mainContentOffset: resolvedLayout.contentTop,
-        mainContentOffsetMobile: resolvedLayout.contentTopMobile,
-      },
-      finalBannerLink: '',
-      currentBannerType: 'none' as BannerType,
     }
   }
 

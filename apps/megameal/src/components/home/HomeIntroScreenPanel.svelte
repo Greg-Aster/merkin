@@ -7,23 +7,42 @@ import {
   DoubleSide,
   FrontSide,
   type Group,
-  LinearFilter,
   type Mesh,
+  type MeshBasicMaterial,
   NormalBlending,
-  SRGBColorSpace,
   type Texture,
   TextureLoader,
   type WebGLRenderer,
 } from 'three'
 import type * as THREE from 'three'
 import {
-  getHomeIntroKtx2Loader,
   releaseHomeIntroKtx2Loader,
   retainHomeIntroKtx2Loader,
 } from './homeIntroKtx2Loader'
-import { homeIntroReflectionOnlyUserDataKey } from './homeIntroReflectionOnly'
 import { HomeIntroScreenContentRenderer } from './homeIntroScreenContentRenderer'
 import { loadHomeIntroScreenModelInstance } from './homeIntroScreenModel'
+import {
+  SCREEN_FALLBACK_HEIGHT,
+  SCREEN_FALLBACK_WIDTH,
+  SCREEN_FRAME_HEIGHT,
+  SCREEN_FRAME_WIDTH,
+  SCREEN_MEDIA_HEIGHT,
+  SCREEN_MEDIA_SURFACE_Z,
+  SCREEN_MEDIA_WIDTH,
+  SCREEN_MODEL_Z,
+  SCREEN_PORTRAIT_ROTATION_Z,
+  SCREEN_TEXT_HEIGHT,
+  SCREEN_TEXT_SURFACE_Z,
+  SCREEN_TEXT_WIDTH,
+  SCREEN_VIDEO_PLAYBACK_RATE,
+  bindScreenContentGlitchMask,
+  buildScreenContentRenderKey,
+  getTextureTint,
+  loadConfiguredKtx2Texture,
+  loadConfiguredTexture,
+  resolveThrelteRenderer,
+  stepScreenHoverMotion,
+} from './homeIntroScreenPanelHelpers'
 import {
   createScreenInfoTickerTextureController,
   createScreenTextTexture,
@@ -89,48 +108,18 @@ let titleMediaTint = '#ffffff'
 const screenInfoTicker = createScreenInfoTickerTextureController()
 const videoPlayback = createHomeIntroScreenVideoPlayback()
 
-const additiveBlending = AdditiveBlending
-const normalBlending = NormalBlending
-const doubleSide = DoubleSide
-const frontSide = FrontSide
-const frameWidth = 3.18
-const frameHeight = 1.78
-const portraitFrameRotationZ = Math.PI / 2
-const screenModelZ = -0.07
-const screenContentInset = 0.9
-const mediaWidth = frameWidth * screenContentInset
-const mediaHeight = mediaWidth * (9 / 16)
-const fallbackWidth = 2.76
-const fallbackHeight = 0.44
-const mediaSurfaceZ = screenModelZ + 0.012
-const textWidth = 2.54
-const textHeight = 1.24
-const textSurfaceZ = screenModelZ + 0.028
-const screenVideoPlaybackRate = 0.33
 $: screenLayout = portraitLayout ? 'portrait' : 'landscape'
-$: framePlaneWidth = portraitLayout ? frameHeight : frameWidth
-$: framePlaneHeight = portraitLayout ? frameWidth : frameHeight
-$: mediaPlaneWidth = portraitLayout ? mediaHeight : mediaWidth
-$: mediaPlaneHeight = portraitLayout ? mediaWidth : mediaHeight
-$: textPlaneWidth = portraitLayout ? mediaPlaneWidth : textWidth
-$: textPlaneHeight = portraitLayout ? mediaPlaneHeight : textHeight
+$: framePlaneWidth = portraitLayout ? SCREEN_FRAME_HEIGHT : SCREEN_FRAME_WIDTH
+$: framePlaneHeight = portraitLayout ? SCREEN_FRAME_WIDTH : SCREEN_FRAME_HEIGHT
+$: mediaPlaneWidth = portraitLayout ? SCREEN_MEDIA_HEIGHT : SCREEN_MEDIA_WIDTH
+$: mediaPlaneHeight = portraitLayout ? SCREEN_MEDIA_WIDTH : SCREEN_MEDIA_HEIGHT
+$: textPlaneWidth = portraitLayout ? mediaPlaneWidth : SCREEN_TEXT_WIDTH
+$: textPlaneHeight = portraitLayout ? mediaPlaneHeight : SCREEN_TEXT_HEIGHT
 
-function getTextureTint(opacity: number) {
-  const channel = Math.round(Math.min(1, Math.max(0, opacity)) * 255)
-    .toString(16)
-    .padStart(2, '0')
-
-  return `#${channel}${channel}${channel}`
-}
-
-function getRenderer() {
-  const renderer = threlte.renderer as
-    | WebGLRenderer
-    | { current?: WebGLRenderer }
-    | null
-
-  return renderer && 'current' in renderer ? renderer.current ?? null : renderer
-}
+const getRenderer = () =>
+  resolveThrelteRenderer(
+    threlte.renderer as WebGLRenderer | { current?: WebGLRenderer } | null,
+  )
 
 function disposeTitleTexture() {
   titleTexture?.dispose()
@@ -152,7 +141,7 @@ function syncVideoPlayback() {
     videoPlayback.sync({
       enabled: videoPlaybackEnabled,
       src: videoSrc,
-      playbackRate: screenVideoPlaybackRate,
+      playbackRate: SCREEN_VIDEO_PLAYBACK_RATE,
       shouldLoadMedia,
       active,
       hovered,
@@ -191,20 +180,6 @@ function disposeScreenModel() {
   screenModel = null
 }
 
-function configureMediaTexture(texture: Texture, invertY = false) {
-  texture.colorSpace = SRGBColorSpace
-  texture.generateMipmaps = false
-  texture.minFilter = LinearFilter
-  texture.magFilter = LinearFilter
-
-  if (invertY) {
-    texture.repeat.y = -1
-    texture.offset.y = 1
-  }
-
-  texture.needsUpdate = true
-}
-
 function syncScreenTextTexture() {
   if (!mounted) return
 
@@ -227,8 +202,8 @@ async function loadScreenModel() {
 
   try {
     const model = await loadHomeIntroScreenModelInstance(
-      frameWidth,
-      frameHeight,
+      SCREEN_FRAME_WIDTH,
+      SCREEN_FRAME_HEIGHT,
     )
 
     if (!mounted || controller.signal.aborted || !model) {
@@ -285,26 +260,19 @@ function ensureMediaTexturesLoaded() {
     shouldLoadStill && ktx2Src && sceneQuality !== 'lean'
 
   if (shouldLoadKtx2Still && !stillTexture && !ktx2TextureRequested) {
-    const ktx2Loader = getHomeIntroKtx2Loader(getRenderer())
-
-    if (ktx2Loader) {
+    const started = loadConfiguredKtx2Texture({
+      renderer: getRenderer(),
+      src: ktx2Src,
+      isMounted: () => mounted,
+      onLoaded: texture => {
+        stillTexture = texture
+      },
+      onError: () => {
+        if (!stillTextureRequested) loadStillTexture()
+      },
+    })
+    if (started) {
       ktx2TextureRequested = true
-      ktx2Loader.load(
-        ktx2Src,
-        texture => {
-          if (!mounted) {
-            texture.dispose()
-            return
-          }
-          configureMediaTexture(texture, true)
-          stillTexture = texture
-        },
-        undefined,
-        () => {
-          if (!mounted || stillTextureRequested) return
-          loadStillTexture()
-        },
-      )
       return
     }
   }
@@ -315,12 +283,7 @@ function ensureMediaTexturesLoaded() {
 
   if (primary && imageSrc && !titleTextureRequested) {
     titleTextureRequested = true
-    titleTexture = loader.load(imageSrc, texture => {
-      if (!mounted) {
-        texture.dispose()
-        return
-      }
-      configureMediaTexture(texture)
+    titleTexture = loadConfiguredTexture(loader, imageSrc, () => mounted, texture => {
       titleTexture = texture
     })
   }
@@ -330,12 +293,7 @@ function loadStillTexture() {
   if (!loader || !stillSrc) return
 
   stillTextureRequested = true
-  stillTexture = loader.load(stillSrc, texture => {
-    if (!mounted) {
-      texture.dispose()
-      return
-    }
-    configureMediaTexture(texture)
+  stillTexture = loadConfiguredTexture(loader, stillSrc, () => mounted, texture => {
     stillTexture = texture
   })
 }
@@ -355,10 +313,6 @@ function ensureScreenContentRenderer() {
   return screenContentRenderer
 }
 
-function getScreenContentTextureKey(texture: Texture | null) {
-  return texture ? `${texture.uuid}@${texture.version}` : 'none'
-}
-
 function renderScreenContent() {
   const renderer = getRenderer()
   if (!renderer || !mounted) return
@@ -372,15 +326,7 @@ function renderScreenContent() {
     videoReady,
     videoTexture,
   }
-  const nextRenderKey = [
-    renderState.fallbackColor,
-    renderState.fallbackOpacity.toFixed(3),
-    getScreenContentTextureKey(renderState.mediaTexture),
-    renderState.mediaTint,
-    renderState.videoMediaOpacity.toFixed(3),
-    renderState.videoReady ? 'ready' : 'pending',
-    getScreenContentTextureKey(renderState.videoTexture),
-  ].join(':')
+  const nextRenderKey = buildScreenContentRenderKey(renderState)
   const hasLiveVideo =
     Boolean(videoTexture && videoReady && videoMediaOpacity > 0.001) &&
     videoPlayback.isPlaying
@@ -419,54 +365,34 @@ $: if (mounted && (kicker || title || stat || ctaLabel || portraitLayout)) {
 $: mediaTint = getTextureTint(mediaOpacity)
 $: titleMediaTint = getTextureTint(titleMediaOpacity)
 $: if (screenContentMesh && screenContentMaterial) {
-  screenContentMesh.userData[homeIntroReflectionOnlyUserDataKey] =
-    Boolean(screenModel)
-  screenContentMesh.visible = true
-  screenContentMaterial.colorWrite = true
-  screenContentMaterial.depthTest = true
-  screenContentMaterial.depthWrite = false
-  screenContentMesh.onBeforeRender = renderer => {
-    const renderTarget = renderer.getRenderTarget()
-    const renderTargetName = renderTarget?.texture?.name ?? ''
-    const isLogoGlitchPass =
-      Boolean(renderTarget) && renderTargetName === 'HomeIntroLogoGlitch.logo'
-
-    screenContentMaterial!.colorWrite = !isLogoGlitchPass
-    screenContentMaterial!.depthTest = true
-    screenContentMaterial!.depthWrite = false
-  }
-  screenContentMesh.onAfterRender = () => {
-    screenContentMaterial!.colorWrite = true
-    screenContentMaterial!.depthTest = true
-    screenContentMaterial!.depthWrite = false
-  }
+  bindScreenContentGlitchMask(
+    screenContentMesh,
+    screenContentMaterial as MeshBasicMaterial,
+    Boolean(screenModel),
+  )
 }
 
 function updateScreenMotion(delta: number) {
   const time = performance.now() * 0.001
-  const ease = 1 - Math.exp(-delta * 8)
 
   if (motionEnabled) {
-    hoverBlend += (((hovered && !portraitLayout) ? 1 : 0) - hoverBlend) * ease
-    const baseTitleOpacity = 0.94
-    const baseMediaOpacity = primary ? 0.92 : 0.86
-    videoMediaOpacity = videoReady ? hoverBlend : 0
-    titleMediaOpacity =
-      baseTitleOpacity +
-      (1 - baseTitleOpacity) * hoverBlend -
-      videoMediaOpacity * 0.18
-    mediaOpacity = baseMediaOpacity + (1 - baseMediaOpacity) * hoverBlend
-    const baseTextOpacity = primary ? 0.96 : 0.88
-    textOpacity = baseTextOpacity * (1 - hoverBlend)
-    infoTextOpacity = Math.max(0, (hoverBlend - 0.34) / 0.66) * 0.92
-
-    if (panelRoot) {
-      panelRoot.position.z = hoverBlend * 0.045
-      panelRoot.rotation.x = hoverBlend * -0.018
-      panelRoot.rotation.y = Math.sin(time * 0.8 + index) * hoverBlend * 0.018
-      const scale = 1 + hoverBlend * 0.028
-      panelRoot.scale.set(scale, scale, scale)
-    }
+    const next = stepScreenHoverMotion({
+      hoverBlend,
+      hovered,
+      portraitLayout,
+      primary,
+      videoReady,
+      delta,
+      time,
+      index,
+      panelRoot,
+    })
+    hoverBlend = next.hoverBlend
+    videoMediaOpacity = next.videoMediaOpacity
+    titleMediaOpacity = next.titleMediaOpacity
+    mediaOpacity = next.mediaOpacity
+    textOpacity = next.textOpacity
+    infoTextOpacity = next.infoTextOpacity
   }
 
   if (infoTextOpacity > 0.01) {
@@ -488,15 +414,15 @@ useTask(updateScreenMotion, { stage: motionStage, autoInvalidate: false })
 
 <T.Group bind:ref={panelRoot}>
 	{#if screenModel}
-		<T.Group position={[0, 0, screenModelZ]} rotation={[0, 0, portraitLayout ? portraitFrameRotationZ : 0]}>
+		<T.Group position={[0, 0, SCREEN_MODEL_Z]} rotation={[0, 0, portraitLayout ? SCREEN_PORTRAIT_ROTATION_Z : 0]}>
 			<T is={screenModel} />
 		</T.Group>
 	{:else}
-		<T.Mesh position={[0, 0, screenModelZ]} renderOrder={12}>
+		<T.Mesh position={[0, 0, SCREEN_MODEL_Z]} renderOrder={12}>
 			<T.PlaneGeometry args={[framePlaneWidth, framePlaneHeight]} />
 			<T.MeshPhysicalMaterial
 				color="#f8fafc"
-				side={doubleSide}
+				side={DoubleSide}
 				transparent={true}
 				opacity={primary ? 0.16 : 0.11}
 				roughness={0.26}
@@ -520,27 +446,27 @@ useTask(updateScreenMotion, { stage: motionStage, autoInvalidate: false })
 	{/if}
 
 	{#if screenContentTexture}
-		<T.Mesh bind:ref={screenContentMesh} position={[0, primary ? 0.02 : 0, mediaSurfaceZ]} renderOrder={80}>
-			<T.PlaneGeometry args={[primary && !portraitLayout ? mediaWidth : mediaPlaneWidth, primary && !portraitLayout ? mediaHeight : mediaPlaneHeight]} />
+		<T.Mesh bind:ref={screenContentMesh} position={[0, primary ? 0.02 : 0, SCREEN_MEDIA_SURFACE_Z]} renderOrder={80}>
+			<T.PlaneGeometry args={[primary && !portraitLayout ? SCREEN_MEDIA_WIDTH : mediaPlaneWidth, primary && !portraitLayout ? SCREEN_MEDIA_HEIGHT : mediaPlaneHeight]} />
 			<T.MeshBasicMaterial
 				bind:ref={screenContentMaterial}
 				map={screenContentTexture}
-				side={frontSide}
-				blending={normalBlending}
+				side={FrontSide}
+				blending={NormalBlending}
 				transparent={true}
 				depthTest={true}
 				depthWrite={false}
 			/>
 		</T.Mesh>
 	{:else}
-		<T.Mesh position={[0, 0.02, mediaSurfaceZ]} renderOrder={80}>
-			<T.PlaneGeometry args={[portraitLayout ? fallbackHeight : fallbackWidth, portraitLayout ? fallbackWidth : fallbackHeight]} />
+		<T.Mesh position={[0, 0.02, SCREEN_MEDIA_SURFACE_Z]} renderOrder={80}>
+			<T.PlaneGeometry args={[portraitLayout ? SCREEN_FALLBACK_HEIGHT : SCREEN_FALLBACK_WIDTH, portraitLayout ? SCREEN_FALLBACK_WIDTH : SCREEN_FALLBACK_HEIGHT]} />
 			<T.MeshBasicMaterial
 				color={primary ? "#67e8f9" : "#8b5cf6"}
-				side={doubleSide}
+				side={DoubleSide}
 				transparent={true}
 				opacity={primary ? 0.32 : 0.16}
-				blending={additiveBlending}
+				blending={AdditiveBlending}
 				depthTest={true}
 				depthWrite={false}
 			/>
@@ -548,16 +474,16 @@ useTask(updateScreenMotion, { stage: motionStage, autoInvalidate: false })
 	{/if}
 
 	{#if screenTextTexture}
-		<T.Mesh position={[0, 0.01, textSurfaceZ]} renderOrder={90}>
+		<T.Mesh position={[0, 0.01, SCREEN_TEXT_SURFACE_Z]} renderOrder={90}>
 			<T.PlaneGeometry args={[textPlaneWidth, textPlaneHeight]} />
-			<T.MeshBasicMaterial map={screenTextTexture} side={frontSide} transparent={true} opacity={textOpacity} blending={normalBlending} depthTest={true} depthWrite={false} />
+			<T.MeshBasicMaterial map={screenTextTexture} side={FrontSide} transparent={true} opacity={textOpacity} blending={NormalBlending} depthTest={true} depthWrite={false} />
 		</T.Mesh>
 	{/if}
 
 	{#if screenInfoTexture}
-		<T.Mesh position={[0, 0.018, textSurfaceZ + 0.006]} renderOrder={91}>
+		<T.Mesh position={[0, 0.018, SCREEN_TEXT_SURFACE_Z + 0.006]} renderOrder={91}>
 			<T.PlaneGeometry args={[textPlaneWidth, textPlaneHeight]} />
-			<T.MeshBasicMaterial map={screenInfoTexture} side={frontSide} transparent={true} opacity={infoTextOpacity} blending={normalBlending} depthTest={true} depthWrite={false} />
+			<T.MeshBasicMaterial map={screenInfoTexture} side={FrontSide} transparent={true} opacity={infoTextOpacity} blending={NormalBlending} depthTest={true} depthWrite={false} />
 		</T.Mesh>
 	{/if}
 

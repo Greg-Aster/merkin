@@ -499,13 +499,6 @@ export function getBannerAnimationSettings(): BannerAnimationConfig & {
 }
 
 /**
- * Get video configuration settings
- */
-export function getVideoConfig(): VideoBannerConfig {
-  return videoConfig
-}
-
-/**
  * Get banner link for a specific item index
  */
 export function getBannerLink(index: number): string | null {
@@ -542,78 +535,6 @@ export function getLinkPreviewData(url: string): LinkPreviewInfo {
  */
 export function getIconSVG(iconName: string): string {
   return iconSVGs[iconName] || iconSVGs['arrow-up-right-from-square']
-}
-
-/**
- * Get banner item by index with type safety
- */
-export function getBannerItem(index: number): BannerItem | null {
-  if (index < 0 || index >= bannerList.length) {
-    return null
-  }
-  return bannerList[index]
-}
-
-/**
- * Get total number of banner items
- */
-export function getBannerCount(): number {
-  return bannerList.length
-}
-
-/**
- * Validate mixed banner configuration
- */
-export function validateStandardBannerConfig(): {
-  isValid: boolean
-  warnings: string[]
-} {
-  const warnings: string[] = []
-
-  // Check if bannerList and bannerLinks have the same length
-  if (bannerList.length !== bannerLinks.length) {
-    warnings.push(
-      `Banner list length (${bannerList.length}) does not match banner links length (${bannerLinks.length}).`,
-    )
-  }
-
-  // Check for missing alt text
-  const itemsWithoutAlt = bannerList.filter(
-    item => !item.alt || item.alt.trim() === '',
-  )
-  if (itemsWithoutAlt.length > 0) {
-    warnings.push(
-      `${itemsWithoutAlt.length} banner items are missing alt text for accessibility.`,
-    )
-  }
-
-  // Check for missing link preview data
-  const linksWithoutPreviews = bannerLinks
-    .filter(link => link && link.trim() !== '')
-    .filter(link => !linkPreviewData[link as string])
-
-  if (linksWithoutPreviews.length > 0) {
-    warnings.push(
-      `Missing link preview data for: ${linksWithoutPreviews.join(', ')}.`,
-    )
-  }
-
-  // Check video file paths
-  const videoItems = bannerList.filter(isVideoBannerItem)
-  const invalidVideoPaths = videoItems.filter(
-    item => !item.src.startsWith('/videos/'),
-  )
-
-  if (invalidVideoPaths.length > 0) {
-    warnings.push(
-      `Video items should use /videos/ path. Found: ${invalidVideoPaths.map(item => item.src).join(', ')}`,
-    )
-  }
-
-  return {
-    isValid: warnings.length === 0,
-    warnings,
-  }
 }
 
 /**
@@ -717,15 +638,11 @@ export const standardBannerConfig = {
 
   // Helper functions
   getBannerAnimationSettings,
-  getVideoConfig,
-  getBannerLink, // Retain for now if used elsewhere, but preview details should come from the new function
-  hasAnyBannerLinks, // Retain for now
-  getLinkPreviewData, // Retain for now
-  getIconSVG, // Retain for now
-  getBannerItemPreviewDetails, // Export the new function
-  getBannerItem,
-  getBannerCount,
-  validateStandardBannerConfig,
+  getBannerLink,
+  hasAnyBannerLinks,
+  getLinkPreviewData,
+  getIconSVG,
+  getBannerItemPreviewDetails,
 
   // Type guards for convenience
   isVideoBannerItem,

@@ -123,12 +123,6 @@ import '../styles/features/extracted/navbar.css'
                 {!siteConfig.themeLock && <LightDarkSwitch client:idle></LightDarkSwitch>}
             </div>
 
-            <!-- Fullscreen Mode Toggle -->
-            <!-- <button aria-label="Toggle Fullscreen Mode" title="Toggle Fullscreen Mode" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="fullscreen-btn">
-                <Icon name="fa6-solid:expand" class="fullscreen-icon text-[1.25rem]"></Icon>
-                <Icon name="fa6-solid:compress" class="fullscreen-exit-icon text-[1.25rem] hidden"></Icon>
-            </button> -->
-                        
             <button aria-label="Menu" name="Nav Menu" data-sfx-hover="hover-soft" data-sfx-click="panel-open" class="mobile-header-button nav-action-button btn-plain scale-animation rounded-lg active:scale-90 md:!hidden" id="nav-menu-switch">
                 <Icon name="material-symbols:menu-rounded" class="nav-action-icon"></Icon>
             </button>
@@ -238,60 +232,6 @@ import '../styles/features/extracted/navbar.css'
 
         updateMobileThemeLabel();
         syncStoreControlsVisibility();
-    
-        initializeFullscreenMode();
-    }
-    
-    function initializeFullscreenMode() {
-        const toggleBtn = document.getElementById('fullscreen-btn');
-        if (!toggleBtn) return; // Exit if button doesn't exist
-        
-        const expandIcon = toggleBtn?.querySelector('.fullscreen-icon');
-        const compressIcon = toggleBtn?.querySelector('.fullscreen-exit-icon');
-        
-        const isFullscreen = localStorage.getItem('fullscreenMode') === 'true';
-        
-        if (isFullscreen) {
-            applyFullscreenState();
-        } else {
-            applyNormalState();
-        }
-        
-        toggleBtn?.addEventListener('click', () => {
-            const currentState = localStorage.getItem('fullscreenMode') === 'true';
-            
-            if (currentState) {
-                disableFullscreenMode();
-            } else {
-                enableFullscreenMode();
-            }
-        });
-        
-        function applyFullscreenState() {
-            document.body.classList.add('force-mobile-view');
-            document.body.classList.add('fullscreen-mode');
-            
-            expandIcon?.classList.add('hidden');
-            compressIcon?.classList.remove('hidden');
-        }
-        
-        function applyNormalState() {
-            document.body.classList.remove('force-mobile-view');
-            document.body.classList.remove('fullscreen-mode');
-            
-            expandIcon?.classList.remove('hidden');
-            compressIcon?.classList.add('hidden');
-        }
-        
-        function enableFullscreenMode() {
-            localStorage.setItem('fullscreenMode', 'true');
-            applyFullscreenState();
-        }
-        
-        function disableFullscreenMode() {
-            localStorage.setItem('fullscreenMode', 'false');
-            applyNormalState();
-        }
     }
     
     // Initialize everything

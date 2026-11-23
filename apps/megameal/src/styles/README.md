@@ -4,7 +4,6 @@
 
 Use this folder for styles that are shared beyond a single component:
 
-- `main.css`: Tailwind component-layer entry point. Keep it thin.
 - `variables.styl`: theme variables and light/dark CSS custom properties.
 - `foundation/`: design tokens, global utilities, reusable component classes, and site-wide behavior.
 - `layouts/`: CSS owned by layout wrappers.

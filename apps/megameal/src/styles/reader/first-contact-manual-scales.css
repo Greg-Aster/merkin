@@ -1,0 +1,226 @@
+/* Consolidated scale-specific layout styles for the First Contact Manual reader. */
+
+/* === first-contact-manual-microscopic.css === */
+/* Microscopic-exponential entity layout for First Contact Manual chapter 1. */
+
+.fcmi-scale-entry--microscopic-bg {
+  background:
+    radial-gradient(circle at 8% 0, rgb(var(--fcmi-accent-rgb) / 0.18), transparent 30%),
+    radial-gradient(circle at 78% 8%, rgb(115 218 160 / 0.16), transparent 36%),
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.78), rgb(var(--fcmi-surface-rgb) / 0.58)),
+    url("/first-contact/microscopic-bg.webp") center / cover no-repeat,
+    rgb(var(--fcmi-surface-rgb) / 0.72);
+  box-shadow:
+    inset 0 0 52px rgb(var(--fcmi-glow-rgb) / 0.11),
+    inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.03),
+    0 20px 56px rgb(0 0 0 / 0.32);
+}
+
+.fcmi-scale-entry--microscopic-bg .fcmi-scale-copy,
+.fcmi-scale-entry--microscopic-bg .fcmi-scale-type-band span,
+.fcmi-scale-entry--microscopic-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--microscopic-bg .fcmi-scale-note {
+  backdrop-filter: blur(5px);
+}
+
+.fcmi-scale-entry--microscopic-bg .fcmi-scale-copy {
+  padding: clamp(0.72rem, 1.8vw, 0.92rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.14);
+  border-radius: var(--fcmi-radius-sm);
+}
+
+.fcmi-scale-entry--microscopic-bg .fcmi-scale-copy,
+.fcmi-scale-entry--microscopic-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--microscopic-bg .fcmi-scale-type-band span {
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.58), rgb(var(--fcmi-surface-rgb) / 0.38)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.08), transparent 74%);
+}
+
+/* === first-contact-manual-individual.css === */
+/* Individual-scale entity layout for First Contact Manual chapter 1. */
+
+.fcmi-scale-entry--individual-bg {
+  background:
+    radial-gradient(circle at 9% 6%, rgb(var(--fcmi-accent-rgb) / 0.19), transparent 31%),
+    radial-gradient(circle at 79% 12%, rgb(124 194 104 / 0.14), transparent 37%),
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.8), rgb(var(--fcmi-surface-rgb) / 0.59)),
+    url("/first-contact/individual.webp") center / cover no-repeat,
+    rgb(var(--fcmi-surface-rgb) / 0.74);
+  box-shadow:
+    inset 0 0 54px rgb(var(--fcmi-glow-rgb) / 0.11),
+    inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.03),
+    0 20px 56px rgb(0 0 0 / 0.32);
+}
+
+.fcmi-scale-entry--individual-bg .fcmi-scale-copy,
+.fcmi-scale-entry--individual-bg .fcmi-scale-type-band span,
+.fcmi-scale-entry--individual-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--individual-bg .fcmi-scale-note {
+  backdrop-filter: blur(5px);
+}
+
+.fcmi-scale-entry--individual-bg .fcmi-scale-copy {
+  padding: clamp(0.72rem, 1.8vw, 0.92rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.14);
+  border-radius: var(--fcmi-radius-sm);
+}
+
+.fcmi-scale-entry--individual-bg .fcmi-scale-copy,
+.fcmi-scale-entry--individual-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--individual-bg .fcmi-scale-type-band span {
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.6), rgb(var(--fcmi-surface-rgb) / 0.4)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.08), transparent 74%);
+}
+
+/* === first-contact-manual-mega-organism.css === */
+/* Mega-organism-scale entity layout for First Contact Manual chapter 1. */
+
+.fcmi-scale-entry--mega-organism-bg {
+  background:
+    radial-gradient(circle at 11% 7%, rgb(var(--fcmi-accent-rgb) / 0.2), transparent 32%),
+    radial-gradient(circle at 77% 18%, rgb(112 155 206 / 0.14), transparent 38%),
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.81), rgb(var(--fcmi-surface-rgb) / 0.6)),
+    url("/first-contact/mega-organism.webp") center 42% / cover no-repeat,
+    rgb(var(--fcmi-surface-rgb) / 0.75);
+  box-shadow:
+    inset 0 0 58px rgb(var(--fcmi-glow-rgb) / 0.12),
+    inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.03),
+    0 20px 56px rgb(0 0 0 / 0.33);
+}
+
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-copy,
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-type-band span,
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-note {
+  backdrop-filter: blur(5px);
+}
+
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-copy {
+  padding: clamp(0.72rem, 1.8vw, 0.92rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.14);
+  border-radius: var(--fcmi-radius-sm);
+}
+
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-copy,
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-type-band span {
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.61), rgb(var(--fcmi-surface-rgb) / 0.41)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.09), transparent 74%);
+}
+
+/* === first-contact-manual-planetary.css === */
+/* Planetary-scale entity layout for First Contact Manual chapter 1. */
+
+.fcmi-scale-entry--planetary-bg {
+  background:
+    radial-gradient(circle at 10% 8%, rgb(var(--fcmi-accent-rgb) / 0.22), transparent 33%),
+    radial-gradient(circle at 83% 18%, rgb(226 176 116 / 0.13), transparent 38%),
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.82), rgb(var(--fcmi-surface-rgb) / 0.61)),
+    url("/first-contact/planatery-bg.webp") center 40% / cover no-repeat,
+    rgb(var(--fcmi-surface-rgb) / 0.76);
+  box-shadow:
+    inset 0 0 62px rgb(var(--fcmi-glow-rgb) / 0.13),
+    inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.03),
+    0 20px 58px rgb(0 0 0 / 0.34);
+}
+
+.fcmi-scale-entry--planetary-bg .fcmi-scale-copy,
+.fcmi-scale-entry--planetary-bg .fcmi-scale-type-band span,
+.fcmi-scale-entry--planetary-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--planetary-bg .fcmi-scale-note,
+.fcmi-scale-entry--planetary-bg .fcmi-scale-alert {
+  backdrop-filter: blur(5px);
+}
+
+.fcmi-scale-entry--planetary-bg .fcmi-scale-copy {
+  padding: clamp(0.72rem, 1.8vw, 0.92rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.15);
+  border-radius: var(--fcmi-radius-sm);
+}
+
+.fcmi-scale-entry--planetary-bg .fcmi-scale-copy,
+.fcmi-scale-entry--planetary-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--planetary-bg .fcmi-scale-type-band span {
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.62), rgb(var(--fcmi-surface-rgb) / 0.42)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.1), transparent 74%);
+}
+
+/* === first-contact-manual-stellar.css === */
+/* Stellar-scale entity layout for First Contact Manual chapter 1. */
+
+.fcmi-scale-entry--stellar-bg {
+  background:
+    radial-gradient(circle at 12% 6%, rgb(var(--fcmi-accent-rgb) / 0.2), transparent 32%),
+    radial-gradient(circle at 74% 15%, rgb(94 231 212 / 0.16), transparent 35%),
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.82), rgb(var(--fcmi-surface-rgb) / 0.61)),
+    url("/first-contact/stellar-bg.webp") center 38% / cover no-repeat,
+    rgb(var(--fcmi-surface-rgb) / 0.76);
+  box-shadow:
+    inset 0 0 64px rgb(var(--fcmi-glow-rgb) / 0.13),
+    inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.03),
+    0 20px 58px rgb(0 0 0 / 0.34);
+}
+
+.fcmi-scale-entry--stellar-bg .fcmi-scale-copy,
+.fcmi-scale-entry--stellar-bg .fcmi-scale-type-band span,
+.fcmi-scale-entry--stellar-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--stellar-bg .fcmi-scale-note,
+.fcmi-scale-entry--stellar-bg .fcmi-scale-alert {
+  backdrop-filter: blur(5px);
+}
+
+.fcmi-scale-entry--stellar-bg .fcmi-scale-copy {
+  padding: clamp(0.72rem, 1.8vw, 0.92rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.15);
+  border-radius: var(--fcmi-radius-sm);
+}
+
+.fcmi-scale-entry--stellar-bg .fcmi-scale-copy,
+.fcmi-scale-entry--stellar-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--stellar-bg .fcmi-scale-type-band span {
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.62), rgb(var(--fcmi-surface-rgb) / 0.42)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.1), transparent 74%);
+}
+
+/* === first-contact-manual-scale-exceptions.css === */
+/* Scale-exceptions entity layout for First Contact Manual chapter 1. */
+
+.fcmi-scale-entry--scale-exceptions-bg {
+  background:
+    radial-gradient(circle at 10% 5%, rgb(var(--fcmi-accent-rgb) / 0.2), transparent 32%),
+    radial-gradient(circle at 78% 15%, rgb(157 112 255 / 0.18), transparent 35%),
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.82), rgb(var(--fcmi-surface-rgb) / 0.6)),
+    url("/first-contact/exceptions-bg.webp") center 38% / cover no-repeat,
+    rgb(var(--fcmi-surface-rgb) / 0.76);
+  box-shadow:
+    inset 0 0 64px rgb(var(--fcmi-glow-rgb) / 0.14),
+    inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.03),
+    0 20px 58px rgb(0 0 0 / 0.34);
+}
+
+.fcmi-scale-entry--scale-exceptions-bg .fcmi-scale-copy,
+.fcmi-scale-entry--scale-exceptions-bg .fcmi-scale-type-band span,
+.fcmi-scale-entry--scale-exceptions-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--scale-exceptions-bg .fcmi-scale-note,
+.fcmi-scale-entry--scale-exceptions-bg .fcmi-scale-alert {
+  backdrop-filter: blur(5px);
+}
+
+.fcmi-scale-entry--scale-exceptions-bg .fcmi-scale-copy {
+  padding: clamp(0.72rem, 1.8vw, 0.92rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.16);
+  border-radius: var(--fcmi-radius-sm);
+}
+
+.fcmi-scale-entry--scale-exceptions-bg .fcmi-scale-copy,
+.fcmi-scale-entry--scale-exceptions-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--scale-exceptions-bg .fcmi-scale-type-band span {
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.63), rgb(var(--fcmi-surface-rgb) / 0.43)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.11), transparent 74%);
+}

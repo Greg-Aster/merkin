@@ -1,7 +1,9 @@
 ---
+import '@fontsource/creepster'
+import '@fontsource/metal-mania'
+import SharedPagination from '@merkin/blog-core/components/control/Pagination.astro'
 import type { GetStaticPaths } from 'astro'
 import PostPage from '../components/PostPage.astro'
-import Pagination from '../components/control/Pagination.astro'
 import PortalDemoVideoPlayer from '../components/home/PortalDemoVideoPlayer.astro'
 import PortalHeroBackgroundSlide from '../components/home/PortalHeroBackgroundSlide.astro'
 import PortalHeroSlide from '../components/home/PortalHeroSlide.astro'
@@ -51,11 +53,11 @@ const len = page.data.length
   {!isFirstPage && (
     <div class="dispatches-stream deferred-section">
       <PostPage page={page}></PostPage>
-      <Pagination
+      <SharedPagination
         class="mx-auto onload-animation"
         page={page}
         style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
-      ></Pagination>
+      ></SharedPagination>
     </div>
   )}
   {isFirstPage && (

@@ -34,7 +34,8 @@ export async function getSortedPosts(
   const allBlogPosts = (await getCollection(
     'posts',
     includeDrafts
-      ? entry => entry.data.archive !== true || options.includeArchived === true
+      ? (entry: { data: { archive?: boolean } }) =>
+          entry.data.archive !== true || options.includeArchived === true
       : filter,
   )) as unknown as SortedPost[]
 
@@ -65,7 +66,7 @@ export type Tag = {
 }
 
 export async function getTagList(): Promise<Tag[]> {
-  const allBlogPosts = await getCollection<'posts'>(
+  const allBlogPosts = await getCollection(
     'posts',
     import.meta.env.PROD ? publicCollectionFilter : undefined,
   )
@@ -163,7 +164,7 @@ export async function getPostsByEra(
 // --- End series / arc helpers ---
 
 export async function getCategoryList(): Promise<Category[]> {
-  const allBlogPosts = await getCollection<'posts'>(
+  const allBlogPosts = await getCollection(
     'posts',
     import.meta.env.PROD ? publicCollectionFilter : undefined,
   )
