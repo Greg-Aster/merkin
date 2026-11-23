@@ -1,10 +1,10 @@
-import { type EngineEvent, EventBus, World } from "../src/engine/core/index.js";
-import { quat, vec3 } from "../src/engine/math/index.js";
+import { type EngineEvent, EventBus, World } from "@ainekio/engine/core";
+import { quat, vec3 } from "@ainekio/engine/math";
 import type {
 	InputActionPhase,
 	InputActionState,
 	PlayerInputComponent,
-} from "../src/engine/modules/input/index.js";
+} from "@ainekio/engine/modules/input";
 import {
 	LIGHT_COMPONENT,
 	LIGHT_TRANSFORM_COMPONENT,
@@ -14,7 +14,7 @@ import {
 	type PointLightComponent,
 	type RenderTransform,
 	TRANSFORM_COMPONENT,
-} from "../src/engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/rendering";
 import { createPlayerLightCameraAnchorSystem } from "../src/game/systems/camera.js";
 import {
 	createChargedActionSystem,

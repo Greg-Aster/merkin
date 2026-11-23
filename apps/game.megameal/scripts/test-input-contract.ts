@@ -1,8 +1,5 @@
-import { CommandBus, World } from "../src/engine/core/index.js";
-import {
-	InputManager,
-	createActionMap,
-} from "../src/engine/modules/input/index.js";
+import { CommandBus, World } from "@ainekio/engine/core";
+import { InputManager, createActionMap } from "@ainekio/engine/modules/input";
 import {
 	INPUT_SNAPSHOT_RESOURCE,
 	PLAYER_ENTITY_RESOURCE,

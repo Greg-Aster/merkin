@@ -1,9 +1,9 @@
-import { BrowserPlatform } from "../engine/adapters/browser/index.js";
+import type { RuntimeSceneManifestData } from "@ainekio/engine";
+import { BrowserPlatform } from "@ainekio/engine/adapters/browser";
 import {
 	type EngineClientApi,
 	createEngineClientApi,
-} from "../engine/client-api/index.js";
-import type { RuntimeSceneManifestData } from "../engine/index.js";
+} from "@ainekio/engine/client-api";
 import type { MultiplayerSession } from "../multiplayer/index.js";
 import { type GameClientMount, mountGameClient } from "./mountGameClient";
 

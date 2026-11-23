@@ -1,9 +1,9 @@
-import type { Entity, System, World } from "../../engine/core/index.js";
-import type { PlayerInputComponent } from "../../engine/modules/input/index.js";
+import type { Entity, System, World } from "@ainekio/engine/core";
+import type { PlayerInputComponent } from "@ainekio/engine/modules/input";
 import {
 	LIGHT_COMPONENT,
 	type LightComponent,
-} from "../../engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/rendering";
 import {
 	CHARGED_ACTION_COMPONENT,
 	type ChargedActionComponent,

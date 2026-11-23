@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { World } from "../src/engine/core/index.js";
-import { quat, vec3 } from "../src/engine/math/index.js";
+import { World } from "@ainekio/engine/core";
+import { quat, vec3 } from "@ainekio/engine/math";
 import {
 	RENDERABLE_COMPONENT,
 	type RenderTransform,
 	TRANSFORM_COMPONENT,
-} from "../src/engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/rendering";
 import { PLAYER_ENTITY_RESOURCE } from "../src/game/systems/components.js";
 import {
 	PLAYER_AVATAR_LIGHT_SPRITE_ASSET_ID,

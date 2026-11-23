@@ -1,6 +1,14 @@
 import { strict as assert } from "node:assert";
 
 import {
+	AssetManager,
+	type AssetManifest,
+	type AssetManifestEntry,
+	type RuntimeSceneManifestData,
+	runtimeSceneManifestValidator,
+	validateRuntimeSceneManifest,
+} from "@ainekio/engine";
+import {
 	type ThreeMaterialFactoryAsset,
 	type ThreeMaterialLike,
 	type ThreeObject3DLike,
@@ -10,15 +18,7 @@ import {
 	type ThreeTextureLike,
 	createThreeAssetObjectResolver,
 	registerThreeAssetLoaders,
-} from "../src/engine/adapters/three/index.js";
-import {
-	AssetManager,
-	type AssetManifest,
-	type AssetManifestEntry,
-	type RuntimeSceneManifestData,
-	runtimeSceneManifestValidator,
-	validateRuntimeSceneManifest,
-} from "../src/engine/index.js";
+} from "@ainekio/engine/adapters/three";
 
 const terrainTextureIds = [
 	"texture_splat",

@@ -1,4 +1,4 @@
-import type { AudioContentManifest } from "../../engine/modules/audio/index.js";
+import type { AudioContentManifest } from "@ainekio/engine/modules/audio";
 import { playerPackageConfig } from "./config.js";
 import {
 	PLAYER_CHARGE_RELEASE_AUDIO_ASSET_ID,

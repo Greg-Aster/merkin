@@ -9,11 +9,11 @@ import {
 	levelDefinitionValidator,
 	loadRuntimeSceneManifest,
 	renderProfileValidator,
-} from "../engine/data/index.js";
+} from "@ainekio/engine/data";
 import {
 	type AudioContentManifest,
 	parseAudioContentManifest,
-} from "../engine/modules/audio/index.js";
+} from "@ainekio/engine/modules/audio";
 import {
 	PERFORMANCE_CONFIG_RESOURCE,
 	type PerformanceConfig,

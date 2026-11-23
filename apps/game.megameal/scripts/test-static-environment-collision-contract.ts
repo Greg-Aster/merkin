@@ -2,15 +2,15 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import packageJson from "../package.json";
-import { World, loadRuntimeSceneManifest } from "../src/engine/index.js";
-import { quat, vec3 } from "../src/engine/math/index.js";
+import { World, loadRuntimeSceneManifest } from "@ainekio/engine";
+import { quat, vec3 } from "@ainekio/engine/math";
 import {
 	CHARACTER_CONTROLLER_COMPONENT,
 	COLLIDER_COMPONENT,
 	type CharacterControllerComponent,
-} from "../src/engine/modules/physics/index.js";
-import { TRANSFORM_COMPONENT } from "../src/engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/physics";
+import { TRANSFORM_COMPONENT } from "@ainekio/engine/modules/rendering";
+import packageJson from "../package.json";
 import { createWalkableGroundingSystem } from "../src/game/systems/index.js";
 import { staticEnvironmentCollisionProfiles } from "../src/levels/global/collisionSettings.js";
 import {

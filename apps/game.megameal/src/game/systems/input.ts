@@ -1,16 +1,12 @@
-import type { Command, Entity, System } from "../../engine/core/index.js";
-import {
-	lengthSquaredVec3,
-	normalizeVec3,
-	vec3,
-} from "../../engine/math/index.js";
+import type { Command, Entity, System } from "@ainekio/engine/core";
+import { lengthSquaredVec3, normalizeVec3, vec3 } from "@ainekio/engine/math";
 import {
 	type InputPlatformPort,
 	type InputSnapshot,
 	type PlayerInputComponent,
 	createActionMap,
 	getActionValue,
-} from "../../engine/modules/input/index.js";
+} from "@ainekio/engine/modules/input";
 import {
 	type CloseStoryNoteCommand,
 	INPUT_SNAPSHOT_RESOURCE,

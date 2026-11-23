@@ -1,4 +1,4 @@
-import type { AssetManifestEntry } from "../../engine/modules/assets/index.js";
+import type { AssetManifestEntry } from "@ainekio/engine/modules/assets";
 
 export const meshWaterPlane = {
 	id: "mesh_water_plane",

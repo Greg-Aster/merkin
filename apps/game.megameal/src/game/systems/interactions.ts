@@ -1,4 +1,4 @@
-import type { System } from "../../engine/core/index.js";
+import type { System } from "@ainekio/engine/core";
 import {
 	ACTIVE_INTERACTION_TARGET_RESOURCE,
 	ACTIVE_NPC_RESOURCE,

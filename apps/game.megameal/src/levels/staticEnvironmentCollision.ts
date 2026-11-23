@@ -1,4 +1,4 @@
-import type { LevelData, PrefabData } from "../engine/data/index.js";
+import type { LevelData, PrefabData } from "@ainekio/engine/data";
 
 export type StaticEnvironmentCollisionVector3 = readonly [
 	number,

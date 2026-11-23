@@ -112,23 +112,23 @@ for (const file of files) {
 	}
 
 	if (pathStartsWith(rel, "src/game")) {
-		for (const specifier of importsPackage(
-			imports,
-			forbiddenFrameworkPackages,
-		)) {
+		for (const specifier of importsPackage(imports, [
+			...forbiddenFrameworkPackages,
+			"@ainekio/engine/adapters",
+		])) {
 			violations.push(
-				`${rel}: game code must not import framework package "${specifier}"`,
+				`${rel}: game code must not import framework/adapter package "${specifier}"`,
 			);
 		}
 	}
 
 	if (pathStartsWith(rel, "src/multiplayer")) {
-		for (const specifier of importsPackage(
-			imports,
-			forbiddenFrameworkPackages,
-		)) {
+		for (const specifier of importsPackage(imports, [
+			...forbiddenFrameworkPackages,
+			"@ainekio/engine/adapters",
+		])) {
 			violations.push(
-				`${rel}: multiplayer feature contracts must not import framework package "${specifier}"`,
+				`${rel}: multiplayer feature contracts must not import framework/adapter package "${specifier}"`,
 			);
 		}
 

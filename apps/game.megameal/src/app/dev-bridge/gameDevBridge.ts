@@ -1,4 +1,4 @@
-import type { RuntimeSnapshot } from "../../engine/client-api/index.js";
+import type { RuntimeSnapshot } from "@ainekio/engine/client-api";
 import type { PerformanceDiagnosticsState } from "../../game/performance/index.js";
 import type { MultiplayerSnapshot } from "../../multiplayer/index.js";
 

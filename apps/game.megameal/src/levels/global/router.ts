@@ -1,5 +1,5 @@
-import type { RuntimeSceneManifestData } from "../../engine/index.js";
-import type { AudioContentManifest } from "../../engine/modules/audio/index.js";
+import type { RuntimeSceneManifestData } from "@ainekio/engine";
+import type { AudioContentManifest } from "@ainekio/engine/modules/audio";
 import { mirandaDeckLevelBundle } from "../miranda-deck/index.js";
 import { observatoryLevelBundle } from "../observatory/index.js";
 import { portalArenaLevelBundle } from "../portal-arena/index.js";

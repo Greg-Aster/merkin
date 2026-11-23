@@ -1,23 +1,23 @@
-import type { Entity, System, World } from "../../engine/core/index.js";
+import type { Entity, System, World } from "@ainekio/engine/core";
 import {
 	addVec3,
 	multiplyQuat,
 	quatFromAxisAngle,
 	vec3,
-} from "../../engine/math/index.js";
+} from "@ainekio/engine/math";
 import {
 	ACTIVE_CAMERA_POSE_RESOURCE,
 	CAMERA_TARGET_COMPONENT,
 	type CameraPose,
 	type CameraTargetComponent,
-} from "../../engine/modules/camera/index.js";
+} from "@ainekio/engine/modules/camera";
 import {
 	LIGHT_COMPONENT,
 	LIGHT_TRANSFORM_COMPONENT,
 	type LightComponent,
 	type RenderTransform,
 	TRANSFORM_COMPONENT,
-} from "../../engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/rendering";
 import {
 	FIRST_PERSON_CONTROLLER_COMPONENT,
 	type FirstPersonControllerComponent,

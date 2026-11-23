@@ -1,7 +1,7 @@
-import type { Entity, World } from "../../engine/core/index.js";
-import { prefabDefinitionValidator } from "../../engine/data/index.js";
-import { quat, vec3 } from "../../engine/math/index.js";
-import type { SceneScope } from "../../engine/modules/scene/index.js";
+import type { Entity, World } from "@ainekio/engine/core";
+import { prefabDefinitionValidator } from "@ainekio/engine/data";
+import { quat, vec3 } from "@ainekio/engine/math";
+import type { SceneScope } from "@ainekio/engine/modules/scene";
 
 export type PrefabId = string;
 export type StableEntityId = string;

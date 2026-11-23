@@ -1,11 +1,11 @@
-import type { Entity, System, World } from "../../engine/core/index.js";
-import type { RuntimeSceneManifestData } from "../../engine/data/index.js";
-import type { Vec3 } from "../../engine/math/index.js";
-import type { AssetManagerPort } from "../../engine/modules/assets/index.js";
+import type { Entity, System, World } from "@ainekio/engine/core";
+import type { RuntimeSceneManifestData } from "@ainekio/engine/data";
+import type { Vec3 } from "@ainekio/engine/math";
+import type { AssetManagerPort } from "@ainekio/engine/modules/assets";
 import {
 	COLLIDER_COMPONENT,
 	type ColliderComponent,
-} from "../../engine/modules/physics/index.js";
+} from "@ainekio/engine/modules/physics";
 import {
 	LIGHT_COMPONENT,
 	type LightComponent,
@@ -13,8 +13,8 @@ import {
 	type RenderTransform,
 	type RenderableComponent,
 	TRANSFORM_COMPONENT,
-} from "../../engine/modules/rendering/index.js";
-import type { RuntimeUpdateContext } from "../../engine/runtime/index.js";
+} from "@ainekio/engine/modules/rendering";
+import type { RuntimeUpdateContext } from "@ainekio/engine/runtime";
 import { STABLE_ID_COMPONENT } from "../prefabs/index.js";
 import { PLAYER_ENTITY_RESOURCE } from "../systems/components.js";
 import {

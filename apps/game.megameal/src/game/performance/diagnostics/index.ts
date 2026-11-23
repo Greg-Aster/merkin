@@ -1,13 +1,13 @@
-import type { World } from "../../../engine/core/index.js";
-import type { AssetManagerPort } from "../../../engine/modules/assets/index.js";
+import type { World } from "@ainekio/engine/core";
+import type { AssetManagerPort } from "@ainekio/engine/modules/assets";
 import {
 	COLLIDER_COMPONENT,
 	type ColliderComponent,
-} from "../../../engine/modules/physics/index.js";
+} from "@ainekio/engine/modules/physics";
 import {
 	LIGHT_COMPONENT,
 	RENDERABLE_COMPONENT,
-} from "../../../engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/rendering";
 import {
 	PERFORMANCE_RUNTIME_STATE_RESOURCE,
 	type PerformanceRuntimeState,

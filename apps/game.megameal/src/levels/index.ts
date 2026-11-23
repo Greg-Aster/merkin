@@ -5,7 +5,7 @@ export type {
 	LevelLoader,
 	LevelPrefabInstance,
 	LevelRegistry,
-} from "../engine/modules/scene/index.js";
+} from "@ainekio/engine/modules/scene";
 
 export * from "./global/index.js";
 export * from "./miranda-deck/index.js";

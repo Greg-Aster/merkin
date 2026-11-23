@@ -1,12 +1,12 @@
-import type { Entity, System, World } from "../../../engine/core/index.js";
+import type { Entity, System, World } from "@ainekio/engine/core";
 import {
 	COLLIDER_COMPONENT,
 	type ColliderComponent,
-} from "../../../engine/modules/physics/index.js";
+} from "@ainekio/engine/modules/physics";
 import {
 	type RenderTransform,
 	TRANSFORM_COMPONENT,
-} from "../../../engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/rendering";
 import { STABLE_ID_COMPONENT } from "../../prefabs/index.js";
 import { buildCollisionSpatialBucketPlan } from "./spatial.js";
 import { summarizeCollisionChunks } from "./summary.js";

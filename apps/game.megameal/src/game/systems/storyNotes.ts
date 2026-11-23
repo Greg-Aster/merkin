@@ -1,9 +1,9 @@
-import type { Entity, System } from "../../engine/core/index.js";
-import { lengthSquaredVec3, subtractVec3 } from "../../engine/math/index.js";
+import type { Entity, System } from "@ainekio/engine/core";
+import { lengthSquaredVec3, subtractVec3 } from "@ainekio/engine/math";
 import {
 	type RenderTransform,
 	TRANSFORM_COMPONENT,
-} from "../../engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/rendering";
 import {
 	ACTIVE_INTERACTION_TARGET_RESOURCE,
 	ACTIVE_STORY_NOTE_RESOURCE,

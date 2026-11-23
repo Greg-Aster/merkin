@@ -4,13 +4,13 @@ import {
 	type Scene,
 	evaluateRuntimeSceneReadiness,
 	loadRuntimeSceneManifest,
-} from "../../engine/index.js";
+} from "@ainekio/engine";
 import {
 	AUDIO_MANAGER_RESOURCE,
 	type AudioManagerPort,
 	registerSceneAudioCleanup,
-} from "../../engine/modules/audio/index.js";
-import type { SceneScope } from "../../engine/modules/scene/index.js";
+} from "@ainekio/engine/modules/audio";
+import type { SceneScope } from "@ainekio/engine/modules/scene";
 import {
 	ACTIVE_INTERACTION_TARGET_RESOURCE,
 	ACTIVE_NPC_RESOURCE,

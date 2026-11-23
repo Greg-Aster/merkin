@@ -11,7 +11,7 @@ import {
 	quat,
 	runtimeSceneManifestValidator,
 	vec3,
-} from "../src/engine/index.js";
+} from "@ainekio/engine";
 import {
 	COLLISION_SPATIAL_INDEX_RESOURCE,
 	type CollisionSpatialIndexResource,

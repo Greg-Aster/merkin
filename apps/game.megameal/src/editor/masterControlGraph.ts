@@ -1,5 +1,5 @@
+import type { RuntimeSceneManifestData } from "@ainekio/engine";
 import { runtimeSettings } from "../app/levelPackageDiscovery.js";
-import type { RuntimeSceneManifestData } from "../engine/index.js";
 
 export type MasterControlGraphNodeGroup =
 	| "app"
@@ -442,7 +442,7 @@ export function createMasterControlGraph(
 				id: "data-contracts",
 				label: "Data Contracts",
 				group: "engine",
-				owner: "src/engine/data and src/engine/data/schemas",
+				owner: "@ainekio/engine/data and @ainekio/engine/data/schemas",
 				contract:
 					"Validates manifests, assets, prefabs, levels, render profiles, audio mappings, collision, lights, water, NPCs, and readiness before runtime load.",
 				status: "partial",
@@ -461,7 +461,7 @@ export function createMasterControlGraph(
 				id: "asset-manager",
 				label: "Asset Manager",
 				group: "engine",
-				owner: "src/engine/modules/assets",
+				owner: "@ainekio/engine/modules/assets",
 				contract:
 					"Registers, preloads, exposes, and releases manifest-owned assets by stable ID.",
 				status: "implemented",
@@ -473,7 +473,7 @@ export function createMasterControlGraph(
 				id: "scene-manager",
 				label: "Scene Manager",
 				group: "engine",
-				owner: "src/engine/modules/scene",
+				owner: "@ainekio/engine/modules/scene",
 				contract:
 					"Owns scene transitions, scene scopes, level loading, and unload cleanup.",
 				status: "implemented",
@@ -485,7 +485,7 @@ export function createMasterControlGraph(
 				id: "level-loader",
 				label: "Level Loader",
 				group: "engine",
-				owner: "src/engine/modules/scene and src/game/scenes",
+				owner: "@ainekio/engine/modules/scene and src/game/scenes",
 				contract:
 					"Turns validated scene data into ECS entities, resources, asset registrations, and readiness-gated playable state.",
 				status: "implemented",
@@ -509,7 +509,7 @@ export function createMasterControlGraph(
 				id: "engine-core",
 				label: "Engine Core",
 				group: "engine",
-				owner: "src/engine/core and src/engine/runtime",
+				owner: "@ainekio/engine/core and @ainekio/engine/runtime",
 				contract:
 					"Owns World/ECS state, Scheduler, CommandBus, EventBus, fixed-step runtime, and runtime snapshots.",
 				status: "implemented",
@@ -533,7 +533,7 @@ export function createMasterControlGraph(
 				id: "input-stage",
 				label: "Input Stage",
 				group: "game",
-				owner: "src/game/systems/input.ts and src/engine/modules/input",
+				owner: "src/game/systems/input.ts and @ainekio/engine/modules/input",
 				contract:
 					"Reads BrowserInputAdapter snapshots and writes PlayerInput plus command intent.",
 				status: "implemented",
@@ -581,7 +581,8 @@ export function createMasterControlGraph(
 				id: "character-stage",
 				label: "Character Stage",
 				group: "game",
-				owner: "src/game/systems/movement.ts and src/engine/modules/physics",
+				owner:
+					"src/game/systems/movement.ts and @ainekio/engine/modules/physics",
 				contract:
 					"Turns movement intent into first-person look, motor state, walkable grounding, and kinematic character movement.",
 				status: "partial",
@@ -617,7 +618,7 @@ export function createMasterControlGraph(
 				id: "physics-stage",
 				label: "Physics Stages",
 				group: "game",
-				owner: "src/engine/modules/physics",
+				owner: "@ainekio/engine/modules/physics",
 				contract:
 					"Syncs ECS rigid bodies/colliders to Rapier, steps physics, and syncs results back through engine components.",
 				status: "implemented",
@@ -629,7 +630,7 @@ export function createMasterControlGraph(
 				id: "audio-stage",
 				label: "Audio Stage",
 				group: "game",
-				owner: "src/engine/modules/audio and level audio mappings",
+				owner: "@ainekio/engine/modules/audio and level audio mappings",
 				contract:
 					"Consumes semantic gameplay events and scene music declarations from manifest-owned audio content.",
 				status: "implemented",
@@ -641,7 +642,7 @@ export function createMasterControlGraph(
 				id: "render-sync-stage",
 				label: "Render Sync",
 				group: "game",
-				owner: "src/engine/modules/rendering and src/game/runtime",
+				owner: "@ainekio/engine/modules/rendering and src/game/runtime",
 				contract:
 					"Projects Transform, Renderable, Light, reflection probes, camera pose, and diagnostics into renderer ports.",
 				status: "implemented",
@@ -725,7 +726,7 @@ export function createMasterControlGraph(
 				id: "browser-input-adapter",
 				label: "Browser Input Adapter",
 				group: "adapters",
-				owner: "src/engine/adapters/browser",
+				owner: "@ainekio/engine/adapters/browser",
 				contract:
 					"Owns keyboard, mouse, touch, gamepad, focus, and browser input cleanup details.",
 				status: "implemented",
@@ -737,7 +738,7 @@ export function createMasterControlGraph(
 				id: "rapier-adapter",
 				label: "Rapier Adapter",
 				group: "adapters",
-				owner: "src/engine/adapters/rapier",
+				owner: "@ainekio/engine/adapters/rapier",
 				contract:
 					"Owns Rapier world/bodies/colliders behind engine physics contracts.",
 				status: "implemented",
@@ -749,7 +750,7 @@ export function createMasterControlGraph(
 				id: "web-audio-adapter",
 				label: "Web Audio Adapter",
 				group: "adapters",
-				owner: "src/engine/adapters/browser/audio.ts",
+				owner: "@ainekio/engine/adapters/browser/audio.ts",
 				contract:
 					"Owns browser audio unlock, playback, node cleanup, and platform behavior.",
 				status: "implemented",
@@ -760,7 +761,7 @@ export function createMasterControlGraph(
 				id: "three-renderer-adapter",
 				label: "Three Renderer Adapter",
 				group: "adapters",
-				owner: "src/engine/adapters/three",
+				owner: "@ainekio/engine/adapters/three",
 				contract:
 					"Owns Three scene objects, renderer, camera projection, lights, sky/environment projection, water/material rendering, and debug overlay output.",
 				status: "partial",
@@ -833,7 +834,7 @@ export function createMasterControlGraph(
 				id: "networking-module",
 				label: "Networking",
 				group: "engine",
-				owner: "src/engine/modules/networking",
+				owner: "@ainekio/engine/modules/networking",
 				contract:
 					"Owns future transport/session-ready command and snapshot foundations without trusting local-only state.",
 				status: "partial",
@@ -845,7 +846,8 @@ export function createMasterControlGraph(
 				id: "save-replay-tools",
 				label: "Save / Replay",
 				group: "engine",
-				owner: "src/engine/data/serializers and src/engine/data/replay",
+				owner:
+					"@ainekio/engine/data/serializers and @ainekio/engine/data/replay",
 				contract:
 					"Serializes engine state, command logs, and deterministic snapshots without serializing Three/Rapier/DOM/audio objects.",
 				status: "partial",
@@ -857,7 +859,7 @@ export function createMasterControlGraph(
 				id: "debug-tooling",
 				label: "Debug Tooling",
 				group: "engine",
-				owner: "src/engine/modules/debug and src/game/diagnostics",
+				owner: "@ainekio/engine/modules/debug and src/game/diagnostics",
 				contract:
 					"Owns inspectors, scheduler view, profiling, traces, scene leak reports, physics debug draw, render counts, and runtime diagnostics.",
 				status: "partial",

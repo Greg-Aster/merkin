@@ -5,6 +5,7 @@
 	"type": "module",
 	"packageManager": "pnpm@9.14.4",
 	"dependencies": {
+		"@ainekio/engine": "github:Greg-Aster/ainekio-engine#v0.1.0",
 		"@astrojs/svelte": "7.2.5",
 		"@dimforge/rapier3d-compat": "0.17.3",
 		"astro": "5.18.0",

@@ -2,17 +2,17 @@ import { strict as assert } from "node:assert";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
-import { World } from "../src/engine/core/index.js";
+import { World } from "@ainekio/engine/core";
 import {
 	COLLIDER_COMPONENT,
 	type ColliderComponent,
-} from "../src/engine/modules/physics/index.js";
+} from "@ainekio/engine/modules/physics";
 import {
 	LIGHT_COMPONENT,
 	type LightComponent,
 	RENDERABLE_COMPONENT,
 	type RenderableComponent,
-} from "../src/engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/rendering";
 import {
 	PERFORMANCE_CONFIG_RESOURCE,
 	type PerformanceConfig,

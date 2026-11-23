@@ -39,8 +39,12 @@ export function createBrowserMultiplayerClient(
 			try {
 				const [{ createPeerHostTransport }, { createHttpRoomDirectory }] =
 					await Promise.all([
-						import("../engine/adapters/browser/networking/peerTransport.js"),
-						import("../engine/adapters/browser/networking/roomDirectory.js"),
+						import(
+							"@ainekio/engine/adapters/browser/networking/peer-transport"
+						),
+						import(
+							"@ainekio/engine/adapters/browser/networking/room-directory"
+						),
 					]);
 				const transport = await createPeerHostTransport();
 				const directory = createHttpRoomDirectory({
@@ -76,8 +80,12 @@ export function createBrowserMultiplayerClient(
 			try {
 				const [{ createPeerClientTransport }, { createHttpRoomDirectory }] =
 					await Promise.all([
-						import("../engine/adapters/browser/networking/peerTransport.js"),
-						import("../engine/adapters/browser/networking/roomDirectory.js"),
+						import(
+							"@ainekio/engine/adapters/browser/networking/peer-transport"
+						),
+						import(
+							"@ainekio/engine/adapters/browser/networking/room-directory"
+						),
 					]);
 				const directory = createHttpRoomDirectory({
 					baseUrl: roomDirectoryUrl,

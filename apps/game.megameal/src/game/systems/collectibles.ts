@@ -1,9 +1,9 @@
-import type { Entity, System, World } from "../../engine/core/index.js";
-import { lengthSquaredVec3, vec3 } from "../../engine/math/index.js";
+import type { Entity, System, World } from "@ainekio/engine/core";
+import { lengthSquaredVec3, vec3 } from "@ainekio/engine/math";
 import {
 	type RenderTransform,
 	TRANSFORM_COMPONENT,
-} from "../../engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/rendering";
 import {
 	COLLECTED_COUNT_RESOURCE,
 	COLLECTIBLE_COMPONENT,

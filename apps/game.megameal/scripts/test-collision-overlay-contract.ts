@@ -1,11 +1,11 @@
 import { strict as assert } from "node:assert";
 
-import { World } from "../src/engine/core/index.js";
+import { World } from "@ainekio/engine/core";
 import {
 	COLLIDER_COMPONENT,
 	PHYSICS_TRANSFORM_COMPONENT,
 	RIGID_BODY_COMPONENT,
-} from "../src/engine/modules/physics/index.js";
+} from "@ainekio/engine/modules/physics";
 import {
 	collectCollisionOverlayItems,
 	summarizeCollisionOverlay,

@@ -1,13 +1,13 @@
 import { readFileSync } from "node:fs";
-import { World } from "../src/engine/core/index.js";
-import { vec3 } from "../src/engine/math/index.js";
+import { World } from "@ainekio/engine/core";
+import { vec3 } from "@ainekio/engine/math";
 import {
 	LIGHT_COMPONENT,
 	type LightComponent,
 	type RenderTransform,
 	TRANSFORM_COMPONENT,
-} from "../src/engine/modules/rendering/index.js";
-import { LevelLoader } from "../src/engine/modules/scene/index.js";
+} from "@ainekio/engine/modules/rendering";
+import { LevelLoader } from "@ainekio/engine/modules/scene";
 import { PrefabRegistry } from "../src/game/prefabs/index.js";
 import {
 	ACTIVE_INTERACTION_TARGET_RESOURCE,
@@ -386,21 +386,21 @@ for (const stableId of fireflyStableIds) {
 
 {
 	const runtimeFiles = [
-		"src/game/systems/npcs.ts",
-		"src/game/runtime/index.ts",
-		"src/engine/modules/rendering/index.ts",
-		"src/engine/adapters/three/index.ts",
+		new URL("../src/game/systems/npcs.ts", import.meta.url),
+		new URL("../src/game/runtime/index.ts", import.meta.url),
+		new URL(import.meta.resolve("@ainekio/engine/modules/rendering")),
+		new URL(import.meta.resolve("@ainekio/engine/adapters/three")),
 	];
 
 	for (const file of runtimeFiles) {
-		const source = readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
+		const source = readFileSync(file, "utf8");
 		if (
 			/FireflyBehaviorSystem|FireflyLightSystem|firefly-specific|npc-firefly/i.test(
 				source,
 			)
 		) {
 			throw new Error(
-				`${file} must not introduce a firefly-specific runtime or adapter system.`,
+				`${file.pathname} must not introduce a firefly-specific runtime or adapter system.`,
 			);
 		}
 	}

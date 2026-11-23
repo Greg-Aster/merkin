@@ -1,5 +1,5 @@
-import type { RuntimeSceneManifestData } from "../engine/index.js";
-import type { AudioContentManifest } from "../engine/modules/audio/index.js";
+import type { RuntimeSceneManifestData } from "@ainekio/engine";
+import type { AudioContentManifest } from "@ainekio/engine/modules/audio";
 import type { RuntimePlayerAvatar } from "../game/runtime/index.js";
 import {
 	type GameDevBridgeSettings,

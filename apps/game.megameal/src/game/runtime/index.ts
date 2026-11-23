@@ -32,7 +32,7 @@ import {
 	createTransformHistorySystem,
 	musicStateFromAudioContentManifest,
 	parseAudioContentManifest,
-} from "../../engine/index.js";
+} from "@ainekio/engine";
 import {
 	type MultiplayerRemoteAvatarRenderable,
 	type MultiplayerSession,

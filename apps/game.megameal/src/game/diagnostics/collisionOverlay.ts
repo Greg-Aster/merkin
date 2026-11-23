@@ -1,4 +1,4 @@
-import type { Entity, World } from "../../engine/core/index.js";
+import type { Entity, World } from "@ainekio/engine/core";
 import {
 	COLLIDER_COMPONENT,
 	type ColliderComponent,
@@ -7,12 +7,12 @@ import {
 	type PhysicsTransformComponent,
 	RIGID_BODY_COMPONENT,
 	type RigidBodyComponent,
-} from "../../engine/modules/physics/index.js";
+} from "@ainekio/engine/modules/physics";
 import type {
 	CollisionOverlayItem,
 	CollisionOverlayShape,
 	RenderTransform,
-} from "../../engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/rendering";
 import { STABLE_ID_COMPONENT } from "../prefabs/index.js";
 
 export type CollisionOverlayDiagnosticsState = {

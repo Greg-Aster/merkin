@@ -1,9 +1,9 @@
-import type { Entity, World } from "../../engine/core/index.js";
-import type { InputSnapshot } from "../../engine/modules/input/index.js";
+import type { Entity, World } from "@ainekio/engine/core";
+import type { InputSnapshot } from "@ainekio/engine/modules/input";
 import {
 	type RenderTransform,
 	TRANSFORM_COMPONENT,
-} from "../../engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/rendering";
 import {
 	ACTIVE_INTERACTION_TARGET_RESOURCE,
 	type ActiveInteractionTargetState,

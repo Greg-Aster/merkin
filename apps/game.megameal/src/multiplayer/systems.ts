@@ -1,17 +1,17 @@
-import type { Entity, System, World } from "../engine/core/index.js";
-import { quat, vec3 } from "../engine/math/index.js";
+import type { Entity, System, World } from "@ainekio/engine/core";
+import { quat, vec3 } from "@ainekio/engine/math";
 import {
 	RENDERABLE_COMPONENT,
 	type RenderTransform,
 	type RenderableComponent,
 	TRANSFORM_COMPONENT,
-} from "../engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/rendering";
+import type { MultiplayerSession } from "@ainekio/engine/multiplayer";
 import { STABLE_ID_COMPONENT } from "../game/prefabs/index.js";
 import {
 	type GameHudState,
 	PLAYER_ENTITY_RESOURCE,
 } from "../game/systems/components.js";
-import type { MultiplayerSession } from "./session.js";
 
 export const MULTIPLAYER_REMOTE_PLAYER_COMPONENT = "MultiplayerRemotePlayer";
 export const MULTIPLAYER_REMOTE_PLAYER_OWNER_RESOURCE =

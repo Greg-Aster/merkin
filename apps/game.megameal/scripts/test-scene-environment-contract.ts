@@ -3,7 +3,7 @@ import {
 	type RenderProfileEnvironmentData,
 	type RuntimeSceneManifestData,
 	loadRuntimeSceneManifest,
-} from "../src/engine/index.js";
+} from "@ainekio/engine";
 import {
 	sampleEquirectangularSky,
 	sampleVideoSky,

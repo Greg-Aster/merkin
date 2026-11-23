@@ -11,13 +11,13 @@
  *   - Sends player physical interactions (wrenches, joint pins, pose reset, recording)
  */
 
-import type * as THREE from "three";
-import { BrowserRobotAudioAdapter } from "../../engine/adapters/browser/index.js";
+import { BrowserRobotAudioAdapter } from "@ainekio/engine/adapters/browser";
 import {
 	type ThreeRendererAdapter,
 	ThreeVirtualRobotV2Rig,
 	type VirtualRobotCanvasLike,
-} from "../../engine/adapters/three/index.js";
+} from "@ainekio/engine/adapters/three";
+import type * as THREE from "three";
 import {
 	BRIDGE_BIN_FACE_RGBA,
 	BRIDGE_BIN_SPEAKER_PCM,

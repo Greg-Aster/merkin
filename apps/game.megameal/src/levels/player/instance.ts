@@ -1,4 +1,4 @@
-import type { LevelPrefabInstance } from "../../engine/modules/scene/index.js";
+import type { LevelPrefabInstance } from "@ainekio/engine/modules/scene";
 import { playerPackageConfig } from "./config.js";
 import { PLAYER_PREFAB_ID, PLAYER_STABLE_ID } from "./constants.js";
 

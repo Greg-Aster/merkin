@@ -1,25 +1,25 @@
 import {
-	BrowserAudioManager,
-	BrowserInputAdapter,
-	type BrowserPlatform,
-	createBrowserAudioAssetDisposer,
-	createBrowserAudioAssetLoader,
-} from "../engine/adapters/browser/index.js";
-import { createRapierPhysicsAdapter } from "../engine/adapters/rapier/index.js";
-import {
-	ThreeRendererAdapter,
-	createThreeAssetObjectResolver,
-	loadDefaultThreeRuntime,
-	registerThreeAssetLoaders,
-} from "../engine/adapters/three/index.js";
-import {
 	type AssetLoader,
 	AssetManager,
 	type EngineRuntime,
 	type MobileInputControlsPort,
 	type RendererPort,
 	type RuntimeSceneManifestData,
-} from "../engine/index.js";
+} from "@ainekio/engine";
+import {
+	BrowserAudioManager,
+	BrowserInputAdapter,
+	type BrowserPlatform,
+	createBrowserAudioAssetDisposer,
+	createBrowserAudioAssetLoader,
+} from "@ainekio/engine/adapters/browser";
+import { createRapierPhysicsAdapter } from "@ainekio/engine/adapters/rapier";
+import {
+	ThreeRendererAdapter,
+	createThreeAssetObjectResolver,
+	loadDefaultThreeRuntime,
+	registerThreeAssetLoaders,
+} from "@ainekio/engine/adapters/three";
 import { type GameHudState, createMegamealGameRuntime } from "../game/index.js";
 import type {
 	RuntimeDiagnosticToggleResult,

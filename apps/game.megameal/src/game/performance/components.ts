@@ -1,4 +1,4 @@
-import type { RenderableComponent } from "../../engine/modules/rendering/index.js";
+import type { RenderableComponent } from "@ainekio/engine/modules/rendering";
 import type { StreamingChunkRole } from "./streaming/index.js";
 
 export const PERFORMANCE_LOD_COMPONENT = "PerformanceLod";

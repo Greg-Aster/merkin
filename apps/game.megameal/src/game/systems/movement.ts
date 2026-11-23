@@ -1,12 +1,12 @@
-import type { System, World } from "../../engine/core/index.js";
+import type { System, World } from "@ainekio/engine/core";
 import {
 	lengthSquaredVec3,
 	normalizeVec3,
 	quatFromAxisAngle,
 	rotateVec3ByQuat,
 	vec3,
-} from "../../engine/math/index.js";
-import type { PlayerInputComponent } from "../../engine/modules/input/index.js";
+} from "@ainekio/engine/math";
+import type { PlayerInputComponent } from "@ainekio/engine/modules/input";
 import {
 	CHARACTER_CONTROLLER_COMPONENT,
 	CHARACTER_MOTOR_COMPONENT,
@@ -16,11 +16,11 @@ import {
 	type ColliderComponent,
 	type MeshColliderShape,
 	createKinematicCharacterControllerSystem,
-} from "../../engine/modules/physics/index.js";
+} from "@ainekio/engine/modules/physics";
 import {
 	type RenderTransform,
 	TRANSFORM_COMPONENT,
-} from "../../engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/rendering";
 import {
 	COLLISION_SPATIAL_INDEX_RESOURCE,
 	type CollisionSpatialIndexResource,

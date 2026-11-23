@@ -1,3 +1,2 @@
-export * from "./messages.js";
-export * from "./session.js";
+export * from "@ainekio/engine/multiplayer";
 export * from "./systems.js";

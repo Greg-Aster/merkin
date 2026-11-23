@@ -1,5 +1,5 @@
-import type { Command, Entity } from "../../engine/core/index.js";
-import type { vec3 } from "../../engine/math/index.js";
+import type { Command, Entity } from "@ainekio/engine/core";
+import type { vec3 } from "@ainekio/engine/math";
 
 export const PLAYER_ENTITY_RESOURCE = "game:playerEntity";
 export const INPUT_SNAPSHOT_RESOURCE = "game:inputSnapshot";

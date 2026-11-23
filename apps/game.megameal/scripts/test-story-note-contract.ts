@@ -3,7 +3,7 @@ import {
 	type EngineEvent,
 	EventBus,
 	World,
-} from "../src/engine/core/index.js";
+} from "@ainekio/engine/core";
 import {
 	ACTIVE_INTERACTION_TARGET_RESOURCE,
 	ACTIVE_PORTAL_RESOURCE,

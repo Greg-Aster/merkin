@@ -1,4 +1,4 @@
-import type { AssetManifestEntry } from "../../../engine/modules/assets/index.js";
+import type { AssetManifestEntry } from "@ainekio/engine/modules/assets";
 
 export type PlayerAvatarVector3 = readonly [number, number, number];
 

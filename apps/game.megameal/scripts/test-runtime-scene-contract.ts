@@ -1,10 +1,4 @@
 import {
-	type BrowserAudioBufferSourceNodeLike,
-	type BrowserAudioContextLike,
-	BrowserAudioManager,
-	type BrowserAudioNodeLike,
-} from "../src/engine/adapters/browser/index.js";
-import {
 	AUDIO_MANAGER_RESOURCE,
 	type AssetKind,
 	AssetManager,
@@ -20,7 +14,13 @@ import {
 	musicStateFromAudioContentManifest,
 	parseAudioContentManifest,
 	sceneMusicTrackIds,
-} from "../src/engine/index.js";
+} from "@ainekio/engine";
+import {
+	type BrowserAudioBufferSourceNodeLike,
+	type BrowserAudioContextLike,
+	BrowserAudioManager,
+	type BrowserAudioNodeLike,
+} from "@ainekio/engine/adapters/browser";
 import { PrefabRegistry } from "../src/game/prefabs/index.js";
 import { createGameScene } from "../src/game/scenes/index.js";
 import {

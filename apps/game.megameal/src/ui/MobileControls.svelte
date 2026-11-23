@@ -1,6 +1,6 @@
 <script lang="ts">
+import type { MobileInputControlsPort } from "@ainekio/engine";
 import { onDestroy } from "svelte";
-import type { MobileInputControlsPort } from "../engine/index.js";
 
 type TouchActionIds = {
 	readonly moveForward: string;

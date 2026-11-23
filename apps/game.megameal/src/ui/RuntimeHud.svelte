@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { RuntimeSnapshot } from "../engine/client-api/index.js";
-import type { Command } from "../engine/index.js";
+import type { Command } from "@ainekio/engine";
+import type { RuntimeSnapshot } from "@ainekio/engine/client-api";
 
 type HudState = {
 	readonly playerAlive: boolean;

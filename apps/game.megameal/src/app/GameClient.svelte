@@ -1,7 +1,7 @@
 <script lang="ts">
+import type { Command, MobileInputControlsPort } from "@ainekio/engine";
+import type { RuntimeSnapshot } from "@ainekio/engine/client-api";
 import { onDestroy, onMount } from "svelte";
-import type { RuntimeSnapshot } from "../engine/client-api/index.js";
-import type { Command, MobileInputControlsPort } from "../engine/index.js";
 import { type GameHudState, MOBILE_TOUCH_ACTION_IDS } from "../game/index.js";
 import type { MultiplayerSnapshot } from "../multiplayer/index.js";
 import MobileControls from "../ui/MobileControls.svelte";

@@ -1,15 +1,11 @@
-import type { Entity, System } from "../../engine/core/index.js";
-import {
-	lengthSquaredVec3,
-	subtractVec3,
-	vec3,
-} from "../../engine/math/index.js";
+import type { Entity, System } from "@ainekio/engine/core";
+import { lengthSquaredVec3, subtractVec3, vec3 } from "@ainekio/engine/math";
 import {
 	LIGHT_COMPONENT,
 	type LightComponent,
 	type RenderTransform,
 	TRANSFORM_COMPONENT,
-} from "../../engine/modules/rendering/index.js";
+} from "@ainekio/engine/modules/rendering";
 import { STABLE_ID_COMPONENT } from "../prefabs/index.js";
 import {
 	ACTIVE_INTERACTION_TARGET_RESOURCE,
