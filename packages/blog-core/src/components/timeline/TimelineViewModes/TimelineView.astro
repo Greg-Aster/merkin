@@ -1,0 +1,305 @@
+---
+import ImageWrapper from '../../misc/ImageWrapper.astro'
+import StarNode from '../StarNode.astro'
+import { hashCode } from '../../../utils/starUtils'
+import {
+  defaultTimelineViewConfig,
+  type EraConfigMap,
+  type TimelineConnectionPatternMap,
+  type TimelineConstellationConfigMap,
+  type TimelineConstellationPatternMap,
+  type TimelineEvent,
+} from '../../../services/TimelineConfig'
+
+export interface Props {
+  id?: string
+  events: TimelineEvent[]
+  background: string
+  backgroundVideo?: string
+  backgroundVideoPlaybackRate?: number
+  compact?: boolean
+  initialScale?: number
+  initialOffsetX?: number
+  initialOffsetY?: number
+  useEraColors?: boolean
+  startYear: number
+  endYear: number
+  eraConfig: EraConfigMap
+  constellationConfig?: TimelineConstellationConfigMap
+  constellationPatterns?: TimelineConstellationPatternMap
+  connectionPatterns?: TimelineConnectionPatternMap
+  selectedEventSlug?: string | null
+}
+
+const {
+  id = 'timeline-view',
+  events,
+  background,
+  backgroundVideo,
+  backgroundVideoPlaybackRate = 1,
+  compact = false,
+  initialScale = defaultTimelineViewConfig.defaultZoom,
+  initialOffsetX = 0,
+  initialOffsetY = 0,
+  useEraColors = false,
+  startYear,
+  endYear,
+  eraConfig,
+  constellationConfig = {},
+  constellationPatterns = {},
+  connectionPatterns = {},
+  selectedEventSlug = null,
+} = Astro.props
+const clamp = (value: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, value))
+const timespan = Math.max(1, endYear - startYear)
+const padding = defaultTimelineViewConfig.padding
+const defaultPattern = constellationPatterns.scattered ?? [{ azOffset: 0, elOffset: 0 }]
+const positionedPerEra = new Map<string, number>()
+const sortedEvents = [...events].sort(
+  (a, b) => a.year - b.year || a.slug.localeCompare(b.slug),
+)
+
+function getPositionPercentage(year: number, customPadding?: number): number {
+  const paddingToUse = customPadding !== undefined ? customPadding : padding
+  const clampedYear = Math.max(startYear, Math.min(endYear, year))
+  const basePercentage = ((clampedYear - startYear) / timespan) * 100
+  return paddingToUse + (basePercentage * (100 - 2 * paddingToUse)) / 100
+}
+
+const eventPositions = sortedEvents.map((event) => {
+  const eraKey = event.era || 'unknown'
+  const eventEraConfig = event.era && eraConfig[event.era] ? eraConfig[event.era] : null
+  const eraVisual = constellationConfig[eraKey] ?? constellationConfig.unknown ?? {
+    centerAzimuth: 180,
+    centerElevation: 45,
+    spread: 24,
+    pattern: 'scattered',
+  }
+  const pattern =
+    constellationPatterns[eraVisual.pattern] ??
+    constellationPatterns[eraKey] ??
+    defaultPattern
+  const eraIndex = positionedPerEra.get(eraKey) ?? 0
+  positionedPerEra.set(eraKey, eraIndex + 1)
+
+  const point = pattern[eraIndex % pattern.length] ?? { azOffset: 0, elOffset: 0 }
+  const loop = Math.floor(eraIndex / pattern.length)
+  const spreadScale = Math.max(0.78, Math.min(1.16, eraVisual.spread / 38))
+  const eraOffsetX = (eraVisual.centerAzimuth - 180) / 26
+  const eraOffsetY = (eraVisual.centerElevation - 45) / 3.6
+  const timelineX = getPositionPercentage(event.year, eventEraConfig?.customPadding)
+  const orbitAngle = (loop % 6) * (Math.PI / 3)
+  const orbitRing = Math.floor(loop / 6) + (loop > 0 ? 1 : 0)
+  const overflowX = orbitRing > 0 ? Math.cos(orbitAngle) * orbitRing * 1.9 : 0
+  const overflowY = orbitRing > 0 ? Math.sin(orbitAngle) * orbitRing * 2.1 : 0
+  const yearBias =
+    eventEraConfig && Number.isFinite(eventEraConfig.startYear) && Number.isFinite(eventEraConfig.endYear)
+      ? (((event.year - eventEraConfig.startYear) / Math.max(1, eventEraConfig.endYear - eventEraConfig.startYear)) - 0.5) * 2.2
+      : 0
+  const fineSeed = hashCode(event.slug) % 3
+  const fineShift = fineSeed === 0 ? -0.18 : fineSeed === 1 ? 0 : 0.18
+
+  return {
+    event,
+    x: clamp(
+      timelineX + point.azOffset * 0.24 * spreadScale + eraOffsetX * 0.04 + yearBias + overflowX + fineShift,
+      9,
+      91,
+    ),
+    y: clamp(
+      50 - point.elOffset * 1.02 * spreadScale - eraOffsetY * 0.82 + overflowY,
+      16,
+      84,
+    ),
+  }
+})
+
+const groupedByEra = eventPositions.reduce<Record<string, typeof eventPositions>>(
+  (groups, entry) => {
+    const eraKey = entry.event.era || 'unknown'
+    groups[eraKey] ??= []
+    groups[eraKey].push(entry)
+    return groups
+  },
+  {},
+)
+
+const connectionLines = Object.entries(groupedByEra).flatMap(([eraKey, entries]) => {
+  if (entries.length < 2) return []
+  const patternName =
+    constellationConfig[eraKey]?.pattern ?? constellationConfig.unknown?.pattern ?? 'scattered'
+  const patternConnections = connectionPatterns[patternName]
+  const fallbackConnections = entries.slice(0, -1).map((_, index) => [index, index + 1] as [number, number])
+  const activeConnections =
+    patternConnections?.filter(([from, to]) => entries[from] && entries[to]) ?? fallbackConnections
+
+  return activeConnections.map(([fromIndex, toIndex], index) => ({
+    id: `${eraKey}-${fromIndex}-${toIndex}-${index}`,
+    era: eraKey,
+    x1: entries[fromIndex].x,
+    y1: entries[fromIndex].y,
+    x2: entries[toIndex].x,
+    y2: entries[toIndex].y,
+  }))
+})
+
+const initialBackground =
+  eraConfig['all-eras']?.backgroundImage ||
+  Object.values(eraConfig).find((entry) => entry.backgroundImage)?.backgroundImage ||
+  background
+const initialBackgroundVideo =
+  eraConfig['all-eras']?.backgroundVideo ||
+  Object.values(eraConfig).find((entry) => entry.backgroundVideo)?.backgroundVideo ||
+  backgroundVideo ||
+  ''
+const initialBackgroundVideoPlaybackRate =
+  eraConfig['all-eras']?.backgroundVideoPlaybackRate ||
+  Object.values(eraConfig).find((entry) => typeof entry.backgroundVideoPlaybackRate === 'number')?.backgroundVideoPlaybackRate ||
+  backgroundVideoPlaybackRate ||
+  1
+---
+
+<div
+  id={`${id}-container`}
+  class="timeline-map-shell relative h-full overflow-hidden"
+  data-background={initialBackground}
+  data-timeline-shell="true"
+  data-events-id={`${id}-events-data`}
+  data-era-config-id={`${id}-era-config-data`}
+  data-initial-background={initialBackground}
+  data-initial-background-video={initialBackgroundVideo}
+  data-initial-background-video-playback-rate={String(initialBackgroundVideoPlaybackRate)}
+  data-min-zoom={String(defaultTimelineViewConfig.minZoom)}
+  data-max-zoom={String(defaultTimelineViewConfig.maxZoom)}
+  data-zoom-step={String(defaultTimelineViewConfig.zoomStep)}
+>
+  <div class="timeline-background-layer absolute inset-0 z-0 overflow-hidden">
+    <ImageWrapper
+      src={initialBackground}
+      alt="Timeline background"
+      class:list={[
+        'timeline-background-image-wrapper h-full w-full',
+        initialBackgroundVideo ? 'is-background-hidden' : '',
+      ]}
+      imgClass="timeline-background-media timeline-background-image object-cover"
+      loading="eager"
+    />
+    <video
+      class:list={[
+        'timeline-background-media',
+        'timeline-background-video',
+        'object-cover',
+        !initialBackgroundVideo ? 'is-background-hidden' : '',
+      ]}
+      src={initialBackgroundVideo || undefined}
+      poster={initialBackgroundVideo ? undefined : initialBackground}
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      data-playback-rate={initialBackgroundVideoPlaybackRate}
+      aria-hidden="true"
+    ></video>
+    <div class="timeline-depth-layer timeline-depth-layer--nebula"></div>
+    <div class="timeline-depth-layer timeline-depth-layer--dust"></div>
+    <div class="timeline-depth-layer timeline-depth-layer--foreground"></div>
+  </div>
+
+  <div
+    class="timeline-stage"
+    data-initial-scale={initialScale}
+    data-initial-offset-x={initialOffsetX}
+    data-initial-offset-y={initialOffsetY}
+  >
+    <div class="timeline-flow-axis" aria-hidden="true">
+      <div class="timeline-flow-axis__line"></div>
+      <div class="timeline-flow-axis__marker timeline-flow-axis__marker--start"></div>
+      <div class="timeline-flow-axis__marker timeline-flow-axis__marker--end"></div>
+    </div>
+
+    <svg class="timeline-constellation-lines absolute inset-0 z-10 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      {connectionLines.map((line) => (
+        <line
+          class="timeline-constellation-line"
+          data-era={line.era}
+          x1={line.x1}
+          y1={line.y1}
+          x2={line.x2}
+          y2={line.y2}
+        />
+      ))}
+    </svg>
+
+    <div class="timeline-events-layer absolute inset-0 z-20">
+      {eventPositions.map(({ event, x, y }) => (
+        <div
+          class:list={[
+            'timeline-event',
+            selectedEventSlug === event.slug ? 'has-active-card is-selected-event' : '',
+          ]}
+          data-event-slug={event.slug}
+          data-era={event.era || 'unknown'}
+          data-year={event.year}
+          style={`left:${x}%; top:${y}%;`}
+        >
+          <button
+            type="button"
+            class="timeline-event-button"
+            data-slug={event.slug}
+            aria-label={`Open ${event.title}`}
+          >
+            <StarNode
+              era={event.era}
+              isKeyEvent={event.isKeyEvent}
+              isSelected={selectedEventSlug === event.slug}
+              isHovered={false}
+              identifier={event.slug}
+              useEraColors={useEraColors}
+              size={event.isKeyEvent ? 6 : 4.8}
+            />
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <div class="timeline-active-card" aria-live="polite"></div>
+
+  {events.length === 0 && (
+    <div class="timeline-empty-state">
+      <div class="timeline-empty-title">No timeline events found</div>
+      <div class="timeline-empty-copy">
+        Add timeline metadata to your content to populate the chronology map.
+      </div>
+    </div>
+  )}
+</div>
+
+<script
+  type="application/json"
+  id={`${id}-events-data`}
+  is:inline
+  set:html={JSON.stringify(eventPositions)}
+></script>
+<script
+  type="application/json"
+  id={`${id}-era-config-data`}
+  is:inline
+  set:html={JSON.stringify(eraConfig)}
+></script>
+<script
+  type="application/json"
+  id={`${id}-connection-lines-data`}
+  is:inline
+  set:html={JSON.stringify(connectionLines)}
+></script>
+
+<script>
+  import { destroyTimelineViews, initTimelineViews } from './timelineViewClient.js'
+
+  initTimelineViews()
+  document.addEventListener('astro:before-swap', destroyTimelineViews)
+  document.addEventListener('astro:page-load', initTimelineViews)
+</script>

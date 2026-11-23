@@ -1,0 +1,142 @@
+---
+import {
+  Content,
+  frontmatter,
+} from '@/content/posts/store/store-placeholder.mdx'
+import MainGridLayout from '@/layouts/MainGridLayout.astro'
+import StoreLayout from '@/layouts/store/StoreLayout.astro'
+import { url } from '@/utils/url-utils'
+import { Icon } from 'astro-icon/components'
+
+const isStorePagination404 = Astro.url.pathname.startsWith('/store/page/')
+const pageTitle = '404: Page Not Found'
+const pageDescription =
+  "This address doesn't point to an active page in the MEGAMEAL archive."
+const requestedPath = Astro.url.pathname
+const baseUrl = import.meta.env.BASE_URL
+const notFoundLayoutPost = {
+  slug: 'not-found',
+  data: {
+    title: pageTitle,
+    description: pageDescription,
+    bannerType: 'none',
+    oneColumn: true,
+    showToc: false,
+  },
+} as const
+const recoveryLinks = [
+  {
+    href: url('/', baseUrl),
+    icon: 'material-symbols:home-rounded',
+    label: 'Home',
+    description: 'Return to the main MEGAMEAL experience.',
+  },
+  {
+    href: url('/archive/', baseUrl),
+    icon: 'material-symbols:archive-outline',
+    label: 'Archive',
+    description: 'Browse stories, records, recipes, and transmissions.',
+  },
+  {
+    href: url('/timeline/', baseUrl),
+    icon: 'material-symbols:timeline',
+    label: 'Timeline',
+    description: 'Follow the chronology of the MEGAMEAL universe.',
+  },
+] as const
+---
+
+{isStorePagination404 ? (
+  <StoreLayout title={frontmatter.title} description={frontmatter.description}>
+    <Content />
+  </StoreLayout>
+) : (
+  <MainGridLayout
+    title={pageTitle}
+    description={pageDescription}
+    post={notFoundLayoutPost}
+    oneColumn={true}
+  >
+    <section
+      class="card-base megameal-surface mx-auto w-full max-w-5xl px-5 py-7 sm:px-8 sm:py-9 lg:px-12 lg:py-12"
+      aria-labelledby="not-found-title"
+    >
+      <div class="mx-auto max-w-4xl">
+        <header class="grid gap-6 border-b border-black/10 pb-7 dark:border-white/10 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-8 sm:pb-9">
+          <div
+            class="font-jetbrains-mono text-7xl font-black leading-none tracking-[-0.08em] text-[var(--primary)] sm:text-8xl lg:text-9xl"
+            aria-hidden="true"
+          >
+            404
+          </div>
+          <div class="min-w-0">
+            <div class="mb-3 flex items-center gap-2 font-jetbrains-mono text-xs font-bold uppercase tracking-[0.14em] text-[var(--primary)]">
+              <Icon name="material-symbols:public" class="text-lg" />
+              Navigation error
+            </div>
+            <h1
+              id="not-found-title"
+              class="text-3xl font-bold leading-tight text-black/90 dark:text-white/90 sm:text-4xl lg:text-5xl"
+            >
+              This page is missing.
+            </h1>
+            <p class="mt-4 max-w-2xl text-base leading-relaxed text-black/65 dark:text-white/65 sm:text-lg">
+              The address may be mistyped, retired, or moved. Choose a known destination below to continue exploring.
+            </p>
+            <p class="mt-4 max-w-full break-all rounded-lg border border-black/10 bg-black/5 px-3 py-2 font-jetbrains-mono text-xs text-black/55 dark:border-white/10 dark:bg-white/5 dark:text-white/55">
+              <span class="sr-only">Requested path: </span><span data-requested-path>{requestedPath}</span>
+            </p>
+          </div>
+        </header>
+
+        <nav class="pt-7 sm:pt-9" aria-labelledby="recovery-links-title">
+          <div class="mb-4 flex flex-wrap items-end justify-between gap-2">
+            <h2
+              id="recovery-links-title"
+              class="text-xl font-bold text-black/85 dark:text-white/85 sm:text-2xl"
+            >
+              Choose a destination
+            </h2>
+            <span class="font-jetbrains-mono text-[0.68rem] uppercase tracking-[0.12em] text-black/45 dark:text-white/45">
+              Three stable routes
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+            {recoveryLinks.map((link) => (
+              <a
+                href={link.href}
+                class="card-base card-base-interactive group flex min-h-40 flex-col p-5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)]"
+                data-sfx-hover="hover-soft"
+                data-sfx-click="soft"
+              >
+                <span class="mb-6 flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary)] transition group-hover:bg-[var(--primary)]/20">
+                  <Icon name={link.icon} class="text-2xl" />
+                </span>
+                <span class="flex items-center justify-between gap-3 text-lg font-bold text-black/85 dark:text-white/85">
+                  {link.label}
+                  <Icon
+                    name="material-symbols:arrow-forward-rounded"
+                    class="text-xl text-[var(--primary)] transition-transform group-hover:translate-x-1"
+                  />
+                </span>
+                <span class="mt-2 text-sm leading-relaxed text-black/55 dark:text-white/55">
+                  {link.description}
+                </span>
+              </a>
+            ))}
+          </div>
+        </nav>
+      </div>
+    </section>
+    <script is:inline data-astro-rerun>
+      (() => {
+        const requestedPath = document.querySelector('[data-requested-path]')
+
+        if (requestedPath) {
+          requestedPath.textContent = window.location.pathname
+        }
+      })()
+    </script>
+  </MainGridLayout>
+)}

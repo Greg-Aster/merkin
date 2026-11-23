@@ -1,0 +1,360 @@
+{
+	"id": "v2_lab",
+	"runtimeScene": {
+		"schemaVersion": 1,
+		"id": "v2_lab_runtime",
+		"generatedAt": "2026-11-20T00:00:00.000Z",
+		"source": {
+			"kind": "prototype",
+			"id": "v2_lab"
+		},
+		"readiness": {
+			"playerStableId": "player",
+			"requiredAssetIds": [
+				"mesh_v2_lab_floor",
+				"mesh_v2_lab_box",
+				"material_v2_lab_floor",
+				"material_v2_lab_cable",
+				"material_v2_lab_obstacle",
+				"material_v2_lab_landmark_cyan",
+				"material_v2_lab_landmark_teal",
+				"material_v2_lab_landmark_violet"
+			],
+			"requiredCollisionPrefabIds": ["v2_lab_floor"]
+		}
+	},
+	"level": {
+		"id": "v2_lab",
+		"sceneId": "v2_lab",
+		"preloadGroups": ["v2_lab"],
+		"resources": {
+			"game:collectedCount": 0,
+			"game:totalCollectibles": 0,
+			"game:characterBounds": {
+				"minX": -3,
+				"maxX": 3,
+				"minZ": -3,
+				"maxZ": 3
+			}
+		},
+		"preload": [
+			"mesh_v2_lab_floor",
+			"mesh_v2_lab_box",
+			"material_v2_lab_floor",
+			"material_v2_lab_cable",
+			"material_v2_lab_obstacle",
+			"material_v2_lab_landmark_cyan",
+			"material_v2_lab_landmark_teal",
+			"material_v2_lab_landmark_violet"
+		],
+		"instances": [
+			{
+				"id": "floor",
+				"prefabId": "v2_lab_floor",
+				"stableId": "v2_lab:floor"
+			},
+			{
+				"id": "cable_strip_near",
+				"prefabId": "v2_lab_cable_strip",
+				"stableId": "v2_lab:cable_strip_near",
+				"transform": {
+					"position": [0.0, 0.0075, 0.65],
+					"scale": [1.5, 0.015, 0.03]
+				}
+			},
+			{
+				"id": "cable_strip_far",
+				"prefabId": "v2_lab_cable_strip",
+				"stableId": "v2_lab:cable_strip_far",
+				"transform": {
+					"position": [0.0, 0.008, 1.25],
+					"scale": [1.5, 0.016, 0.032]
+				}
+			},
+			{
+				"id": "corridor_curb_right",
+				"prefabId": "v2_lab_obstacle_block",
+				"stableId": "v2_lab:corridor_curb_right",
+				"transform": {
+					"position": [-0.75, 0.09, 0.95],
+					"scale": [0.48, 0.18, 0.28]
+				}
+			},
+			{
+				"id": "landmark_pillar_north",
+				"prefabId": "v2_lab_landmark_cyan",
+				"stableId": "v2_lab:landmark_pillar_north",
+				"transform": {
+					"position": [0.0, 0.35, 2.2],
+					"scale": [0.7, 0.7, 0.3]
+				}
+			},
+			{
+				"id": "landmark_pillar_west",
+				"prefabId": "v2_lab_landmark_teal",
+				"stableId": "v2_lab:landmark_pillar_west",
+				"transform": {
+					"position": [1.85, 0.3, 0.3],
+					"scale": [0.3, 0.6, 0.5]
+				}
+			},
+			{
+				"id": "landmark_pillar_east",
+				"prefabId": "v2_lab_landmark_violet",
+				"stableId": "v2_lab:landmark_pillar_east",
+				"transform": {
+					"position": [-1.85, 0.3, -0.4],
+					"scale": [0.3, 0.6, 0.5]
+				}
+			}
+		]
+	},
+	"assets": {
+		"shared": [],
+		"local": [
+			{
+				"id": "mesh_v2_lab_floor",
+				"kind": "mesh",
+				"url": "builtin://arena-floor"
+			},
+			{
+				"id": "mesh_v2_lab_box",
+				"kind": "mesh",
+				"url": "builtin://box"
+			},
+			{
+				"id": "material_v2_lab_floor",
+				"kind": "material",
+				"url": "builtin://tile-green",
+				"material": {
+					"color": "#2a3441",
+					"roughness": 0.85,
+					"metalness": 0.05
+				}
+			},
+			{
+				"id": "material_v2_lab_cable",
+				"kind": "material",
+				"url": "builtin://solid",
+				"material": {
+					"color": "#f59e0b",
+					"roughness": 0.5,
+					"metalness": 0.1
+				}
+			},
+			{
+				"id": "material_v2_lab_obstacle",
+				"kind": "material",
+				"url": "builtin://solid",
+				"material": {
+					"color": "#ef4444",
+					"roughness": 0.6,
+					"metalness": 0.1
+				}
+			},
+			{
+				"id": "material_v2_lab_landmark_cyan",
+				"kind": "material",
+				"url": "builtin://solid",
+				"material": {
+					"color": "#20cfff",
+					"roughness": 0.45,
+					"metalness": 0.1
+				}
+			},
+			{
+				"id": "material_v2_lab_landmark_teal",
+				"kind": "material",
+				"url": "builtin://solid",
+				"material": {
+					"color": "#33efcb",
+					"roughness": 0.45,
+					"metalness": 0.1
+				}
+			},
+			{
+				"id": "material_v2_lab_landmark_violet",
+				"kind": "material",
+				"url": "builtin://solid",
+				"material": {
+					"color": "#a855f7",
+					"roughness": 0.45,
+					"metalness": 0.1
+				}
+			}
+		],
+		"preloadGroups": {
+			"v2_lab": [
+				"mesh_v2_lab_floor",
+				"mesh_v2_lab_box",
+				"material_v2_lab_floor",
+				"material_v2_lab_cable",
+				"material_v2_lab_obstacle",
+				"material_v2_lab_landmark_cyan",
+				"material_v2_lab_landmark_teal",
+				"material_v2_lab_landmark_violet"
+			]
+		}
+	},
+	"prefabs": {
+		"local": [
+			{
+				"id": "v2_lab_floor",
+				"assetIds": ["mesh_v2_lab_floor", "material_v2_lab_floor"],
+				"tags": ["world", "collision", "walkable"],
+				"components": {
+					"Transform": {
+						"position": [0, -0.05, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [6, 0.1, 6]
+					},
+					"Renderable": {
+						"meshId": "mesh_v2_lab_floor",
+						"materialId": "material_v2_lab_floor",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "walkable",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [3, 0.05, 3]
+						}
+					}
+				}
+			},
+			{
+				"id": "v2_lab_cable_strip",
+				"assetIds": ["mesh_v2_lab_box", "material_v2_lab_cable"],
+				"tags": ["world", "robotics"],
+				"components": {
+					"Transform": {
+						"position": [0, 0.0075, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1.5, 0.015, 0.03]
+					},
+					"Renderable": {
+						"meshId": "mesh_v2_lab_box",
+						"materialId": "material_v2_lab_cable",
+						"visible": true
+					}
+				}
+			},
+			{
+				"id": "v2_lab_obstacle_block",
+				"assetIds": ["mesh_v2_lab_box", "material_v2_lab_obstacle"],
+				"tags": ["world", "robotics", "collision"],
+				"components": {
+					"Transform": {
+						"position": [0, 0.09, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [0.48, 0.18, 0.28]
+					},
+					"Renderable": {
+						"meshId": "mesh_v2_lab_box",
+						"materialId": "material_v2_lab_obstacle",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [0.24, 0.09, 0.14]
+						}
+					}
+				}
+			},
+			{
+				"id": "v2_lab_landmark_cyan",
+				"assetIds": ["mesh_v2_lab_box", "material_v2_lab_landmark_cyan"],
+				"tags": ["world", "landmark"],
+				"components": {
+					"Transform": {
+						"position": [0, 0.35, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [0.7, 0.7, 0.3]
+					},
+					"Renderable": {
+						"meshId": "mesh_v2_lab_box",
+						"materialId": "material_v2_lab_landmark_cyan",
+						"visible": true
+					}
+				}
+			},
+			{
+				"id": "v2_lab_landmark_teal",
+				"assetIds": ["mesh_v2_lab_box", "material_v2_lab_landmark_teal"],
+				"tags": ["world", "landmark"],
+				"components": {
+					"Transform": {
+						"position": [0, 0.3, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [0.3, 0.6, 0.5]
+					},
+					"Renderable": {
+						"meshId": "mesh_v2_lab_box",
+						"materialId": "material_v2_lab_landmark_teal",
+						"visible": true
+					}
+				}
+			},
+			{
+				"id": "v2_lab_landmark_violet",
+				"assetIds": ["mesh_v2_lab_box", "material_v2_lab_landmark_violet"],
+				"tags": ["world", "landmark"],
+				"components": {
+					"Transform": {
+						"position": [0, 0.3, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [0.3, 0.6, 0.5]
+					},
+					"Renderable": {
+						"meshId": "mesh_v2_lab_box",
+						"materialId": "material_v2_lab_landmark_violet",
+						"visible": true
+					}
+				}
+			}
+		]
+	},
+	"audio": {
+		"eventMappings": []
+	},
+	"renderProfile": {
+		"id": "v2_lab_daylight",
+		"renderer": {
+			"clearColor": "#111824",
+			"clearAlpha": 1,
+			"antialias": true,
+			"maxPixelRatio": 2,
+			"fallbackMaterialColor": "#60a5fa"
+		},
+		"lighting": {
+			"lights": [
+				{
+					"kind": "ambient",
+					"color": "#e2ecf8",
+					"intensity": 0.95
+				},
+				{
+					"kind": "directional",
+					"color": "#fff8ea",
+					"intensity": 2.2,
+					"position": [2.5, 5, 3.5]
+				}
+			]
+		}
+	},
+	"player": {
+		"spawnPosition": [0.75, 0.6, -0.85]
+	}
+}

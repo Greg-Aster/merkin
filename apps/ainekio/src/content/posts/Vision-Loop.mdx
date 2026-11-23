@@ -1,0 +1,72 @@
+---
+title: "ESP32-P4 Robot Vision & Face Display: Chin-Mounted OV5647 Camera, 59-Expression ST7789 LCD & Optical Flow"
+published: 2026-08-27T08:30:00-07:00
+updated: 2026-11-12
+description: "Ainekio V2's 1.9-inch ST7789 LCD face (59 expressions), lower-jaw chin-mounted OV5647 MIPI-CSI camera (10,000 µs motion-safe exposure cap), Cockpit HUD optical-flow obstacle range, YOLOE tracking, and depth odometry."
+image: "/assets/ainekio/v2/vision-loop-concept.webp"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, Camera, Vision, ST7789, OV5647, Optical Flow, Odometry, YOLOE, Ainekio OS]
+category: "Perception and Voice"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: perception
+  generation: both
+  kind: reference
+  next: voice-loop
+  related: ["ainekio-v2", "gateway-and-simulator", "ainekio-os", "2026-11-11-on-chip-neural-gait-and-ainekio-os"]
+---
+
+Ainekio V2's removable front face carrier ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) pairs outward expression and forward perception in one compact nose assembly: a **1.9-inch `ST7789` color IPS LCD** (`320 × 170`) rendering **59 animated facial expressions**, and an **`OV5647` MIPI-CSI camera** tucked into the **lower-jaw / chin mount below the LCD** for action-correlated snapshots, Cockpit HUD obstacle range, object tracking, and monocular depth odometry.
+
+## 1.9-inch `ST7789` LCD face and 59 expressions
+
+The V2 display sits in a recessed red front bezel supported by four printed wireless spacers so Wi-Fi antenna clearance stays unobstructed. Onboard C firmware drives **59 procedural expression animations** at `15 fps`—covering idle blinking, directional eye glances, curiosity, sleep/doze states, live audio-synced voice bars during speech playback, Freestyle gesture accompaniments, `cosmic_horror`, and token-matched **body-contact reaction faces** when the robot is tipped, shaken, or stalled.
+
+![Contact sheet of Ainekio's 59 animated ST7789 LCD facial expressions](/gallery/lcd-face-contact-sheet-1600.webp)
+
+## Chin-mounted `OV5647` MIPI-CSI camera
+
+On V2 (`Waveshare ESP32-P4-WIFI6`), vision moves from V1's parallel `OV3660` module on the `ESP32-S3` to a higher-throughput **`OV5647` MIPI-CSI sensor** mounted in the lower jaw directly beneath the `1.9"` LCD:
+
+- **Lower-jaw routing & `180°` image rotation**: Seating the sensor in the chin mount below the LCD gives a clean floor-and-room sightline across full stance pitch and keeps the CSI flex ribbon clear of the shoulder servos; because the sensor PCB sits inverted in the chin pocket, the image pipeline rotates frames **`180°`** so all snapshots, Cockpit HUD views, and tracking boxes arrive upright.
+- **`10,000 µs` (`10 ms`) motion-safe exposure ceiling**: Standard indoor auto-exposure algorithms stretch shutter times in dim rooms, smearing frames whenever the robot walks or turns. The V2 camera pipeline enforces a **`10,000 µs` maximum exposure cap**, keeping edges crisp during active `50 Hz` walking and visual odometry.
+- **On-device microSD clip recording**: Alongside live JPEG streaming, the `ESP32-P4` can record segmented video clips directly to its onboard microSD slot for later review in Body Control.
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <figure>
+    <img src="/posts/vision-loop/ov5647-chin-cam-floor-pov.webp" alt="Actual 1280x960 180-degree rotated floor-level photograph captured from Ainekio V2's lower-jaw OV5647 MIPI-CSI camera sitting on living-room carpet." width="1280" height="960" loading="lazy" />
+    <figcaption>First-person <code>960P</code> (<code>1280 × 960</code>) room view captured directly from Ainekio V2's chin-mounted <code>OV5647</code> camera on carpet after <code>180°</code> ISP rotation.</figcaption>
+  </figure>
+  <figure>
+    <img src="/gallery/diagram-lcd-wiring-960.webp" alt="SPI2 wiring diagram connecting the XIITIA 1.9-inch ST7789 320x170 IPS LCD to ESP32-P4 GPIO21 through GPIO26." width="960" height="744" loading="lazy" />
+    <figcaption><code>SPI2</code> wiring (<code>GPIO21–26</code>) for the <code>1.9"</code> <code>ST7789</code> (<code>320 × 170</code>) landscape face display seated directly above the chin camera pocket.</figcaption>
+  </figure>
+</div>
+
+## Action-correlated vision in Ainekio OS
+
+Instead of flooding a multimodal model with continuous room video, the gateway binds still captures to specific events so **[Ainekio OS](/posts/ainekio-os/)** ([embodied bridge](/posts/metahuman-integration/)) always knows *when* an image was taken and *which physical step* it verifies:
+
+| Capture Trigger | Correlation Key | Role in Cognition & Control |
+| --- | --- | --- |
+| **Explicit snapshot** | `action_id` | On-demand visual look requested by Ainekio OS or the human operator |
+| **Post-motion verification frame** | `command_sequence_id` | Captured right before a movement's `done` receipt so Goal Review can confirm whether the physical move achieved its visual goal |
+| **Spoken utterance end (VAD)** | `utterance_id` | Pairs what someone said in the room with what Ainekio was looking at during that turn |
+| **Cockpit HUD, tracking & odometry** | `frame_id` + timestamp | Feeds live optical-flow obstacle range, YOLOE/ByteTrack object tracking, and depth odometry |
+
+Visual locomotion goals require actual camera confirmation through Ainekio OS's vision specialist role rather than assuming a finished walk command automatically reached the target.
+
+## Optical-flow obstacle range, object tracking, and depth odometry
+
+On the host gateway ([gateway guide](/posts/gateway-and-simulator/)), the chin camera also drives active spatial measurement during walking:
+
+1. **Cockpit HUD optical-flow + monocular depth obstacle range**: During live walking, pyramidal Lucas-Kanade sparse optical flow is fused with Depth-Anything ground-plane contact projection to estimate real-time obstacle contact distance and approach clearance directly ahead of the chin lens.
+2. **Open-vocabulary YOLOE + ByteTrack tracking**: Open-vocabulary YOLOE detection paired with ByteTrack multi-frame association lets Ainekio search for, lock onto, and follow a specific person or object across frames—halting motion immediately if visual lock is lost during person-following.
+3. **OpenGV 2-point RANSAC depth odometry**: Combining monocular depth points with `208 Hz` `LSM6DS3` IMU rotation priors inside an OpenGV 2-point RANSAC solver transforms chin-camera motion into body-frame forward displacement and yaw progress.
+4. **On-demand metric depth (`MoGe-2`)**: Heavy metric depth weights load only while an active locomotion goal or gait trial needs visual distance verification, unloading automatically afterward so workstation memory stays free for conversational models.

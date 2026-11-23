@@ -1,0 +1,108 @@
+---
+import ArchiveAtmosphere from '@components/archive/ArchiveAtmosphere.svelte'
+import ArchiveStoryMap from '@components/archive/ArchiveStoryMap.astro'
+import I18nKey from '@i18n/i18nKey'
+import { i18n } from '@i18n/translation'
+import MainGridLayout from '@layouts/MainGridLayout.astro'
+import archiveManifest from '../../../../../packages/shared-data/generated/archive.json'
+import gameStarsManifest from '../../../../../packages/shared-data/generated/game-stars.json'
+import timelineManifest from '../../../../../packages/shared-data/generated/timeline.json'
+import { isPublicContentData } from '../../contracts/content'
+import { routeStyleHref } from '../../styles/routeStyleBundles'
+
+const allRecords = archiveManifest.items
+const publishedRecords = archiveManifest.items.filter(isPublicContentData)
+const restrictedRecords = archiveManifest.items.filter(
+  record => !isPublicContentData(record),
+)
+const allTimelineItems = timelineManifest.items
+const allGameStars = gameStarsManifest.items
+const activeArcCount = new Set(
+  allRecords
+    .map(record => record.series)
+    .filter((seriesId): seriesId is string => Boolean(seriesId)),
+).size
+
+const publicationYears = allRecords
+  .map(record =>
+    record.published ? new Date(record.published).getUTCFullYear() : null,
+  )
+  .filter((year): year is number => year !== null)
+
+const latestYear =
+  publicationYears.length > 0 ? Math.max(...publicationYears) : null
+const earliestYear =
+  publicationYears.length > 0 ? Math.min(...publicationYears) : null
+
+const archiveStats = [
+  {
+    label: 'Archive Records',
+    value: String(allRecords.length),
+    note:
+      latestYear && earliestYear
+        ? `${publishedRecords.length} public, ${restrictedRecords.length} restricted`
+        : 'Known archive scope',
+  },
+  {
+    label: 'Timeline Entries',
+    value: String(allTimelineItems.length),
+    note: 'Chronology records, including restricted map nodes',
+  },
+  {
+    label: 'Story Arcs',
+    value: String(activeArcCount),
+    note: 'Connected reading routes and restricted branches',
+  },
+  {
+    label: 'Star Map Nodes',
+    value: String(allGameStars.length),
+    note: 'Observatory destinations synced to the game layer',
+  },
+]
+
+const archivePagePost = {
+  slug: 'archive',
+  data: {
+    title: i18n(I18nKey.archive),
+    description:
+      'A connected record of posts, timeline entries, story arcs, and star map destinations across the Mega Meal Saga.',
+    image: '/assets/banner/archive_still.png',
+    bannerType: 'none',
+    oneColumn: true,
+    showToc: false,
+  },
+}
+---
+
+<MainGridLayout
+  title={i18n(I18nKey.archive)}
+  description={archivePagePost.data.description}
+  post={archivePagePost}
+  oneColumn={true}
+  backgroundImage="none"
+>
+    <Fragment slot="head">
+      <link rel="stylesheet" href={routeStyleHref('archive')} data-route-style="archive" />
+    </Fragment>
+    <ArchiveAtmosphere slot="overlay" client:load />
+    <section class="archive-summary card-base" aria-labelledby="archive-page-title">
+      <div class="archive-summary-head">
+        <div class="archive-kicker">Archive</div>
+        <h1 id="archive-page-title" class="archive-title">MEGA MEAL SAGA Archive</h1>
+        <p class="archive-copy">
+          One story graph, multiple ways in. Browse public records, restricted files, timeline entries, and star-map nodes from the same shared index.
+        </p>
+      </div>
+
+      <div class="archive-stats-grid">
+        {archiveStats.map((stat) => (
+          <div class="archive-stat-card">
+            <div class="archive-stat-label">{stat.label}</div>
+            <div class="archive-stat-value">{stat.value}</div>
+            <div class="archive-stat-note">{stat.note}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+    <ArchiveStoryMap />
+</MainGridLayout>

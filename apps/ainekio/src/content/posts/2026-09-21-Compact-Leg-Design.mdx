@@ -1,0 +1,204 @@
+---
+title: "Compact Legs, Narrowed Chassis, and Shell Iterations"
+published: 2026-09-21
+updated: 2026-09-21
+description: "Shortening the legs to 22/36/55 mm, narrowing the chassis from 103 to 51.2 mm around the 1.9-inch display, and iterating the outer carapace shell."
+image: "/posts/2026-09-21-design-progress/flat-parts-september-18.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V2, Linkages, CAD, Chassis, Shell, 3D Printing]
+category: "Development Log"
+draft: false
+lang: "en"
+contentFormat: "update"
+reading:
+  topic: legs
+  generation: v2
+  kind: journal
+  next: 2026-09-24-body-and-battery
+  related: ["gait-development", "ainekio-v2", "2026-10-06-compact-linkage"]
+---
+
+Since the [first printed leg prototypes](/posts/2026-09-15-leg-prototypes/), CAD and
+fit passes between September 17 and 21 simplified all three mechanical layers of
+Ainekio V2: a direct four-bar leg shortened to **22 / 36 / 55 mm**, a central frame
+narrowed from **103 mm to 51.2 mm**, and an outer carapace shaped around the moving
+links.
+
+![Four leg parts laid out on their printing faces: knee crank, upper carrier, connecting rod, and lower leg.](/posts/2026-09-21-design-progress/flat-parts-september-18.webp)
+
+*September 18 print-bed layout showing the knee crank, upper carrier, curved connecting rod, and lower leg.*
+
+## Direct crank-to-lower-leg linkage
+
+The earlier prototype routed knee drive through an intermediate coupler and relay
+rocker. Dropping that extra relay lets the **knee crank** drive the **lower leg**
+directly through a single curved **connecting rod**, while the second planar servo
+drives the **upper carrier** and the hip-roll servo swings the whole leg plane.
+
+On September 18 I leveled both planar servo shafts at the same height (**12.5 mm apart
+horizontally**) with a **24 mm crank, 24 mm lower-leg pickup, 41 mm connecting rod,
+40 mm upper carrier, and 60 mm lower leg**. Short M3×6 screws (threading 2.7 mm past the
+bearing and washer stack) replaced three long through-bolts and nut traps, paired with
+two **12.4 × 4.2 × 5.25 mm** servo mounting shims.
+
+## Comparing 24/41/60 mm and compact 22/36/55 mm geometry
+
+On September 19 I tested a tighter **22 / 36 / 55 mm** leg (crank / connecting rod /
+knee-to-foot projection) against the 24 / 41 / 60 mm baseline, keeping the upper carrier
+at 40 mm and the lower-leg pickup radius at 24 mm:
+
+| Dimension | Earlier leg | Compact revision |
+| --- | ---: | ---: |
+| Knee crank (joint centers) | 24 mm | 22 mm |
+| Connecting rod (joint centers) | 41 mm | 36 mm |
+| Upper carrier | 40 mm | 40 mm |
+| Lower-leg pickup radius | 24 mm | 24 mm |
+| Lower-leg knee-to-foot projection | 60 mm | 55 mm |
+
+<div className="grid gap-5 sm:grid-cols-3">
+  <figure>
+    <a href="/posts/2026-09-21-design-progress/compact-crank.webp"><img src="/posts/2026-09-21-design-progress/compact-crank.webp" alt="Rendered upright knee crank with its horn pocket and joint bore" width="1200" height="900" loading="lazy" /></a>
+    <figcaption>Knee crank: 22 mm pivot spacing.</figcaption>
+  </figure>
+  <figure>
+    <a href="/posts/2026-09-21-design-progress/compact-rod.webp"><img src="/posts/2026-09-21-design-progress/compact-rod.webp" alt="Rendered upright curved connecting rod with bores at both ends" width="1200" height="900" loading="lazy" /></a>
+    <figcaption>Connecting rod: 36 mm pivot spacing.</figcaption>
+  </figure>
+  <figure>
+    <a href="/posts/2026-09-21-design-progress/compact-lower-leg.webp"><img src="/posts/2026-09-21-design-progress/compact-lower-leg.webp" alt="Rendered upright lower leg with knee, linkage pickup and foot attachment" width="1200" height="900" loading="lazy" /></a>
+    <figcaption>Lower leg: 55 mm knee-to-foot projection.</figcaption>
+  </figure>
+</div>
+
+Matching nine reference poses across 520 sampled actuator pairs confirmed that the
+shorter linkage preserves the full angular sweep while giving up very little foot
+reach:
+
+| Matched exercise | Earlier leg | Compact revision |
+| --- | ---: | ---: |
+| Upper-link angular sweep | 90.00° | 90.00° |
+| Lower-link orientation change | 54.00° | 54.00° |
+| Required crank-input sweep | 98.12° | 100.81° |
+| Foot-bolt horizontal extent | 67.268 mm | 66.248 mm (−1.5%) |
+| Foot-bolt vertical extent | 45.383 mm | 41.200 mm (−9.2%) |
+
+See the [gait development guide](/posts/gait-development/#linkage-kinematics-and-workspace-geometry)
+for the kinematics and workspace analysis behind this four-bar geometry.
+
+## Fixing the upper-carrier horn cavity
+
+When test-fitting the printed upper carrier onto a servo horn, the round hub seated
+cleanly, but earlier profile edits had pinched the narrow arm slot so the horn arm
+couldn't drop in. Enlarging **only the arm slot by 5% in-plane**—while leaving the
+4.05 mm hub seat, pocket floor, and screw holes untouched—fixed the press fit.
+
+![CAD render of the upper carrier showing the widened horn-arm cavity and retained cylindrical hub seat.](/posts/2026-09-21-design-progress/horn-cavity.webp)
+
+*Upper carrier with +5% in-plane horn-arm clearance and unchanged hub seat.*
+
+### Upright compact leg part set
+
+By September 20, the 22/36/55 mm compact leg set was synchronized across all four
+corners in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot):
+
+| Component | Role / dimension |
+| --- | --- |
+| Knee crank | 22 mm input crank |
+| Connecting rod | 36 mm curved coupler |
+| Lower leg | 55 mm knee-to-foot projection |
+| Upper carrier | 40 mm carrier with +5% horn-arm clearance |
+| Outer foot shell | Clamping outer sole half |
+| Inner foot shell | Mating inner sole half |
+
+## Narrowing the chassis from 103 mm to 51.2 mm
+
+While the [September 10 body layout](/posts/2026-09-10-v2-body-design/) explored a
+wide bay for three boards, the September 17 revision narrowed the chassis from
+**103 mm to 51.2 mm**—matching the nominal PCB width of the 1.9-inch display—by
+translating each side assembly inward **25.9 mm**.
+
+![Side view of the September 20 CAD assembly, with exposed red leg links, black servo housings and a pale outer shell.](/posts/2026-09-21-design-progress/assembly-side-september-20.webp)
+
+*September 20 CAD assembly side view with red leg linkages, black servo housings, and carapace shell.*
+
+| Feature | Earlier wide layout | September 17 narrow revision |
+| --- | --- | --- |
+| Chassis outer width | 103 mm | 51.2 mm |
+| Side assemblies | Wide-body positions | Each moved inward 25.9 mm |
+| Rear cover | Wide cover | 47.2 mm wide (2 mm inset per side) |
+| Plate thickness | 3 mm nominal | Retained (3.2 mm at top support-contact regions) |
+| Q6A board and tray | Onboard in wide packaging study | Moved offboard in this narrow variant |
+| ESP32-P4 and PCA9685 | Rear side-by-side placement | Retained for narrow-body mounting |
+
+![Top detail of the narrow chassis, showing the central plate between the paired servo assemblies.](/posts/2026-09-21-design-progress/narrow-chassis-top.webp)
+
+*Top view of the narrowed 51.2 mm central plate between the paired shoulder assemblies.*
+
+### Shoulder-to-board clearance and bottom camera-cable routing
+
+A 308-pose shoulder rotation check swept all four **upper servo brackets** against the
+ESP32-P4 and PCA9685 board envelopes inside the narrowed frame:
+
+| Housing pair | Board model | Clear rotation window | Minimum clearance | Contact angle |
+| --- | --- | --- | ---: | ---: |
+| Rear left / right | ESP32-P4 | 19° inward to 125° outward | 1.970 / 1.967 mm | ~33.0° inward |
+| Front left / right | PCA9685 | 13.01° inward to 140° outward | 0.788 mm per side | ~22.3° inward |
+
+On September 18, the front panel's camera-cable recess was also moved from the top
+center edge to the bottom center edge so the ribbon exits cleanly below the face:
+
+| Cable opening | Earlier top-edge profile | Revised bottom-edge profile |
+| --- | --- | --- |
+| Position | Top center | Bottom center |
+| Mouth width | 22.36 mm | 22.36 mm |
+| Inner flat & depth | Narrower, 4.0 mm deep | 17.0 mm flat, 4.8 mm deep |
+| Central ventilation slots | 21.0 mm high | 18.2 mm high (leaving a 2 mm bridge above recess) |
+
+## Developing the carapace shell around the mechanism
+
+Alongside the frame and linkage work, the outer shell progressed through front,
+side, and three-quarter silhouette passes in Blender—refining the face opening,
+collar, roof, shoulder fins, guards, and chin.
+
+![September 20 CAD assembly with a pale developing shell above four articulated red legs and exposed black servo housings.](/posts/2026-09-21-design-progress/assembly-september-20.webp)
+
+*September 20 three-quarter view of the carapace shell over the four leg assemblies.*
+
+| Area | Issue addressed | Geometry change |
+| --- | --- | --- |
+| Collar | Broad solid center obscured layered profile | Narrowed shoulders, recessed front edge, and enlarged rounded rear relief |
+| Shoulder fins | Flattened old plates failed front/side silhouette checks | Rebuilt fin surfaces with dedicated prototype supports |
+| Roof tips | Unequal outward flare (−42.75 mm vs +44.65 mm) | Matched lateral span to **±41 mm** and lowered outer edges 1 mm |
+| Brow and cheeks | Harsh facet highlights and missing panel seams | Adjusted local crown and added shallow panel divisions around the face opening |
+| Chin | Flat upper center | Added up to 0.6 mm convex ridge above the camera opening |
+| Neck plate & roof | Dense 11,099-vertex neck mesh and deep roof walls | Simplified neck plate to a 162-vertex closed solid (~2 mm spacing) and reconstructed roof at ~99 × 41 mm per side with 1.6 mm walls, vents, and three interior hex pads per side |
+
+<div className="grid gap-5 sm:grid-cols-2">
+  <figure>
+    <a href="/posts/2026-09-21-design-progress/roof-before.webp"><img src="/posts/2026-09-21-design-progress/roof-before.webp" alt="Earlier red roof with the near outer tip flaring farther from the central body" width="1200" height="773" loading="lazy" /></a>
+    <figcaption>Before: earlier roof pass with asymmetric tip flare.</figcaption>
+  </figure>
+  <figure>
+    <a href="/posts/2026-09-21-design-progress/roof-after.webp"><img src="/posts/2026-09-21-design-progress/roof-after.webp" alt="The same red roof after its outer tips were brought to a matched span and lowered locally" width="1200" height="773" loading="lazy" /></a>
+    <figcaption>After: matched ±41 mm roof tips lowered 1 mm at the outer edges.</figcaption>
+  </figure>
+</div>
+
+![Top view of the September 20 CAD assembly showing the shell panels, central vents and paired leg mechanisms.](/posts/2026-09-21-design-progress/assembly-top-september-20.webp)
+
+*Top view of the September 20 CAD assembly showing the shell panels, central vents, and paired leg mechanisms.*
+
+## Supporting design records
+
+- [Level-shaft geometry and fastening notes](/posts/2026-09-21-design-progress/data/level-shafts-record.txt)
+- [Compact test geometry and saved checks](/posts/2026-09-21-design-progress/data/compact-leg-record.txt)
+- [Matched-range comparison method](/posts/2026-09-21-design-progress/data/range-comparison-record.txt) and [JSON data](/posts/2026-09-21-design-progress/data/range-comparison.json)
+- [Printed horn-fit problem and correction](/posts/2026-09-21-design-progress/data/horn-fit-record.txt)
+- [September 17 chassis design record](/posts/2026-09-21-design-progress/data/chassis-record.txt)
+- [Housing-to-board motion and clearance audit](/posts/2026-09-21-design-progress/data/board-clearance-record.txt)
+- [September 18 camera-cable recess report](/posts/2026-09-21-design-progress/data/camera-cable-record.txt)
+- [September 19 carapace iteration log](/posts/2026-09-21-design-progress/data/shell-iteration-log.txt)

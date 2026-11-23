@@ -1,0 +1,102 @@
+---
+title: "Three Short-Rod Leg Mechanisms: What the CAD Tests Found"
+published: 2026-09-09T12:00:00-07:00
+updated: 2026-09-10
+description: "A direct pushrod, a supported relay yoke, and an offset cascade compared by rod length, modeled range, pose coverage, and interference."
+image: "/posts/2026-09-09-leg-study/three-variants.png"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V2, CAD, Mechanical Design, Linkages, MG90S]
+category: "Mechanical Research"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: legs
+  generation: v2
+  kind: journal
+  next: 2026-09-10-v2-body-design
+  related: ["gait-development", "2026-10-12-shell-power-and-motion"]
+---
+
+On September 9 I ran a CAD study to see whether a quadruped knee could be driven
+through short rigid pushrods while keeping its servo fixed to the chassis—even as the
+leg rolls sideways at the hip. Keeping that motor and its cable off the swinging leg
+was a central constraint. I tested three candidate mechanisms against the same 15
+target poses and a desired knee sweep of 160–180°.
+
+**None of the three cleared every target pose.** Variant 2—a supported relay yoke on
+the upper leg—came closest and gave the cleanest starting point for follow-up linkage
+work, alongside the [four-leg V2 body assembly](/posts/2026-09-10-v2-body-design/).
+
+## Study constraints and baseline
+
+An off-the-shelf M3×30 bolt limited each pushrod to at most
+**25 mm between rod-end pivot centers**. All three mechanisms share 40 mm effective
+upper links and 60 mm lower links. Both the knee and hip-roll servos stay fixed to the
+chassis, while the hip-pitch servo rides on the roll carrier. Each modeled MG90S case
+occupies a 22.8 × 12.2 × 28.5 mm envelope, sweeping a 180° actuator window (10° to
+190° in the geometric solver).
+
+The starting leg envelope came from the OpenHarmony Puppy V2 reference geometry; credit
+and the production linkage that eventually grew out of these experiments are documented
+in the [V2 build guide](/posts/ainekio-v2/#compact-leg-linkage-geometry).
+
+## Comparing the three mechanisms
+
+| Mechanism | Rod center distances | Useful modeled knee travel at hip 0°, roll 0° | Modeled travel with mesh checks at hip 30°, roll 0° | Pose probes passing |
+| --- | --- | --- | --- | --- |
+| 1 · Direct short rod | 24.7 mm | 96.5° (53.7–150.2°) | 133.1° (34.9–168.0°) | 7 / 15 |
+| 2 · Supported relay yoke | 24.5 + 23.5 mm | 132.1° (23.0–155.2°) | 133.3° (30.6–163.9°) | 9 / 15 |
+| 3 · Offset actuator and cascade | 22.3 + 24.8 mm | 121.3° (27.9–149.2°) | 125.0° (27.9–152.9°) | 9 / 15 |
+
+The two range columns represent tests at different hip angles: the first uses
+geometric transmission, rod-end clearance, and folding checks at hip 0°, while the
+second adds modeled surface-envelope intersection checks in 1° steps at hip 30°.
+
+The direct rod (Variant 1) uses the fewest rods and pivots, but loses usable motion as
+hip angle changes. Its 16 mm input crank is large for the modeled servo, and deep
+folding and rear tuck are particularly limited.
+
+Variant 2 divides the transmission at a supported rocker on the upper leg.
+Its two rods share a relay pin, with their centers 7 mm apart across the leg, and
+a symmetric yoke receives the drive at the knee. It reaches more requested
+poses than the direct rod, though the folded shin and sideways clearance around the
+fixed actuator remain limiting factors.
+
+Variant 3 separates the relay’s input and output arms and offsets the actuator.
+That permits phase adjustment, but introduces a second relay pin and a more
+nonlinear relationship between servo and knee movement. Its rearward poses
+lose range, and the added hardware brings more potential friction and play.
+
+## What stopped Variant 2 from passing
+
+At neutral hip angle, Variant 2's useful geometric range is about **132°**, short of
+the 160–180° target. Shifting the servo horn’s starting orientation moves where that
+travel window falls, but cannot enlarge the 180° actuator span.
+
+| Requested probe | Result in the modeled study |
+| --- | --- |
+| Neutral stand, low crouch, full sit, front wave | Passed geometric and surface-envelope checks |
+| Almost-straight forward extension | Outside the fixed servo window on the retained linkage branch |
+| Near-floor fold | Shin, rod, or shaft interference |
+| Rear tuck | Rod/crank clearance and interference with the roll-servo envelope |
+| Wide and narrow stance | Fixed knee-servo, cheek, or rod-end interference |
+
+![Recorded coupling, angular gain, and rejected configurations for the three mechanisms.](/posts/2026-09-09-leg-study/coupling-and-transmission.png)
+
+*Coupling, angular gain, and rejected configurations across the three mechanisms.*
+
+The 14 mm internal channel is too narrow for every desired roll position of
+the fixed input and its rod ends. Opening the root of that channel and relocating
+the roll-servo package are the next mechanical steps if this relay path is pursued.
+
+## Screening criteria
+
+During the motion search, the solver retained the same linkage assembly branch and
+screened against a 20° minimum transmission angle, an angular gain window of 0.4–2.5,
+rod-end clearance, link folding, and mesh intersections. Those bounds helped isolate
+where short-rod linkages bind before committing to printed parts.

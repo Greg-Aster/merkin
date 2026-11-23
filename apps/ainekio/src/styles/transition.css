@@ -1,0 +1,6 @@
+/* Keep server-rendered HTML immediately visible for LCP, crawlers, and zero layout shift */
+.onload-animation {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+}

@@ -1,0 +1,73 @@
+---
+title: "Embodied Robot Integration: Bridging Ainekio OS to the Physical ESP32-P4 Body"
+published: 2026-08-27T08:00:00-07:00
+updated: 2026-11-18
+description: "How the embodied bridge carries camera snapshots, IMU and 4th-wire joint telemetry, voice transcripts, and body-contact events up into Ainekio OS, and dispatches bounded motion, face, and speech intents back down."
+image: "/assets/ainekio/v2/metahuman-loop-concept.webp"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, Ainekio OS, MetaHuman OS, Durable Execution, Environment Bridge]
+category: "Ainekio OS"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: metahuman
+  generation: both
+  kind: reference
+  next: bounded-autonomy
+  related: ["ainekio-os", "ainekio-companion", "2026-11-11-on-chip-neural-gait-and-ainekio-os"]
+---
+
+While **[Ainekio OS](/posts/ainekio-os/)** ([`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os), formerly MetaHuman OS) owns identity, episodic memory, cognitive graphs, and model routing, and [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot) owns the physical quadruped firmware and host gateway, the **Embodied Bridge** is the narrow, event-driven connection between those two worlds.
+
+Instead of letting a language model poll hardware sensors or stream raw servo angles over Wi-Fi, the bridge translates physical robot state into structured multimodal observations flowing upward, and translates high-level cognitive decisions into checked motion, facial, and speech intents flowing downward.
+
+## Connection topology and robot following
+
+<figure className="my-6">
+  <img src="/posts/ainekio-os/ainekio-os-live-vision-chat.webp" alt="Live Ainekio OS Environment Mode session connected to Body Control, showing Ainekio capturing correlated OV5647 camera frames on request and describing the room in conversation." width="1600" height="870" loading="lazy" />
+  <figcaption>Live embodied turn across the bridge in <code>Environment Mode</code>: Ainekio snaps correlated <code>OV5647</code> frames on request, grounds what it sees in the room, and answers in one Standing Persona voice while <code>Body Control</code> holds the live session.</figcaption>
+</figure>
+
+The bridge connects Ainekio OS to the robot's **Host Gateway** ([gateway guide](/posts/gateway-and-simulator/)) across whichever link is active—local workstation loopback, home Wi-Fi LAN, an edge `Radxa Dragon Q6A` board, an SSH tunnel, or an optional remote tunnel.
+
+- **Single authoritative stream**: Multi-host connection following keeps one active observation and action session pinned to the physical robot (supporting both the 12-servo `ESP32-P4` V2 body and the active 8-servo `ESP32-S3` V1 body) so switching between bench and living-room hosts never spawns duplicate command streams.
+- **Instant operator override**: A top-bar switch in the Body Control workbench and Cockpit HUD pauses or resumes Ainekio OS control immediately without dropping telemetry or manual teleoperation.
+
+## Upward flow: how sensory data and telemetry enter Ainekio OS
+
+Not every hardware reading should trigger a language-model call. The bridge separates high-rate background telemetry from discrete events that warrant cognitive attention:
+
+| Upward Signal | Source on V2 Body & Gateway | How Ainekio OS Consumes It |
+| --- | --- | --- |
+| **Live Robot Status** | `208 Hz` `LSM6DS3` attitude, active posture, and 12-channel `CD74HC4067` (`C4–C15` via `GPIO27–30` → `GPIO49`) servo tracking & `I²t` thermal health (`battery_available = false` on V2; `2S` battery ADC telemetry is V1-only) | Updates live context quietly in the background without firing redundant conversational turns |
+| **Voice Transcripts** | **`microWakeWord` + 5-mode WebRTC VAD** (or Cockpit `Tap to Talk`) `16 kHz` audio from the `ES8311` codec with System 3's motor-silent `NeuralPosePresence` listening gate, transcribed by Whisper ([voice guide](/posts/voice-loop/)) | Enters the embodied workflow as an attributed spoken turn, optionally paired with a camera still taken at utterance end |
+| **Correlated Camera Snapshots** | Chin-mounted `OV5647` MIPI-CSI stills (explicit captures, post-motion verification frames, or tracked object crops; [vision guide](/posts/vision-loop/)) | Tagged with the exact `action_id`, `command_sequence_id`, or `utterance_id` so vision grounding knows *when* and *why* the frame was captured |
+| **Spatial & Obstacle Metrics** | Cockpit HUD optical-flow + `< 0.30 m` `MoGe-2` `8×8` corridor range, 8-sector (`8×45°`) spatial curiosity map, Apache-2.0 `RT-DETRv2 + OWLv2` boxes, and SIFT/depth odometry | Supplies measured forward progress, heading change, and approach clearance during locomotion goals and System 1 Embodied Curiosity |
+| **Body-Contact Events** | Thresholded `tipped`, `shaken`, hardware thermal-cutoff `servo_stall` (`outputs_released: true`), and `boot` events from the IMU and 4th-wire servo wipers | Routes sudden jostles to the fast body-reflex workflow, and routes `boot` / wake transitions to full contextual orientation |
+
+## Downward flow: how cognitive intents become robot actions
+
+When an observation enters Ainekio OS's embodied workflow, four distinct cognitive roles split the work so outward speech stays natural and physical actions stay bounded:
+
+1. **Intent Orchestration (`v26` Intent LoRA)**: Classifies whether incoming input is a new request, a mid-walk adjustment, a cancellation, or pure conversation, and decides whether a spoken reply is appropriate (`v26` Intent/Task specialist training spans **`661` curated source cases / `2,941` dev records**).
+2. **Task Selection (`v26` Task LoRA)**: Picks concrete, schema-validated robot intents—named postures or gaits (`Stand`, `Walk`, `Run`, `Crawl`, `Crab`, or 23 gestures), measured locomotion goals (distance, turn angle, visual approach/follow using on-chip `50 Hz` `MicroDuck v19-snag-p4` or analytical gaits), **Freestyle** 12-DOF target programs synthesized from the **`939`-row** clean `Qwen3.5-0.8B` choreography library and tracked closed-loop at **`50 Hz` by `neural-pose-v8-calibrated`**, explicit camera snapshots, or background coding delegations—without injecting robotic step-by-step narration between movements.
+3. **Goal Review & `5.5 s` Locomotion Progress Window**: Inspects the returned hardware action receipt, shaft-arrival telemetry, and post-motion camera frame before marking a multi-step physical objective complete or selecting a follow-up step. `trackLocomotionProgress()` uses a **`5.5 s` locomotion no-progress window** (`stalledSamples ≥ 4 && elapsedMs ≥ 5,500`) so `MicroDuck`'s `1.8 s` snag detection + `1.8 s` reverse unsnag + forward re-attempt completes cleanly before flagging a blocked path.
+4. **Outward Expression, `50 Hz` `NeuralPosePresence` & `environment.text_stream`**: Synthesizes the single conversational reply in Ainekio's voice, pairs it with **59 animated expressions** on the `1.9"` `ST7789` LCD and **System 3 (`50 Hz` `NeuralPosePresence`)** pure sagittal speech nods (`±2.5 mm` Z, `±4.5°` pitch, `0.0°` shoulder scrub), streams paced Kokoro or Piper audio to the `NS4150B` speaker (`800 ms` self-speech suppression), and projects live workflow & Big Brother replies across **7 cognitive graphs** over **`environment.text_stream`** (`Body Control Text Out`) directly into the [Ainekio Cockpit HUD](/posts/ainekio-cockpit/) without claiming a `bodyLease`.
+
+## Fast body-contact reflexes vs. durable multi-step tasks
+
+Physical contact and multi-step errands operate on very different timescales, so the bridge gives each its own execution path:
+
+- **Sub-second jostle & stall reflexes**: When the `ESP32-P4` reports that Ainekio was tipped, shaken, or stalled against a rug seam, the event routes to a lightweight single-call reflex workflow rather than full task planning. To keep reactions fresh when someone picks the robot up repeatedly, the reflex prompt includes the **last 6 body-event remarks** with diversity penalties, emitting a matching LCD reaction face and a dry, non-repetitive comment without derailing an in-progress goal.
+- **Crash-safe receipts across Wi-Fi drops**: Multi-step tasks (such as standing up, walking across a room, snapping a verification photo, and reporting back) suspend cleanly in SQLite while the body moves. Before dispatching any command over `protocol-v1` ([protocol guide](/posts/protocol-and-safety/)), the gateway adapter records its action ID, payload hash, connection epoch, and sequence number. Every command settles to an explicit terminal state (`done`, `cancelled`, `nak`, or `outcome_unknown` if Wi-Fi drops mid-move), ensuring that reconnect recovery **never blindly replays a physical movement twice**.
+
+## Related guides
+
+- **[Ainekio OS Architecture](/posts/ainekio-os/)**: Full reference for Standing Persona, cognitive graphs, SQLite durability, local/hybrid model routing, and the `02:00` sleep cycle.
+- **[Bounded Autonomy Modes](/posts/bounded-autonomy/)**: How Reactive, Semi Mode, and Full Auto govern self-initiated robot behavior and hardware safety boundaries.
+- **[Gateway, Cockpit HUD & Simulator](/posts/gateway-and-simulator/)** · **[Protocol, Telemetry & Safety](/posts/protocol-and-safety/)**.

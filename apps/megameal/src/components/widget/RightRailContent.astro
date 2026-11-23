@@ -1,0 +1,12 @@
+---
+import FactsWidget from './FactsWidget.astro'
+
+const { isHomePage = false } = Astro.props
+---
+
+{!isHomePage && (
+  <FactsWidget
+    class="onload-animation"
+    style="animation-delay: 200ms"
+  />
+)}

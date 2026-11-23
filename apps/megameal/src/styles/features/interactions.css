@@ -1,0 +1,287 @@
+/* ============================================================
+   PROFILE WIDGET — hide on home page with smooth transition
+   (data-is-home is set on #main-panel-wrapper by blog-core)
+   ============================================================ */
+
+[data-is-home="true"] .mobile-support-profile-group {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  transition: max-height 0.5s ease, opacity 0.4s ease, margin 0.4s ease;
+}
+
+[data-is-home="false"] .mobile-support-profile-group {
+  max-height: 500px;
+  opacity: 1;
+  transition: max-height 0.5s ease, opacity 0.4s ease;
+}
+
+/* ============================================================
+   CARD SURFACES — separate static panels from interactive cards.
+   ============================================================ */
+
+.card-base {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.3s ease,
+              border-color 0.3s ease,
+              background 0.3s ease !important;
+}
+
+.card-base:is(
+  .btn-card,
+  .card-base-interactive,
+  .product-card,
+  a,
+  button,
+  [role='button'],
+  [role='link'],
+  [data-card-interactive='true']
+):hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 0 0 1px oklch(0.55 0.2 var(--hue) / 0.45),
+    0 0 22px oklch(0.55 0.2 var(--hue) / 0.14),
+    0 10px 32px rgba(0, 0, 0, 0.32);
+}
+
+.megameal-surface {
+  --megameal-surface-border: oklch(0.36 0.05 var(--hue) / 0.34);
+  --megameal-surface-hover-border: oklch(0.58 0.12 var(--hue) / 0.46);
+  --megameal-surface-bg:
+    radial-gradient(circle at top left, oklch(0.52 0.11 var(--hue) / 0.12), transparent 30%),
+    linear-gradient(180deg, oklch(0.16 0.03 var(--hue) / 0.72), oklch(0.13 0.03 var(--hue) / 0.62));
+  --megameal-surface-filter: blur(18px) saturate(1.1);
+  --megameal-surface-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --megameal-surface-hover-shadow:
+    0 0 0 1px oklch(0.58 0.12 var(--hue) / 0.24),
+    0 22px 44px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --megameal-surface-sheen:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.06), transparent 34%),
+    linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.03));
+  position: relative;
+  isolation: isolate;
+  border: 1px solid var(--megameal-surface-border);
+  background: var(--megameal-surface-bg);
+  backdrop-filter: var(--megameal-surface-filter);
+  box-shadow: var(--megameal-surface-shadow);
+}
+
+.megameal-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--megameal-surface-sheen);
+  opacity: 0.8;
+}
+
+.megameal-surface > * {
+  position: relative;
+  z-index: 1;
+}
+
+.megameal-surface--interactive {
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.32s ease,
+    border-color 0.32s ease,
+    background 0.32s ease !important;
+}
+
+.megameal-surface--interactive:hover {
+  transform: translateY(-4px);
+  border-color: var(--megameal-surface-hover-border);
+  box-shadow: var(--megameal-surface-hover-shadow);
+}
+
+.timeline-card.card-base,
+.timeline-card.card-base:hover {
+  transform: none !important;
+}
+
+.timeline-card.card-base {
+  backdrop-filter: blur(10px) saturate(1.12);
+  transition: opacity 0.35s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+
+.timeline-card.card-base:hover {
+  box-shadow:
+    0 0 0 1px oklch(0.62 0.16 var(--hue) / 0.42),
+    0 14px 32px rgba(0, 0, 0, 0.25);
+}
+
+/* ============================================================
+   MEGAMEAL ROUTE TRANSITIONS
+   Shared opt-in route overlay for portal-style navigation.
+   ============================================================ */
+
+.megameal-route-transition {
+  --megameal-route-left: 50vw;
+  --megameal-route-top: 42vh;
+  --megameal-route-width: 40vw;
+  --megameal-route-height: 22.5vw;
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 220ms ease, visibility 0s linear 220ms;
+}
+
+html.megameal-route-transition-active .megameal-route-transition {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.megameal-route-transition__frame {
+  position: fixed;
+  left: var(--megameal-route-left);
+  top: var(--megameal-route-top);
+  width: var(--megameal-route-width);
+  height: var(--megameal-route-height);
+  overflow: hidden;
+  border-radius: 1.1rem;
+  background:
+    radial-gradient(circle at 50% 42%, rgb(59 130 246 / 0.24), transparent 58%),
+    rgb(2 6 23);
+  background-position: center;
+  background-size: cover;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.18),
+    0 28px 86px rgb(0 0 0 / 0.45);
+  transform: translateZ(0);
+  transition:
+    left 620ms cubic-bezier(0.2, 0.84, 0.24, 1),
+    top 620ms cubic-bezier(0.2, 0.84, 0.24, 1),
+    width 620ms cubic-bezier(0.2, 0.84, 0.24, 1),
+    height 620ms cubic-bezier(0.2, 0.84, 0.24, 1),
+    border-radius 540ms ease,
+    opacity 420ms ease,
+    filter 540ms ease;
+}
+
+.megameal-route-transition__frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 42%, rgb(0 0 0 / 0.34) 74%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.08), rgb(0 0 0 / 0.2));
+  opacity: 0.8;
+}
+
+.megameal-route-transition__shade {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0);
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+.megameal-route-transition[data-state="entering"] .megameal-route-transition__frame {
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  filter: saturate(1.08) brightness(0.88);
+}
+
+.megameal-route-transition[data-state="entering"] .megameal-route-transition__shade,
+.megameal-route-transition[data-state="arrived"] .megameal-route-transition__shade {
+  opacity: 1;
+}
+
+.megameal-route-transition[data-state="revealing"] {
+  opacity: 0;
+  transition: opacity 680ms ease;
+}
+
+.megameal-route-transition[data-state="revealing"] .megameal-route-transition__frame {
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .megameal-route-transition,
+  .megameal-route-transition__frame,
+  .megameal-route-transition__shade {
+    transition: none;
+  }
+}
+
+/* ============================================================
+   POSTCARD — image zoom on card hover
+   ============================================================ */
+
+.postcard-image {
+  transition: transform 0.45s ease;
+}
+
+.postcard-shell:hover .postcard-image {
+  transform: scale(1.06);
+}
+
+/* ============================================================
+   SIDEBAR WIDGETS — subtle hover enhancement
+   ============================================================ */
+
+/* Fact/lore widget card glow */
+.card-base .info-card:hover,
+.card-base:has(.info-card):hover {
+  /* card-base hover already handles the outer glow */
+}
+
+/* ============================================================
+   FORMAT BADGES — subtle pulse on hover
+   ============================================================ */
+
+.format-badge {
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.format-badge:hover {
+  transform: scale(1.05);
+}
+
+/* ============================================================
+   SERIES INDICATOR — highlight on hover
+   ============================================================ */
+
+.series-indicator {
+  transition: color 0.2s ease;
+}
+
+/* ============================================================
+   DISPATCHES HEADER — accent line animation
+   ============================================================ */
+
+.dispatches-header {
+  position: relative;
+}
+
+.dispatches-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: oklch(0.6 0.2 var(--hue));
+  transition: width 0.6s ease;
+}
+
+.dispatches-header.is-visible::after {
+  width: 6rem;
+}

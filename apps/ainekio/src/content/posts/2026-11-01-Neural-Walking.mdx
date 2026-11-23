@@ -1,0 +1,115 @@
+---
+title: "DAgger Neural Walking, Completed Body Prototype STLs, and Unified Environment Bridge"
+published: 2026-11-01
+updated: 2026-11-01
+description: "Training a 5-command neural gait policy via DAgger in simulation, replaying through Body Control and the native P4 executor, releasing the 12 completed body prototype STLs, and unifying MetaHuman's Environment Bridge."
+image: "/gallery/neural-walking-20261030-poster.webp"
+authorName: "Ainekio Project"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V2, Gait, Training, Simulation, Blender, 3D Printing, MetaHuman OS]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: legs
+  generation: v2
+  kind: journal
+  next: 2026-11-06-carpet-trials-rl-and-big-brother
+  related: ["gait-development", "ainekio-v2", "metahuman-integration"]
+---
+
+With the physical V2 body prototype complete, this week's focus shifted to training a
+command-responsive **neural walking policy** on the exported Blender geometry,
+benchmarking the transfer gap between direct physics simulation and the full Body
+Control + native P4 executor pipeline, packaging the final 12 exterior/power STL
+exports, and consolidating MetaHuman OS onto a single **Environment Bridge**.
+
+<figure>
+  <video controls playsInline preload="metadata" width="1280" height="720" poster="/gallery/neural-walking-20261030-poster.webp" aria-describedby="neural-walking-caption" className="w-full rounded-xl">
+    <source src="/gallery/neural-walking-20261030.mp4" type="video/mp4" />
+  </video>
+  <figcaption id="neural-walking-caption">October 30 simulation comparison: initial vs selected forward walking trials (16 seconds each) after 360,000 DAgger imitation updates.</figcaption>
+</figure>
+
+## DAgger imitation learning on the 650 g Blender assembly
+
+The simulation imports the **650 g** Blender assembly, articulated **35 / 20 / 28 /
+38 / 55 mm** four-bar linkages, and boot collision meshes. Rather than predicting raw
+coupled servo angles (which caused 100/100 geometric linkage rejections in an early
+direct-joint experiment), the neural policy outputs **standing-relative Cartesian foot
+offsets**, which the native inverse-kinematics solver converts into valid twelve-joint
+targets.
+
+Using **DAgger (Dataset Aggregation)** across 360,000 updates—rolling out the learner,
+labeling the states it actually visits with the teacher demonstration's next action,
+and annealing teacher intervention to zero—produced our first unified neural gait policy
+(`walk_nominal_v1`) covering **five commands**: forward, two reverse speeds, left turn,
+and right turn.
+
+### Direct simulation vs Body Control + native P4 executor replay
+
+On November 1, we replayed the selected 360k checkpoint across 16-second trials comparing
+direct simulation against the full **Body Control WebSocket + native P4 executor**
+loop:
+
+| Command | Target velocity | Direct simulation | Body Control + P4 executor |
+| --- | ---: | ---: | ---: |
+| **Forward** | `+80.0 mm/s` | `+27.82 mm/s` | `+22.45 mm/s` |
+| **Reverse** | `−20.0 mm/s` | `−22.20 mm/s` | `−20.55 mm/s` |
+| **Slower reverse** | `−15.0 mm/s` | `−18.28 mm/s` | `−13.48 mm/s` |
+| **Left turn** | `+0.120 rad/s` | `+0.128 rad/s` | `+0.021 rad/s` |
+| **Right turn** | `−0.120 rad/s` | `−0.148 rad/s` | `−0.113 rad/s` |
+
+Neither path fell or rejected a target, but running through the real command/executor
+transport exposed a sharp drop in left-turn authority (`+0.128 → +0.021 rad/s`) and a
+~19% drop in forward speed (`+27.82 → +22.45 mm/s`). Tracing the adapter uncovered two
+concrete causes—fractional command rounding (truncating `−18.75%` to `−19%`) and
+checkpoint evaluation state carryover—both of which are now fixed as we run a 55,000-update
+connected DAgger continuation directly through Body Control.
+
+| Training experiment | Outcome | Engineering takeaway |
+| --- | --- | --- |
+| Higher-quality forward teacher (60 s trial) | `16.40 → 20.96 mm/s` | Teacher trajectory quality directly lifts learner speed |
+| 5-command DAgger aggregation | Forward, 2× reverse, left/right turn | Single policy handles full planar command set without falling |
+| Warm-started SAC after imitation | Degraded gait even at reduced LR | Untrained SAC critic perturbs the imitation actor before value estimates converge |
+| Early PPO velocity reward | High reward with near-zero travel | Rewarded standing still; replaced with coupled linear/yaw tracking + bounded swing credit |
+
+Download the [5-command comparison JSON](/posts/2026-11-01-progress/gait-comparison.json)
+and see the [gait development guide](/posts/gait-development/) for the broader locomotion
+roadmap.
+
+## Body prototype complete: 12 final face, servo-cover, and power STLs
+
+The 650 g mechanical body prototype is now wrapped up, with 12 updated October 27–29 STL
+exports covering the recessed display bezel, split face panels, lower MG90S servo
+bracket, and combined underside battery and power cradle:
+
+<figure>
+  <img src="/posts/2026-11-01-progress/printed-parts.webp" alt="Render of the twelve exported STL parts for Ainekio's face, servo covers, and underside battery/power packaging." width="1400" height="900" loading="lazy" />
+  <figcaption>November 1 STL export set: LCD carrier, recessed bezel, front panel, chin halves, cheek fangs, side guards, MG90S lower housing, charger retainer, and combined battery floor/cradle.</figcaption>
+</figure>
+
+| Subassembly | Exported STL files (Oct 27–29) | Role in the 650 g prototype |
+| --- | --- | --- |
+| **Display & front end** | Black LCD carrier, recessed bezel, compact front-end panel | Mount and frame the 1.9-inch ST7789 display |
+| **Exterior face & guards** | Left/right chin, cheek fangs, left/right side guards | Multi-part angular mask and shoulder protection |
+| **Servo housing** | MG90S lower housing | Revised lower servo cover clearance |
+| **Power packaging** | Rear charger retainer; combined battery floor + power-module cradle | Package the 2S LiPo, Mini560 buck converter, and HiLetgo USB-C charger beneath the chassis |
+
+## Unifying the Environment Bridge and autonomy context training
+
+<figure>
+  <img src="/posts/2026-11-01-progress/body-connection.svg" alt="Diagram showing MetaHuman OS connecting through a single Environment Bridge to Body Control and the ESP32-P4." width="1000" height="560" loading="lazy" />
+  <figcaption>Local, SSH, and Cloudflare body connections now share one Environment Bridge between MetaHuman OS and Body Control.</figcaption>
+</figure>
+
+On the companion host, I folded the separate local and remote bridge paths into a single
+**Environment Bridge** that handles local bench links, SSH tunnels, and Cloudflare
+connections identically while handing Freestyle motion requests straight to Body Control.
+Fourth-wire servo fault and recovery notices now update the robot's health state quietly
+instead of interrupting conversation with unprompted chatter, `llama.cpp` cancels
+in-flight token generation immediately when a turn is superseded, and the Intent
+training set (`1,803` training / `485` evaluation / `46` regression examples) gained
+fresh autonomy scenarios spanning ongoing tasks, room activity, and internal desires.

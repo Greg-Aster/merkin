@@ -1,0 +1,298 @@
+.featured-product-panel,
+	.featured-product-related {
+		padding: 1rem 1.2rem;
+	}
+
+	.featured-product-panel__header,
+	.featured-product-related__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.featured-product-qanda,
+	.featured-product-reviews,
+	.featured-product-assurance,
+	.featured-product-ingredients {
+		display: grid;
+		gap: 0.9rem;
+	}
+
+	.featured-product-qanda article,
+	.featured-product-reviews article,
+	.featured-product-assurance article,
+	.featured-product-ingredients article {
+		padding: 1rem;
+		border: 1px solid rgb(148 163 184 / 0.12);
+		border-radius: 1rem;
+		background: rgb(15 23 42 / 0.54);
+	}
+
+	.featured-product-qanda h3,
+	.featured-product-ingredients h3,
+	.featured-product-review__header strong,
+	.featured-product-review__identity a {
+		margin: 0;
+		font-size: 1rem;
+	}
+
+	.featured-product-review__identity {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.featured-product-review__identity a {
+		color: rgb(248 250 252);
+		text-decoration: none;
+	}
+
+	.featured-product-review__identity a:hover {
+		color: rgb(196 181 253);
+	}
+
+	.featured-product-review__verified {
+		padding: 0.22rem 0.52rem;
+		border-radius: 999px;
+		background: rgb(14 116 144 / 0.24);
+		color: rgb(186 230 253);
+		font-size: 0.64rem;
+		font-weight: 800;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
+
+		.featured-product-qanda p,
+		.featured-product-reviews p,
+		.featured-product-assurance p {
+		margin: 0.55rem 0 0;
+		color: rgb(203 213 225 / 0.94);
+		line-height: 1.7;
+	}
+
+	.featured-product-ingredients ul {
+		margin: 0.8rem 0 0;
+		padding-left: 1.1rem;
+		color: rgb(203 213 225 / 0.94);
+		display: grid;
+		gap: 0.35rem;
+	}
+
+	.featured-product-ingredients li::marker {
+		color: rgb(148 163 184);
+	}
+
+	.featured-product-assurance strong {
+		color: rgb(186 230 253);
+		font-size: 0.72rem;
+		font-weight: 800;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+	}
+
+	.featured-product-review__header {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		color: rgb(148 163 184);
+		font-size: 0.8rem;
+	}
+
+	.featured-product-review__stars {
+		margin-top: 0.45rem;
+	}
+
+	.featured-product-inline-link {
+		display: inline-flex;
+		align-items: center;
+		margin-top: 0.75rem;
+		color: rgb(125 211 252);
+		font-size: 0.8rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		text-decoration: none;
+		text-transform: uppercase;
+	}
+
+	.featured-product-inline-link:hover {
+		color: rgb(186 230 253);
+	}
+
+	.featured-product-inline-link--creepy {
+		color: rgb(244 114 182);
+		text-shadow: 0 0 14px rgb(244 114 182 / 0.35);
+	}
+
+	.featured-product-review__flags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45rem;
+		margin-top: 0.85rem;
+	}
+
+	.featured-product-review__flags span {
+		padding: 0.24rem 0.5rem;
+		border: 1px solid rgb(244 114 182 / 0.18);
+		border-radius: 999px;
+		background: rgb(76 5 25 / 0.26);
+		color: rgb(253 164 175);
+		font-size: 0.62rem;
+		font-weight: 800;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+
+	@keyframes featured-product-refusal-shake {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		20% {
+			transform: translateX(-3px);
+		}
+		40% {
+			transform: translateX(4px);
+		}
+		60% {
+			transform: translateX(-5px);
+		}
+		80% {
+			transform: translateX(3px);
+		}
+	}
+
+	@keyframes featured-product-price-flicker {
+		0%,
+		100% {
+			opacity: 1;
+			transform: translateX(0);
+		}
+		25% {
+			opacity: 0.85;
+			transform: translateX(-1px);
+		}
+		50% {
+			opacity: 1;
+			transform: translateX(1px);
+		}
+		75% {
+			opacity: 0.72;
+			transform: translateX(0);
+		}
+	}
+
+	.featured-product-warnings {
+		gap: 0.7rem;
+	}
+
+	.featured-product-warnings article.featured-product-warning {
+		display: grid;
+		grid-template-columns: 64px 1fr;
+		gap: 0.85rem;
+		align-items: center;
+		padding: 0.65rem 0.85rem;
+		border-width: 2px;
+		border-style: solid;
+	}
+
+	.featured-product-warning__marker {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+		flex-shrink: 0;
+	}
+
+	.featured-product-warning__icon {
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.featured-product-warning__icon svg {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	.featured-product-warning__body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+		min-width: 0;
+	}
+
+	.featured-product-warning__kicker {
+		font-size: 0.55rem;
+		font-weight: 900;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		padding: 0.12rem 0.4rem;
+		border-radius: 0.2rem;
+		text-align: center;
+		line-height: 1;
+	}
+
+	.featured-product-warnings .featured-product-warning strong {
+		color: rgb(248 250 252);
+		font-size: 0.78rem;
+		letter-spacing: 0.08em;
+	}
+
+	.featured-product-warnings .featured-product-warning p {
+		margin: 0.3rem 0 0;
+	}
+
+	.featured-product-warning--prohibition {
+		background: rgb(127 29 29 / 0.2);
+		border-color: rgb(220 38 38 / 0.55);
+	}
+	.featured-product-warning--prohibition .featured-product-warning__icon {
+		color: rgb(248 113 113);
+	}
+	.featured-product-warning--prohibition .featured-product-warning__kicker {
+		background: rgb(220 38 38);
+		color: rgb(254 242 242);
+	}
+
+	.featured-product-warning--hazard {
+		background: rgb(124 45 18 / 0.24);
+		border-color: rgb(234 88 12 / 0.6);
+	}
+	.featured-product-warning--hazard .featured-product-warning__icon {
+		color: rgb(251 146 60);
+	}
+	.featured-product-warning--hazard .featured-product-warning__kicker {
+		background: rgb(234 88 12);
+		color: rgb(255 247 237);
+	}
+
+	.featured-product-warning--caution {
+		background: rgb(113 63 18 / 0.28);
+		border-color: rgb(234 179 8 / 0.6);
+	}
+	.featured-product-warning--caution .featured-product-warning__icon {
+		color: rgb(250 204 21);
+	}
+	.featured-product-warning--caution .featured-product-warning__kicker {
+		background: rgb(234 179 8);
+		color: rgb(20 16 0);
+	}
+
+	.featured-product-warning--notice {
+		background: rgb(30 64 175 / 0.2);
+		border-color: rgb(59 130 246 / 0.55);
+	}
+	.featured-product-warning--notice .featured-product-warning__icon {
+		color: rgb(96 165 250);
+	}
+	.featured-product-warning--notice .featured-product-warning__kicker {
+		background: rgb(59 130 246);
+		color: rgb(239 246 255);
+	}

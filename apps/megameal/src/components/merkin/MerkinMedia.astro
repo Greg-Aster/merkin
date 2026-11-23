@@ -1,0 +1,42 @@
+---
+import type { MerkinMedia } from '../../utils/merkin-gallery'
+import { resolveMerkinAsset } from '../../utils/merkin-gallery'
+
+interface Props {
+  media: MerkinMedia
+  class?: string
+  loading?: 'eager' | 'lazy'
+}
+
+const { media, class: className = '', loading = 'lazy' } = Astro.props
+const src = resolveMerkinAsset(media.src)
+const poster = media.poster ? resolveMerkinAsset(media.poster) : undefined
+---
+
+{
+  media.type === 'video' ? (
+    <video
+      src={src}
+      poster={poster}
+      controls
+      playsinline
+      preload="metadata"
+      class:list={[
+        'h-full w-full bg-black object-contain',
+        className,
+      ]}
+      aria-label={media.alt}
+    />
+  ) : (
+    <img
+      src={src}
+      alt={media.alt}
+      loading={loading}
+      decoding="async"
+      class:list={[
+        'h-full w-full object-contain',
+        className,
+      ]}
+    />
+  )
+}

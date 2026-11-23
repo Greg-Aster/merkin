@@ -1,0 +1,162 @@
+---
+title: "MEGA MEAL Movie Review"
+published: 2026-05-04
+description: "A theater-mode review of MEGA MEAL, the fast-food cyberpunk movie from 2066 that should not be taken with water."
+videoId: "4tR6VLaYJFA"
+channelName: "Corporate Media Division"
+image: "/posts/Mega-Meal-Explained/mme-title.jpg"
+tags: [MEGA MEAL, Trailer, Video Essay, Corporate Media]
+category: "MEGA MEAL"
+draft: false
+showInTimeline: true
+timelineYear: 3.39e4
+timelineEra: "golden-age"
+timelineLocation: "Corporate Media Sector, Galactic Core"
+isKeyEvent: true
+related:
+  - title: "A MEGA MEAL SAGA | Qarnivor"
+    href: "/videos/qarnivor-snuggloid-emergence/"
+    eyebrow: "Next Video"
+    image: "/posts/Mega-Meal-3/title-2.jpg"
+  - title: "The Corporate Empire"
+    href: "/posts/timelines/corporate-empire/"
+    eyebrow: "Universe Context"
+    image: "/posts/Mega-Meal-Explained/ultra-headquarters.png"
+  - title: "The Timeline"
+    href: "/timeline/"
+    eyebrow: "Universe Context"
+    image: "/posts/timeline/universe.png"
+---
+
+import AnimatedMedia from '../../components/misc/AnimatedMedia.astro'
+import ImageWrapper from '../../components/misc/ImageWrapper.astro'
+import MegaMealReviewSlider from '../../components/MegaMealReviewSlider.astro'
+import KiddieMode from '../../components/review-modes/megameal-explained/kiddie.mdx'
+import LargeMode from '../../components/review-modes/megameal-explained/large.mdx'
+import MegaMode from '../../components/review-modes/megameal-explained/mega.mdx'
+import CosmicMode from '../../components/review-modes/megameal-explained/cosmic.mdx'
+import HorrorMode from '../../components/review-modes/megameal-explained/horror.mdx'
+
+<section className="card-base2 overflow-hidden rounded-2xl p-0">
+  <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
+    <div className="p-5 md:p-7">
+      <div className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-[var(--primary)]">
+        {'Transmission Brief'}
+      </div>
+      <h2 className="mb-4 text-2xl font-black leading-tight text-black/90 dark:text-white/90 md:text-3xl">
+        {'A movie from 2066 that was not built for normal digestion.'}
+      </h2>
+      <p className="mb-4 text-base leading-relaxed text-black/70 dark:text-white/70 md:text-lg">
+        {`MEGA MEAL is fast-food capitalism staged as cyberpunk melodrama, then deep-fried until the mascot universe starts leaking through the bag. Cheesy? Yes. Self-aware? Absolutely. Meal-messy and questionable? That too. But oddly satisfying if you are in the right headspace.`}
+      </p>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-xl border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.04]">
+          <div className="text-xs font-bold uppercase tracking-[0.14em] text-black/45 dark:text-white/45">
+            {'Format'}
+          </div>
+          <div className="mt-1 font-bold text-black/85 dark:text-white/85">
+            {'Movie review'}
+          </div>
+        </div>
+        <div className="rounded-xl border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.04]">
+          <div className="text-xs font-bold uppercase tracking-[0.14em] text-black/45 dark:text-white/45">
+            {'Setting'}
+          </div>
+          <div className="mt-1 font-bold text-black/85 dark:text-white/85">
+            {'Corporate dystopia'}
+          </div>
+        </div>
+        <div className="rounded-xl border border-black/10 bg-black/[0.03] p-3 dark:border-white/10 dark:bg-white/[0.04]">
+          <div className="text-xs font-bold uppercase tracking-[0.14em] text-black/45 dark:text-white/45">
+            {'Promise'}
+          </div>
+          <div className="mt-1 font-bold text-black/85 dark:text-white/85">
+            {'Release 2066'}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div className="relative min-h-[18rem] overflow-hidden bg-black">
+      <video
+        className="absolute inset-0 h-full w-full object-cover"
+        src="/posts/Mega-Meal-Explained/gif/logo3.webm"
+        poster="/posts/Mega-Meal-Explained/gif/logo3-poster.webp"
+        autoplay
+        muted
+        loop
+        playsInline
+      />
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent p-5">
+        <div className="text-xs font-bold uppercase tracking-[0.18em] text-white/55">
+          {'Signal Identity'}
+        </div>
+        <div className="mt-1 text-xl font-black text-white">
+          {'MEGA MEAL'}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<MegaMealReviewSlider defaultMode="kiddie" storageKey="megameal-review-mode-v2" />
+
+<div data-review-container data-review-mode="kiddie">
+  <div className="review-mode-section" data-modes="kiddie">
+    <KiddieMode />
+  </div>
+  <div className="review-mode-section" data-modes="large">
+    <LargeMode />
+  </div>
+  <div className="review-mode-section" data-modes="mega">
+    <MegaMode />
+  </div>
+  <div className="review-mode-section" data-modes="cosmic">
+    <CosmicMode />
+  </div>
+  <div className="review-mode-section" data-modes="horror">
+    <HorrorMode />
+  </div>
+</div>
+
+<section className="grid gap-4 md:grid-cols-2">
+  <a
+      href="/videos/qarnivor-snuggloid-emergence/"
+    className="card-base btn-card rounded-2xl p-4 transition"
+    data-sfx-hover="hover-soft"
+    data-sfx-click="soft"
+  >
+    <AnimatedMedia
+      webmSrc="/posts/Mega-Meal-Explained/gif/fries1.webm"
+      poster="/posts/Mega-Meal-Explained/gif/fries1-poster.webp"
+      fallbackSrc="/posts/Mega-Meal-Explained/gif/fries1-poster.webp"
+      alt="Animated fries"
+      class="mb-4 aspect-video rounded-xl"
+    />
+    <div className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
+      {''}
+    </div>
+    <div className="ml-6 mt-1 text-lg font-black text-black/85 dark:text-white/85">
+      {'Follow the next MEGA MEAL signal'}
+    </div>
+  </a>
+  <a
+    href="/posts/timelines/corporate-empire/"
+    className="card-base btn-card rounded-2xl p-4 transition"
+    data-sfx-hover="hover-soft"
+    data-sfx-click="soft"
+  >
+    <AnimatedMedia
+      webmSrc="/posts/Mega-Meal-Explained/gif/orings1.webm"
+      poster="/posts/Mega-Meal-Explained/gif/orings1-poster.webp"
+      fallbackSrc="/posts/Mega-Meal-Explained/gif/orings1-poster.webp"
+      alt="Animated onion rings"
+      class="mb-4 aspect-video rounded-xl"
+    />
+    <div className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
+      {' '}
+    </div>
+    <div className="ml-6 mt-1 text-lg font-black text-black/85 dark:text-white/85">
+      {'Open the corporate empire file'}
+    </div>
+  </a>
+</section>

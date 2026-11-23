@@ -1,0 +1,115 @@
+---
+title: "7-Layer Phantom-Jam Resolution & Per-Joint I²t Servo Winding Thermal Fuse"
+published: 2026-11-16T10:00:00-08:00
+updated: 2026-11-20
+description: "How Ainekio V2 prevents micro-servo burnout while eliminating false carpet-swing jams and competing recovery loops: the 7-layer phantom-jam fix across ESP32-P4 C firmware and NeuralPose v8, 1.8 s walking reverse unsnag, [1..4094] ADC stall sensing, and an 8–10 s per-joint I²t thermal fuse."
+image: "/posts/2026-11-16-progress/jam-protection-and-thermal-fuse.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, Safety, Servo Feedback, Jam Protection, Thermal Fuse, ESP32-P4, PCA9685, Firmware, NeuralPose]
+category: "Robot Runtime"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: control
+  generation: v2
+  kind: reference
+  next: gateway-and-simulator
+  related: ["three-system-neural-architecture", "ainekio-cockpit", "gateway-and-simulator", "2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim"]
+---
+
+At `5.0 V`, a stalled `MG90S` micro servo draws `700–850 mA` (`3.5–4.25 W`) into a tiny brushed coreless/iron-core rotor with almost zero thermal mass—driving an adiabatic copper-winding temperature rise of **`~2.5–2.8 °C/s`**. During bench testing, a single blocked joint (`rear_left_shoulder`) pushed against a mechanical stop outside its nominal `[500, 2800] µs` interior calibration span while waiting on an unbounded arrival checkpoint, cooking the winding over `~156 s`. Conversely, cutting global `PCA9685 OE` power the instant any foot brushes a chair leg would make the robot collapse onto its belly on every minor snag—and overly sensitive software recoil heuristics falsely clamp fast loaded swings on deep carpet.
+
+To solve both sides cleanly, Ainekio V2 combines an **`8–10 s` hardware-enforced per-joint `I²t` winding thermal fuse** on `ESP32-P4` (`servo_feedback_model.c`, `servo_feedback_position.c`, `body.c`) with the **November 20, 2026 7-layer phantom-jam resolution** ([Milestone #20](/posts/2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim/)) across **`NeuralPose v8` (`neural-pose-v8-calibrated`)**, **`50 Hz` `NeuralPosePresence`**, and the Host Gateway—eliminating false leg jams, inverted-carrier over-retraction, and competing recovery loops while keeping genuine locked-rotor protection 100% intact.
+
+<figure className="my-6">
+  <video controls playsinline preload="none" width="1280" height="720" poster="/gallery/v2-jam-protection-test-poster.webp" className="w-full rounded-xl">
+    <source src="/gallery/v2-jam-protection-test.mp4" type="video/mp4" />
+    <a href="/gallery/v2-jam-protection-test.mp4">Download physical V2 floor jam-detection and winding-protection test video.</a>
+  </video>
+  <figcaption>Physical floor jam and compliance check on Ainekio V2: the robot boots, rises to <code>Stand</code>, greets the room, catches a stalled joint during its stretch, measures shaft tracking lag via 4th-wire potentiometer feedback, protects the servo winding without collapsing healthy legs, and asks for help.</figcaption>
+</figure>
+
+---
+
+<figure className="my-6">
+  <img src="/posts/2026-11-16-progress/cap-test-strip-jam.webp" alt="Eight-frame annotated sequence of physical Ainekio V2 on carpet booting, standing, greeting, detecting a stalled joint during stretch via 4th-wire feedback, protecting the winding, and asking for help." width="1440" height="810" loading="lazy" />
+  <figcaption>Step-by-step physical floor trace from the capability test above: <code>Boot → Stand → Greet &amp; observe → Stretch → Stall detected via 4th-wire wiper lag → Winding protected &amp; verbal fault report</code>.</figcaption>
+</figure>
+
+## 1. Three-day phantom leg-jam investigation & 7-layer resolution
+
+Between November 18 and November 20, 2026, live carpet runs exposed an insidious failure cluster: during fast posture swings, wave transitions, and carpet stance recovery, legs occasionally froze crooked mid-air, retracted carriers past calibration, or triggered competing host-versus-firmware recovery loops even when no external obstacle was present. Tracing every event from the 12-bit `CD74HC4067` mux up to the `:8794` Freestyle bridge isolated **seven interacting root causes**—all resolved without weakening the hardware `I²t` fuse:
+
+1. **Streaming reversal high-water unlock (`servo_feedback_position.c`):** During cyclic `50 Hz` direction reversals, high-water progress tracking could latch a stale peak across clipped or extrapolated samples. `ainekio_p4_feedback_stalled()` now enforces an **`80 µs` deadband**, resets on **`80 µs/s` directional slewing**, unlocks on **`25 µs` target shifts**, and **ignores clipped or extrapolated ADC samples** when evaluating streaming reversal progress (while full-span `[1..4094]` thermal protection stays active in `servo_feedback_model.c`).
+2. **Firmware `stand_hold_recover` active-leveling guard & bounded replans (`body.c`):** Previously, continuous `208 Hz` `LSM6DS3` IMU balance trims could masquerade as posture drift and false-trigger `MOTION_POSE` recovery steps, or wait forever on an obstructed foot. Firmware now gates `stand_hold_recover()` behind **`!actively_leveling`**, caps unloaded stepping at **`STAND_MAX_REPLANS = 2`**, and enforces a **`0.8 s` (`ARRIVAL_WAIT_TIMEOUT_US = 800,000`)** checkpoint escape across `MOTION_FREESTYLE`, `MOTION_CLIP`, and `Stand` so limbs never freeze crooked mid-air (while inactivity `lay_down` always reaches `PCA9685 OE = 1`).
+3. **Single posture-recovery owner (`_sync_neural_pose_servo_feedback`):** Running firmware `stand_hold_recover()` simultaneously beneath `50 Hz` host `NeuralPose` created two competing posture controllers fighting over the same 12 servos. Whenever `NeuralPose` owns the body, `_sync_neural_pose_servo_feedback` sets **`stand_enabled: false`** on firmware while keeping `50 Hz` 4th-wire telemetry and **`jam_enabled: true` (`I²t` thermal fuse)** active.
+4. **Removed hardcoded Python `280 ms` `_detect_stalled_recoils` & added `mid_step_active` stance settling (`executor.py`):** The earlier `280 ms` (`14`-tick) Python recoil heuristic could not distinguish a genuinely blocked paw from transient `MG90S` tracking lag during a fast loaded swing—falsely clamping joints mid-gesture. `_detect_stalled_recoils` was deleted in favor of `NeuralPose v8`'s learned carpet-relock compliance plus **`mid_step_active` terminal stance settling**, which holds episode completion until stance error settles **`<= 5.5°`** and shoulder error settles **`<= 3.5°`** (safely inside the `7.0°` zero-heat thermal deadband).
+5. **Eliminated `above_calibration` inverted-carrier over-retraction (`goals.py`):** Aggressive `~61 mm` vertical step lifts drove upper carriers past their `-30.87°` Home stop into the inverted `above_calibration` zone, looking identical to a mechanical jam. Setting **`PoseManifold.CARRIER_HOME_MARGIN_DEG = 3.0`** clamps the carrier floor **`>= -27.87°`** (`3.0°` safely inside `-30.87°` Home) and right-sizes carpet step lift from `~61 mm` to **`18–20 mm`**—achieving **`above_calibration_mask = 0`** and **`stalled_joints = 0`** on live hardware.
+6. **Retired event-driven `0.8B` LLM stall/tip replanning (`library_recovery.py`):** Event-driven LLM recovery synthesis (`library_recovery.py`) was retired and **`828` synthetic recovery rows were pruned** from the Freestyle motion library (`1,767 → 939` clean choreography rows). `Bridge` now interrupts active motion jobs **only** when firmware reports a genuine hardware `I²t` thermal cutoff (**`outputs_released: true`**).
+7. **Replaced legacy `20 Hz` `Master/gateway/presence/` with `50 Hz` `NeuralPosePresence` (`experiments/freestyle/neural_pose/presence.py`):** The older `20 Hz` presence loop issued `stop` on `vad_open` (which could cut off microphone capture timing) and applied nonzero lateral shoulder residuals that scrubbed feet sideways into carpet pile. `50 Hz` `NeuralPosePresence` stays **motor-silent during `vad_open` / wake-word** without issuing `stop`, and during speech drives **pure sagittal nods (`±2.5 mm` Z, `±4.5°` pitch) with `0.0°` shoulder targets** (zero lateral carpet scrub).
+
+---
+
+## 2. System 1 walking unsnag (`1.8 s`) & full-span `[1..4094]` ADC stall sensing
+
+### Autonomous `1.8 s` reverse unsnag during forward locomotion
+
+When a foot hooks under a power cord or raised rug transition during forward walking (`cmd_twist[0] > 0.05 m/s`), both clean-room `MicroDuck` locomotion owners execute a symmetric **autonomous reverse-unsnag reflex**:
+
+- **On-chip `ESP32-P4` (`Slave/firmware/esp32p4-wifi6/main/body.c`):** Integrates per-joint snag duration whenever `|err_cd| > 1400.0 cd` (`14.0°`) and `vel_toward < 1000.0 cd/s` (`10.0 deg/s`). At **`1.8 s`** (`MICRODUCK_SNAG_WINDOW_US`), firmware overrides `cmd_twist` to **`[-0.45, 0.0, 0.0]`** at full stride scale (`xy_scale ≥ 1.0`) for **`1.8 s`** (`MICRODUCK_UNSNAG_DURATION_US`), backing the foot clear before resuming forward walking (`2.5 s` cooldown).
+- **Host neural gait (`Master/gateway/server/service.py`):** Triggers the same `(-0.45, 0.0, 0.0)` `1.8 s` reverse maneuver (`neural_gait_unsnag`) on either 4th-wire joint lag (`≥ 14.0°` at `< 10.0 deg/s`) **or** zero visual/ground-plane odometry progress (`disp < 0.025 m` over `1.8 s` while `lag ≥ 10.0°` or `stalled_joints != 0`).
+- **Ainekio OS goal alignment (`active-task.ts`):** `trackLocomotionProgress()` uses a **`5.5 s`** cognitive stall window (`stalledSamples ≥ 4 && elapsedMs ≥ 5,500`) so the `1.8 s` snag detection + `1.8 s` reverse unsnag + forward re-attempt (~`4.5 s`) finishes cleanly before Goal Review flags a blocked path.
+
+### Full-span `[1..4094]` 12-bit ADC jam measurement
+
+Audit of the `156 s` bench stall exposed that ADC readings outside the `[500, 2800] µs` interior calibration points had previously been discarded as out-of-range. In `servo_feedback_position.c`, `jam_measurement()` linearly extrapolates each joint's 3-point `CD74HC4067` NVS curve across the entire non-railed 12-bit ADC span (**`raw ∈ [1..4094]`**), catching hard mechanical jams near `0°` and `180°` for the `I²t` thermal model while rejecting true open/short wire faults (`0` or `4095`).
+
+<figure className="my-6">
+  <img src="/posts/jam-protection/i2t-thermal-vs-phantom-jam-curves.webp" alt="Quantitative time-domain chart of per-channel MG90S winding thermal_load[j] over 0 to 24 seconds comparing hard end-stop rotor lock (8.0-9.0 s selective LEDn_OFF_H = 0x10 cutoff and 12.0 s cooldown to 0.35 rearm) against zero-heat standing sag (<=6.5 degrees) and fast carpet swings (>12 deg/s)." width="3200" height="1960" loading="lazy" className="w-full rounded-xl" />
+  <figcaption>Per-joint <code>I²t</code> winding thermal accumulator (<code>servo_feedback_model.c</code>) over <code>0 → 24 s</code>: genuine rotor locks trip selective <code>LEDn_OFF_H = 0x10</code> cutoff in <code>8.0–10.0 s</code> while keeping the other 11 channels energized, whereas standing gravity sag (<code>&lt;= 6.5°</code>) and fast carpet swings (<code>&gt; 12°/s</code>) accumulate zero thermal load.</figcaption>
+</figure>
+
+---
+
+## 3. Hardware-enforced per-joint `I²t` winding thermal fuse & selective `PCA9685` cutoff
+
+If an external clamp or wedged limb keeps a servo physically pinned past `NeuralPose v8`'s compliant posture control or `MicroDuck`'s `1.8 s` reverse unsnag, `Slave/firmware/esp32p4-wifi6/main/servo_feedback_model.c` protects the motor copper directly using a per-joint **`I²t` thermal accumulator**:
+
+```text
+Constants:
+  DEADBAND      = 7.0°       # Normal standing gravity sag (<= 5.5° settled) generates ZERO heat forever
+  SLEW          = 12.0 deg/s # Moving shafts (< 12°/s gate) do not accumulate locked-rotor heat
+  FULL_SPAN     = 11.0°      # 18.0° stalled error = 1.0× nominal stall dissipation
+  MAX_DUTY      = 1.25       # Caps extreme angular error at 1.25² = 1.56× heating rate
+  TRIP_SECONDS  = 9.0 s      # Trips in 8.0–10.0 s under hard rotor lock
+  COOL_SECONDS  = 12.0 s     # Linear cool-down retaining thermal memory across re-jams
+  REARM_LOAD    = 0.35       # Channel stays masked (0 µs) until cooled below 35%
+```
+
+When `thermal_load[j]` reaches `1.0`:
+
+1. **Selective single-channel cutoff (no belly-flop collapse):** `handle_thermal_cutoff()` latches `thermal_cutoff_mask |= (1U << j)` and writes `pulses[ch] = 0` (`PCA9685` register `LEDn_OFF_H = 0x10`) **only on the tripped servo channel**—leaving `PCA9685 OE` active so the **11 healthy servos continue holding the robot's stance**.
+2. **Immediate wire & workflow cancellation:** Firmware terminates the active motion (`ESP_ERR_INVALID_STATE`) and emits `{"t":"event","name":"servo_stall","joint_mask":...,"outputs_released":true}`. Because non-cutoff transient stalls no longer trigger chattery software aborts, `outputs_released: true` serves as the single authoritative signal for `GatewayConnection._abort_pending_motion_on_stall()`, `Bridge`, and `EnvironmentAdapter._await_motion_with_stall_abort()` to cancel active motion futures and Freestyle jobs cleanly (while Ainekio OS also supports explicit `stop` with `detach: true` for full PWM disarm on operator command).
+3. **Cooldown & smooth re-seeding:** Masked channels remain at `0 µs` across new commands until `thermal_load[j] < 0.35`, then `seed_zero_channels()` re-seeds the joint from its live 4th-wire shaft reading so re-engagement never snaps abruptly.
+
+---
+
+## 4. Hardware-in-the-loop C + Python & `game.megameal` virtual jam verification
+
+Two complementary harnesses verify stall sensing and `I²t` cutoff end-to-end without risking physical `MG90S` windings:
+
+- **Native C + Python HIL suite (`tests/test_p4_jam_and_thermal.py`):** Compiles production `body.c`, `pca9685.c`, and `servo_feedback_*.c` into a shared library wired to a simulated `I2C` `PCA9685` register bank and 12-bit `CD74HC4067` ADC.
+- **Full-parity `game.megameal` 3D simulator (`VirtualRobotPanel.svelte`, [see simulator guide](/posts/gateway-and-simulator/#game-megameal-simulator)):** Runs the same compiled `ESP32-P4` C firmware (`libgait_native.so`, `full_parity=True`) atop a `500 Hz` MuJoCo plant with interactive **per-servo `J0–J11` pin/jam toggles**, letting operators pin individual joints mid-walk or mid-pose in the browser and watch `thermal_load[j]` trip `LEDn_OFF_H = 0x10` in `8–10 s` while the other 11 joints keep the robot standing.
+
+| Test Suite | Simulated Condition | Verified Hardware & Register Outcome |
+| :--- | :--- | :--- |
+| **Suite 1A · Standing Gravity Sag** | `60 s` continuous `Stand` hold at `6.5°` steady load sag (`<= 7.0°` deadband) | `thermal_load == 0.0`, **`0` false trips** |
+| **Suite 1B · `50 Hz` Neural Streaming** | `60 s` cyclic `50 Hz` `walk_target` / `NeuralPose` reversals (`80 µs` deadband, `80 µs/s` slew, `25 µs` shift) | Streaming reversal high-water tracking unlocks cleanly; **`0` false trips** |
+| **Suite 2 & 3 · Hard End-Stop Lock** | Joint `0` pinned against stop outside `[500, 2800] µs` | Trips in **`8,000–10,000 ms`**, sets `LED0_OFF_H = 0x10`, keeps **`ch 1..11` live**, emits schema-valid `outputs_released: true` |
+| **Suite 4A–4C · Deadlock Bounds** | Blocked Freestyle frame, blocked `Stand` (`!actively_leveling`), blocked `lay_down` | Freestyle escapes at `800 ms`; `Stand` caps at `STAND_MAX_REPLANS = 2`; `lay_down` reaches `PCA9685 OE = 1` |
+| **Suite 5 · On-Chip MicroDuck Snag** | Forward twist (`> 0.05 m/s`) with `> 14°` swing snag | Detects snag in `1.76–1.90 s` and drives `-0.45 m/s` reverse unsnag for `1.78–1.84 s` |

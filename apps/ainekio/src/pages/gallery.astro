@@ -1,0 +1,299 @@
+---
+import MainGridLayout from '../layouts/MainGridLayout.astro'
+import GalleryImage from '../components/GalleryImage.astro'
+import ShareBar from '../components/ShareBar.astro'
+import gallery from '../data/gallery.json'
+import { url } from '../utils/url-utils'
+
+const galleryTitle = 'Ainekio Robot Gallery — Photos, Walking Videos, Wiring & CAD'
+const galleryDescription = 'Photos, videos, and hardware diagrams of Ainekio: the 650 g 12-servo V2 quadruped, carpet walking footage, MuJoCo/MJX simulation rollouts, 59 LCD expressions, and ESP32-P4 wiring diagrams.'
+const galleryJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: galleryTitle,
+  description: galleryDescription,
+  url: Astro.url.href,
+  hasPart: gallery.filter(item => item.src).map(item => ({
+    '@type': 'VideoObject',
+    name: item.title,
+    description: item.caption,
+    contentUrl: new URL(url(item.src!), Astro.site).href,
+    thumbnailUrl: new URL(url(item.poster!), Astro.site).href,
+    uploadDate: `${item.date || '2026-11-06'}T00:00:00Z`,
+    duration: `PT${Math.max(1, Math.round(item.duration || 1))}S`,
+  })),
+}
+const groups = [
+  { id: 'photos', shortLabel: 'Workbench photos', title: 'From the workbench', intro: 'Photographs of the physical robots: the 650 g 12-servo V2 feedback build, single-leg linkage prototypes, and the active 8-servo V1 quadruped.', kinds: ['photo'] },
+  { id: 'videos', shortLabel: 'Floor videos', title: 'The physical robot on video', intro: 'Live V2 capability checks (wake-up, greet, 4th-wire jam detection, and IMU shake reflexes), onboard OV5647 camera footage from carpet walking trials, and floor/bench runs.', kinds: ['physical-video'] },
+  { id: 'animation', shortLabel: 'Sim & RL studies', title: 'Simulation, neural gait & motion studies', intro: 'Cross-morphology V3 motion-transfer rollouts showing why each robot body must learn its own motions, MuJoCo quadruped RL rollouts (MicroDuck v18/v19-snag-p4 & NeuralPose v5), and C-gait imitation policy comparisons.', kinds: ['animation'] },
+  { id: 'diagrams', shortLabel: 'Wiring & Studies', title: 'Hardware wiring, kinematic plots & 59-face libraries', intro: 'ESP32-P4 pinouts, PCA9685 PWM and CD74HC4067 4th-wire feedback wiring diagrams, V3 5-link workspace & DS3235 torque-optimization plots, MicroDuck System-ID benchmarks, and full 59-expression face sheets across V2 (ST7789 LCD) and V1 (128×64 SSD1306 OLED).', kinds: ['diagram'] },
+  { id: 'design', shortLabel: 'CAD & Web Sim', title: 'CAD, 3D Web Simulator & MuJoCo MJCF models', intro: 'Blender CAD assemblies and live simulator captures—Ainekio V3 with Option A-1 5-link crawler legs, Clip 26 clamshell latches & AINEKIO V-003 hull; Ainekio V1 vertical-knee arms & concentric under-arm 4-wire clock-springs; the game.megameal 3D virtual robot lab alpha; and the 650 g Ainekio V2 Keeper Bridge & MuJoCo MJCF models.', kinds: ['design'] },
+].map(group => ({
+  ...group,
+  items: gallery.filter(item => group.kinds.includes(item.kind)),
+}))
+
+const date = (value: string) => new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(value))
+const labelForKind = (kind: string) =>
+  kind === 'photo'
+    ? 'Photograph'
+    : kind === 'physical-video'
+      ? 'Physical footage'
+      : kind === 'animation'
+        ? 'Simulation & motion'
+        : kind === 'diagram'
+          ? 'Hardware reference'
+          : 'CAD model'
+---
+<MainGridLayout oneColumn={true} title={galleryTitle} description={galleryDescription}>
+  <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(galleryJsonLd)}></script>
+  <article class="robot-gallery" data-pagefind-body>
+    <header class="gallery-hero card-base">
+      <div class="gallery-hero-top">
+        <div>
+          <p class="eyebrow">Media library · {gallery.length} items</p>
+          <h1>Photos, video &amp; hardware diagrams</h1>
+          <p class="gallery-lead">Hardware photos, onboard camera footage from physical carpet tests, DAgger-distilled on-chip ESP32-P4 neural gait rollouts, 59 LCD facial expressions, and V2 wiring diagrams.</p>
+        </div>
+      </div>
+
+      <div class="gallery-meta-row">
+        <p class="gallery-milestone">
+          <strong>Latest milestone:</strong>
+          <a href={url('/posts/2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim/')}>Nov 20 V1 clock-spring arms, NeuralPose v8 phantom-jam fix, V3 Option A-1 legs &amp; game.megameal 3D web sim →</a>
+        </p>
+        <ShareBar title={galleryTitle} description={galleryDescription} url={Astro.url.href} />
+      </div>
+    </header>
+
+    <nav class="gallery-jump-bar" aria-label="Gallery sections">
+      {groups.map(group => (
+        <a class="jump-pill" href={`#${group.id}`}>
+          <span>{group.shortLabel}</span>
+          <span class="jump-count">{group.items.length}</span>
+        </a>
+      ))}
+    </nav>
+
+    {groups.map(group => (
+      <section id={group.id} class="gallery-section" aria-labelledby={`${group.id}-title`}>
+        <div class="gallery-section-header">
+          <div>
+            <h2 id={`${group.id}-title`}>{group.title}</h2>
+            <p class="section-intro">{group.intro}</p>
+          </div>
+          <span class="section-count">{group.items.length} {group.items.length === 1 ? 'item' : 'items'}</span>
+        </div>
+
+        <div class:list={['gallery-grid', { 'video-grid': group.kinds.some(k => ['physical-video', 'animation'].includes(k)) }]}>
+          {group.items.map(item => {
+            const largestVariant = item.variants?.at(-1)
+            return (
+            <figure id={item.id} class:list={[{ 'is-photo': item.kind === 'photo', 'is-schematic': ['diagram', 'design'].includes(item.kind) }]}>
+              {largestVariant ? (
+                <a
+                  class="image-link"
+                  href={url(largestVariant.src)}
+                  data-pswp-width={largestVariant.width}
+                  data-pswp-height={largestVariant.height}
+                  data-navigation="off"
+                  aria-label={`Open full-resolution lightbox: ${item.title}`}
+                >
+                  <GalleryImage item={item} />
+                </a>
+              ) : (
+                <video controls playsinline preload="none" width={item.width} height={item.height} poster={url(item.poster!)} aria-describedby={`${item.id}-caption`}>
+                  <source src={url(item.src!)} type="video/mp4" />
+                  <a href={url(item.src!)}>Download {item.title}</a>
+                </video>
+              )}
+              <figcaption id={`${item.id}-caption`}>
+                <p class="media-label">{labelForKind(item.kind)} · {item.date ? <time datetime={item.date}>{date(item.date)}</time> : 'Undated'}</p>
+                <h3>{item.title}</h3>
+                <p>{item.caption}</p>
+                {item.src && (
+                  <a class="download" href={url(item.src)} download>
+                    Download MP4 · {Math.floor(item.duration! / 60)}:{String(Math.round(item.duration! % 60)).padStart(2, '0')} · {(item.bytes! / 1024 / 1024).toFixed(1)} MB
+                  </a>
+                )}
+              </figcaption>
+            </figure>
+          )})}
+        </div>
+      </section>
+    ))}
+
+    <footer class="gallery-bottom-nav">
+      <a href={url('/updates/')}>Read the build journal →</a>
+      <a href={url('/posts/project-overview/')}>System overview &amp; status →</a>
+      <a href={url('/archive/?kind=reference')}>All system reference guides →</a>
+    </footer>
+  </article>
+</MainGridLayout>
+
+<script>
+  function setupGalleryVideoExclusivity() {
+    const videos = Array.from(document.querySelectorAll<HTMLVideoElement>('.robot-gallery video'))
+    for (const activeVideo of videos) {
+      if (activeVideo.dataset.exclusiveBound === 'true') continue
+      activeVideo.dataset.exclusiveBound = 'true'
+      activeVideo.addEventListener('play', () => {
+        for (const other of videos) {
+          if (other !== activeVideo && !other.paused) {
+            other.pause()
+          }
+        }
+      })
+    }
+  }
+  setupGalleryVideoExclusivity()
+  document.addEventListener('astro:page-load', setupGalleryVideoExclusivity)
+</script>
+
+<style>
+  .robot-gallery { width: 100%; margin: 0; color: var(--text-color); }
+  .gallery-hero { padding: clamp(1.25rem, 2.6vw, 2rem); }
+  h1 { font-size: clamp(1.85rem, 3.2vw, 2.55rem); line-height: 1.12; font-weight: 760; margin: .35rem 0 .55rem; }
+  h2 { font-size: clamp(1.32rem, 2.2vw, 1.65rem); font-weight: 750; line-height: 1.25; }
+  h3 { font-size: 1.02rem; font-weight: 700; line-height: 1.35; margin: .3rem 0 .28rem; }
+  p { line-height: 1.58; }
+  .gallery-lead { max-width: 74ch; font-size: 0.95rem; color: color-mix(in srgb, var(--text-color) 88%, transparent); }
+  .eyebrow, .media-label { color: var(--primary); font-size: .72rem; letter-spacing: .05em; }
+  .eyebrow { text-transform: uppercase; font-weight: 750; }
+  a { color: var(--primary); text-underline-offset: .2em; }
+  a:hover { text-decoration: underline; }
+
+  .gallery-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem 1.25rem;
+    margin-top: 0.95rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgb(255 255 255 / 0.08);
+  }
+  .gallery-milestone { font-size: 0.88rem; color: var(--text-color-muted); }
+  .gallery-milestone strong { color: var(--text-color); font-weight: 680; margin-right: 0.25rem; }
+
+  /* Sticky 5-column jump bar on desktop; compact horizontal scroll strip on small phones */
+  .gallery-jump-bar {
+    position: sticky;
+    top: 0.5rem;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+    padding: 0.5rem;
+    border-radius: 0.65rem;
+    background: rgb(9 16 20 / 0.88);
+    backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+  }
+  .jump-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.45rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.45rem;
+    background: rgb(0 0 0 / 0.24);
+    border: 1px solid color-mix(in srgb, var(--primary) 26%, transparent);
+    font-size: 0.82rem;
+    font-weight: 680;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .jump-pill:hover {
+    text-decoration: none;
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    color: var(--primary);
+  }
+  .jump-count {
+    font-size: 0.72rem;
+    font-weight: 750;
+    padding: 0.1rem 0.42rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary) 14%, transparent);
+    color: var(--primary);
+    flex-shrink: 0;
+  }
+
+  .gallery-section { margin-top: 1.65rem; scroll-margin-top: 6rem; }
+  .gallery-section-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.5rem 1.25rem;
+    padding-bottom: 0.65rem;
+    margin-bottom: 0.95rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  }
+  .section-intro { margin-top: 0.25rem; font-size: 0.9rem; color: color-mix(in srgb, var(--text-color) 84%, transparent); max-width: 76ch; }
+  .section-count {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--text-color-muted);
+    white-space: nowrap;
+  }
+
+  .gallery-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.95rem; align-items: stretch; }
+  .video-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  figure {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg);
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 0.7rem;
+    overflow: hidden;
+  }
+  .image-link { display: block; background: #0c1419; border-bottom: 1px solid rgb(255 255 255 / 0.06); }
+  .image-link :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 4/3; object-fit: contain; }
+  figure.is-photo .image-link :global(img) { object-fit: cover; }
+  figure.is-schematic .image-link { padding: 0.35rem; background: #0b1318; }
+  video { display: block; width: 100%; height: auto; aspect-ratio: 16/9; background: #080d10; object-fit: cover; }
+  figcaption {
+    padding: 0.85rem 1rem 0.95rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+  figcaption > p:not(.media-label) { font-size: .86rem; color: color-mix(in srgb, var(--text-color) 85%, transparent); }
+  .download { display: inline-block; margin-top: auto; padding-top: .65rem; font-size: .8rem; font-weight: 680; }
+
+  .gallery-bottom-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-top: 1.5rem;
+    padding: 0.95rem 1.2rem;
+    border-radius: var(--radius-large);
+    background: var(--card-bg);
+    border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+    font-size: 0.88rem;
+    font-weight: 680;
+  }
+
+  @media (max-width: 1020px) {
+    .gallery-jump-bar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 640px) {
+    .gallery-jump-bar {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+      gap: 0.4rem;
+      padding: 0.42rem 0.5rem;
+    }
+    .gallery-jump-bar::-webkit-scrollbar { display: none; }
+    .jump-pill { flex: 0 0 auto; padding: 0.4rem 0.62rem; font-size: 0.78rem; white-space: nowrap; }
+    .gallery-grid, .video-grid { grid-template-columns: 1fr; }
+  }
+</style>

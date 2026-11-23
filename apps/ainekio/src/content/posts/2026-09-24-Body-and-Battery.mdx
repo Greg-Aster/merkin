@@ -1,0 +1,114 @@
+---
+title: "Refining the Body and Fitting the Anker Battery"
+published: 2026-09-24
+updated: 2026-09-24
+description: "A red shell, revised mask mounts, reinforced printed tabs, and an 80 mm chassis placement: fitting a removable 10,000 mAh Anker bank beneath Ainekio V2."
+image: "/posts/2026-09-24-progress/motion-showcase.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V2, Chassis, Battery, CAD, 3D Printing]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: body
+  generation: v2
+  kind: journal
+  next: 2026-09-28-compact-body
+  related: ["ainekio-v2", "v1-v2-comparison", "2026-10-08-standing-walking"]
+---
+
+*Cover: a frame from the September 23 Blender motion export showing the red mask,
+carapace, and exposed linkage.*
+
+Most of the recent design work has focused on the body itself: how the mask
+attaches, how the end plates fit around the bearings, how printed mounts survive
+assembly, and where the battery can sit while the legs move. The initial battery
+candidate is an **Anker PowerCore Slim 10,000 mAh** (**155 × 72 × 16 mm** envelope),
+chosen because it is already on hand. Rather than treating battery packaging as an
+afterthought once the shell is finished, the underside is being designed around a
+removable pack from the start.
+
+The [V1 vs V2 comparison](/posts/v1-v2-comparison/) and
+[V2 power architecture guide](/posts/ainekio-v2/#power-architecture-and-wireless-keeper-bridge)
+track how the power rail evolved from here, while the
+[gait development guide](/posts/gait-development/#closed-loop-stand-and-walk-execution)
+covers the continuous gait controls deployed alongside this chassis pass.
+
+## Chassis width and structural updates
+
+The chassis now measures **80.0 mm across the exterior walls of the center supports**,
+widened from 75 mm by shifting each support and its leg assemblies 2.5 mm outward
+(opening shoulder-center spacing from 56 mm to 61 mm).
+
+| Area | September 22–24 change | Next focus |
+| --- | --- | --- |
+| Face and mask | Shorter front plate, concealed upper mask receivers, and inclined lower screw passages | Fastener length, print fit, and tool access |
+| Rear panel | Matching upper/lower corner tapers (~44 mm at flat edges, 63.2 mm around bearings) | Align end plates with the 80 mm support spacing |
+| Center-support tabs | Flared roots and 1.5 mm screw pilots after four printed tabs split along layer lines during assembly | Reprint and test layer strength |
+| Electronics | Compared flat fore/aft board placement against centered stacked and upright alternatives | Finalize board mounts with connector and cable bend allowances |
+| Underside | Packaged the rounded Anker bank beneath the moving leg assemblies | Build cradle structure and verify full-motion clearance |
+
+### Mask attachment and reinforced center-support tabs
+
+![CAD comparison of the previous raised front brackets and the compact mask screw mounting arrangement.](/posts/2026-09-24-progress/front-panel-mounts.webp)
+
+*September 23 CAD review replacing raised upper brackets with compact screw mounts, using the LCD-facing surface as the print bed.*
+
+The raised upper brackets and lower locating pins were replaced by screw
+mounts. Upper screws pass through 2.2 mm clearance holes into 1.6 mm blind mask
+pilots, while the lower passages incline ~19.8° to clear the LCD and retain
+cheek wall thickness (sized for provisional M2×10 upper and M2×14 lower screws).
+The lower plate corners also taper from 63.2 mm to 51.4 mm at the bottom so they tuck
+cleanly inside the mask silhouette.
+
+![Reinforced center-support roots and recessed fastener seats in the temporary X brace.](/posts/2026-09-24-progress/center-mount-tab-reinforcement.webp)
+
+*Reinforced center-support roots and recessed fastener seats in the underside X brace.*
+
+After all four original lower tabs split along print layers when tightening linkage
+screws on the bench, I switched the center support to the smaller self-threading screws
+that held cleanly in the upper servo brackets: **1.5 mm pilots, 4 mm deep**, backed by
+rounded, flared roots. The mating brace uses 2.2 mm clearance holes with **5.4 × 2.2 mm**
+head recesses, leaving 2 mm of plastic beneath each screw head.
+
+![Rear-panel CAD comparison showing the revised upper taper and relocated mounting holes.](/posts/2026-09-24-progress/rear-panel-y-taper.webp)
+
+*September 23 rear-panel taper preserving full bearing support width while trimming the outer corners.*
+
+### Electronics placement options
+
+A September 23 packaging study compared the flat fore/aft board layout against two
+centered alternatives. Standing the boards on edge saves ~10 mm of vertical height
+compared to a horizontal stack and leaves an 8 mm central wiring channel between
+component envelopes, though the flat fore/aft layout remains the baseline while
+connector clearance is finalized for the physical HUAREW PCA9685 board.
+
+## Battery packaging and clearance studies
+
+| Power stage | Original V1 | September 24 V2 baseline |
+| --- | --- | --- |
+| Battery | 1,000 mAh 2S LiPo (7.4 V) | Anker PowerCore Slim 10,000 mAh (155 × 72 × 16 mm) |
+| Conversion | External buck converter | Regulated bank output |
+| Charging | External balance charger | Integrated USB charging in removable bank |
+
+Three successive CAD clearance checks tested how high the rounded power bank could sit
+under the swinging shoulder brackets without rubbing:
+
+| Clearance pass | Battery top height | Clearance findings |
+| --- | --- | --- |
+| 75 mm width baseline | 54.0 mm datum | Zero mesh intersections across 15,627 gait frames (25 sequences) + 690 quarter-frame checks; minimum ground clearance 31.29 mm in Walk, 16.07 mm in Walk–Run–Walk, 20.00 mm in Crab, and **2.29 mm in Crawl** |
+| 75 mm vs 80 mm width study | 54.59 mm vs 55.96 mm | Widening the support walls from 75 mm (69 mm inner) to 80 mm (74 mm inner) lets the battery sit 1.37 mm higher while keeping a 0.5 mm bracket gap (leaving 2.76 mm below the center mounts) |
+| 17° inward shoulder check | 56.79 mm datum | Backed off 0.50 mm from contact to clear the front-left upper servo bracket at `17°` inward shoulder roll |
+
+![Cross-section study comparing battery positions beneath the 75 mm and 80 mm chassis layouts.](/posts/2026-09-24-progress/anker-battery-width-comparison.webp)
+
+*Cross-section comparison of battery height beneath the 75 mm and 80 mm support-wall widths (cyan: battery, orange: upper servo bracket, purple: screw envelope, gray: servo).*
+
+The next step splits the Blender project into dedicated Wired and Wireless builds
+and explores a shorter, lighter power bank in the
+[September 28 compact body and ROS 2 update](/posts/2026-09-28-compact-body/).

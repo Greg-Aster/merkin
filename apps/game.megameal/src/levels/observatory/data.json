@@ -1,0 +1,464 @@
+{
+	"id": "observatory",
+	"runtimeScene": {
+		"schemaVersion": 1,
+		"id": "observatory_runtime",
+		"generatedAt": "2026-06-06T00:00:00.000Z",
+		"source": {
+			"kind": "authored",
+			"id": "observatory.scene#playable-foundation"
+		},
+		"readiness": {
+			"playerStableId": "player",
+			"requiredAssetIds": [
+				"mesh_observatory_environment",
+				"mesh_water_plane",
+				"material_water_dark_still",
+				"material_observatory_terrain_layered",
+				"texture_observatory_terrain_splat",
+				"texture_observatory_terrain_rock_albedo",
+				"texture_observatory_terrain_rock_normal",
+				"texture_observatory_terrain_rock_roughness",
+				"texture_observatory_terrain_dirt_albedo",
+				"texture_observatory_terrain_dirt_normal",
+				"texture_observatory_terrain_dirt_roughness",
+				"texture_observatory_terrain_gravel_albedo",
+				"texture_observatory_terrain_gravel_normal",
+				"texture_observatory_terrain_gravel_roughness",
+				"texture_observatory_terrain_moss_albedo",
+				"texture_observatory_terrain_moss_normal",
+				"texture_observatory_terrain_moss_roughness"
+			],
+			"requiredCollisionPrefabIds": ["observatory_boundary_blocker"],
+			"requiredCollisionStableIds": [
+				"observatory:collision:boundary:north",
+				"observatory:collision:boundary:south",
+				"observatory:collision:boundary:east",
+				"observatory:collision:boundary:west"
+			],
+			"requiredWalkableStableIds": [],
+			"requiredLightStableIds": [
+				"observatory:firefly:archive",
+				"observatory:firefly:lantern",
+				"observatory:firefly:tide"
+			]
+		}
+	},
+	"level": {
+		"id": "observatory",
+		"sceneId": "observatory_game",
+		"preloadGroups": ["observatory"],
+		"resources": {
+			"game:collectedCount": 0,
+			"game:totalCollectibles": 0,
+			"game:characterBounds": {
+				"minX": -300,
+				"maxX": 300,
+				"minZ": -300,
+				"maxZ": 300
+			}
+		},
+		"preload": [
+			"mesh_observatory_environment",
+			"mesh_water_plane",
+			"material_water_dark_still",
+			"material_observatory_terrain_layered",
+			"texture_observatory_terrain_splat",
+			"texture_observatory_terrain_rock_albedo",
+			"texture_observatory_terrain_rock_normal",
+			"texture_observatory_terrain_rock_roughness",
+			"texture_observatory_terrain_dirt_albedo",
+			"texture_observatory_terrain_dirt_normal",
+			"texture_observatory_terrain_dirt_roughness",
+			"texture_observatory_terrain_gravel_albedo",
+			"texture_observatory_terrain_gravel_normal",
+			"texture_observatory_terrain_gravel_roughness",
+			"texture_observatory_terrain_moss_albedo",
+			"texture_observatory_terrain_moss_normal",
+			"texture_observatory_terrain_moss_roughness"
+		],
+		"instances": [
+			{
+				"id": "observatory-terrain",
+				"prefabId": "observatory_environment",
+				"stableId": "observatory:terrain"
+			},
+			{
+				"id": "observatory-boundary-north",
+				"prefabId": "observatory_boundary_blocker",
+				"stableId": "observatory:collision:boundary:north",
+				"transform": {
+					"position": [0, 5.8, -304]
+				},
+				"components": {
+					"Collider": {
+						"intent": "solid",
+						"channel": "worldStatic",
+						"shape": {
+							"type": "box",
+							"halfExtents": [320, 4, 4]
+						}
+					}
+				}
+			},
+			{
+				"id": "observatory-boundary-south",
+				"prefabId": "observatory_boundary_blocker",
+				"stableId": "observatory:collision:boundary:south",
+				"transform": {
+					"position": [0, 5.8, 304]
+				},
+				"components": {
+					"Collider": {
+						"intent": "solid",
+						"channel": "worldStatic",
+						"shape": {
+							"type": "box",
+							"halfExtents": [320, 4, 4]
+						}
+					}
+				}
+			},
+			{
+				"id": "observatory-boundary-east",
+				"prefabId": "observatory_boundary_blocker",
+				"stableId": "observatory:collision:boundary:east",
+				"transform": {
+					"position": [304, 5.8, 0]
+				},
+				"components": {
+					"Collider": {
+						"intent": "solid",
+						"channel": "worldStatic",
+						"shape": {
+							"type": "box",
+							"halfExtents": [4, 4, 320]
+						}
+					}
+				}
+			},
+			{
+				"id": "observatory-boundary-west",
+				"prefabId": "observatory_boundary_blocker",
+				"stableId": "observatory:collision:boundary:west",
+				"transform": {
+					"position": [-304, 5.8, 0]
+				},
+				"components": {
+					"Collider": {
+						"intent": "solid",
+						"channel": "worldStatic",
+						"shape": {
+							"type": "box",
+							"halfExtents": [4, 4, 320]
+						}
+					}
+				}
+			},
+			{
+				"id": "observatory-water",
+				"prefabId": "water_surface_plane",
+				"stableId": "observatory:water",
+				"transform": {
+					"position": [0, -2, 0],
+					"scale": [4000, 0.02, 4000]
+				}
+			}
+		]
+	},
+	"assets": {
+		"shared": ["mesh_water_plane", "material_water_dark_still"],
+		"local": [
+			{
+				"id": "mesh_observatory_environment",
+				"kind": "mesh",
+				"url": "/assets/game/observatory/observatory-environment.glb",
+				"tags": ["terrain", "observatory", "source-glb"]
+			},
+			{
+				"id": "texture_observatory_terrain_splat",
+				"kind": "texture",
+				"url": "/assets/game/observatory/terrain/rock-dirt-moss/observatory_terrain_splat_rgba.png",
+				"projection": "uv",
+				"colorSpace": "linear",
+				"tags": ["terrain", "observatory", "downloaded", "poly-haven", "cc0"]
+			},
+			{
+				"id": "texture_observatory_terrain_rock_albedo",
+				"kind": "texture",
+				"url": "/assets/game/observatory/terrain/rock-dirt-moss/rock_ground_diff_2k.jpg",
+				"projection": "uv",
+				"colorSpace": "srgb",
+				"tags": ["terrain", "observatory", "downloaded", "poly-haven", "cc0"]
+			},
+			{
+				"id": "texture_observatory_terrain_rock_normal",
+				"kind": "texture",
+				"url": "/assets/game/observatory/terrain/rock-dirt-moss/rock_ground_nor_gl_2k.jpg",
+				"projection": "uv",
+				"colorSpace": "linear",
+				"tags": ["terrain", "observatory", "downloaded", "poly-haven", "cc0"]
+			},
+			{
+				"id": "texture_observatory_terrain_rock_roughness",
+				"kind": "texture",
+				"url": "/assets/game/observatory/terrain/rock-dirt-moss/rock_ground_rough_2k.jpg",
+				"projection": "uv",
+				"colorSpace": "linear",
+				"tags": ["terrain", "observatory", "downloaded", "poly-haven", "cc0"]
+			},
+			{
+				"id": "texture_observatory_terrain_dirt_albedo",
+				"kind": "texture",
+				"url": "/assets/game/observatory/terrain/rock-dirt-moss/dirt_diff_2k.jpg",
+				"projection": "uv",
+				"colorSpace": "srgb",
+				"tags": ["terrain", "observatory", "downloaded", "poly-haven", "cc0"]
+			},
+			{
+				"id": "texture_observatory_terrain_dirt_normal",
+				"kind": "texture",
+				"url": "/assets/game/observatory/terrain/rock-dirt-moss/dirt_nor_gl_2k.jpg",
+				"projection": "uv",
+				"colorSpace": "linear",
+				"tags": ["terrain", "observatory", "downloaded", "poly-haven", "cc0"]
+			},
+			{
+				"id": "texture_observatory_terrain_dirt_roughness",
+				"kind": "texture",
+				"url": "/assets/game/observatory/terrain/rock-dirt-moss/dirt_rough_2k.jpg",
+				"projection": "uv",
+				"colorSpace": "linear",
+				"tags": ["terrain", "observatory", "downloaded", "poly-haven", "cc0"]
+			},
+			{
+				"id": "texture_observatory_terrain_gravel_albedo",
+				"kind": "texture",
+				"url": "/assets/game/observatory/terrain/rock-dirt-moss/gravel_diff_2k.jpg",
+				"projection": "uv",
+				"colorSpace": "srgb",
+				"tags": ["terrain", "observatory", "downloaded", "poly-haven", "cc0"]
+			},
+			{
+				"id": "texture_observatory_terrain_gravel_normal",
+				"kind": "texture",
+				"url": "/assets/game/observatory/terrain/rock-dirt-moss/gravel_nor_gl_2k.jpg",
+				"projection": "uv",
+				"colorSpace": "linear",
+				"tags": ["terrain", "observatory", "downloaded", "poly-haven", "cc0"]
+			},
+			{
+				"id": "texture_observatory_terrain_gravel_roughness",
+				"kind": "texture",
+				"url": "/assets/game/observatory/terrain/rock-dirt-moss/gravel_rough_2k.jpg",
+				"projection": "uv",
+				"colorSpace": "linear",
+				"tags": ["terrain", "observatory", "downloaded", "poly-haven", "cc0"]
+			},
+			{
+				"id": "texture_observatory_terrain_moss_albedo",
+				"kind": "texture",
+				"url": "/assets/game/observatory/terrain/rock-dirt-moss/mossy_rock_diff_2k.jpg",
+				"projection": "uv",
+				"colorSpace": "srgb",
+				"tags": ["terrain", "observatory", "downloaded", "poly-haven", "cc0"]
+			},
+			{
+				"id": "texture_observatory_terrain_moss_normal",
+				"kind": "texture",
+				"url": "/assets/game/observatory/terrain/rock-dirt-moss/mossy_rock_nor_gl_2k.jpg",
+				"projection": "uv",
+				"colorSpace": "linear",
+				"tags": ["terrain", "observatory", "downloaded", "poly-haven", "cc0"]
+			},
+			{
+				"id": "texture_observatory_terrain_moss_roughness",
+				"kind": "texture",
+				"url": "/assets/game/observatory/terrain/rock-dirt-moss/mossy_rock_rough_2k.jpg",
+				"projection": "uv",
+				"colorSpace": "linear",
+				"tags": ["terrain", "observatory", "downloaded", "poly-haven", "cc0"]
+			},
+			{
+				"id": "material_observatory_terrain_layered",
+				"kind": "material",
+				"url": "builtin://materials/terrain/layered-splat",
+				"material": {
+					"roughness": 0.82,
+					"terrain": {
+						"kind": "layered-splat",
+						"coordinateSpace": "world-xz",
+						"splatTextureId": "texture_observatory_terrain_splat",
+						"sourceBaseStrength": 1,
+						"detailBlendStrength": 0.35,
+						"layers": [
+							{
+								"channel": "r",
+								"label": "Rock",
+								"albedoTextureId": "texture_observatory_terrain_rock_albedo",
+								"normalTextureId": "texture_observatory_terrain_rock_normal",
+								"roughnessTextureId": "texture_observatory_terrain_rock_roughness",
+								"metersPerTile": 5.5,
+								"normalScale": 0.7,
+								"strength": 0.09
+							},
+							{
+								"channel": "g",
+								"label": "Dirt",
+								"albedoTextureId": "texture_observatory_terrain_dirt_albedo",
+								"normalTextureId": "texture_observatory_terrain_dirt_normal",
+								"roughnessTextureId": "texture_observatory_terrain_dirt_roughness",
+								"metersPerTile": 4.5,
+								"normalScale": 0.55,
+								"strength": 0.08
+							},
+							{
+								"channel": "b",
+								"label": "Gravel",
+								"albedoTextureId": "texture_observatory_terrain_gravel_albedo",
+								"normalTextureId": "texture_observatory_terrain_gravel_normal",
+								"roughnessTextureId": "texture_observatory_terrain_gravel_roughness",
+								"metersPerTile": 3.2,
+								"normalScale": 0.75,
+								"strength": 0.08
+							},
+							{
+								"channel": "a",
+								"label": "Moss",
+								"albedoTextureId": "texture_observatory_terrain_moss_albedo",
+								"normalTextureId": "texture_observatory_terrain_moss_normal",
+								"roughnessTextureId": "texture_observatory_terrain_moss_roughness",
+								"metersPerTile": 4,
+								"normalScale": 0.65,
+								"strength": 0.07
+							}
+						]
+					}
+				},
+				"tags": ["terrain", "observatory", "layered-splat"]
+			}
+		],
+		"preloadGroups": {
+			"observatory": [
+				"mesh_observatory_environment",
+				"mesh_water_plane",
+				"material_water_dark_still",
+				"material_observatory_terrain_layered",
+				"texture_observatory_terrain_splat",
+				"texture_observatory_terrain_rock_albedo",
+				"texture_observatory_terrain_rock_normal",
+				"texture_observatory_terrain_rock_roughness",
+				"texture_observatory_terrain_dirt_albedo",
+				"texture_observatory_terrain_dirt_normal",
+				"texture_observatory_terrain_dirt_roughness",
+				"texture_observatory_terrain_gravel_albedo",
+				"texture_observatory_terrain_gravel_normal",
+				"texture_observatory_terrain_gravel_roughness",
+				"texture_observatory_terrain_moss_albedo",
+				"texture_observatory_terrain_moss_normal",
+				"texture_observatory_terrain_moss_roughness"
+			]
+		}
+	},
+	"prefabs": {
+		"shared": ["water_surface_plane"],
+		"local": [
+			{
+				"id": "observatory_boundary_blocker",
+				"tags": ["world", "collision", "blocker", "observatory"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1, 1, 1]
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "worldStatic",
+						"shape": {
+							"type": "box",
+							"halfExtents": [1, 1, 1]
+						}
+					}
+				}
+			},
+			{
+				"id": "observatory_environment",
+				"assetIds": [
+					"mesh_observatory_environment",
+					"material_observatory_terrain_layered",
+					"texture_observatory_terrain_splat",
+					"texture_observatory_terrain_rock_albedo",
+					"texture_observatory_terrain_rock_normal",
+					"texture_observatory_terrain_rock_roughness",
+					"texture_observatory_terrain_dirt_albedo",
+					"texture_observatory_terrain_dirt_normal",
+					"texture_observatory_terrain_dirt_roughness",
+					"texture_observatory_terrain_gravel_albedo",
+					"texture_observatory_terrain_gravel_normal",
+					"texture_observatory_terrain_gravel_roughness",
+					"texture_observatory_terrain_moss_albedo",
+					"texture_observatory_terrain_moss_normal",
+					"texture_observatory_terrain_moss_roughness"
+				],
+				"tags": ["world", "terrain", "observatory"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1, 1, 1]
+					},
+					"Renderable": {
+						"meshId": "mesh_observatory_environment",
+						"visible": true,
+						"materialId": "material_observatory_terrain_layered"
+					}
+				}
+			}
+		]
+	},
+	"audio": {
+		"eventMappings": []
+	},
+	"renderProfile": {
+		"id": "observatory_moon_archive",
+		"renderer": {
+			"clearColor": "#020711",
+			"clearAlpha": 1,
+			"antialias": true,
+			"maxPixelRatio": 2,
+			"fallbackMaterialColor": "#273043"
+		},
+		"lighting": {
+			"lights": [
+				{
+					"kind": "ambient",
+					"color": "#c9d8f2",
+					"intensity": 0
+				}
+			]
+		}
+	},
+	"player": {
+		"transform": {
+			"position": [-20, 23, 10]
+		},
+		"firstPersonController": {
+			"yawRadians": 1.5707963267948966,
+			"pitchRadians": 0
+		},
+		"groundY": 1.8,
+		"light": {
+			"kind": "point",
+			"color": "#c061cb",
+			"intensity": 10,
+			"distance": 16,
+			"decay": 2,
+			"visible": true
+		}
+	}
+}

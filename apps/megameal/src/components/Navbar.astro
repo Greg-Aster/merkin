@@ -1,0 +1,301 @@
+---
+import { Icon } from 'astro-icon/components'
+import { navBarConfig, siteConfig } from '../config/config'
+import { LinkPresets } from '../constants/link-presets'
+import { LinkPreset, type NavBarLink } from '../types/config'
+import { url } from '../utils/url-utils'
+import LightDarkSwitch from './LightDarkSwitch.svelte'
+import Search from './Search.svelte'
+import SiteAudioControl from './client/SiteAudioControl.svelte'
+import StoreCartButton from './store/StoreCartButton.svelte'
+import DisplaySettings from './widget/DisplaySettings.svelte'
+import NavMenuPanel from './widget/NavMenuPanel.astro'
+
+const className = Astro.props.class
+
+const links: NavBarLink[] = navBarConfig.links.map(
+  (item: NavBarLink | LinkPreset): NavBarLink => {
+    if (typeof item === 'number') {
+      return LinkPresets[item]
+    }
+    return item
+  },
+)
+
+const homeLink =
+  links.find(link => !link.external && link.url === '/') ??
+  LinkPresets[LinkPreset.Home]
+const navigationLinks = links.filter(link => link !== homeLink)
+import '../styles/features/extracted/navbar.css'
+---
+
+<div id="navbar" class="z-50 onload-animation">
+    <div class="absolute hidden md:block h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div> <!-- used for onload animation -->
+    <div class:list={[
+        className,
+        "navbar-shell card-base !overflow-visible max-w-[var(--page-width)] min-h-[3.25rem] md:h-[4.5rem] md:min-h-0 !rounded-t-none mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-1.5 md:gap-3 px-2.5 py-1 md:px-4 md:py-0"]}>
+        
+        <div class="flex items-center justify-start min-w-0">
+            <a
+              id="public-home-link"
+              aria-label={`${siteConfig.title} home`}
+              href={homeLink.external ? homeLink.url : url(homeLink.url)}
+              target={homeLink.external ? "_blank" : null}
+              data-sfx-hover="hover-emphasis"
+              data-sfx-click="sweep"
+              class="group flex items-center overflow-visible rounded-xl px-1.5 md:px-2 py-1 transition-all duration-200 hover:bg-white/6 active:scale-[0.98]"
+            >
+                <img
+                  src={url('/thumb/megameal.webp')}
+                  width="377"
+                  height="180"
+                  alt="MEGA MEAL"
+                  decoding="async"
+                  class="block h-[40px] w-auto select-none opacity-40 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 md:h-[56px]"
+                />
+            </a>
+        </div>
+        
+        <div id="public-nav-shell" class="flex items-center justify-center gap-2 md:gap-4 min-w-0">
+            <div id="standard-nav" class="hidden md:flex items-center">
+            {navigationLinks.map((l) => {
+                return l.dropdown ? (
+                    <div class="relative group">
+                        <a aria-label={l.name} href={l.external ? l.url : url(l.url)} target={l.external ? "_blank" : null}
+                          data-sfx-hover="hover-soft"
+                          data-sfx-click="sweep"
+                          class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95"
+                        >
+                            <div class="flex items-center">
+                                {l.name}
+                                {l.external && <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.875rem] transition -translate-y-[1px] ml-1 text-black/[0.2] dark:text-white/[0.2]"></Icon>}
+                                <Icon name="material-symbols:keyboard-arrow-down-rounded" class="text-[1.25rem] transition ml-1"></Icon>
+                            </div>
+                        </a>
+                        <div class="absolute left-0 mt-1 w-48 rounded-lg shadow-lg bg-[var(--card-bg)] invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 z-50">
+                            <div class="py-1 rounded-lg overflow-hidden">
+                                {l.dropdown.map((item) => (
+                                    <a href={item.external ? item.url : url(item.url)} target={item.external ? "_blank" : null}
+                                       data-sfx-hover="hover-soft"
+                                       data-sfx-click="soft"
+                                       class="block px-4 py-2 text-black/75 dark:text-white/75 hover:bg-[var(--btn-plain-bg-hover)] hover:text-[var(--primary)] transition-colors duration-200"
+                                    >
+                                        <div class="flex items-center justify-between">
+                                            <span>{item.name}</span>
+                                            {item.external && <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.75rem] transition -translate-y-[1px] ml-1 text-black/[0.2] dark:text-white/[0.2]"></Icon>}
+                                        </div>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <a aria-label={l.name} href={l.external ? l.url : url(l.url)} target={l.external ? "_blank" : null}
+                      data-sfx-hover="hover-soft"
+                      data-sfx-click="sweep"
+                      class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95"
+                    >
+                        <div class="flex items-center">
+                            {l.name}
+                            {l.external && <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.875rem] transition -translate-y-[1px] ml-1 text-black/[0.2] dark:text-white/[0.2]"></Icon>}
+                        </div>
+                    </a>
+                );
+            })}
+            </div>
+        </div>
+        
+        <div class="flex items-center justify-end">
+            <!--<SearchPanel client:load>-->
+            <Search client:only="svelte" hideMobileTrigger={true}></Search>
+            <div class="store-cart-nav-action hidden">
+                <StoreCartButton client:visible />
+            </div>
+            <SiteAudioControl client:only="svelte" />
+            {!siteConfig.themeColor.fixed && (
+                    <button aria-label="Display Settings" data-sfx-hover="hover-soft" data-sfx-click="panel-open" class="nav-action-button btn-plain scale-animation rounded-lg active:scale-90 !hidden md:!inline-flex" id="display-settings-switch">
+                        <Icon name="material-symbols:palette-outline" class="nav-action-icon"></Icon>
+                    </button>
+            )}
+            
+            <!-- Light/Dark Switch -->
+            <div class="hidden md:flex">
+                {!siteConfig.themeLock && <LightDarkSwitch client:idle></LightDarkSwitch>}
+            </div>
+
+            <!-- Fullscreen Mode Toggle -->
+            <!-- <button aria-label="Toggle Fullscreen Mode" title="Toggle Fullscreen Mode" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="fullscreen-btn">
+                <Icon name="fa6-solid:expand" class="fullscreen-icon text-[1.25rem]"></Icon>
+                <Icon name="fa6-solid:compress" class="fullscreen-exit-icon text-[1.25rem] hidden"></Icon>
+            </button> -->
+                        
+            <button aria-label="Menu" name="Nav Menu" data-sfx-hover="hover-soft" data-sfx-click="panel-open" class="mobile-header-button nav-action-button btn-plain scale-animation rounded-lg active:scale-90 md:!hidden" id="nav-menu-switch">
+                <Icon name="material-symbols:menu-rounded" class="nav-action-icon"></Icon>
+            </button>
+        </div>
+        
+        <NavMenuPanel links={links}>
+            <div class="mobile-menu-tools md:hidden">
+                <button type="button" id="mobile-search-action" data-sfx-hover="hover-soft" data-sfx-click="panel-open" class="mobile-menu-tools__button">
+                    <span>Search</span>
+                    <Icon name="material-symbols:search-rounded" class="text-[1.1rem] text-[var(--primary)]" />
+                </button>
+                {!siteConfig.themeLock && (
+                    <button type="button" id="mobile-theme-action" data-sfx-hover="hover-soft" data-sfx-click="soft" class="mobile-menu-tools__button">
+                        <span id="mobile-theme-action-label">Theme</span>
+                        <Icon name="material-symbols:dark-mode-outline-rounded" class="text-[1.1rem] text-[var(--primary)]" />
+                    </button>
+                )}
+            </div>
+        </NavMenuPanel>
+        <DisplaySettings client:only="svelte"></DisplaySettings>
+    </div>
+</div>
+
+<script>
+    function switchTheme() {
+        if (localStorage.theme === 'dark') {
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    function syncStoreControlsVisibility() {
+        const isStoreRoute = /^\/store(\/|$)/.test(window.location.pathname);
+        document
+            .querySelectorAll<HTMLElement>('.store-cart-nav-action')
+            .forEach((element) => {
+                element.classList.toggle('hidden', !isStoreRoute);
+                element.classList.toggle('flex', isStoreRoute);
+            });
+    }
+    
+    function loadButtonScript() {
+        function toggleFloatPanel(panel: HTMLElement | null) {
+            if (!panel) return;
+            const isClosed = panel.classList.contains('float-panel-closed');
+            if (isClosed) {
+                panel.hidden = false;
+                requestAnimationFrame(() => {
+                    panel.classList.remove('float-panel-closed');
+                });
+            } else {
+                panel.classList.add('float-panel-closed');
+            }
+        }
+
+        function updateMobileThemeLabel() {
+            const label = document.getElementById('mobile-theme-action-label');
+            if (!label) return;
+            label.textContent =
+                localStorage.theme === 'dark' ? 'Theme: Dark' : 'Theme: Light';
+        }
+
+        // Display settings button
+        let settingBtn = document.getElementById("display-settings-switch");
+        if (settingBtn) {
+            settingBtn.addEventListener("click", function () {
+                let settingPanel = document.getElementById("display-setting");
+                toggleFloatPanel(settingPanel);
+            });
+        }
+    
+        let menuBtn = document.getElementById("nav-menu-switch");
+        if (menuBtn) {
+            menuBtn.addEventListener("click", function () {
+                let menuPanel = document.getElementById("nav-menu-panel");
+                toggleFloatPanel(menuPanel);
+            });
+        }
+
+        const mobileSearchAction = document.getElementById('mobile-search-action');
+        if (mobileSearchAction) {
+            mobileSearchAction.addEventListener('click', function () {
+                const menuPanel = document.getElementById('nav-menu-panel');
+                const searchPanel = document.getElementById('search-panel');
+                menuPanel?.classList.add('float-panel-closed');
+                searchPanel?.classList.remove('float-panel-closed');
+
+                requestAnimationFrame(() => {
+                    const searchInput = document.querySelector('#search-bar-inside input');
+                    if (searchInput instanceof HTMLInputElement) {
+                        searchInput.focus();
+                    }
+                });
+            });
+        }
+
+        const mobileThemeAction = document.getElementById('mobile-theme-action');
+        if (mobileThemeAction) {
+            mobileThemeAction.addEventListener('click', function () {
+                switchTheme();
+                updateMobileThemeLabel();
+            });
+        }
+
+        updateMobileThemeLabel();
+        syncStoreControlsVisibility();
+    
+        initializeFullscreenMode();
+    }
+    
+    function initializeFullscreenMode() {
+        const toggleBtn = document.getElementById('fullscreen-btn');
+        if (!toggleBtn) return; // Exit if button doesn't exist
+        
+        const expandIcon = toggleBtn?.querySelector('.fullscreen-icon');
+        const compressIcon = toggleBtn?.querySelector('.fullscreen-exit-icon');
+        
+        const isFullscreen = localStorage.getItem('fullscreenMode') === 'true';
+        
+        if (isFullscreen) {
+            applyFullscreenState();
+        } else {
+            applyNormalState();
+        }
+        
+        toggleBtn?.addEventListener('click', () => {
+            const currentState = localStorage.getItem('fullscreenMode') === 'true';
+            
+            if (currentState) {
+                disableFullscreenMode();
+            } else {
+                enableFullscreenMode();
+            }
+        });
+        
+        function applyFullscreenState() {
+            document.body.classList.add('force-mobile-view');
+            document.body.classList.add('fullscreen-mode');
+            
+            expandIcon?.classList.add('hidden');
+            compressIcon?.classList.remove('hidden');
+        }
+        
+        function applyNormalState() {
+            document.body.classList.remove('force-mobile-view');
+            document.body.classList.remove('fullscreen-mode');
+            
+            expandIcon?.classList.remove('hidden');
+            compressIcon?.classList.add('hidden');
+        }
+        
+        function enableFullscreenMode() {
+            localStorage.setItem('fullscreenMode', 'true');
+            applyFullscreenState();
+        }
+        
+        function disableFullscreenMode() {
+            localStorage.setItem('fullscreenMode', 'false');
+            applyNormalState();
+        }
+    }
+    
+    // Initialize everything
+    loadButtonScript();
+    document.addEventListener('astro:page-load', syncStoreControlsVisibility);
+
+</script>

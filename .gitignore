@@ -1,0 +1,94 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build artifacts
+dist/
+**/dist/
+public/downloads/
+**/public/downloads/
+.astro/
+**/.astro/
+.svelte-kit/
+**/.svelte-kit/
+.wrangler/
+**/.wrangler/
+
+# Logs and temp files
+*.log
+*.tmp
+.DS_Store
+
+# IDE/system
+.vscode/
+.idea/
+.claude/
+.codex
+.codex/
+.codex-logs/
+AGENTS.md
+CLAUDE.md
+
+# Environment/secrets
+.env
+.env.*
+!.env.example
+
+# Cache
+.pnpm-store/
+*.tsbuildinfo
+__pycache__/
+*.pyc
+
+# Non-monorepo sibling projects in this folder
+Mesh_Hair_Generator/
+mascot-chatbot-cf-worker/
+
+# BlogPusher app — separate git repo (github.com/Greg-Aster/blog-pusher.git)
+blog-pusher-sync/
+
+# Legacy game app — local reference only; new game runtime lives in apps/game.megameal
+apps/game/
+
+# OS and shortcut metadata
+desktop.ini
+*.url
+
+# Git worktrees (local-only, not committed)
+.linked-worktrees/
+.dev-runtime/
+
+# Local editor recovery snapshots
+apps/megameal/.local-notes/
+apps/game/src/threlte/editor/scenes/*.backup.json
+apps/game/src/threlte/editor/scenes/*.pre-restore.json
+apps/game/.visual-smoke/
+apps/game/.editor-exports/
+apps/game/performance-certification-report.json
+apps/game/reports/
+apps/game/tmp/
+apps/blender/scene-packages/
+apps/blender/hunyuan3d-direct/outputs/
+
+# Local source audio libraries and downloaded packs
+Archive/audio-packs/
+
+# Local AI training archives
+merkin-lora-good.tar.gz
+
+# Archived large media (cleanup guardrails)
+**/posts/Mega-Meal-Explained/gif/title4.gif
+**/posts/Mega-Meal-Explained/gif/running-480p.gif
+apps/megameal/public/assets/hdri/ComfyUI_0057.png
+apps/megameal/public/assets/hdri/ComfyUI_0058.png
+
+# Generated runtime/vendor sync output
+apps/game/public/vendor/
+apps/megameal/public/vendor/
+
+# Blender source scenes/backups and dead local generation scratch outputs
+*.blend
+*.blend[0-9]*
+apps/megameal/public/generated/hunyuan3d/
+apps/megameal/public/generated/style-lab/
+apps/megameal/public/generated/runtime-game-assets/

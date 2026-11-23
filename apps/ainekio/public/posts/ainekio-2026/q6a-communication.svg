@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="940" viewBox="0 0 760 940" role="img" aria-labelledby="title desc">
+  <title id="title">Ainekio's intended P4, Q6A and remote-compute split</title>
+  <desc id="desc">The P4 keeps gait execution and command deadlines. The intended Q6A host contains the gateway and local Environment Bridge, camera processing and speech. Direct Wi-Fi is the preferred body link. A remote desktop supplies heavy inference through requests and results. Dashed lines mark integration work; this is not a deployed-topology claim.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M1 1 11 6 1 11" fill="none" stroke="#f4c16d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <style>
+      text{font-family:Arial,Helvetica,sans-serif;fill:#eefaf6;text-anchor:middle}
+      .title{font-size:36px;font-weight:700}.node-title{font-size:34px;font-weight:700}.body{font-size:28px}.muted{fill:#b6d0ce}.amber{fill:#f4c16d}.cyan{fill:#65d9e8}
+      .planned{fill:#113337;stroke:#f4c16d;stroke-width:2;stroke-dasharray:10 8}.source{fill:#10373a;stroke:#65d9e8;stroke-width:2}.link{fill:none;stroke:#f4c16d;stroke-width:3;stroke-dasharray:9 7;marker-start:url(#arrow);marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="760" height="940" rx="28" fill="#062426"/>
+  <text x="380" y="57" class="title">Where the work goes</text>
+  <text x="380" y="98" class="body muted">Intended split · 30 September 2026</text>
+  <rect x="62" y="143" width="636" height="131" rx="18" class="planned"/>
+  <text x="380" y="194" class="node-title">Remote desktop</text>
+  <text x="380" y="239" class="body">Heavy LLM inference</text>
+  <path d="M130 290V370" class="link"/>
+  <text x="425" y="323" class="body">Requests / results</text>
+  <text x="425" y="360" class="body amber">Remote integration pending</text>
+  <rect x="62" y="392" width="636" height="225" rx="18" class="planned"/>
+  <text x="380" y="444" class="node-title">Q6A SBC</text>
+  <text x="380" y="487" class="body">Gateway + local Environment Bridge</text>
+  <text x="380" y="528" class="body muted">Camera processing · speech · coordination</text>
+  <rect x="108" y="550" width="544" height="45" rx="12" fill="#062426"/>
+  <text x="380" y="581" class="body cyan">One body-command owner</text>
+  <path d="M130 637V749" class="link"/>
+  <text x="425" y="665" class="body">Direct Wi-Fi · preferred link</text>
+  <text x="425" y="704" class="body muted">↓ Commands · updates · cancel</text>
+  <text x="425" y="742" class="body muted">↑ Receipts · status · JPEG/audio</text>
+  <rect x="62" y="775" width="636" height="122" rx="18" class="source"/>
+  <text x="380" y="824" class="node-title">ESP32-P4</text>
+  <text x="380" y="866" class="body">Local gait · servo execution · deadlines</text>
+</svg>

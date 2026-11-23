@@ -1,0 +1,95 @@
+{
+  "restored": "2026-10-12",
+  "site_source_commit": "01283684",
+  "removal_commit": "4bef8c7e",
+  "method": "Public Google Docs exports copied into the existing Astro posts collection. Original prose retained; whitespace, Markdown structure, and local navigation normalized. These are copies retrieved on this date, not recovered July revisions. Original publication dates retained, except two 2036 typos corrected to 2026 using the original timelineYear.",
+  "documents": [
+    {
+      "name": "parts",
+      "source_url": "https://docs.google.com/document/d/1wz0kyqttPK3HHL0P0_9lLtRW_B87U5u4kEt-UhttHFA/edit",
+      "export_format": "md",
+      "export_sha256": "008d66392dd244804a1359f0a5b95fad15bba067149c76938bc3411ce9a988a9",
+      "local_copy": "src/content/posts/Robot-Familiar-Parts-Overview.md",
+      "local_sha256": "8d23c1d90c4c71b8c3ac76d5afc5f2a08f7ffb14e634f8025eea3afa6fc382e3"
+    },
+    {
+      "name": "firmware",
+      "source_url": "https://docs.google.com/document/d/1lc4L2lCaWBcMhWY4lfOYCHUTjKad6MjmrFsp2GbDA4Y/edit",
+      "export_format": "md",
+      "export_sha256": "9654c52ea1691dc5d0f070f8ac501c98384b4ccc3d3a5c91142a2f3823363c47",
+      "local_copy": "src/content/posts/Firmware.md",
+      "local_sha256": "dca3e57f316f160715e5e831b0a99eb9be81ad84e53b8ea310f0f15218affc6d"
+    },
+    {
+      "name": "software",
+      "source_url": "https://docs.google.com/document/d/1w1k1ZmoCP_l_8z639lCzDJ3wRVZI1T3BijteEptouvg/edit",
+      "export_format": "md",
+      "export_sha256": "e3bdfb78ab8bf36990e74b7e64d5d757f2d77f4898d55fce6918aaf414a213d6",
+      "local_copy": "src/content/posts/Software.md",
+      "local_sha256": "128c74e56bbbcac96c301ca2a79ec5fa1edd4e50cb956d0a43156eefc03cd702"
+    },
+    {
+      "name": "discussion",
+      "source_url": "https://docs.google.com/document/d/1W6tBv69McloKX-0O9Lbr3ebVgXQyvL2sXHQsEvOILTo/edit",
+      "export_format": "txt",
+      "export_sha256": "160f59e14e54028b560553350f4eccc6ecd68a2e3bfb14b7dfc308b59603393a",
+      "local_copy": "src/content/posts/Discussion.md",
+      "local_sha256": "c4cab122e43f6672ba4fce8850d0ddc460788eabd511cdac14d1a029fd83ca40"
+    },
+    {
+      "name": "intro",
+      "source_url": "https://docs.google.com/document/d/1AVtNyFN7AG5ymLqshQI-77jO4nfG0yev8FUABZ8YE9E/edit",
+      "export_format": "txt",
+      "export_sha256": "46147e2f769c38bb4e4a9e8a79f7bc324bc30a9cc864a549affa7af5dbdec877",
+      "local_copy": "src/content/posts/archive/Project-Overview.md",
+      "local_sha256": "e9ee78ea5cbabca02a0938eec9f5dfe18c1981e9f0fd0a1dd84fe0f14786d2a5"
+    },
+    {
+      "name": "status",
+      "source_url": "https://docs.google.com/document/d/1uv5FAk8vwUOn8M2ttY6TtQT92P0Z5SP95sxKeCuTWRM/edit",
+      "export_format": "txt",
+      "export_sha256": "74077f4772dbf04da529226a4dff26cc0ed086e8214a5962195bf1c9a827d97b",
+      "local_copy": "src/content/posts/archive/Broad-Strokes.md",
+      "local_sha256": "dc5acc4b649352bebcadc2a2676c16aa42b524c56c5fa2152c8ba8f4b98a0779"
+    },
+    {
+      "name": "first",
+      "source_url": "https://docs.google.com/document/d/11-HIevKJzReutvqYSodHPu3CDrxDo3ujfTpTGzB27oo/edit",
+      "export_format": "txt",
+      "export_sha256": "aafab7917e6dffa66416be2d35df17ce13b7b87f16e2bdc385af42f9d9a302f9",
+      "local_copy": "src/content/posts/archive/First-Steps-Work-In-Progress.md",
+      "local_sha256": "3a1e9a2e015aa47b74d3c10b83982b821a5c4fd7c4e9be3c1785d639b0633f85"
+    },
+    {
+      "name": "motion",
+      "source_url": "https://docs.google.com/document/d/1STxKMbLI6e3qjGkIlxk1ea7HBDYXW6MEF5rsJpfY0tU/edit",
+      "export_format": "txt",
+      "export_sha256": "1deeb0744266f3aadb242e1ae06bb65ad7a546de9ae243babacb736eb502047e",
+      "local_copy": "src/content/posts/archive/Motion-Systems.md",
+      "local_sha256": "ee94eb0f2e89a1051316cf9dc194186bbe1e34bec45f0589f003f2265df2e51a"
+    },
+    {
+      "name": "unmapped",
+      "source_url": "https://docs.google.com/document/d/1TqrlbjaKIxkAuf-49KdEVl6QT0yXZnAPgf1siMnWOcg/edit",
+      "export_format": "txt",
+      "export_sha256": "dcc8893dd5414a1d3d298a3f706b629e2533a8f1a0891a0ca41f2a05e2768cb1",
+      "local_copy": "public/posts/v1-originals/system-specification-v1.txt",
+      "local_sha256": "4e9d89d7aa3a5b3ec2d0264d871f63989bb990baab4b6b41f91719a317fd7923"
+    },
+    {
+      "name": "build",
+      "source_url": "https://docs.google.com/document/d/1JZMMG3J96v6cnw2YupPp9OF9fiw0H4j0tS8t8fsplJk/edit",
+      "export_format": "md",
+      "export_sha256": "165eac6a5df54adc08eb633ff68b5ecfb1b2e92d65e3086b4eb2b84843caa296",
+      "local_copy": "public/posts/v1-originals/esp32-s3-build-reference.md",
+      "local_sha256": "e0c9fd8bbc7a22c0d00449cc018e7ac15333d9d241774ac351efababf7aac44f"
+    }
+  ],
+  "formatting_notes": [
+    "Original article artwork restored from existing site assets; not represented as physical photographs.",
+    "Historical hardware corrections and source retrieval dates added separately from original text.",
+    "Original local reading-map links updated to canonical archive routes; former routes redirect to those pages.",
+    "Early bridge and motion commentary retained, with the complete original documents appended.",
+    "Normalized line endings and replaced trailing-space Markdown hard breaks with explicit backslash hard breaks; source export hashes retained."
+  ]
+}

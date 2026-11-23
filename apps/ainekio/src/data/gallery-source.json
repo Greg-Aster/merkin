@@ -1,0 +1,741 @@
+[
+  {
+    "id": "v3-armored-three-quarter",
+    "kind": "design",
+    "source": "media-originals/cad/v3_hero_three_quarter.png",
+    "title": "Ainekio V3 heavy-equipment armored CAD with Option A-1 5-link crawler legs (front three-quarter)",
+    "caption": "November 20 Blender CAD (v3-2.blend, Scene 'v3', 537 active meshes): 402.0 × 236.5 × 343.1 mm neutral CAD envelope (with whip antenna), Option A-1 compact 5-link pantograph legs (54/22/46/56/135 mm, +120% lift, 0.93:1 dual-servo balance), recessed AINEKIO V-003 badging, symmetric front fender arches, 2.8-inch MSP2807 Cyclops eye, and 12 waterproof DS3235 actuators.",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "megameal-v2-lab-simulator",
+    "kind": "design",
+    "source": "media-originals/screenshots/megameal_v2_lab_simulator.png",
+    "title": "game.megameal 3D virtual robot lab: Ainekio V2 in the 1:1 browser simulator (alpha PoC)",
+    "caption": "Live browser WebGL capture from game.megameal (?scene=v2_lab_runtime) showing the 12-servo Ainekio V2 quadruped in the 1:1 cable-and-obstacle arena alongside the interactive MuJoCo-parity HUD (virtual OV5647 chin-camera feed, ST7789 face mirror, Free/Follow/POV cameras, force-wrench perturbations, and J0–J11 servo pin/jam controls).",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "v1-clockspring-open-deck",
+    "kind": "design",
+    "source": "media-originals/cad/v1_clockspring_open_deck.png",
+    "title": "Ainekio V1 open-deck CAD: concentric under-arm 4-wire clock-springs & ESP32-P4 layout",
+    "caption": "Overhead cutaway with the Frame8 enclosure cap hidden, exposing all four hip-coaxial rotary clock-springs (33.9 mm under-arm rotor cups, stationary servo-snout stators, and 4-wire coiled harnesses), Waveshare ESP32-P4-WIFI6, Adafruit PCA9685, and dual 2S 14500 battery bays.",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "v1-sculpted-leg-parity",
+    "kind": "design",
+    "source": "media-originals/cad/v1_sculpted_leg_parity.png",
+    "title": "Ainekio V1 unified sculpted spiked lower leg (21,216 verts) parity comparison",
+    "caption": "Three-panel studio comparison of V1’s bio-mechanical cobalt-blue spiked lower leg (39.30 × 5.30 × 79.17 mm) with recessed MG90S servo-horn pocket and mounting screw clearances.",
+    "date": "2026-11-19"
+  },
+  {
+    "id": "v3-opt-a1-rear-three-quarter",
+    "kind": "design",
+    "source": "media-originals/cad/v3_opt_a1_rear_three_quarter.png",
+    "title": "Ainekio V3 rear three-quarter CAD: Option A-1 legs, AINEKIO V-003 hull & sloped rear tray",
+    "caption": "Rear-left three-quarter Blender render of Ainekio V3 standing on all four compact Option A-1 5-link crawler legs (-48.6 mm shorter rear overhang), showing the 40° sloped F688ZZ rear bearing undertray, ribbed cargo trunk, and recessed AINEKIO V-003 badging.",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "v3-opt-a1-workspaces",
+    "kind": "diagram",
+    "source": "media-originals/cad/v3_opt_a1_workspaces.png",
+    "title": "Ainekio V3 5-link leg kinematic & 270° foot workspace point-cloud study",
+    "caption": "Four-panel sagittal workspace comparison across >5,000 evaluated geometries: Baseline V3 (red fender collision zone) vs. Option A compact angled pantograph, Option B zero-tail tucked bellcrank, and Option C symmetric parallel diamond 5-bar.",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "v3-opt-a1-torque-charts",
+    "kind": "diagram",
+    "source": "media-originals/cad/v3_opt_a1_torque_charts.png",
+    "title": "Ainekio V3 DS3235 torque bottleneck, 270° travel utilization & peak motor power study",
+    "caption": "Engineering plots showing how Option A-1 halves peak servo moment arms (shifting bounding load from 84% stall zone to the 46% peak mechanical power zone for +120% vertical lift and +116% running thrust).",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "v3-fender-ainekio-v003",
+    "kind": "design",
+    "source": "media-originals/cad/v3_fender_ainekio_v003_sym.png",
+    "title": "Ainekio V3 symmetric front fender arches & blocky AINEKIO V-003 FDM badging",
+    "caption": "Four-panel left/right elevation and front-3/4 CAD inspection of V3’s extended planar front fender brows, angled yellow side sponsons, hazard stripes, and 79 × 16.4 mm recessed AINEKIO / V-003 Field Companion Unit lettering.",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "v3-clamshell-clip26-latch",
+    "kind": "design",
+    "source": "media-originals/cad/v3_functional_clamshell_clip26.png",
+    "title": "Ainekio V3 functional Clip 26 leaf-spring clamshell latch & M3 anchor cross-section",
+    "caption": "Four-panel CAD section and exterior view of V3’s Clip 26 service-hood latch: hidden M3 anchor foot, 1.8 mm stress-relieved leaf-spring neck, molded 45° striker catch bar, and upper thumb-pull release lip.",
+    "date": "2026-11-19"
+  },
+  {
+    "id": "v3-msp2807-cyclops-eye",
+    "kind": "design",
+    "source": "media-originals/cad/v3_msp2807_cyclops_eye_preview.png",
+    "title": "Ainekio V3 recessed 2.8-inch MSP2807 cyan-phosphor Cyclops eye",
+    "caption": "November 18 Scene 'v3' front vault update: a high-contrast cyan-phosphor Cyclops eye display centered inside the 4-bolt cast-gunmetal MSP2807 (ILI9341) bezel behind the swept ROPS bull-bar and dual Arducam B0066 brow camera pods.",
+    "date": "2026-11-18"
+  },
+  {
+    "id": "v3-clamshell-service-hood",
+    "kind": "design",
+    "source": "media-originals/cad/v3_clamshell_empty_pivot_rig.png",
+    "title": "Ainekio V3 rear-hinged clamshell service hood (0° closed vs. 50° open)",
+    "caption": "Three-angle CAD study showing all 132 upper hull components (isogrid dorsal radiator core, ROPS frame, rear fenders, and cargo subframe) pivoting open 50° as a single clamshell on the rear 2.0 mm piano hinge to expose the Radxa Dragon Q6A and 4× 21700 bay.",
+    "date": "2026-11-18"
+  },
+  {
+    "id": "v3-printable-piano-hinge",
+    "kind": "design",
+    "source": "media-originals/cad/v3_printable_piano_hinge_2mm.png",
+    "title": "Ainekio V3 72 mm printable rear piano hinge & Ø2.0 mm wire core",
+    "caption": "Four-panel mechanical CAD breakdown of V3's rear clamshell service hinge: separate stationary and moving leaves, Ø2.0 × 72 mm stainless wire pin, flush M3×6 screw recesses in the rear vent bumper and cargo trunk, and 60° open service clearance.",
+    "date": "2026-11-18"
+  },
+  {
+    "id": "v3-dorsal-core-isogrid",
+    "kind": "design",
+    "source": "media-originals/cad/v3_dorsal_core_isogrid.png",
+    "title": "Ainekio V3 lightweighting triangular isogrid under the dorsal SBC core",
+    "caption": "Underside and assembled CAD views of V3's dorsal Radxa Dragon Q6A radiator spine, using an internal 1.0 mm-rib triangular isogrid pocket pattern to reduce upper-shell mass while preserving torsional stiffness.",
+    "date": "2026-11-18"
+  },
+  {
+    "id": "v3-armored-interior-cutaway",
+    "kind": "design",
+    "source": "media-originals/cad/v3_interior_cutaway.png",
+    "title": "Ainekio V3 internal cutaway: Radxa Q6A, ESP32-P4 & 4× 21700 bay",
+    "caption": "Cutaway CAD render with upper dorsal armor hidden, revealing the Radxa Dragon Q6A Linux SBC + Armor 7056A heatsink above four 21700 (2S2P) cells, ESP32-P4-WIFI6, 14 AWG copper-busbar PCA9685, and blue-anodized DS3235 actuators.",
+    "date": "2026-11-16"
+  },
+  {
+    "id": "v3-motion-library-12pose",
+    "kind": "design",
+    "source": "media-originals/cad/v3_motion_library_showcase.png",
+    "title": "Ainekio V3 12-pose kinematic motion library contact sheet",
+    "caption": "Twelve keyposes from the 47-chapter V3 kinematic rig (Walk, Walk→Run→Walk, Walk Backward, Turn Left 90, Crawl, Crab Left, Sit, Rest, Wave, Bow, Dance, and experimental Upright) verifying zero BVHTree armor collisions across full limb travel.",
+    "date": "2026-11-16"
+  },
+  {
+    "id": "v3-part003-clearance-study",
+    "kind": "design",
+    "source": "media-originals/cad/v3_part003_views.png",
+    "title": "Ainekio V3 Part_003 DS3235 shoulder pod & 25T clamping horn clearance audit",
+    "caption": "Four-quadrant Blender CAD clearance check of the V3 shoulder bracket (|OC| = 28.32 mm shaft spacing, 6.50 mm axial stagger), waterproof DS3235 servo wire grommet relief, 25T aluminum clamping horn bolt clearance, and F688ZZ counter-pivot.",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "v1-blender-three-quarter",
+    "kind": "design",
+    "source": "media-originals/cad/v1_clean_three_quarter.png",
+    "title": "Ainekio V1 modernized CAD: vertical-knee arm setup, under-arm clock-springs & sculpted spiked legs",
+    "caption": "November 20 Scene 'v1' CAD (174.8 × 155.5 × 84.1 mm, 174 active meshes): 36.17 × 36.17 × 37.50 mm R2V10 upper arms with vertical knee MG90S servos, 3-part concentric under-arm 4-wire clock-springs (rotor cup + snout stator + spiral harness), Frame8 clock-spring bays, 21,216-vert cobalt-blue spiked lower legs, and 0.96-inch SSD1306 OLED eyes.",
+    "date": "2026-11-20"
+  },
+  {
+    "id": "v1-p4-revisit-4view-cad",
+    "kind": "design",
+    "source": "media-originals/cad/v1_p4_revisit_layout.png",
+    "title": "Ainekio V1 modernized ESP32-P4, 4th-wire & coaxial-harness 4-view CAD",
+    "caption": "Four-view engineering layout of the modernized eight-servo Ainekio V1 interior: Waveshare ESP32-P4-WIFI6, PCA9685 + 8 direct-ADC 4th-wire sense leads, 20×30 mm speaker bridge cradle over GY-LSM6DS3 IMU, rear master rocker switch + external 2S charge jack, and coaxial Hip-Z wire arches.",
+    "date": "2026-11-17"
+  },
+  {
+    "id": "v1-blender-workspace",
+    "kind": "design",
+    "source": "media-originals/cad/v1_clean_workspace.png",
+    "title": "Ainekio V1 Blender workspace: open electronics bay & detached Frame8 cap",
+    "caption": "Blender 'v1 -' workspace staging with the Frame8 top enclosure cap parked beside the wired Frame7 body, exposing the Freenove ESP32-S3-WROOM CAM, Adafruit PCA9685 servo header, Mini560 5V/5A buck, and HiLetgo 2S USB-C boost charger.",
+    "date": "2026-11-17"
+  },
+  {
+    "id": "v1-blender-top-electronics",
+    "kind": "design",
+    "source": "media-originals/cad/v1_clean_top_electronics.png",
+    "title": "Ainekio V1 top orthographic deck in Blender: ESP32-S3, PCA9685 & dual 2S routing",
+    "caption": "Orthographic top-down Blender CAD deck of Ainekio V1 showing symmetrical left and right 2S 1000 mAh (14500) battery bays, servo lead routing along all four R2V10 brackets, central ESP32-S3 + PCA9685 distribution deck, and rear dual-buck power regulation.",
+    "date": "2026-11-17"
+  },
+  {
+    "id": "v3-gaits-and-motions-2x-standard",
+    "kind": "animation",
+    "source": "public/gallery/v3-gaits-and-motions-2x-standard.mp4",
+    "title": "Why robot motions don't translate: V2's 47-motion library replayed on V3 (2×)",
+    "caption": "An example of why robot motions do not translate across bodies and each robot needs to learn its own motions: replaying Ainekio V2's 47 analytical gaits and gestures onto the 1.44× longer-legged, heavier V3 chassis produces foot slip, pitch oscillation, and geometry mismatches—illustrating why each generation must learn policies tailored to its own mass and kinematics.",
+    "date": "2026-11-17",
+    "posterTime": 5
+  },
+  {
+    "id": "microduck-v18-sysid",
+    "kind": "animation",
+    "source": "media-originals/training/microduck_v18_p4_replay.mp4",
+    "title": "MicroDuck v18-p4 System-ID evaluation (107.8 KB int8)",
+    "caption": "November 12 System-ID repair trained from physical V2 floor traces (-19.1° J3 compliance & weak RL gain): +1.3246 10-scenario composite score, 0 falls, +69.5% weak-RL speed, and +79.7% faster 14–17 mm cable traversal.",
+    "date": "2026-11-12",
+    "posterTime": 3
+  },
+  {
+    "id": "ainekio-v1-physical",
+    "kind": "photo",
+    "source": "media-originals/photos/ainekio-v1-physical.jpg",
+    "title": "Physical Ainekio V1 eight-servo ESP32-S3 quadruped on carpet",
+    "caption": "Summer 2026 baseline robot on living-room carpet showing its glowing 0.96-inch SSD1306 OLED eyes, chin OV3660 camera, Frame7/Frame8 chassis, and cyan serrated 2-DOF MG90S legs.",
+    "date": "2026-08-31"
+  },
+  {
+    "id": "ainekio-v1-physical-wave",
+    "kind": "photo",
+    "source": "media-originals/photos/ainekio-v1-physical-wave.jpg",
+    "title": "Physical Ainekio V1 executing a front-leg wave on carpet",
+    "caption": "Action still of the eight-servo ESP32-S3 Ainekio V1 quadruped lifting its front-left cyan serrated 2-DOF leg in a greeting wave while displaying an animated expression on its 0.96-inch SSD1306 OLED.",
+    "date": "2026-08-31"
+  },
+  {
+    "id": "ainekio-v1-physical-dance",
+    "kind": "photo",
+    "source": "media-originals/photos/ainekio-v1-physical-dance.jpg",
+    "title": "Physical Ainekio V1 in wide spider-stance dance motion",
+    "caption": "The eight-servo ESP32-S3 Ainekio V1 prototype splayed across living-room carpet mid-dance clip (.amot keyframe playback) with glowing SSD1306 OLED eyes and chin-mounted OV3660 camera.",
+    "date": "2026-08-31"
+  },
+  {
+    "id": "v2-shake-and-greet-test",
+    "kind": "physical-video",
+    "source": "public/gallery/v2-shake-and-greet-test.mp4",
+    "title": "Capability check: wake-up stretch, physical shake reflex & snarky remark",
+    "caption": "End-to-end IMU reflex and Ainekio OS continuity test on carpet: Ainekio boots, stretches, converses, gets picked up and shaken mid-turn—firing an immediate snarky vocal and LCD reaction via fast-body-event-mode—and resumes friendly interaction afterward.",
+    "date": "2026-11-17",
+    "posterTime": 75
+  },
+  {
+    "id": "v2-jam-protection-test",
+    "kind": "physical-video",
+    "source": "public/gallery/v2-jam-protection-test.mp4",
+    "title": "Capability check: boot, greet, stretch & 4th-wire jam/fault detection",
+    "caption": "Startup and closed-loop fault-awareness check on V2: Ainekio boots, rises to Stand, greets and observes the room, hits a stalled joint during its stretch, detects the shaft tracking error via 4th-wire potentiometer feedback, protects the winding, and asks for help.",
+    "date": "2026-11-17",
+    "posterTime": 18
+  },
+  {
+    "id": "v2-basic-motion-test",
+    "kind": "physical-video",
+    "source": "public/gallery/v2-basic-motion-test.mp4",
+    "title": "Capability check: voice prompt, thinking face & physical gesture response",
+    "caption": "Basic V2 conversational motion turn on living-room carpet: Ainekio listens to a spoken prompt, shifts to its animated thinking expression while Ainekio OS selects an action, executes a coordinated body gesture, and delivers its spoken reply.",
+    "date": "2026-11-17",
+    "posterTime": 8
+  },
+  {
+    "id": "ainekio-v2-neural-walk-first-run",
+    "kind": "physical-video",
+    "source": "media-originals/ainekio-v2-neural-walk-first-run.mp4",
+    "title": "First real-life neural network walking run",
+    "caption": "November 6 milestone: the physical 650 g 12-servo Ainekio V2 quadruped walking forward across carpet and reversing cleanly under its trained 200M-step MJX neural network policy.",
+    "date": "2026-11-06",
+    "posterTime": 5
+  },
+  {
+    "id": "ainekio-v2-alert-stance",
+    "kind": "photo",
+    "source": "media-originals/photos/ainekio-v2-alert-stance.jpg",
+    "title": "Physical Ainekio V2 standing alert on carpet with glowing ST7789 eyes",
+    "caption": "Close-up floor view of the 650 g 12-servo Ainekio V2 quadruped in an upright standing posture, showing its 1.9-inch ST7789 IPS face, lower-jaw OV5647 camera pocket, serrated four-bar legs, and top-deck 4th-wire feedback harness.",
+    "date": "2026-11-14"
+  },
+  {
+    "id": "ainekio-v2-physical-three-quarter",
+    "kind": "photo",
+    "source": "media-originals/ainekio-v2-physical-three-quarter.jpg",
+    "title": "Physical Ainekio V2 on carpet (three-quarter view)",
+    "caption": "The 650 g 12-servo Ainekio V2 quadruped in its printed red-and-black shell with 4th-wire servo feedback harness and four-bar legs before neural gait trials.",
+    "date": "2026-11-06"
+  },
+  {
+    "id": "ainekio-v2-physical-front",
+    "kind": "photo",
+    "source": "media-originals/ainekio-v2-physical-front.jpg",
+    "title": "Physical Ainekio V2 on carpet (front profile)",
+    "caption": "Front-on floor view showing the 1.9-inch ST7789 LCD face bay, lower-jaw OV5647 CSI camera mount, and wide-stance 3-DOF leg linkages.",
+    "date": "2026-11-06"
+  },
+  {
+    "id": "microduck-p4-student-110kb",
+    "kind": "animation",
+    "source": "public/gallery/microduck-p4-student-110kb.mp4",
+    "title": "Distilled 107.8 KB on-chip ESP32-P4 MicroDuck student rollout",
+    "caption": "2-round DAgger student policy (720→128→64→32→12, 110,432 B int8) fitting inside the ESP32-P4's 128 KB L2 cache, trained with multi-surface slick/carpet friction and simulated 4th-wire ADC rail sag.",
+    "date": "2026-11-10",
+    "posterTime": 3
+  },
+  {
+    "id": "pupper-mjx-800m-rollout",
+    "kind": "animation",
+    "source": "media-originals/training/pupper_mjx_800m_rollout.mp4",
+    "title": "800M-step omnidirectional MJX walking policy rollout (7-maneuver suite)",
+    "caption": "November 10 checkpoint (804.6M MJX steps at 50 Hz): 11.2-second multi-command evaluation executing zero-drift stand hold, +0.26 m/s forward walk, -0.26 m/s reverse across a 4 mm mat, ±0.12 m/s left/right crab strafes, and ±1.20 rad/s yaw turns in place.",
+    "date": "2026-11-10",
+    "posterTime": 3
+  },
+  {
+    "id": "microduck-terrain-showcase",
+    "kind": "animation",
+    "source": "public/gallery/microduck-terrain-showcase.mp4",
+    "title": "MicroDuck teacher terrain rollout: sloped ramps, steps, rocks, slip & pushes",
+    "caption": "Full-CAD 650 g Ainekio V2 traversing sloped ramps, discrete steps, rocks, low-friction slip zones, and lateral push disturbances under the 512-256-128 MicroDuck teacher policy.",
+    "date": "2026-11-07",
+    "posterTime": 3
+  },
+  {
+    "id": "rl-rough-terrain-400m",
+    "kind": "animation",
+    "source": "media-originals/training/ainekio_rough_terrain_400M_policy.mp4",
+    "title": "400M-step full-CAD Ainekio V2 rough-terrain step-obstacle rollout",
+    "caption": "November 6 MuJoCo MJX rough-terrain policy (400M steps) driving the full-CAD 650 g Ainekio V2 model across randomized floor blocks and step ledges before DAgger distillation.",
+    "date": "2026-11-06",
+    "posterTime": 3
+  },
+  {
+    "id": "rl-centered-stride-200m",
+    "kind": "animation",
+    "source": "media-originals/rl-centered-stride-200m.mp4",
+    "title": "200M-step centered-stride & upright reverse rollout (Run #5)",
+    "caption": "Resolved full-CAD MuJoCo policy after fixing tiny hops and reverse dragging: 56.6–63.7 mm centered fore-aft stride, 3.5× higher foot air-time credit, and upright reverse walking (0.072 m torso height, zero rear scoot).",
+    "date": "2026-11-05",
+    "posterTime": 2
+  },
+  {
+    "id": "rl-scootybooty-200m",
+    "kind": "animation",
+    "source": "media-originals/rl-scootybooty-200m.mp4",
+    "title": "RL failure mode: 'Scootybooty' reverse dragging (Run #4)",
+    "caption": "Intermediate 200M-step rollout before stance centering: the policy parked in an asymmetric split stance and dropped its rear end to 0.044 m to scoot backward instead of lifting its rear feet.",
+    "date": "2026-11-05",
+    "posterTime": 7
+  },
+  {
+    "id": "rl-tiny-hops-35m",
+    "kind": "animation",
+    "source": "media-originals/rl-tiny-hops-35m.mp4",
+    "title": "RL failure mode: rapid tiny hops (35M-step rollout)",
+    "caption": "Early 35M-step full-CAD rollout where narrow action scaling produced rapid miniature hops (20–27 mm foot swing) rather than full four-bar strides.",
+    "date": "2026-11-05",
+    "posterTime": 2
+  },
+  {
+    "id": "rl-progress-centered-200m",
+    "kind": "diagram",
+    "source": "media-originals/rl-progress-centered-200m.png",
+    "title": "200M-step JAX/Brax/MJX PPO training curve",
+    "caption": "Evaluation episode reward curve across 201.5 million MJX environment steps for the centered-stride neural gait policy (28.97 ± 13.18 reward).",
+    "date": "2026-11-05"
+  },
+  {
+    "id": "carpet-trial-20261102",
+    "kind": "physical-video",
+    "source": "media-originals/training/650a-carpet26-onboard.mp4",
+    "title": "Onboard camera: carpet walking trial",
+    "caption": "November 2 physical forward-refinement trial recorded from Ainekio's onboard OV5647 CSI camera (with 180° firmware rotation and motion-safe 10,000 µs exposure ceiling) while testing native-C imitation gait updates on carpet.",
+    "date": "2026-11-02",
+    "posterTime": 2
+  },
+  {
+    "id": "ainekio-mjcf-preview",
+    "kind": "design",
+    "source": "media-originals/training/ainekio-mjcf-preview.png",
+    "title": "Ainekio full-CAD MuJoCo MJCF model",
+    "caption": "November 5 MuJoCo model exported directly from the V2 Blender CAD assembly (0.650 kg, 12 servo actuators, 8 passive hinges, and 4 planar four-bar equality constraints) for JAX/Brax/MJX gait training.",
+    "date": "2026-11-05"
+  },
+  {
+    "id": "v2-cad-open-keeper-deck",
+    "kind": "design",
+    "source": "media-originals/cad/v2_cad_open_keeper_deck.jpg",
+    "title": "Ainekio V2 open-top CAD deck: ESP32-P4, PCA9685, CD74HC4067 & Keeper Bridge",
+    "caption": "Orthographic top-down Blender CAD view of the 650 g Ainekio V2 chassis with dorsal carapace hidden, exposing the Waveshare ESP32-P4-WIFI6, PCA9685 PWM board, front CD74HC4067 4th-wire mux behind the faceted head mask, rear 2S Wireless Keeper Bridge, and four-bar linkages.",
+    "date": "2026-11-09"
+  },
+  {
+    "id": "neural-walking-20261030",
+    "kind": "animation",
+    "source": "media-originals/training/neural-walking-20261030.mp4",
+    "title": "Neural walking: initial vs. aggregated imitation policy",
+    "caption": "October 30 simulation comparison: two 16-second forward trials before and after C-gait teacher demonstration aggregation (360,000 imitation updates).",
+    "date": "2026-10-30",
+    "posterTime": 22
+  },
+  {
+    "id": "20261021_083818",
+    "kind": "photo",
+    "source": "media-originals/photos/20261021_083818.jpg",
+    "title": "The rebuilt V2 prototype, front view",
+    "caption": "The assembled 12-servo V2 prototype on the workbench with its red face shell, restored 1.9-inch ST7789 LCD, OV5647 camera, and 4th-wire feedback harness.",
+    "date": "2026-10-21"
+  },
+  {
+    "id": "20261021_081323",
+    "kind": "photo",
+    "source": "media-originals/photos/20261021_081323.jpg",
+    "title": "Red shell and five-bar leg linkages",
+    "caption": "Three-quarter view of the rebuilt V2 chassis showing the planar leg linkages and compact body shell.",
+    "date": "2026-10-21"
+  },
+  {
+    "id": "20261021_081343",
+    "kind": "photo",
+    "source": "media-originals/photos/20261021_081343.jpg",
+    "title": "Low stance, side profile",
+    "caption": "Side profile of the V2 prototype in a low rest stance, showing the side frame, linkage geometry, and rear electronics bay.",
+    "date": "2026-10-21"
+  },
+  {
+    "id": "20261017_213601",
+    "kind": "photo",
+    "source": "media-originals/photos/20261017_213601.jpg",
+    "title": "4th-wire feedback servo harness on the bench",
+    "caption": "The open V2 body, modified MG90S servos, and analog potentiometer feedback wiring laid out during the closed-loop rebuild.",
+    "date": "2026-10-17"
+  },
+  {
+    "id": "20261017_200604",
+    "kind": "photo",
+    "source": "media-originals/photos/20261017_200604.jpg",
+    "title": "Inside the V2 electronics bay",
+    "caption": "The open chassis during assembly with the ST7789 display, ESP32-P4, PCA9685 PWM driver, and CD74HC4067 multiplexer wiring exposed.",
+    "date": "2026-10-17"
+  },
+  {
+    "id": "20261015_172412",
+    "kind": "photo",
+    "source": "media-originals/photos/20261015_172412.jpg",
+    "title": "Printed leg carrier and linkage assembly",
+    "caption": "Close-up of a single 3-DOF leg module showing the 35 mm carrier, 20 mm crank, 28 mm pickup, 38 mm rod, and 55 mm lower leg.",
+    "date": "2026-10-15"
+  },
+  {
+    "id": "20261013_154510",
+    "kind": "photo",
+    "source": "media-originals/photos/20261013_154510.jpg",
+    "title": "Resting stance on carpet",
+    "caption": "The assembled twelve-servo prototype resting low on the floor between standing and leveling tests.",
+    "date": "2026-10-13"
+  },
+  {
+    "id": "20261008_181333",
+    "kind": "photo",
+    "source": "media-originals/photos/20261008_181333.jpg",
+    "title": "Uncovered twelve-servo prototype",
+    "caption": "The uncovered V2 chassis on the bench during initial standing, walking, and display bring-up.",
+    "date": "2026-10-08"
+  },
+  {
+    "id": "20260914_152236",
+    "kind": "photo",
+    "source": "public/photos/20260914_152236.jpg",
+    "title": "Single-leg linkage bench prototype",
+    "caption": "Early physical leg linkage prototype used to verify joint ranges and bell-crank clearances before printing the full V2 frame.",
+    "date": "2026-09-14"
+  },
+  {
+    "id": "20260914_152130",
+    "kind": "photo",
+    "source": "public/photos/20260914_152130.jpg",
+    "title": "Linkage prototype, side view",
+    "caption": "Side angle of the September single-leg mechanism test rig.",
+    "date": "2026-09-14"
+  },
+  {
+    "id": "20260914_152101",
+    "kind": "photo",
+    "source": "public/photos/20260914_152101.jpg",
+    "title": "Linkage prototype, upper pivot detail",
+    "caption": "Upper carrier and horn pivot detail on the early single-leg test print.",
+    "date": "2026-09-14"
+  },
+  {
+    "id": "20260827_093250",
+    "kind": "photo",
+    "source": "public/photos/20260827_093250.jpg",
+    "title": "Original V1 eight-servo build",
+    "caption": "The earlier red eight-servo ESP32-S3 prototype on the floor.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "20260827_093221",
+    "kind": "photo",
+    "source": "public/photos/20260827_093221.jpg",
+    "title": "V1 prototype, three-quarter view",
+    "caption": "Three-quarter view of the original eight-servo build and exposed servo leads.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "20260827_093218",
+    "kind": "photo",
+    "source": "public/photos/20260827_093218.jpg",
+    "title": "V1 prototype, front stance",
+    "caption": "Front stance of the early eight-servo printed chassis.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "20260827_093204",
+    "kind": "photo",
+    "source": "public/photos/20260827_093204.jpg",
+    "title": "V1 prototype, side view",
+    "caption": "Side profile of the original eight-servo quadruped.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "20260827_093200",
+    "kind": "photo",
+    "source": "public/photos/20260827_093200.jpg",
+    "title": "V1 prototype, top-down packaging",
+    "caption": "Top-down view of the original eight-servo frame and electronics bay.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "20260827_093156",
+    "kind": "photo",
+    "source": "public/photos/20260827_093156.jpg",
+    "title": "V1 prototype, rear quarter",
+    "caption": "Rear-quarter view of the August eight-servo prototype.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "20260827_092219",
+    "kind": "photo",
+    "source": "public/photos/20260827_092219.jpg",
+    "title": "V1 prototype, low pose",
+    "caption": "The early eight-servo chassis resting on carpet.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "20260827_092217",
+    "kind": "photo",
+    "source": "public/photos/20260827_092217.jpg",
+    "title": "V1 prototype, close-up",
+    "caption": "Close-up of the original eight-servo leg and frame print.",
+    "date": "2026-08-27"
+  },
+  {
+    "id": "lcd-face-contact-sheet",
+    "kind": "diagram",
+    "source": "media-originals/diagrams/lcd-face-contact-sheet.png",
+    "title": "59 animated LCD face expressions",
+    "caption": "Contact sheet of all 59 procedural face expressions rendered by the ESP32-P4 firmware at 320×170 (15 FPS) on the 1.9-inch ST7789 SPI display.",
+    "date": "2026-11-03"
+  },
+  {
+    "id": "v1-oled-59-expressions",
+    "kind": "diagram",
+    "source": "media-originals/diagrams/v1_oled_derived_from_v2.png",
+    "title": "59 monochrome 128×64 SSD1306 OLED expressions for Ainekio V1",
+    "caption": "Complete 59-expression (303-frame) 1-bit 128×64 SSD1306 OLED contact sheet generated by derive_v1_oled.py from V2's procedural face engine so V1 and V2 share full facial vocabulary parity over protocol-v1.",
+    "date": "2026-11-17"
+  },
+  {
+    "id": "microduck-v18-sysid-benchmark",
+    "kind": "diagram",
+    "source": "media-originals/diagrams/microduck_v18_p4_environment.png",
+    "title": "MicroDuck v18-p4 System-ID & 14–17 mm cable clearance benchmark",
+    "caption": "Benchmark comparison of microduck-v17-p4 vs. System-ID repaired microduck-v18-p4 across carpet, slick wood, reverse, 14–17 mm power cables (+79.7% speed), and weak rear-left gain (+69.5% speed), alongside per-leg peak swing clearance.",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "diagram-assembly-reference",
+    "kind": "diagram",
+    "source": "media-originals/diagrams/Assembly_Reference.png",
+    "title": "V2 system assembly & bus reference",
+    "caption": "Complete V2 hardware interconnect diagram covering the Waveshare ESP32-P4-WIFI6, PCA9685 PWM driver, CD74HC4067 4th-wire feedback mux, ST7789 LCD, OV5647 CSI camera, LSM6DS3 IMU, and 2S power system.",
+    "date": "2026-10-18"
+  },
+  {
+    "id": "diagram-esp32p4-pinout",
+    "kind": "diagram",
+    "source": "media-originals/diagrams/ESP32P4_Pinout.png",
+    "title": "Waveshare ESP32-P4-WIFI6 GPIO pinout",
+    "caption": "Pin allocation on the ESP32-P4 header for I2C0 (LSM6DS3), I2C1 (PCA9685), SPI2 (ST7789 LCD), ADC2/MUX (CD74HC4067 4th-wire feedback), and onboard audio.",
+    "date": "2026-10-18"
+  },
+  {
+    "id": "diagram-multiplexer-wiring",
+    "kind": "diagram",
+    "source": "media-originals/diagrams/Multiplexer_Wiring.png",
+    "title": "CD74HC4067 4th-wire servo feedback wiring",
+    "caption": "Routing of the 12 modified MG90S potentiometer wiper leads into MUX channels C4–C15 and ADC2_CH0 (GPIO49) for closed-loop position and stall detection.",
+    "date": "2026-10-18"
+  },
+  {
+    "id": "diagram-pca9685-wiring",
+    "kind": "diagram",
+    "source": "media-originals/diagrams/PCA9685_Wiring.png",
+    "title": "PCA9685 12-servo PWM driver wiring",
+    "caption": "I2C1 (GPIO2/3) and Output Enable (GPIO4) wiring to the HUAREW PCA9685 50 Hz servo controller and 5V 5A Mini560 power rail.",
+    "date": "2026-10-18"
+  },
+  {
+    "id": "diagram-servo-socket-map",
+    "kind": "diagram",
+    "source": "media-originals/diagrams/Servo_Socket_Map.png",
+    "title": "V2 12-servo channel & leg socket map",
+    "caption": "Physical mapping of Rear-Left (0–2), Rear-Right (3–5), Front-Left (6–8), and Front-Right (9–11) abduction, hip, and knee servos.",
+    "date": "2026-10-18"
+  },
+  {
+    "id": "diagram-lcd-wiring",
+    "kind": "diagram",
+    "source": "media-originals/diagrams/LCD_Wiring.png",
+    "title": "XIITIA 1.9-inch ST7789 SPI LCD wiring",
+    "caption": "SPI2 wiring (GPIO21–26) for the 320×170 landscape face display.",
+    "date": "2026-10-18"
+  },
+  {
+    "id": "diagram-lsm6ds3-wiring",
+    "kind": "diagram",
+    "source": "media-originals/diagrams/LSM6DS3_Wiring.png",
+    "title": "GY-LSM6DS3 6-DOF IMU wiring",
+    "caption": "Shared I2C0 (GPIO7/8 at 400 kHz, address 0x6A) wiring for 208 Hz x-io Fusion attitude estimation and body motion event detection.",
+    "date": "2026-10-18"
+  },
+  {
+    "id": "design-boot-angular-comparison",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/boot-angular-comparison.png",
+    "title": "Lower-leg and foot profile comparison",
+    "caption": "Blender geometry comparison of candidate lower-leg and foot profiles.",
+    "date": "2026-09-23"
+  },
+  {
+    "id": "design-boot-angular-leg",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/boot-angular-leg.png",
+    "title": "Angular lower-leg linkage study",
+    "caption": "Modeled single-leg linkage with the angular lower-leg profile.",
+    "date": "2026-09-23"
+  },
+  {
+    "id": "design-boot-angular-robot",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/boot-angular-robot.png",
+    "title": "Full assembly with angular boots",
+    "caption": "Blender study of the four-leg assembly fitted with the angular lower legs.",
+    "date": "2026-09-23"
+  },
+  {
+    "id": "design-boot-replacement-inner",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/boot-replacement-inner.png",
+    "title": "Inner linkage pivot clearance study",
+    "caption": "Blender check of inner linkage clearances across the leg stroke.",
+    "date": "2026-09-23"
+  },
+  {
+    "id": "design-boot-replacement-leg",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/boot-replacement-leg.png",
+    "title": "Replacement lower-leg geometry",
+    "caption": "Candidate lower-leg geometry modeled in Blender.",
+    "date": "2026-09-23"
+  },
+  {
+    "id": "design-front-quarter",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/front-quarter.png",
+    "title": "September V2 CAD: front quarter",
+    "caption": "September 22 Blender assembly study of the 12-servo frame.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "design-front",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/front.png",
+    "title": "September V2 CAD: front view",
+    "caption": "Front orthographic view of the September 22 CAD assembly.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "design-left-side",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/left-side.png",
+    "title": "September V2 CAD: left profile",
+    "caption": "Left orthographic view of the September 22 CAD assembly.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "design-overview",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/overview.png",
+    "title": "September V2 CAD: perspective overview",
+    "caption": "Perspective overview of the September 22 CAD assembly.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "design-rear-quarter",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/rear-quarter.png",
+    "title": "September V2 CAD: rear quarter",
+    "caption": "Rear-quarter view of the September 22 CAD assembly.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "design-rear",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/rear.png",
+    "title": "September V2 CAD: rear view",
+    "caption": "Rear orthographic view of the September 22 CAD assembly.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "design-right-side",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/right-side.png",
+    "title": "September V2 CAD: right profile",
+    "caption": "Right orthographic view of the September 22 CAD assembly.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "design-top",
+    "kind": "design",
+    "source": "media-originals/photos/current-state-images/top.png",
+    "title": "September V2 CAD: top view",
+    "caption": "Top orthographic view showing shoulder spacing and internal bay layout.",
+    "date": "2026-09-22"
+  },
+  {
+    "id": "floor-test",
+    "kind": "physical-video",
+    "source": "media-originals/photos/Timeline 2.mp4",
+    "title": "Early prototype floor test",
+    "caption": "Physical footage of the early prototype on carpet during linkage and stance adjustments.",
+    "date": "2026-08-31",
+    "posterTime": 5
+  },
+  {
+    "id": "early-bench",
+    "kind": "physical-video",
+    "source": "media-originals/photos/20260729_203710.mp4",
+    "title": "Early electronics bench test",
+    "caption": "July workbench test of the initial electronics, servos, and display.",
+    "date": "2026-07-29",
+    "posterTime": 3
+  },
+  {
+    "id": "motion-library",
+    "kind": "animation",
+    "source": "media-originals/photos/ainekio-gaits-and-motions-2x-standard.mp4",
+    "title": "33 motions in Blender (2× showcase)",
+    "caption": "Blender showcase of 33 modeled poses, emotes, and gait trajectories at 2× playback speed.",
+    "date": "2026-09-23",
+    "posterTime": 3
+  },
+  {
+    "id": "variable-gait",
+    "kind": "animation",
+    "source": "media-originals/photos/ainekio-variable-gait-demo.mp4",
+    "title": "Variable gait study in Blender",
+    "caption": "Blender animation studying stride transitions across the four-bar leg linkages.",
+    "date": "2026-10-05",
+    "posterTime": 1
+  }
+]

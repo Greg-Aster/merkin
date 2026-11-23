@@ -1,0 +1,66 @@
+---
+import type { GetStaticPaths } from 'astro'
+import PostPage from '../components/PostPage.astro'
+import Pagination from '../components/control/Pagination.astro'
+import PortalDemoVideoPlayer from '../components/home/PortalDemoVideoPlayer.astro'
+import PortalHeroBackgroundSlide from '../components/home/PortalHeroBackgroundSlide.astro'
+import PortalHeroSlide from '../components/home/PortalHeroSlide.astro'
+import PortalSponsoredBloom from '../components/home/PortalSponsoredBloom.astro'
+import { PAGE_SIZE } from '../constants/constants'
+import MainGridLayout from '../layouts/MainGridLayout.astro'
+import { routeStyleHref } from '../styles/routeStyleBundles'
+import { getSortedPosts } from '../utils/content-utils'
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const allBlogPosts = await getSortedPosts()
+  return paginate(allBlogPosts, { pageSize: PAGE_SIZE })
+}) satisfies GetStaticPaths
+// https://github.com/withastro/astro/issues/6507#issuecomment-1489916992
+
+const { page } = Astro.props
+const isFirstPage = page.currentPage === 1
+const len = page.data.length
+---
+
+<MainGridLayout
+  homeLayout={isFirstPage ? 'portal' : 'default'}
+  contentMode={isFirstPage ? 'banner-only' : 'default'}
+>
+  <Fragment slot="head">
+    <link
+      rel="stylesheet"
+      href={routeStyleHref(isFirstPage ? 'home' : 'listing')}
+      data-route-style={isFirstPage ? 'home' : 'listing'}
+    />
+  </Fragment>
+  {isFirstPage && (
+    <Fragment slot="banner-overlay-content">
+      <PortalHeroSlide />
+    </Fragment>
+  )}
+  {isFirstPage && (
+    <Fragment slot="banner-slide-content">
+      <PortalHeroBackgroundSlide />
+    </Fragment>
+  )}
+  {isFirstPage && (
+    <Fragment slot="portal-demo-content">
+      <PortalDemoVideoPlayer />
+    </Fragment>
+  )}
+  {!isFirstPage && (
+    <div class="dispatches-stream deferred-section">
+      <PostPage page={page}></PostPage>
+      <Pagination
+        class="mx-auto onload-animation"
+        page={page}
+        style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
+      ></Pagination>
+    </div>
+  )}
+  {isFirstPage && (
+    <PortalSponsoredBloom
+      slot="overlay"
+    />
+  )}
+</MainGridLayout>

@@ -1,0 +1,195 @@
+﻿Ainekio - System Specification v1.0
+NORMATIVE SET: this file plus the Parts Overview (normative for electrical facts only; this file controls behavior). If a required fact is in neither, implementation stops for an errata. This v1.0 is a consolidation of Spec v0.6 + Amendment 1 with no intended behavioral changes; any discovered divergence from that lineage is a defect in this file. CHANGE CONTROL: this spec changes only via numbered errata for implementation-discovered defects (a clause that cannot be built, an internal contradiction found in code, or a test that cannot pass as written). RFC-2119 keywords.
+
+
+docs/ layout: this file (normative), Parts Overview (normative-electrical), everything else background or archive. docs/README.md names the two normative files.
+1. System overview
+Ainekio is a desk-companion robot. The master brain (Python, home PC) runs MetaHuman OS: an operator LLM that queues tasks, Whisper speech-to-text, and face detection. The body is a Freenove ESP32-S3-WROOM CAM (module marking ESP32-S3-WROOM-1 N16R8: 16 MB quad flash + 8 MB octal PSRAM - procurement MUST confirm, photo evidence in H2) running C firmware on ESP-IDF v5.x / FreeRTOS. The body executes intent-level commands, streams camera JPEG and mic PCM up, plays speaker PCM and canned assets, drives 8 MG90S servos (MCPWM), an SSD1306 OLED face (I2C), and INMP441 mic + MAX98357A amp (I2S), and enforces every safety rule locally. Exactly one WebSocket connects them, always dialed out by the body. The brain is never trusted with safety.
+
+
+Repo layout: protocol/ (schemas, binary helpers, golden fixtures), emulator/, gateway/ (server + dashboard + bridge_client), firmware/esp32s3/, tests/protocol/ (fixtures shared by all suites), docs/. simulators/sesame-robot-sim is a visual rendering backend only - it implements no protocol behavior and is never the acceptance stand-in.
+
+
+Roles: the Robot Gateway is the single brain process owning the robot socket, seq assignment, epochs, and auth. It WRAPS the existing MetaHuman environment bridge: only the bridge-client and action-translation logic are extracted from the old adapter into gateway/bridge_client; the old adapter CLI is simulator-only and MUST NOT consume the robot deployment SSE stream (guard test A25).
+
+
+Build order and gates:
+
+
+* B1 protocol library + golden fixtures. Gate to B2: A16 passes.
+* B2 emulator phase 1 (control plane, safety, states). Gate to B3: A1-A5, A10, A11, and the emulator-local parts of A22/A23 pass.
+* B3 gateway skeleton + dashboard. Complete when A15, A17, A19, A24 pass against the emulator, plus reconnect semantics A3/A11.
+* B4 emulator phase 2 (media) + B5 bridge integration. Gate: full A-series passes.
+* B6 firmware. Start gates: full A-series green, Parts Overview present and reviewed, H2 plan reviewed. Done: H-series passes with recorded evidence.
+2. Definitions
+BRAIN: master computer and services. BODY: robot firmware, or the emulator standing in for it. INTENT: named high-level command. MOVEMENT_INTENT: {sit, stand, neutral, look, walk} - the only commands gated by S1 and the only commands that re-attach servos after a stop. SESSION: one WebSocket lifetime. EPOCH: integer the gateway increments per session. PROFILE: bandwidth policy (home, tether). CONTROL FRAME: text frame with one JSON object. MEDIA FRAME: binary frame. UTTERANCE: one streamed-speech unit bracketed by tts start/end.
+3. Protocol
+3.1 Transport
+One WebSocket; the body initiates to its configured endpoint and accepts no inbound connections outside provisioning (6.7). LAN and relay endpoints use the identical protocol; a relay is a transparent pipe for payloads (relay-level pairing/auth belongs to the future relay deployment doc). Disconnect + redial is a normal event. Gateway transport lives behind a small boundary module so relay topology can change without touching protocol logic. ws:// MAY be used on the home LAN; wss:// MUST be used for relay.
+3.2 Session
+Body first message: {"t":"hello","ver":1,"fw":"0.1.0","id":"ainekio-01","auth":"REDACTED-TOKEN"} (token <=128 chars). Gateway: auth failure -> {"t":"err","code":"auth"} + close 4001; version unsupported -> {"t":"err","code":"ver"} + close 4002 (gateway supports the advertised ver exactly or rejects; the body never adapts). Success -> {"t":"welcome","ver":1,"epoch":13,"profile":"home"}. Epoch increments every session; commands cannot cross sessions. One active connection per robot id: a newer authenticated connection closes the older with 4000; unfinished intents on the old socket are reported cancelled code "reconnect"; the new session starts with an empty queue. seq: uint32 from 1 per session, strictly increasing; reaching 2^31 is a protocol error requiring reconnect.
+3.3 Brain-to-body messages
+All carry seq except ping. Angles/degrees are numbers; yaw, pitch, fps, steps, ms, sleep_s are integers.
+
+
+Normal operation: | message | example | constraints | | --- | --- | --- | | intent | {"t":"intent","seq":41,"name":"sit"} | names: sit, stand, neutral, look, walk, face, say | | intent look | {"t":"intent","seq":42,"name":"look","yaw":-30,"pitch":10,"ms":400} | yaw -90..90; pitch -45..45; ms 100..5000 default 400 | | intent walk | {"t":"intent","seq":43,"name":"walk","dir":"fwd","steps":2} | dir fwd/back/turn_l/turn_r; steps 1..10 | | intent face | {"t":"intent","seq":44,"name":"face","expr":"happy"} | asset name: [a-z0-9_]{1,32} | | intent say | {"t":"intent","seq":45,"name":"say","asset":"greeting_1"} | canned clip; streamed speech uses tts+0x10 | | stop | {"t":"stop","seq":46} | E-STOP, S7 | | tts | {"t":"tts","seq":47,"op":"start"} | op start/end/cancel; 3.6 | | cam | {"t":"cam","seq":48,"on":true,"fps":5,"res":"VGA"} | fps 0..15 (0 = snapshot-only); res QVGA/VGA | | snap | {"t":"snap","seq":49} | one frame now | | mic | {"t":"mic","seq":50,"on":true,"gate":"vad"} | gate open/vad/wake | | profile | {"t":"profile","seq":51,"name":"tether"} | home/tether | | state | {"t":"state","seq":52,"name":"doze"} | idle/doze/sleep; sleep requires sleep_s 60..86400: {"t":"state","seq":53,"name":"sleep","sleep_s":28800} | | ping | {"t":"ping"} | no seq; both directions |
+
+
+Calibration mode only (else nak "mode"): mode {"name":"calibrate"|"normal"} (auto-timeout to normal after 600 s idle); servo {"id":0..7,"deg":45.0,"ms":300}; limits {"id","min","max","invert","center"}; pose_save {"name","servos":[[id,deg],...]}; cal_save (persist to NVS; on NVS write failure nak "busy" msg "nvs write failed", retryable). limits/pose_save live in RAM until cal_save. Coalescing: servo/limits apply at most 20 Hz per servo; excess coalesce to latest value; every valid calibration message is acked on acceptance; calibration commands never emit done - a dashboard slider is safe by construction.
+
+
+The gateway converts operator wall-clock wake times to sleep_s AT SOCKET-WRITE TIME; the body never needs wall-clock time; its ack echoes the accepted sleep_s.
+3.4 Body-to-brain messages
+message
+	example
+	notes
+	ack
+	{"t":"ack","seq":42}
+	state sleep ack carries sleep_s
+	nak
+	{"t":"nak","seq":43,"code":"unsafe","msg":"vbat below move threshold"}
+	codes: stale, mode, unsafe, limit, unknown (unrecognized intent name only), busy, profile, malformed, asset_missing. seq omitted only when input was unparseable
+	done
+	{"t":"done","seq":43}
+	per lifecycle table
+	cancelled
+	{"t":"cancelled","seq":43,"code":"stop"}
+	codes: stop, disconnect, reconnect, overflow
+	status
+	{"t":"status","vbat":7.42,"rssi":-52,"state":"active","uptime":312,"heap":183000,"sd":true,"cam_drops":4,"spk_underruns":0,"mic_drops":2}
+	every 5 s (home) / 30 s (tether or DOZING)
+	event
+	{"t":"event","name":"vad_open"}
+	names and triggers: vad_open/vad_close (gate transitions), wake_word, battery_warn/battery_cutoff (S1/S2 crossings), brownout_recovered, boot, sd_fail (mount or I/O error), sd_corrupt (filesystem corruption), littlefs_fail, asset_missing, tts_orphan (0x10 outside open utterance), tts_overflow (utterance cancelled by overflow)
+	cam_meta
+	{"t":"cam_meta","res":"VGA","fps":5,"counter_base":1042}
+	on cam setting change or stream (re)start; with counters, supports drop detection and stream position (capture-age is not claimed; a capture tick is a recorded future extension)
+	pong
+	{"t":"pong"}
+	no seq
+
+
+Command lifecycle - every seq terminates in exactly one class: | class | commands | terminal | | --- | --- | --- | | nak | any rejected command | nak, nothing follows | | ack-only | stop, cam, mic, profile, mode, servo, limits, pose_save, cal_save, state idle, state doze, tts end, tts cancel | ack | | ack->done | MOVEMENT_INTENTs, face, say, snap (done when the frame is queued), tts start (done when playback completes), state sleep (final status then graceful close 1000 follows; not a cancellation) | done | | ack->cancelled | the ack->done set when ended early | cancelled(code) | stop's own seq is ack-only; the cancellation it causes references the preempted seq.
+
+
+Malformed input (unparseable JSON, wrong types, out-of-range, unknown t) -> nak "malformed" (seq-less if unrecoverable); the body never crashes or partially executes. Unknown ADDITIONAL fields on known messages are ignored (forward compatibility).
+3.5 Staleness and freshness
+Body: nak "stale" any seq <= highest acked this session (epochs prevent cross-session staleness by construction). Gateway: action age is measured on the gateway MONOTONIC clock from bridge/SSE receipt to seq assignment; actions older than max_action_age_ms (default 2000) are never assigned a seq; actions arriving while the body is offline expire (the operator reissues); on body disconnect, in-flight seqs are reported cancelled code "disconnect". Wall-clock jumps must not affect freshness (A24). Bridge-supplied timestamps are metadata only.
+3.6 Media, queues, TTS
+Binary header: byte0 type; bytes1-4 uint32 LE per-type counter (monotonic, wraps at 2^32, loss/ordering metrics only). Types: 0x01 body->brain mic PCM 16 kHz s16le mono, exactly 640 payload bytes (20 ms); 0x02 body->brain one complete JPEG, max 120 KB (larger dropped at source, counted in cam_drops); 0x10 brain->body speaker PCM as 0x01. Unknown types dropped silently.
+
+
+Outbound queue classes (both sides): control - bounded 32 messages, never dropped, drained before media; stop and ping/pong bypass the queue; non-stop control overflow closes the socket (normal failsafe/reconnect path) and can never delay stop. Mic - 10 frames (configurable 4..20), drop-oldest, counted in mic_drops. Speaker - 25 frames (500 ms), ORDER PRESERVED, never selectively dropped; overflow cancels the whole utterance. Camera - 2 frames, drop-oldest, counted in cam_drops.
+
+
+TTS utterance semantics: {"t":"tts","op":"start"}, its 0x10 frames, and {"t":"tts","op":"end"} form ONE ORDERED STREAM - end MUST NOT be transmitted or applied ahead of any earlier 0x10 frame of the same utterance, notwithstanding control-before-media priority (the gateway enqueues end into the speaker-ordered stream, not the control fast path). stop and tts cancel MAY preempt and flush. Lifecycle: start/end/cancel each acked; done for the START seq when playback completes; stop/cancel -> flush + cancelled(start seq,"stop"); overflow -> flush + event tts_overflow + cancelled(start seq,"overflow"). Orphan 0x10 frames are dropped with one tts_orphan event per burst. Streamed TTS and asset playback (say) never run concurrently; the later command is nak "busy".
+3.7 Liveness and failsafe
+Liveness is judged on CONTROL frames only. Each side pings after 2 s without sending a control frame; the peer pongs promptly. Body failsafe: no control frame received for 3 s -> neutral over 300 ms, detach servos, stop speaker, close socket, reconnect with backoff 1 s x2 to 30 s cap, +/-20% jitter. Gateway marks the robot offline after 3 s control silence. E-stop deadline: <=100 ms from receipt to motion preemption in every reachable state, regardless of congestion. RX and TX are serviced independently (separate tasks or a verified full-duplex nonblocking client - the firmware WebSocket library's full-duplex behavior is verified at B6 bring-up, not assumed); every socket write is wall-time bounded (chunked).
+3.8 Golden fixtures (implementation task number one)
+A machine-readable schema (JSON Schema or table-driven validator) exists in protocol/ before any gateway/firmware message code. tests/protocol/ contains, per message type: >=1 valid fixture, >=1 invalid fixture, and for binary: valid, counter-wrap, truncated, unknown-type. All suites (gateway, emulator, firmware) consume the same fixture files. Fixtures and logs redact tokens (literal "REDACTED-TOKEN").
+4. Safety (enforced only in the body)
+* S1. vbat < 7.0 V (debounced per S5): nak "unsafe" all MOVEMENT_INTENTs except neutral; stop always works; event battery_warn once per crossing.
+* S2. vbat < 6.8 V (debounced): park neutral, detach, event battery_cutoff, play low-battery asset if available, enter DEEP-SLEEP. Wake: RTC timer every 30 min samples the battery with radio off; boots normally when vbat >= 7.2 V; power cycle always wakes.
+* S3. Every servo target clamps to calibrated [min,max]; outside -> nak "limit".
+* S4. servo/limits/pose_save rejected outside calibration mode; calibration times out after 600 s idle; nothing persists without cal_save.
+* S5. Battery voltage = mean of >=16 ADC samples; threshold actions need 3 consecutive qualifying readings; divider/filtering per Parts Overview; ADC calibration factor stored at H9. Sampling MUST NOT be starved: during continuous motion the motion task schedules a quiet ADC window (interpolation hold <=20 ms) at least every 5 s; S1/S2 logic runs on every sample set, including during sustained walking and stall.
+* S6. Servo outputs stay unattached until boot completes and NVS calibration loads; after a stop, servos remain detached until the next accepted MOVEMENT_INTENT re-attaches (face/say/tts/cam/mic/profile/state never re-attach or clear stop).
+* S7. stop: begin neutral within 100 ms, then detach; preempts queued and executing motion; emits cancelled "stop" for the preempted seq; honored in every state except DEEP-SLEEP; idempotent (a stop right after reconnect is still acked).
+* S8. Missing asset -> nak "asset_missing" + event asset_missing; never fatal. LittleFS mount failure -> event littlefs_fail, assets disabled, OLED uses a compiled-in default face. SD absent/failed -> event sd_fail, SD features disabled, everything else continues; SD task failures never block or delay network, motion, or safety tasks.
+5. State machine
+States: ACTIVE, IDLE, DOZING, DEEP-SLEEP, FAILSAFE. INTENT TRAFFIC = intent and snap only; cam, mic, profile, ping are honored in place and do not reset the idle timer.
+
+
+Media precedence: state overrides profile; profile further caps within what the state allows. In IDLE and DOZING, cam/mic SETTING changes are accepted (ack-only), stored, and take effect on return to ACTIVE; continuous camera streaming never runs in IDLE or DOZING; snap is always honored and exits to ACTIVE.
+
+
+* ACTIVE: full function per settings and profile. -> IDLE after 60 s without intent traffic, or state idle.
+* IDLE: idle animations from flash; any intent or snap -> ACTIVE and executes.
+* DOZING (state doze): camera off, mic VAD/wake only, servos parked, status every 30 s; accepts all commands; any intent or snap -> ACTIVE and executes; stop always accepted.
+* DEEP-SLEEP (state sleep, or S2): entry order - ack (echo sleep_s), one final status, graceful close 1000, radio off; RTC wake after sleep_s (or per S2 rule) -> normal boot -> reconnect -> ACTIVE. Accepts nothing while asleep; power cycle always wakes.
+* FAILSAFE (3 s control silence): neutral + detach + reconnect loop; on reconnect -> ACTIVE.
+6. Body firmware (ESP-IDF v5.x, C)
+6.1 Tasks
+Core 0: network RX (high), network TX (high, drains 3.6 queue classes), camera (medium), dispatcher (high; sole writer of state transitions; other tasks read via getter). Core 1: motion (highest), audio (high). Any core: telemetry (low), oled (low), SD (own low-priority task; ALL SD I/O confined to it). Queues for inter-task data; mutex for any shared mutable state. E-stop path: RX detects {"t":"stop"} and signals motion by direct high-priority task notification, bypassing the command queue.
+6.2 Servo driver
+MCPWM ONLY - LEDC is consumed by camera XCLK; libraries that silently allocate LEDC (e.g., ESP32Servo) are forbidden. 50 Hz, 500-2500 us mapped to calibrated degrees, linear interpolation at the 50 Hz tick, per-servo detach, outputs high-impedance until S6 attach. Bring-up produces an allocation table (unit, timer, operator, comparator, generator, GPIO, servo id, detach behavior) verified against the TRM/soc headers, plus a test driving all 8 outputs independently and detaching each independently.
+6.3 Pin map
+Fixed by board/module: camera GPIO 4-13,15-18; UART 43/44 (programming + logs); GPIO 35-37 consumed by octal PSRAM; GPIO0 = BOOT button, never used for functions; SD_MMC 1-bit fixed at 38(CMD)/39(CLK)/40(DAT0). MAP_B (primary, PROVISIONAL until H2 passes): servos GPIO 1,2,14,21,33,34,45,46; battery ADC GPIO 3 (must be ADC1; ADC2 conflicts with WiFi); I2S BCLK 41, WS 42, mic DIN 19, amp DOUT 20; I2C SDA 47, SCL 48. Recorded facts and gates: the WROOM-1 datasheet reserves IO35-37 on octal-PSRAM modules while some ESP-IDF pages caution GPIO33-37 - H2 is the arbiter: if GPIO33 or 34 is absent from the board schematic, marked reserved by gpio_dump_io_configuration(), or unstable under the H2 concurrent soak, MAP_B is REJECTED before pin-map freeze. Contingency ladder (a planned path): (1) I2C ADC (e.g., ADS1115) on the OLED bus frees GPIO3 to a servo; (2) I2C PWM expander for 2 servos, or PCA9685 for all 8; (3) board change. GPIO0/3/45/46 are strapping pins; GPIO3 carries the divider and 45/46 carry servo lines at reset, so H3 tests boot with attached circuitry. GPIO19/20 are USB D-/D+: assigning them to I2S sacrifices native-USB debugging - accepted; the board programs/logs via CH343 UART and OTA covers updates. SD requires 10 kOhm-class pull-ups on CMD and DAT0 even in 1-bit mode; H2 verifies them on the schematic or adds them. Both pin maps live in one config header selected by build flag.
+6.4 Partitions (16 MB; partitions.csv committed with B6 scaffolding)
+nvs 64 KB; nvs_keys 4 KB reserved-unused; otadata 8 KB; ota_0 3 MB; ota_1 3 MB; littlefs remainder (~9 MB). Built image fits an OTA slot with >=25% headroom (H7). OTA images mark themselves valid only after reaching CONNECTED once; otherwise the bootloader rolls back (H6).
+6.5 NVS
+Namespaced keys + schema_version. Contents: WiFi credentials, endpoint URL, robot id, auth token, per-servo calibration, named poses, default profile, ADC calibration factor, setup-secret hash. Recovery: nvs_flash_init failures incl. ESP_ERR_NVS_NO_FREE_PAGES/version mismatch -> partition erase+reinit permitted; missing namespace -> recreate; corrupt namespace -> erase namespace; whole-partition corruption -> full erase -> provisioning; a recoverable SCHEMA mismatch migrates WITHOUT erasing WiFi credentials; never a boot loop. v1 stores the token unencrypted (threat model, section 9); enabling NVS encryption later requires marking nvs_keys encrypted and erasing it before first use, plus a migration errata.
+6.6 SD subsystem
+Hard requirement of v1 FEATURE scope; never required to boot (S8). SDMMC 1-bit, FAT (kit's 1 GB card). No card-detect exists. Mount at boot; on failure retry only on dashboard request or first SD-dependent command. Log format: append-only ring, per-record length+CRC, fsync at most every 5 s or 32 KB; torn tail detected and skipped at next mount. Corrupted FAT -> event sd_corrupt, SD features disabled, dashboard offers an authenticated two-step-confirmed reformat (documented destructive). Retention: captures max 7 days or 200 MB, enforced by a daily sweep and at write time; dashboard "clear recordings/logs" is best-effort FAT deletion, not forensic erasure (stated in UI). Credentials never on SD.
+6.7 Provisioning
+Triggers: no valid NVS; NVS corruption (after 6.5 recovery); authenticated dashboard reset; BOOT held 5 s AFTER normal boot (post-boot polling - holding BOOT through reset enters ROM download mode and is NOT provisioning). Flow: SoftAP "Ainekio-Setup", WPA2. SETUP SECRET: 12 random base32 chars (~60 bits), regenerated each provisioning entry, hash stored in NVS, displayed on the OLED for the session, used as BOTH the WPA2 passphrase and the portal login; portal rate limit 5/min with 5-minute lockout after 10 failures; if the OLED is unavailable the secret prints once on the UART console; if both unavailable, provisioning is blocked except via authenticated dashboard reset. Payload: wifi_ssid, wifi_psk, endpoint_url, robot_id, robot_token. Token origin: the GATEWAY generates robot tokens; its provisioning page displays a new token exactly once and the operator pastes it into the portal (manual step; rotation automation out of scope). Atomic save: staging namespace -> validate -> commit via schema_version bump; failed commit leaves prior credentials untouched; post-provisioning auth failure leaves saved settings intact and shows an OLED notice. Timeout: with valid credentials present (reset/BOOT entry), the AP times out after 10 min and reboots to normal; with NO valid credentials, the AP cycles 10 min on / 60 s off indefinitely until saved (no reboot loop). The portal never echoes stored secrets; secrets never pass through logs.
+6.8 Audio
+One I2S controller, full duplex, 16 kHz s16le mono, DMA both directions. Mic: DMA -> VAD (energy + hangover; ESP-SR WakeNet is the designed-for upgrade) -> 0x01 when the gate is open. Speaker: single consumer of the ordered speaker stream, mixing streamed utterances and LittleFS assets (never concurrently); underrun plays silence without reordering; spk_underruns and mic_drops reported in status.
+6.9 LittleFS
+esp_littlefs (joltwallet), exact version pinned in the manifest, mount /assets, images built with mklittlefs in CI and verified as a CI artifact. Mount failure per S8.
+7. Data profiles
+home: cam up to 10 fps VGA; mic any gate; status 5 s. tether: cam snapshot/request only, QVGA default (VGA on explicit snap); mic gate MUST be vad or wake (gate "open" -> nak "profile"); status 30 s; say prefers canned assets. The body enforces caps (nak "profile"); the gateway refuses out-of-profile commands; the dashboard shows effective caps. The brain sets the profile.
+8. Brain components
+Gateway API (to bridge_client and dashboard): queue_intent(name,params)->seq; estop(); tts_speak(pcm_stream)->start_seq; set_profile(p); set_state(name, sleep_s); request_snap(); subscribe_events(cb); subscribe_transcripts(cb); subscribe_frames(cb); revoke_token(robot_id); status(). Config: max_action_age_ms. revoke_token atomically invalidates the token store entry and closes any active socket for that id with 4001. The gateway logs all commands and events with timestamps and without secrets. Whisper consumes 0x01 PCM; face detection consumes decoded 0x02 frames; both are gateway plugins.
+
+
+Dashboard (auth required): no default password anywhere in the repo; first run generates a password stored as a salted hash/verifier (never plaintext) in an auth file - POSIX 0600, Windows ACL owner+Administrators only - with the plaintext shown once, only on an interactive TTY, never through any logger; reset by deleting the auth file. Sessions: HttpOnly + SameSite=Strict cookie; login rate limit 5/min; logout endpoint. Audit log: login failures; stop issued; stop cleared (= first accepted MOVEMENT_INTENT after a stop). Panels: connection status + heartbeat age; always-visible E-STOP labeled "signal stop"; manual intents; calibration UI; camera panel (snapshot + low-fps); mic level meter + speaker test; battery/RSSI; effective caps; command/event log; SD panel (mount state, retry, authenticated reformat, clear recordings). Single-user acceptable in v1.
+
+
+Emulator: implements ALL body behavior in this spec (S1-S8 with simulated vbat, section 5 states, full protocol including TTS ordering), MAP-agnostic, PC webcam/mic/speakers as transducers, bandwidth throttle, fault injection: drop link; stall control while media continues; oversize frame; malformed JSON; control flood; duplicate connection; token revoked mid-session; speaker congestion; gateway clock-jump hook. Phase 1 = control plane + safety + states; phase 2 = media. May drive the Sesame browser sim as a visual backend.
+9. Threat model and security (v1)
+Trusted: the home and owner LAN; physical possession of the robot; the brain PC. Accepted: SD media is removable and unencrypted (retention limits + clear controls mitigate); tokens rest unencrypted in NVS (revocable, never on SD or in logs; nvs_keys reserved for a future encryption migration). Defends against: LAN opportunists, stale-command replay (epoch/seq - not against use of a stolen valid token, which revocation addresses), unauthorized dashboard control, casual secret theft from logs/SD. Out of v1 defense: compromised brain PC, attacker with physical possession, SD card removal. Requirements distributed through this spec: dashboard auth (8), provisioning hardening (6.7), revocation (8), wss for relay (3.1), no-secrets logging everywhere.
+10. Acceptance tests
+A-series (against the emulator):
+
+
+* A1 connect + authenticate; wrong token -> 4001.
+* A2 lifecycle: each command class terminates per the 3.4 table; duplicate/decreasing seq -> nak "stale".
+* A3 kill link mid-motion: FAILSAFE within 3 s; pre-disconnect command never executes after reconnect (epoch); gateway reports in-flight cancelled "disconnect".
+* A4 e-stop: interrupts a long walk <=100 ms; cancelled "stop"; servos stay detached; non-movement commands (face/say/cam/state) do NOT re-attach; the next MOVEMENT_INTENT does.
+* A5 calibration: raw servo in normal mode -> nak "mode"; accepted in calibration; limits enforced; coalescing acks per 3.3; calibration persists across emulator restart.
+* A6 audio CI: recorded PCM fixture -> VAD -> gateway -> stubbed Whisper transcript; stubbed TTS to null sink; message-flow assertions only. (A6-manual: live mic/speaker smoke test, non-gating.)
+* A7 video: webcam frames at commanded fps; under throttle camera drops first, control never delayed.
+* A8 battery: warn at 7.0 V with movement nak'd; cutoff at 6.8 V; S5 debounce shown; detection works DURING a continuous walk loop.
+* A9 tether profile enforces caps.
+* A10 robustness: malformed JSON / wrong types / out-of-range / unknown t -> nak "malformed", session survives; control flood closes the socket without delaying stop.
+* A11 duplicate connection: old socket closed 4000; epochs distinct; unfinished intent cancelled "reconnect".
+* A12 e-stop meets 100 ms during max-size camera transmission AND control-queue saturation.
+* A13 mic gate "open" under tether -> nak "profile".
+* A14 provisioning: successful credential replacement (staged commit); failed commit preserves old credentials; old token rejected after gateway rotation.
+* A15 dashboard: unauthenticated commands rejected; rate limit enforced; stored auth artifact is a verifier, not plaintext.
+* A16 golden fixtures round-trip (valid, invalid, binary wrap/truncation) consumed by emulator and gateway suites.
+* A17 gateway freshness: offline or over-age actions expire, never execute after reconnect.
+* A18 speaker congestion: never reordered or gapped speech; utterance cancels whole (tts_overflow + cancelled "overflow"); tts end never overtakes earlier 0x10 frames.
+* A19 revocation closes the active socket 4001; token rejected on reconnect.
+* A20 sleep: ack echoes sleep_s; final status; graceful close 1000; reappears after scaled duration (drift tolerance +/-2% or 2 s, whichever larger).
+* A21 cam_meta + counters: drop detection and stream position under throttle (no capture-age claim).
+* A22 tts lifecycle: start/end/cancel acked; done for start seq on completion; orphan 0x10 dropped with event; stop mid-utterance -> flush + cancelled "stop"; say during open utterance -> nak "busy".
+* A23 state matrix: intent/snap exit IDLE and DOZING to ACTIVE and execute; cam/mic/profile/ping honored in place without exiting or resetting the 60 s timer; cam on in IDLE/DOZING stores settings but streaming starts only in ACTIVE.
+* A24 gateway clock jump: freshness still enforced (monotonic).
+* A25 old adapter CLI cannot attach to the robot deployment stream.
+
+
+H-series (hardware; each records evidence - photos, logs, measurements - in the repo):
+
+
+* H1 Freenove tutorial sanity: blink, WiFi, camera web server.
+* H2 MAP_B gate: schematic + N16R8 module-marking photo; SD CMD/DAT0 pull-ups verified; gpio_dump_io_configuration() shows GPIO33/34 unreserved; PSRAM + camera streaming + SD mounted + PWM on 33/34 concurrently for 30 min. Any failure -> contingency ladder.
+* H3 strapping matrix: cold boot / warm reset / brownout cycling x USB / battery power, divider + all servos attached, 20 cycles each; strap levels documented.
+* H4 concurrency soak 30 min: camera + duplex audio + 8 servos + command traffic; record WiFi drops, jitter, audio glitches, fps, min free heap; battery sampling verified during sustained motion.
+* H5 supervised first charge per Parts Overview.
+* H6 OTA update + deliberate bad-image rollback.
+* H7 built image fits an OTA slot with >=25% headroom.
+* H8 SD: boot without card; hot mount via dashboard; mid-write card pull -> sd_fail, no crash, other tasks unaffected.
+* H9 ADC calibration vs multimeter; factor stored; S5 debounce observed.
+* H10 e-stop latency on hardware during max-size camera transmission: <=100 ms.
+* H11 e-stop rail current: normal load and induced stall, before/after detach; pass = within 20% of no-load idle baseline within 1 s; plus physical check that horn movement is not actively corrected after detach; servo model and sample count recorded.
+* H12 provisioning matrix: no-valid-NVS (AP cycles, no reboot loop); corrupt NVS; dashboard reset; post-boot BOOT hold works; BOOT-through-reset = download mode, not provisioning; OLED-unavailable serial fallback; setup-secret PSK validity; portal rate limit.
+* H13 NVS: factory erase/reflash recovery; corrupt namespace and whole-partition corruption -> provisioning, no boot loop; schema migration preserves WiFi credentials; S2 cutoff -> charge -> automatic recovery.
+* H14 SD extended: corrupted FAT -> sd_corrupt + authenticated two-step reformat; torn-tail record skipped; retention sweep enforces 7 d / 200 MB; SD task hang does not delay e-stop.
+11. Out of scope (v1, recorded)
+QR-code provisioning; WakeNet wake word (designed-for); relay implementation (transport boundary fixed; a relay deployment doc with reconnect/revocation/duplicate-socket/stop-latency tests precedes shipping relay mode); phone-as-brain; token rotation automation; protocol compression; SD media encryption; multi-user dashboard; capture-timestamp frame age.
+12. Risk register (bring-up watch list)
+I2S full-duplex bring-up. WiFi throughput under load (H4). Strapping pins 3/45/46 with attached circuitry (H3). 2.4 GHz congestion. Servo stall vs MINI560 regulation (Parts Overview; H4/H11). GPIO33/34 availability (H2; contingency ladder). Zero spare GPIOs - new peripherals require the I2C bus or the ladder. GPIO19/20 USB-JTAG sacrificed for I2S (UART-only debug). SD has no card-detect (6.6 mitigations). Relay duration limits (reconnect-tolerant by design).
+13. Migration checklist (existing repo code)
+[ ] Extract bridge client + action translation into gateway/bridge_client. [ ] Old adapter CLI marked simulator-only in help text and docs. [ ] Guard test A25 in CI. [ ] Old TTL behavior superseded by max_action_age_ms. [ ] motion/ sequence data optionally converted to seed firmware pose tables (NVS is the runtime source of truth). [ ] Stale PCA9685/Pi references removed or marked historical. [ ] docs/README.md names this file + Parts Overview as the normative set; older specs archived.

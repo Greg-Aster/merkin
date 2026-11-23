@@ -1,0 +1,35 @@
+/* Mega-organism-scale entity layout for First Contact Manual chapter 1. */
+
+.fcmi-scale-entry--mega-organism-bg {
+  background:
+    radial-gradient(circle at 11% 7%, rgb(var(--fcmi-accent-rgb) / 0.2), transparent 32%),
+    radial-gradient(circle at 77% 18%, rgb(112 155 206 / 0.14), transparent 38%),
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.81), rgb(var(--fcmi-surface-rgb) / 0.6)),
+    url("/first-contact/mega-organism.webp") center 42% / cover no-repeat,
+    rgb(var(--fcmi-surface-rgb) / 0.75);
+  box-shadow:
+    inset 0 0 58px rgb(var(--fcmi-glow-rgb) / 0.12),
+    inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.03),
+    0 20px 56px rgb(0 0 0 / 0.33);
+}
+
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-copy,
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-type-band span,
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-note {
+  backdrop-filter: blur(5px);
+}
+
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-copy {
+  padding: clamp(0.72rem, 1.8vw, 0.92rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.14);
+  border-radius: var(--fcmi-radius-sm);
+}
+
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-copy,
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-detail-card,
+.fcmi-scale-entry--mega-organism-bg .fcmi-scale-type-band span {
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.61), rgb(var(--fcmi-surface-rgb) / 0.41)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.09), transparent 74%);
+}

@@ -1,0 +1,103 @@
+---
+title: "Three-System Neural Motion Stack: Clean-Room MicroDuck v19, 50 Hz NeuralPose v8 & NeuralPosePresence"
+published: 2026-11-16T09:30:00-08:00
+updated: 2026-11-20
+description: "Architecture and benchmarks for Ainekio's commercial-clean three-system neural controllers—System 1 L2-cached MicroDuck v19-snag-p4 locomotion, System 2 50 Hz NeuralPose v8 (2.46M GPU MuJoCo steps, Schmitt-trigger carpet stepping, 12/12 suites) & 939-row Freestyle library, and System 3 50 Hz NeuralPosePresence—plus ESP32-P4 RISC-V PIE vector fixes."
+image: "/posts/2026-11-16-progress/three-system-neural-stack.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, Neural Gait, MicroDuck, NeuralPose, NeuralPosePresence, ESP32-P4, RISC-V, Reinforcement Learning, Freestyle]
+category: "Mechanical Research"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: legs
+  generation: v2
+  kind: reference
+  next: protocol-and-safety
+  related: ["jam-protection-and-thermal-safety", "gateway-and-simulator", "gait-development", "2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim"]
+---
+
+Rather than forcing a single monolithic network to walk over cables, perform seated two-paw gestures, and nod subtly during conversation, Ainekio V2 divides learned motor control into **three specialized, commercial-clean neural systems** coordinated across `ESP32-P4` Core 1 and the **Body Control** runtime:
+
+| Neural Tier | Rate & Footprint | Active Policy / Adapter | Role on the Robot |
+| :--- | :--- | :--- | :--- |
+| **System 1 · Locomotion** | `50 Hz` · **`110,432 B` (`107.84 KiB`) `int8`** (`ESP32-P4` `128 KB` L2 cache) | Clean-room **`MicroDuck v18-p4` / `v19-snag-p4`** (`policy.bin`, `720 → 128 → 64 → 32 → 12`; GPL-3.0 `pupper-mjx` retired in `68a325b`) | Omnidirectional closed-loop walking, slick-wood/carpet seam traversal, weak-servo compensation, `25 mm` swing-foot snag clearance, and `1.8 s` firmware carpet-unsnag reflex |
+| **System 2 · Pose & Choreography** | `50 Hz` · **`826,776` params** ONNX (`2.46M` GPU MuJoCo steps, `0.4 ms` CPU) + `Qwen3.5-0.8B` / `2B` LoRAs | **`neural-pose-v8-calibrated`** + **`939`-row** clean Freestyle choreography library (`828` synthetic recovery rows pruned) + `v25/v26` Intent/Task LoRAs (`2,941` dev + `814` eval) | Single posture owner (`stand_enabled: false`, `jam_enabled: true`); models re-locking carpet pile (`mu = 0.10..2.05`), stand-before-step gate (`\|ca_err\| <= 14°`), Schmitt-trigger single-leg sequencer (`> 6.5°` / `<= 3.0°`), tripod CoM shift, and `CARRIER_HOME_MARGIN_DEG = 3.0` (`12/12` 3D MuJoCo suites, `0` falls) |
+| **System 3 · Autonomic Presence** | **`50 Hz`** · Shared `NeuralPose` manifold | **`NeuralPosePresence`** (`experiments/freestyle/neural_pose/presence.py`, replacing legacy `20 Hz` `Master/gateway/presence/`) | Motor-silent during `vad_open`/wake-word (never cuts off the mic with `stop`), pure sagittal speech nods (`±2.5 mm` Z, `±4.5°` pitch) with **`0.0°` shoulder targets** (zero lateral carpet scrub), and person-aware idle rest via Apache-2.0 **RT-DETRv2 + OWLv2** |
+
+---
+
+## 1. System 1: Clean-room `50 Hz` MicroDuck progression (`v16` → `v18` Sys-ID → `v19-snag-p4`)
+
+In commit `68a325b`, all GPL-3.0 `pupper-mjx` patches and host actors were retired, consolidating both on-chip and host-streamed locomotion on clean-room **MicroDuck PPO** (alongside replacing AGPL YOLO with Apache-2.0 **RT-DETRv2 + OWLv2** in `detector_backend.py`). Compiled into a `110,432`-byte (`107.84 KiB`) symmetric row-wise `int8` weight binary (`policy.bin`) multiplied against dynamically quantized `int16` activations (`102,784` MACs/step, `< 0.1 mm` foot-offset error vs. FP32 ONNX), System 1 runs natively on `ESP32-P4` Core 1 at `50 Hz` inside the chip's `128 KB` L2 cache (`ainekio-neural-gait-v7-proprio`: `15 × 48 = 720` floats of 4th-wire joint angles, velocities, `208 Hz` IMU gyro/accel/gravity, twist `[vx, vy, wz]`, and prior actions).
+
+### System identification from physical floor runs (`v17` → `v18`)
+
+On November 12, three untethered floor trials on physical unit `ainekio-p4-e6ebe5` (`220 MB` of `50 Hz` `trace.jsonl` logs across `298` commands) revealed two real-hardware asymmetries not present in nominal CAD simulation: `-19.1°` compliance sag on front-right shoulder `J3` (`J3`/`J6` diagonal flex) and `41–45%` lower effective position gain on the rear-left (`RL`) leg under load.
+
+Injecting per-world `MG90SActuator` `effort_scale`, coupled weak-`RL` randomization (`kp 0.42–0.72×`, `effort 0.60–0.86×`), diagonal shoulder compliance, a single-leg ground-dragging penalty (`contact > 0.70 s`), and `18 mm` cable ledges produced **`microduck-v18-p4`** (`+8.01M` PPO steps):
+
+- **10-Scenario Composite Benchmark:** Improved from `-1.2871` (`1` fall in `v17`) to **`+1.3246` with `0` falls**.
+- **Weak-RL System-ID Suite:** Forward velocity jumped **`+69.5%`** (`+0.0817 m/s`), keeping 10th-percentile pelvis height at **`52.5 mm`** instead of sagging to `22.4 mm`.
+- **Cable Ledges & Carpet:** Speed across `14–17 mm` cables rose **`+79.7%`** (`+0.0575 m/s`, `3.2×` straighter heading), and plush carpet speed rose **`+28.6%`** (`+0.0970 m/s`).
+
+<figure className="my-6">
+  <img src="/posts/three-system-neural/neuralpose-v8-presence-50hz-chart.webp" alt="Technical architecture diagram of Ainekio's commercial-clean three-system 50 Hz neural motion stack: System 1 L2 MicroDuck v19-snag-p4, System 2 neural-pose-v8-calibrated tripod CoM shift support polygon, and System 3 NeuralPosePresence audio/motion timeline." width="3200" height="1960" loading="lazy" className="w-full rounded-xl" />
+  <figcaption>Commercial-clean <code>50 Hz</code> three-system coordination: System 1 on-chip <code>MicroDuck v19-snag-p4</code>, System 2 <code>neural-pose-v8-calibrated</code> tripod CoM shift &amp; vertical carpet unload (bottom-left), and System 3 <code>NeuralPosePresence</code> holding motor-silent during <code>vad_open</code> and pinning <code>0.0°</code> shoulder targets during TTS nods (bottom-right).</figcaption>
+</figure>
+
+<figure className="my-6">
+  <video controls playsinline preload="none" width="960" height="540" poster="/gallery/microduck-v18-sysid-poster.webp" className="w-full rounded-xl">
+    <source src="/gallery/microduck-v18-sysid.mp4" type="video/mp4" />
+    <a href="/gallery/microduck-v18-sysid.mp4">Download the microduck-v18-p4 System-ID evaluation video.</a>
+  </video>
+  <figcaption><code>microduck-v18-p4</code> (<code>128×64×32 int8</code>) maintaining level pelvis clearance and compensatory rear-left foot lift across the 500 Hz System-ID Weak-RL, slick hardwood, carpet seam, and cable-ledge evaluation suite.</figcaption>
+</figure>
+
+### Active production actor: `25 mm` swing-foot snag obstacle plant (`MicroDuck v19-snag-p4`)
+
+To prevent low-slung micro-quadruped toes from catching on cords or rug edges mid-swing, the active on-chip actor **`microduck-v19-snag-p4`** (`TASK_REVISION = 19`, compiled into the **`110,432 B` `policy.bin`** at `Slave/software/models/v2-12servo/motions/microduck/policy.bin`) adds a **`25 mm` (`lip_z = 22–27 mm`) `500 Hz` unilateral swing-foot snag plant** (`compute_swing_snag_wrench_500hz`) in MuJoCo:
+
+- During `28%` of episodes (`DEFAULT_SNAG_PROB = 0.28`), a `25 mm` nominal unilateral lip (`22–27 mm`) catches forward-moving swing feet below lip height with a `950 N/m` + `14 N·s/m` contact wrench (capped at `5.5 N`).
+- Paired with a telescopic `snag_clearance` lift reward (`+1.80` clearance bonus) and firmware's **`1.8 s` (`-0.45 m/s`) autonomous carpet-unsnag reflex**, `microduck-v19-snag-p4` lifts snagged feet cleanly up and over obstructions rather than pushing stall current into the snag.
+
+---
+
+## 2. Fixing three ESP-IDF RISC-V PIE vector coprocessor bugs (`idf_pie_coproc.cmake`)
+
+Enabling `ESP32-P4` RISC-V PIE SIMD acceleration alongside multi-task FreeRTOS scheduling uncovered three upstream bugs in ESP-IDF `v5.5.4` and `esp-nn`—including a live crash where an interrupt boundary corrupted `PC` into `pxPortGetCoprocArea` (`cpair = 99`). Rather than modifying the global SDK installation, `Slave/firmware/esp32p4-wifi6/cmake/idf_pie_coproc.cmake` (`753` lines, verified by `tests/test_pie_coproc.py`) applies three deterministic build-directory patches inside `${CMAKE_BINARY_DIR}/ainekio-idf`:
+
+1. **Hardware-loop (`HWLP`) interrupt PC corruption fix:** Replaces short (`< 8`-instruction), unaligned, or vector-terminated `esp.lp.setup` hardware loops in `esp-nn` with scalar `addi + bnez` loops (which dual-issue alongside PIE vector instructions on `ESP32-P4` without hardware-loop PC state hazards across interrupts).
+2. **Lazy FreeRTOS PIE ownership fix:** Strips direct `csrsi 0x7f2, 0b01` (`CSR_PIE_STATE_REG`) writes from `esp-nn` kernels so FreeRTOS's lazy coprocessor trap (`rtos_save_pie_coproc`) properly claims task ownership and preserves vector state across context switches.
+3. **`portasm.S` & `rvruntime-frames.h` context-frame repair:** Saves and restores previously omitted vector register `q3` and `PIE CFG`, unswaps `SAR` versus `FFT_BIT_WIDTH` on context restore, and widens `RV_PIE_XACC` from `4` bytes to the full `8`-byte accumulator width.
+
+---
+
+## 3. System 2: `50 Hz` `NeuralPose v8`, `939`-row clean Freestyle library & single posture owner
+
+When Ainekio stops walking to bow, wave, brace on its haunches, rise from a splayed or prone floor state, or execute an operator-prompted emote, control hands off to **System 2** ([Milestone #20](/posts/2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim/)):
+
+- **Four `NeuralPose` iterations in 3 days (`v5-adaptive` → `v6-relock` → `v7-hysteresis` → `neural-pose-v8-calibrated`, `2.46M` GPU MuJoCo steps, `826,776` params, `50 Hz`):**
+  1. **Re-locking carpet-pile contact physics (`v6-relock`, `mu = 0.10..2.05`):** Models how real carpet fibers re-lock onto curved 3D-printed soles whenever lateral motion pauses, forcing the actor to unload normal force vertically before translating feet horizontally.
+  2. **Stand-before-step gate & Schmitt-trigger single-leg sequencer (`v7-hysteresis`):** Requires upright carrier convergence (**`|ca_err| <= 14°`**) before lifting any foot off the floor, then sequences recovery steps one leg at a time through a **Schmitt trigger**—initiating a step strictly above **`6.5°` shoulder splay**, latching until splay settles **`<= 3.0°`**, and holding calm zero-lift below `6.5°` (eliminating continuous "drunk wobble" hunting).
+  3. **Tripod CoM shift & equivariant DAgger warmstart (`neural-pose-v8-calibrated`):** Shifts the torso center of mass onto the planted support triangle (**`±14 mm` Y, `±9 mm` X, `-8 mm` diagonal brace**) with L/R mirror-equivariant DAgger initialization—passing **`12/12` 3D MuJoCo qualification scenarios with `0` falls**.
+- **Eliminating phantom carpet jams across `goals.py`, `executor.py` & firmware (`7-layer fix`):**
+  - **Single posture-recovery owner (`_sync_neural_pose_servo_feedback`):** Sets **`stand_enabled: false`** on `ESP32-P4` firmware whenever host `NeuralPose` runs while keeping 4th-wire telemetry and **`jam_enabled: true`** (`8–10 s` per-joint `I²t` winding fuse) active.
+  - **Inverted-carrier floor clamp (`goals.py`):** Sets `PoseManifold.CARRIER_HOME_MARGIN_DEG = 3.0`, clamping carrier targets **`>= -27.87°`** above `-30.87°` Home and right-sizing carpet step lift from `~61 mm` to **`18–20 mm`** (`above_calibration_mask = 0` and `stalled_joints = 0` on live hardware).
+  - **Terminal stance settling (`executor.py`):** Removed the hardcoded `280 ms` `_detect_stalled_recoils` heuristic (which falsely clamped fast loaded swings) and added **`mid_step_active` terminal stance settling** (`<= 5.5°` stance / `<= 3.5°` shoulder error, safely inside the `7.0°` zero-heat thermal deadband).
+- **Clean `939`-Row Freestyle Library & `v25/v26` Specialist Routing:** Event-driven `0.8B` LLM stall/tip replanning (`library_recovery.py`) was retired and **`828` synthetic recovery rows were pruned** (`1,767 → 939` clean choreography rows), while `Bridge` interrupts active jobs **only** on genuine hardware thermal cutoff (`outputs_released: true`; see [7-Layer Phantom-Jam Resolution & Thermal Fuse](/posts/jam-protection-and-thermal-safety/)). Upstream in **[Ainekio OS](/posts/ainekio-os/)**, **`v25/v26` Intent and Task specialist LoRAs** (`2,941` dev + `814` eval records) route user requests into `requestMotion` and closed-loop locomotion intents.
+
+---
+
+## 4. System 3: `50 Hz` `NeuralPosePresence` (`experiments/freestyle/neural_pose/presence.py`)
+
+Between walks and explicit emotes, the legacy `20 Hz` `Master/gateway/presence/` network was replaced on November 20, 2026 by **`50 Hz` `NeuralPosePresence`** (`experiments/freestyle/neural_pose/presence.py`), eliminating two subtle floor bugs at the root:
+
+- **Motor-silent listening without cutting off the mic (`vad_open` / wake-word):** Previously, issuing `stop` on `vad_open` could interrupt active capture timing. `NeuralPosePresence` holds **completely motor-silent** throughout `vad_open` and wake-word speech capture without sending `stop`, keeping servo gear noise off the `ES8311` microphone while displaying the `listening` LCD expression.
+- **Pure sagittal speech nods with zero lateral carpet scrub:** During `16 kHz` robot/host TTS playback, `NeuralPosePresence` drives conversational body cadence strictly in the sagittal plane (**`±2.5 mm` vertical Z, `±4.5°` pitch**) while pinning **`0.0°` shoulder targets**—eliminating the sideways carpet-pile scrubbing and shoulder heat caused by earlier lateral presence residuals.
+- **Person-aware `180 s` idle rest:** After `180 s` of room quiet—deferred whenever Apache-2.0 **RT-DETRv2 + OWLv2** (`detector_backend.py`) detects a person in view—the body settles smoothly into rest and disarms `PCA9685 OE`, preempting immediately on the next command or wake event.

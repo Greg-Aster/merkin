@@ -1,0 +1,26 @@
+---
+import ArchivePanel from '@components/ArchivePanel.astro'
+import { UNCATEGORIZED } from '@constants/constants'
+import MainGridLayout from '@layouts/MainGridLayout.astro'
+import { formatArchiveTaxonomyLabel } from '@utils/archiveTaxonomy'
+
+const categoryLabel = formatArchiveTaxonomyLabel(UNCATEGORIZED)
+const title = `Category: ${categoryLabel}`
+const description = `Archive entries filed under ${categoryLabel} in the MEGA MEAL SAGA.`
+
+const archiveLayoutPost = {
+  data: {
+    bannerType: 'none',
+    showToc: false,
+  },
+}
+---
+
+<MainGridLayout
+  title={title}
+  description={description}
+  post={archiveLayoutPost}
+>
+    <h1 class="sr-only">{title}</h1>
+    <ArchivePanel categories={[UNCATEGORIZED]}></ArchivePanel>
+</MainGridLayout>

@@ -1,0 +1,330 @@
+{
+	"id": "portal_arena",
+	"runtimeScene": {
+		"schemaVersion": 1,
+		"id": "portal_arena_runtime",
+		"generatedAt": "2026-06-05T00:00:00.000Z",
+		"source": {
+			"kind": "authored",
+			"id": "portal_arena"
+		},
+		"readiness": {
+			"playerStableId": "player",
+			"requiredAssetIds": [
+				"mesh_portal_field",
+				"mesh_portal_gate",
+				"audio_portal_activate",
+				"audio_ambient_portal_deck",
+				"audio_ambient_shadow_waltz",
+				"audio_ambient_whistling_dreams"
+			],
+			"requiredCollisionPrefabIds": ["portal_arena_floor", "portal_gate"],
+			"requiredCollisionStableIds": [
+				"portal-arena:floor",
+				"portal-arena:portal:prototype-arena",
+				"portal-arena:portal:miranda-deck",
+				"portal-arena:portal:observatory"
+			],
+			"requiredLightStableIds": []
+		}
+	},
+	"level": {
+		"id": "portal_arena",
+		"sceneId": "portal_arena_game",
+		"preloadGroups": ["portal_arena"],
+		"resources": {
+			"game:collectedCount": 0,
+			"game:totalCollectibles": 0,
+			"game:characterBounds": {
+				"minX": -360,
+				"maxX": 360,
+				"minZ": -360,
+				"maxZ": 360
+			}
+		},
+		"preload": [
+			"mesh_portal_field",
+			"mesh_portal_gate",
+			"audio_portal_activate",
+			"audio_ambient_portal_deck",
+			"audio_ambient_shadow_waltz",
+			"audio_ambient_whistling_dreams"
+		],
+		"instances": [
+			{
+				"id": "floor",
+				"prefabId": "portal_arena_floor",
+				"stableId": "portal-arena:floor"
+			},
+			{
+				"id": "portal-prototype-arena",
+				"prefabId": "portal_gate",
+				"stableId": "portal-arena:portal:prototype-arena",
+				"transform": {
+					"position": [0, 0, -7.5],
+					"rotation": [0, 1, 0, 6.123233995736766e-17]
+				},
+				"components": {
+					"Portal": {
+						"id": "prototype-arena",
+						"label": "Prototype Arena",
+						"prompt": "Click to enter Prototype Arena",
+						"targetRuntimeSceneId": "prototype_arena_runtime",
+						"activationRadius": 2.35
+					}
+				}
+			},
+			{
+				"id": "portal-miranda-deck",
+				"prefabId": "portal_gate",
+				"stableId": "portal-arena:portal:miranda-deck",
+				"transform": {
+					"position": [5.303, 0, -5.303],
+					"rotation": [0, 0.9238795325112867, 0, 0.38268343236508984]
+				},
+				"components": {
+					"Portal": {
+						"id": "miranda-deck",
+						"label": "Miranda Deck",
+						"prompt": "Click to enter Miranda Deck",
+						"targetRuntimeSceneId": "miranda_deck_runtime",
+						"activationRadius": 2.35
+					}
+				}
+			},
+			{
+				"id": "portal-observatory",
+				"prefabId": "portal_gate",
+				"stableId": "portal-arena:portal:observatory",
+				"transform": {
+					"position": [7.5, 0, 0],
+					"rotation": [0, 0.7071067811865476, 0, 0.7071067811865475]
+				},
+				"components": {
+					"Portal": {
+						"id": "observatory",
+						"label": "Observatory",
+						"prompt": "Click to enter Observatory",
+						"targetRuntimeSceneId": "observatory_runtime",
+						"activationRadius": 2.35
+					}
+				}
+			},
+			{
+				"id": "portal-solitude",
+				"prefabId": "portal_gate",
+				"stableId": "portal-arena:portal:solitude",
+				"transform": {
+					"position": [5.303, 0, 5.303],
+					"rotation": [0, 0.38268343236508984, 0, 0.9238795325112867]
+				},
+				"components": {
+					"Portal": {
+						"id": "solitude",
+						"label": "Solitude",
+						"prompt": "Solitude portal is not connected yet",
+						"activationRadius": 2.35
+					}
+				}
+			},
+			{
+				"id": "portal-forge",
+				"prefabId": "portal_gate",
+				"stableId": "portal-arena:portal:forge",
+				"transform": {
+					"position": [0, 0, 7.5],
+					"rotation": [0, 6.123233995736766e-17, 0, 1]
+				},
+				"components": {
+					"Portal": {
+						"id": "forge",
+						"label": "Forge",
+						"prompt": "Forge portal is not connected yet",
+						"activationRadius": 2.35
+					}
+				}
+			},
+			{
+				"id": "portal-archive",
+				"prefabId": "portal_gate",
+				"stableId": "portal-arena:portal:archive",
+				"transform": {
+					"position": [-5.303, 0, 5.303],
+					"rotation": [0, -0.3826834323650897, 0, 0.9238795325112867]
+				},
+				"components": {
+					"Portal": {
+						"id": "archive",
+						"label": "Archive",
+						"prompt": "Archive portal is not connected yet",
+						"activationRadius": 2.35
+					}
+				}
+			},
+			{
+				"id": "portal-garden",
+				"prefabId": "portal_gate",
+				"stableId": "portal-arena:portal:garden",
+				"transform": {
+					"position": [-7.5, 0, 0],
+					"rotation": [0, -0.7071067811865475, 0, 0.7071067811865477]
+				},
+				"components": {
+					"Portal": {
+						"id": "garden",
+						"label": "Garden",
+						"prompt": "Garden portal is not connected yet",
+						"activationRadius": 2.35
+					}
+				}
+			},
+			{
+				"id": "portal-nexus-reserve",
+				"prefabId": "portal_gate",
+				"stableId": "portal-arena:portal:nexus-reserve",
+				"transform": {
+					"position": [-5.303, 0, -5.303],
+					"rotation": [0, -0.9238795325112867, 0, 0.38268343236508984]
+				},
+				"components": {
+					"Portal": {
+						"id": "nexus-reserve",
+						"label": "Nexus Reserve",
+						"prompt": "Nexus Reserve portal is not connected yet",
+						"activationRadius": 2.35
+					}
+				}
+			}
+		]
+	},
+	"assets": {
+		"shared": [
+			"mesh_portal_gate",
+			"audio_portal_activate",
+			"audio_ambient_shadow_waltz",
+			"audio_ambient_whistling_dreams"
+		],
+		"local": [
+			{
+				"id": "mesh_portal_field",
+				"kind": "mesh",
+				"url": "/assets/game/terrain/portal_field_moor.glb",
+				"tags": ["terrain", "field", "portal-arena"]
+			},
+			{
+				"id": "audio_ambient_portal_deck",
+				"kind": "audio",
+				"url": "/audio/ambient/portal-deck.mp3",
+				"tags": ["music", "ambient", "portal-arena"]
+			}
+		],
+		"preloadGroups": {
+			"portal_arena": [
+				"mesh_portal_field",
+				"mesh_portal_gate",
+				"audio_portal_activate",
+				"audio_ambient_portal_deck",
+				"audio_ambient_shadow_waltz",
+				"audio_ambient_whistling_dreams"
+			]
+		}
+	},
+	"prefabs": {
+		"shared": ["portal_gate"],
+		"local": [
+			{
+				"id": "portal_arena_floor",
+				"assetIds": ["mesh_portal_field"],
+				"tags": ["world", "collision", "portal-arena"],
+				"components": {
+					"Transform": {
+						"position": [0, -0.05, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1, 1, 1]
+					},
+					"Renderable": {
+						"meshId": "mesh_portal_field",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [2600, 0.05, 2600]
+						}
+					}
+				}
+			}
+		]
+	},
+	"audio": {
+		"sceneMusic": {
+			"trackIds": [
+				"audio_ambient_portal_deck",
+				"audio_ambient_shadow_waltz",
+				"audio_ambient_whistling_dreams"
+			],
+			"volume": 0.18,
+			"autoplay": true
+		},
+		"eventMappings": [
+			{
+				"id": "portal-arena.portal.activate",
+				"eventType": "PortalActivated",
+				"soundId": "audio_portal_activate",
+				"volume": 0.32,
+				"sceneId": "portal_arena_game"
+			}
+		]
+	},
+	"renderProfile": {
+		"id": "portal_arena_navigation_room",
+		"renderer": {
+			"clearColor": "#05070c",
+			"clearAlpha": 1,
+			"antialias": true,
+			"maxPixelRatio": 2,
+			"fallbackMaterialColor": "#223326"
+		},
+		"lighting": {
+			"lights": [
+				{
+					"kind": "ambient",
+					"color": "#8da4c7",
+					"intensity": 0.32
+				},
+				{
+					"kind": "directional",
+					"color": "#b8c8ff",
+					"intensity": 0.88,
+					"position": [-7, 12, 5]
+				},
+				{
+					"kind": "directional",
+					"color": "#355d74",
+					"intensity": 0.28,
+					"position": [8, 4, -7]
+				}
+			]
+		}
+	},
+	"player": {
+		"transform": {
+			"position": [0, 0.65, 0]
+		},
+		"groundY": 0.65,
+		"light": {
+			"kind": "point",
+			"color": "#ffd6a3",
+			"intensity": 5.5,
+			"distance": 16,
+			"decay": 2,
+			"visible": true
+		}
+	}
+}

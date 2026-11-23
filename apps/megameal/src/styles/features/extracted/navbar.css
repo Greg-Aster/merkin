@@ -1,0 +1,118 @@
+  #navbar {
+    --navbar-action-size: 44px;
+    --navbar-action-icon-size: 20px;
+  }
+
+  #navbar.onload-animation.loaded {
+    transform: none;
+  }
+
+  #navbar .nav-action-button {
+    width: var(--navbar-action-size);
+    min-width: var(--navbar-action-size);
+    height: var(--navbar-action-size);
+    min-height: var(--navbar-action-size);
+  }
+
+  #navbar .nav-action-icon,
+  #navbar .nav-action-button > svg {
+    width: var(--navbar-action-icon-size) !important;
+    min-width: var(--navbar-action-icon-size);
+    height: var(--navbar-action-icon-size) !important;
+    flex-shrink: 0;
+  }
+
+  #navbar .mobile-menu-tools {
+    margin-bottom: 0.45rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px solid var(--line-divider);
+  }
+
+  #navbar .mobile-menu-tools__button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 0.75rem;
+    border-radius: 0.5rem;
+    color: rgb(0 0 0 / 0.75);
+    font-weight: 700;
+    transition:
+      background-color 180ms ease,
+      color 180ms ease;
+  }
+
+  :root.dark #navbar .mobile-menu-tools__button {
+    color: rgb(255 255 255 / 0.75);
+  }
+
+  #navbar .mobile-menu-tools__button:hover,
+  #navbar .mobile-menu-tools__button:focus-visible {
+    background: var(--btn-plain-bg-hover);
+    color: var(--primary);
+    outline: none;
+  }
+
+  @media (max-width: 767px) {
+    #top-row {
+      width: 100vw !important;
+      max-width: none !important;
+      margin-inline: calc(50% - 50vw) !important;
+      padding-inline: 0 !important;
+    }
+
+    #navbar-wrapper {
+      position: relative !important;
+      top: auto !important;
+      width: 100% !important;
+    }
+
+    #navbar {
+      width: 100%;
+    }
+
+    #navbar .navbar-shell {
+      width: 100vw;
+      max-width: none !important;
+      margin-inline: 0 !important;
+      min-height: 3.25rem;
+      height: auto;
+    }
+
+    #navbar #public-nav-shell {
+      min-width: 0;
+    }
+
+    #navbar #public-home-link {
+      min-width: 0;
+      padding-inline: 0;
+    }
+
+    #navbar .navbar-shell > div:last-of-type {
+      gap: 0.25rem;
+    }
+
+    #navbar #search-switch {
+      display: none !important;
+    }
+
+    #navbar .nav-action-button {
+      border: 0;
+    }
+
+    #navbar .nav-action-icon,
+    #navbar .nav-action-button > svg {
+      color: currentColor;
+    }
+
+    #nav-menu-panel {
+      right: 0.75rem !important;
+      left: 0.75rem !important;
+      width: auto;
+      max-width: none;
+      margin-top: 0.55rem;
+      border-radius: 1rem;
+    }
+
+  }

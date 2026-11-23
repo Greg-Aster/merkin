@@ -1,0 +1,141 @@
+---
+import '@fontsource/creepster'
+import '@fontsource/metal-mania'
+import SiteArrivalStatus from '@components/client/SiteArrivalStatus.astro'
+import SiteAudioRuntime from '@components/client/SiteAudioRuntime.svelte'
+import SiteSfxBridge from '@components/client/SiteSfxBridge.svelte'
+import UniverseHeroSlide from '@components/home/UniverseHeroSlide.astro'
+import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
+import { routeStyleHref } from '../styles/routeStyleBundles'
+import { siteStyleHref } from '../styles/site'
+import {
+  isContentPostPage,
+  postUsesArchiveBanner,
+  resolvePostOneColumn,
+} from '../utils/mainGridLayout.server'
+
+interface Props {
+  title?: string
+  banner?: string
+  description?: string
+  lang?: string
+  setOGTypeArticle?: boolean
+  headings?: import('astro').MarkdownHeading[]
+  post?: unknown
+  bannerLink?: string
+  isPostPage?: boolean
+  backgroundImage?: string | null
+  oneColumn?: boolean
+  customAuthorData?: {
+    avatarImage?: string
+    authorName?: string
+    authorBio?: string
+    authorLink?: string
+  }
+  homeLayout?: 'default' | 'portal'
+  contentMode?: 'default' | 'banner-only'
+  renderTimelineBannerSlot?: boolean
+}
+
+const sharedHomeLayout = Astro.props.homeLayout
+const hasCustomBannerSlideContent = Astro.slots.has('banner-slide-content')
+const hasCustomBannerOverlayContent = Astro.slots.has('banner-overlay-content')
+const hasTimelineBannerContent = Astro.slots.has('timeline-banner-content')
+const originalPost = Astro.props.post as
+  | ({
+      data?: {
+        bannerType?: string
+        bannerData?: Record<string, unknown>
+      }
+    } & Record<string, unknown>)
+  | undefined
+const isContentPost = isContentPostPage(Astro.props.isPostPage, originalPost)
+const layoutPost = originalPost
+const resolvedOneColumn = isContentPost
+  ? resolvePostOneColumn(originalPost)
+  : Astro.props.oneColumn
+const usesArchiveBanner = !isContentPost && postUsesArchiveBanner(layoutPost)
+const CompactArchiveBanner = usesArchiveBanner
+  ? (await import('@components/archive/CompactArchiveBanner.astro')).default
+  : null
+const usesTimelinePostBanner =
+  !hasTimelineBannerContent && layoutPost?.data?.bannerType === 'timeline'
+const TimelineBanner = usesTimelinePostBanner
+  ? (await import('@components/timeline/TimelineBanner.astro')).default
+  : null
+const timelineBannerData = layoutPost?.data?.bannerData ?? {}
+const rendersTimelineBanner =
+  hasTimelineBannerContent || Boolean(TimelineBanner)
+const hasPortalDemoContent = Astro.slots.has('portal-demo-content')
+const sharedProps: Omit<Props, 'homeLayout'> & {
+  homeLayout?: 'default' | 'portal'
+} = {
+  ...Astro.props,
+  post: layoutPost,
+  homeLayout: sharedHomeLayout,
+  oneColumn: resolvedOneColumn,
+  contentMode: Astro.props.contentMode,
+  renderTimelineBannerSlot: rendersTimelineBanner,
+}
+---
+
+<SharedMainGridLayout
+  {...sharedProps}
+>
+  <Fragment slot="head">
+    <SiteArrivalStatus part="styles" />
+    <link rel="stylesheet" href={siteStyleHref} data-site-style />
+    <link rel="stylesheet" href={routeStyleHref('banner')} data-feature-style="banner" />
+    <slot name="head" />
+  </Fragment>
+  <slot />
+  {hasCustomBannerOverlayContent && (
+    <Fragment slot="banner-overlay-content">
+      <slot name="banner-overlay-content" />
+    </Fragment>
+  )}
+  <Fragment slot="overlay">
+    <slot name="overlay" />
+    <SiteArrivalStatus part="status" />
+    <SiteAudioRuntime client:load />
+    <SiteSfxBridge client:load />
+  </Fragment>
+  {hasPortalDemoContent && (
+    <Fragment slot="portal-demo-content">
+      <slot name="portal-demo-content" />
+    </Fragment>
+  )}
+  {hasTimelineBannerContent ? (
+    <Fragment slot="timeline-banner-content">
+      <slot name="timeline-banner-content" />
+    </Fragment>
+  ) : TimelineBanner ? (
+    <Fragment slot="timeline-banner-content">
+      <TimelineBanner
+        {...timelineBannerData}
+        class="h-full w-full"
+        asBanner={true}
+        bannerHeight="100%"
+      />
+    </Fragment>
+  ) : null}
+  {hasCustomBannerSlideContent ? (
+    <Fragment slot="banner-slide-content">
+      <slot name="banner-slide-content" />
+    </Fragment>
+  ) : usesArchiveBanner && CompactArchiveBanner ? (
+    <Fragment slot="banner-slide-content">
+      <CompactArchiveBanner post={layoutPost as any} />
+    </Fragment>
+  ) : (
+    <Fragment slot="banner-slide-content">
+      <UniverseHeroSlide />
+    </Fragment>
+  )}
+</SharedMainGridLayout>
+
+<script>
+  import { initMegamealRouteTransitions } from '@/utils/megamealRouteTransitions'
+
+  initMegamealRouteTransitions()
+</script>

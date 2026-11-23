@@ -1,0 +1,105 @@
+{
+  "review_date": "2026-09-21",
+  "revision": "stride-and-rate-v3",
+  "source_snapshot_timestamp": "2026-09-21T23:16:54.620169+00:00",
+  "scope": "Variable-gait CAD demonstration and numerical handoff. No physical walking or firmware deployment is established by these assets.",
+  "files": [
+    {
+      "file": "data/source-report.txt",
+      "source": "Blender workspace/variable-gait/ainekio-gait-results.md",
+      "source_sha256": "128e846c93e99bc086e2dc71cf1f023b1b3500a90dd13a0d56a47ac6d2b8dca4",
+      "published_sha256": "811dfb124588d55709427ebb08c3bb3b30d6062173f2352e7db075375b33992f",
+      "transform": "Workspace prefixes shortened; Markdown report served as text"
+    },
+    {
+      "file": "data/gait-data-results.json",
+      "source": "Blender workspace/variable-gait/gait-data-results.json",
+      "source_sha256": "cc105a8c94be6a7bd0a23a627d7923a1f97f3f53b6ba44a5b3ecb7ffed8e7883",
+      "published_sha256": "ed4708fd2e677689427c6669faa3ed56aecfa5a70dcc974e37d31047f5a6271f",
+      "transform": "Workspace prefixes shortened; JSON serialized for web download"
+    },
+    {
+      "file": "data/gait-data-schema.json",
+      "source": "Blender workspace/variable-gait/gait-data-schema.json",
+      "source_sha256": "01a17584ca2fccac351b5b1c2453f28ff7301b9ecba0c1521095d9d0a4a16114",
+      "published_sha256": "3f0a6b980dd5f9c50bd4d3a4061a86b8605d2b004861a2771f1099dfd41e830b",
+      "transform": "Workspace prefixes shortened; JSON serialized for web download"
+    },
+    {
+      "file": "data/control-checks.json",
+      "source": "Blender workspace/variable-gait/control-checks.json",
+      "source_sha256": "577349804d19c108efaeb2cf60194acea89a90b28a5b01e93d0b54c60126c67c",
+      "published_sha256": "482d9762c5c90fa8240813d9cec8fe80d6919c16e3c1000cb5be4022d354a80e",
+      "transform": "Workspace prefixes shortened; JSON serialized for web download"
+    },
+    {
+      "file": "data/blender-validation.json",
+      "source": "Blender workspace/variable-gait/blender-validation.json",
+      "source_sha256": "4e4ae1dfa0d2e7beafdd1e959d3a414ab7dd6cb3ae814aaa58e48adc434d0108",
+      "published_sha256": "c93740f2f64c47ce308df798fef4484b5ee0506abf3c8b30eada46a6017caab7",
+      "transform": "Workspace prefixes shortened; JSON serialized for web download"
+    },
+    {
+      "file": "data/collision-screen.json",
+      "source": "Blender workspace/variable-gait/collision-screen.json",
+      "source_sha256": "c8ec6250c7fa0c92402599f0e3093af1c80ed566046656bf0ca78d849fd7957a",
+      "published_sha256": "946ca0d394d8f38e8235eb4025d9fe77907c9a481eccefd6e2635010239c1d8b",
+      "transform": "Workspace prefixes shortened; JSON serialized for web download"
+    },
+    {
+      "file": "data/ainekio-gait-geometry.json",
+      "source": "Blender workspace/variable-gait/ainekio-gait-geometry.json",
+      "source_sha256": "2af75617f6c5c99099575a939328c3717d64285204643f01135bd2387a4c0684",
+      "published_sha256": "063b4ddbf665dca360c475f842dfb02c76fb928aabde7a7a1998c692f436f8a7",
+      "transform": "Workspace prefixes shortened; JSON serialized for web download"
+    },
+    {
+      "file": "data/ainekio-gait-timestamps.csv",
+      "source": "Blender workspace/variable-gait/ainekio-gait-timestamps.csv",
+      "source_sha256": "91de3c447eb6f8773f600b851e2913228df63eab82e29a62b7d384308175bd40",
+      "published_sha256": "22672f72e6d8f53dfa9f854f9cecc40b693cc8f7672c81f7aa4a063510ef1a44",
+      "transform": "CSV line endings normalized to LF; data values unchanged"
+    },
+    {
+      "file": "data/speed-percentage-table.csv",
+      "source": "Blender workspace/variable-gait/speed-percentage-table.csv",
+      "source_sha256": "ff602e7af04818bf15fb80861b8a91fa9b24528338318d6c8eb42b0651fa6254",
+      "published_sha256": "39f9b42e1a9cc10101d2ef773a7c0912a00bb4cdce14219a79f61511ee3ae25b",
+      "transform": "CSV line endings normalized to LF; data values unchanged"
+    },
+    {
+      "file": "data/ainekio_gait.py",
+      "source": "Blender workspace/variable-gait/ainekio_gait.py",
+      "source_sha256": "3ef0b80c54634afe87ac4e20b2d1988dffc662017f03457fe8e02b85aa01439a",
+      "published_sha256": "3ef0b80c54634afe87ac4e20b2d1988dffc662017f03457fe8e02b85aa01439a",
+      "transform": "Unchanged"
+    },
+    {
+      "file": "data/check_controls.py",
+      "source": "Blender workspace/variable-gait/check_controls.py",
+      "source_sha256": "2ed40266a33dd2b617bd85493e54ba0aa3eea2151adf3e62b317831f3f2dd7f6",
+      "published_sha256": "2ed40266a33dd2b617bd85493e54ba0aa3eea2151adf3e62b317831f3f2dd7f6",
+      "transform": "Unchanged"
+    },
+    {
+      "file": "data/gait-data.npz",
+      "source": "Blender workspace/variable-gait/gait-data.npz",
+      "source_sha256": "a1ba22e6ffd071ba169a335c701802267784ee3c6a7b745c380f9b52f85eca2c",
+      "published_sha256": "a1ba22e6ffd071ba169a335c701802267784ee3c6a7b745c380f9b52f85eca2c",
+      "transform": "Unchanged"
+    },
+    {
+      "file": "ainekio-variable-gait-demo.mp4",
+      "source": "Blender workspace/variable-gait/ainekio-variable-gait-demo.mp4",
+      "source_sha256": "542941eedfaca2f73d2c0773b453827fe47e5b95c8e9cb9c2266619dad64b3c1",
+      "published_sha256": "542941eedfaca2f73d2c0773b453827fe47e5b95c8e9cb9c2266619dad64b3c1",
+      "transform": "Unchanged"
+    },
+    {
+      "file": "demo-poster.webp",
+      "source": "ainekio-variable-gait-demo.mp4 at 5.2 seconds",
+      "published_sha256": "8ba59132734a01f05cdee993bdbc89ffc3ee2c495d2a6693f5c3efa1840c31e6",
+      "transform": "Unaltered video frame extracted and encoded as WebP"
+    }
+  ]
+}

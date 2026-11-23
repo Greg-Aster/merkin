@@ -1,0 +1,124 @@
+---
+name: "Puppy Rescue Rations"
+tagline: "A shelf-stable chili event with an unfortunate translation history."
+brand: "Protein Solutions Division"
+draft: false
+showInTimeline: true
+timelineYear: 2.8043e4
+timelineEra: "singularity-conflict"
+timelineLocation: "Post-Miranda Salvage Distribution Channels"
+isKeyEvent: false
+availability: "not_in_your_timeline"
+ctaMode: "none"
+image: ""
+price: 12.99
+category: "consumables"
+format: "physical"
+featured: false
+listingStyle: "showcase"
+listingLabel: "Transit Listing"
+sku: "PRR-001"
+description: "Puppy Rescue Rations is a canned chili-like ration imported from a notoriously difficult regional dialect cluster where direct translation is considered an act of aggression. Whether the title refers to rescued puppies, puppies performing the rescue, or an entirely unrelated local phrase remains disputed. The contents are savory, dense, faintly metallic, and more conventional than the label suggests."
+realDescription: "A chili-style preserved ration with ambiguous branding and surprisingly stable shelf life. Availability collapsed after the destruction of the Miranda star system disrupted the relevant trade corridor, but sealed new old stock still circulates through secondary channels."
+shippingNote: "Primary distribution ended after the Miranda system loss. Remaining units are old stock, warehouse recoveries, or shipments with unverifiable paperwork."
+rating: 2.8
+media:
+  - type: image
+    src: "/ads/puppy-rescue.png"
+    thumbnailSources:
+      - src: "/ads/puppy-rescue-card-320.webp"
+        width: 320
+      - src: "/ads/puppy-rescue-card-640.webp"
+        width: 640
+    alt: "Puppy Rescue Rations can"
+    caption: "Recovered export label from a dialect region no translator will confidently certify."
+specifications:
+  - label: "Product Type"
+    value: "Canned chili-adjacent ration"
+  - label: "Translation Status"
+    value: "Literal phrasing disputed by every responsible language office"
+  - label: "Net Weight"
+    value: "425g per can"
+  - label: "Storage"
+    value: "Extremely shelf stable. Best kept cool, dry, and emotionally detached."
+  - label: "Availability"
+    value: "Mostly new old stock following Miranda corridor failure"
+  - label: "Flavor Profile"
+    value: "Tomato, beans, protein fragments, mild smoke, unresolved semantics"
+  - label: "Allergen Notice"
+    value: "Contains soy and wheat. May contain milk, sesame, and translational uncertainty."
+  - label: "Serving Suggestion"
+    value: "Heat thoroughly and avoid discussing the name during the meal"
+ingredients:
+  - "Tomato concentrate"
+  - "Beans"
+  - "Hydrated vegetable protein"
+  - "Textured meat analogue or poorly translated equivalent"
+  - "Onion"
+  - "Pepper"
+  - "Starch thickener"
+  - "Salt"
+  - "Spice blend"
+  - "Natural smoke flavor"
+  - "Stabilizers"
+  - "May contain soy, wheat, milk, sesame, and trace archival dust"
+nutritionFacts:
+  - label: "Serving Size"
+    value: "1 cup heated"
+  - label: "Calories"
+    value: "260"
+  - label: "Protein"
+    value: "14g"
+  - label: "Total Fat"
+    value: "9g"
+  - label: "Sodium"
+    value: "780mg"
+  - label: "Total Carbohydrate"
+    value: "29g"
+  - label: "Fiber"
+    value: "7g"
+assurances:
+  - label: "Ingredient Assurance"
+    value: "The ration is chili-adjacent preserved food. Current evidence supports beans, tomato concentrate, protein matter, and translation failure rather than the literal reading of the export label."
+  - label: "Stock Assurance"
+    value: "Remaining cans are new old stock, salvage inventory, or warehouse recoveries. Distribution paperwork may be incomplete after the Miranda corridor failure."
+  - label: "Seal Assurance"
+    value: "Consumption guidance assumes an intact can, stable seal, and no visible compromise. If the container argues back, do not heat it."
+qanda:
+  - question: "Is this actually made from puppies?"
+    answer: "Probably not. The most widely accepted interpretation is that the original phrase referred to a rescue-meal ration distributed during juvenile evacuation drives. Less careful translators chose speed over dignity, and the export label has been wrong ever since."
+  - question: "So what is inside the can?"
+    answer: "A chili-like mixture of beans, protein matter, tomato concentrate, and seasonings. The contents are mundane. The packaging is the unstable element."
+  - question: "Why is it so hard to find now?"
+    answer: "Availability dropped sharply after the destruction of the Miranda star system severed a major shipping lane and erased several contracted distributors. Most surviving units are old warehouse stock, estate pallets, or cans that appear in salvage lots with excellent expiration confidence."
+    linkLabel: "Read the Miranda incident file"
+    linkHref: "/posts/timelines/the-miranda-incident/"
+    linkAccent: "creepy"
+  - question: "Is it safe to eat old stock?"
+    answer: "If the seal is intact and the can is not compromised, the product remains remarkably stable. The trade office attributes this to excellent preservation methods. Other observers have less specific theories."
+  - question: "Why does the label never explain itself clearly?"
+    answer: "Because every attempt to clarify the translation has produced two new arguments and one diplomatic complaint. The manufacturer now considers ambiguity part of the brand."
+preWrittenReviews:
+  - author: "I. Darras, Freight Kitchen"
+    rating: 3
+    date: "Route canteen"
+    comment: "Tastes like canned chili from a place that has never heard of subtlety. Perfectly edible. I still do not enjoy opening it in front of coworkers because then we have to do the whole conversation again."
+  - author: "Concerned Shopper, Formal Complaint"
+    rating: 1
+    date: "Filed twice"
+    comment: "The label is unacceptable and the explanation somehow made it worse. I bought one out of anger and the product itself was fine, which I found deeply irritating."
+  - author: "Salvage Pantry Cooperative"
+    rating: 4
+    date: "Post-Miranda inventory"
+    comment: "Most cans in the recovered lot were in excellent condition despite the shipping records ending abruptly. Better than expected over rice. We ate three cases before anyone asked what the title meant."
+    linkLabel: "Open the Miranda debris record"
+    linkHref: "/posts/timelines/miranda-bloody-mary/"
+    flags:
+      - "new old stock"
+      - "route recovered after system loss"
+  - author: "Translation Office Annex B"
+    rating: 2
+    date: "Redacted memorandum"
+    comment: "We continue to object to the export label. The product name is not, in our view, a faithful rendering of the source phrase. Nevertheless, the canning quality is high and the spice balance is competent."
+    verified: true
+---

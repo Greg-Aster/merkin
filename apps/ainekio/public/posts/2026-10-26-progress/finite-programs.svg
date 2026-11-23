@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+<title id="title">One program, measured targets</title>
+<desc id="desc">A request runs once; actual body events can request recovery.. Generate targets: Joint / foot / body; Requested speed; Explicit holds. Execute on P4: Ramp toward targets; Read shaft positions; Verify arrival. Finish or recover: Finish the program; Fault or tipping event; Generate a correction. Shaft position is measured. Foot contact is not.</desc>
+<rect width="1200" height="675" fill="#08191e"/><path d="M0 610H1200M0 642H1200" stroke="#12343b"/>
+<g font-family="sans-serif">
+<text x="60" y="68" fill="#57d7ca" font-size="20" letter-spacing="3">AINEKIO / 27 OCTOBER 2026</text>
+<text x="60" y="134" fill="#edf6f5" font-size="43" font-weight="700">One program, measured targets</text>
+<text x="60" y="182" fill="#a5bec4" font-size="24">A request runs once; actual body events can request recovery.</text>
+<rect x="60" y="245" width="340" height="245" rx="14" fill="#102b32" stroke="#37646d"/>
+<text x="84" y="286" fill="#ed8c78" font-size="20">01</text>
+<text x="84" y="330" fill="#edf6f5" font-size="28" font-weight="700">Generate targets</text>
+<text x="84" y="377" fill="#c6d9dc" font-size="22">Joint / foot / body</text>
+<text x="84" y="410" fill="#c6d9dc" font-size="22">Requested speed</text>
+<text x="84" y="443" fill="#c6d9dc" font-size="22">Explicit holds</text>
+<path d="M405 365h20m-7 -7 7 7-7 7" fill="none" stroke="#57d7ca" stroke-width="3"/>
+<rect x="430" y="245" width="340" height="245" rx="14" fill="#102b32" stroke="#37646d"/>
+<text x="454" y="286" fill="#ed8c78" font-size="20">02</text>
+<text x="454" y="330" fill="#edf6f5" font-size="28" font-weight="700">Execute on P4</text>
+<text x="454" y="377" fill="#c6d9dc" font-size="22">Ramp toward targets</text>
+<text x="454" y="410" fill="#c6d9dc" font-size="22">Read shaft positions</text>
+<text x="454" y="443" fill="#c6d9dc" font-size="22">Verify arrival</text>
+<path d="M775 365h20m-7 -7 7 7-7 7" fill="none" stroke="#57d7ca" stroke-width="3"/>
+<rect x="800" y="245" width="340" height="245" rx="14" fill="#102b32" stroke="#37646d"/>
+<text x="824" y="286" fill="#ed8c78" font-size="20">03</text>
+<text x="824" y="330" fill="#edf6f5" font-size="28" font-weight="700">Finish or recover</text>
+<text x="824" y="377" fill="#c6d9dc" font-size="22">Finish the program</text>
+<text x="824" y="410" fill="#c6d9dc" font-size="22">Fault or tipping event</text>
+<text x="824" y="443" fill="#c6d9dc" font-size="22">Generate a correction</text>
+<text x="60" y="558" fill="#a5bec4" font-size="23">Shaft position is measured. Foot contact is not.</text>
+<text x="60" y="632" fill="#57d7ca" font-size="19">BUILD JOURNAL · MOTION, MEASUREMENTS AND RESULTS</text>
+</g></svg>

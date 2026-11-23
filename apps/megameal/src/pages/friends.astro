@@ -1,0 +1,7 @@
+---
+import { getRetiredPublicRouteTarget } from '../contracts/routes'
+
+const redirectTarget = getRetiredPublicRouteTarget('/friends/')
+
+return Astro.redirect(redirectTarget, 301)
+---

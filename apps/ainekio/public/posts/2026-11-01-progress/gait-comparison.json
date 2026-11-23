@@ -1,0 +1,161 @@
+{
+  "reviewed": "2026-11-01",
+  "scope": "simulation_only",
+  "selected_actor": "16fa88334085443e9a3e8b2a90808b72",
+  "selected_imitation_updates": 360000,
+  "connected_baseline_before_fractional_encoding_fix": true,
+  "trials": [
+    {
+      "execution_backend": "direct",
+      "falls": 0,
+      "command_results": [
+        {
+          "command": [
+            0.08,
+            0.0,
+            0.0
+          ],
+          "seconds": 16.0,
+          "measured_velocity_command_m_s": [
+            0.027817266574768452,
+            0.0029015460322990706
+          ],
+          "measured_yaw_rate_rad_s": -0.003893540762660369,
+          "mean_reward_per_second": 7.07662096882403
+        },
+        {
+          "command": [
+            -0.02,
+            0.0,
+            0.0
+          ],
+          "seconds": 16.0,
+          "measured_velocity_command_m_s": [
+            -0.02219871423931008,
+            0.001233111963842275
+          ],
+          "measured_yaw_rate_rad_s": 0.0030797430002492817,
+          "mean_reward_per_second": 10.968355878929545
+        },
+        {
+          "command": [
+            -0.015,
+            0.0,
+            0.0
+          ],
+          "seconds": 16.0,
+          "measured_velocity_command_m_s": [
+            -0.018282011525314616,
+            0.001148164372790512
+          ],
+          "measured_yaw_rate_rad_s": 0.0013486038243219881,
+          "mean_reward_per_second": 0.6576281031824843
+        },
+        {
+          "command": [
+            0.0,
+            0.0,
+            0.12
+          ],
+          "seconds": 16.0,
+          "measured_velocity_command_m_s": [
+            0.0010835111191926192,
+            0.002871815718486548
+          ],
+          "measured_yaw_rate_rad_s": 0.1277540188532814,
+          "mean_reward_per_second": 20.136136417366657
+        },
+        {
+          "command": [
+            0.0,
+            0.0,
+            -0.12
+          ],
+          "seconds": 16.0,
+          "measured_velocity_command_m_s": [
+            -0.0017453654492217178,
+            0.0039989133321618985
+          ],
+          "measured_yaw_rate_rad_s": -0.14758455278800092,
+          "mean_reward_per_second": 17.183749349025067
+        }
+      ]
+    },
+    {
+      "execution_backend": "body_control",
+      "falls": 0,
+      "command_results": [
+        {
+          "command": [
+            0.08,
+            0.0,
+            0.0
+          ],
+          "seconds": 16.0,
+          "measured_velocity_command_m_s": [
+            0.022453943036030773,
+            0.002192240088200432
+          ],
+          "measured_yaw_rate_rad_s": 0.006275528829618345,
+          "mean_reward_per_second": 3.864767764637044
+        },
+        {
+          "command": [
+            -0.02,
+            0.0,
+            0.0
+          ],
+          "seconds": 16.0,
+          "measured_velocity_command_m_s": [
+            -0.02055216997704822,
+            0.0002771639753858536
+          ],
+          "measured_yaw_rate_rad_s": 0.005347803265055035,
+          "mean_reward_per_second": 17.814242260334037
+        },
+        {
+          "command": [
+            -0.015,
+            0.0,
+            0.0
+          ],
+          "seconds": 16.0,
+          "measured_velocity_command_m_s": [
+            -0.013481384059979723,
+            -0.0017355985801642433
+          ],
+          "measured_yaw_rate_rad_s": 0.00986202499557883,
+          "mean_reward_per_second": -5.485653479790981
+        },
+        {
+          "command": [
+            0.0,
+            0.0,
+            0.12
+          ],
+          "seconds": 16.0,
+          "measured_velocity_command_m_s": [
+            0.0006143848981791601,
+            0.018668473695960017
+          ],
+          "measured_yaw_rate_rad_s": 0.020779691458293295,
+          "mean_reward_per_second": -21.978620995976282
+        },
+        {
+          "command": [
+            0.0,
+            0.0,
+            -0.12
+          ],
+          "seconds": 16.0,
+          "measured_velocity_command_m_s": [
+            -0.001976267767098029,
+            0.0021683590296207827
+          ],
+          "measured_yaw_rate_rad_s": -0.11319445949265743,
+          "mean_reward_per_second": 15.430301953640184
+        }
+      ]
+    }
+  ]
+}

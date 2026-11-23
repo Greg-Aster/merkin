@@ -1,0 +1,40 @@
+﻿    /* ===================================================================
+     * â­ SIMPLIFIED: FULLSCREEN MODE - MOBILE ONE-COLUMN FRIENDLY
+     * ===================================================================
+     */
+    
+    /* ðŸŽ¯ FULLSCREEN MODE - Main panel wrapper adjustments */
+    .force-mobile-view #main-panel-wrapper {
+        /* Remove max-width constraints */
+        max-width: none !important;
+        width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    
+    /* ðŸŽ¯ FULLSCREEN MODE - Content wrapper adjustments */
+    .force-mobile-view #main-content-wrapper {
+        /* Ensure content can use full width */
+        width: 100% !important;
+        max-width: none !important;
+    }
+    
+    /* ðŸŽ¯ FULLSCREEN MODE - Navbar adjustments */
+    .force-mobile-view #navbar-wrapper {
+        /* Ensure navbar spans full width */
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+    
+    .force-mobile-view #top-row {
+        /* Remove max-width from top row */
+        max-width: none !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    /* ðŸŽ¯ FULLSCREEN MODE - TOC Visibility */
+    .force-mobile-view #toc-wrapper {
+        /* Hide table of contents in fullscreen mode */
+        display: none !important;
+    }

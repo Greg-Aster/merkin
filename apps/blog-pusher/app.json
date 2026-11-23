@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Blog Pusher",
+    "slug": "blog-pusher",
+    "version": "1.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a3a2a"
+    },
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {
+      "versionCode": 2,
+      "adaptiveIcon": {
+        "backgroundColor": "#1a3a2a",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "com.gregaster.blogpusher"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "76f4d34d-1680-4d8b-9358-ca2981ef287b"
+      }
+    }
+  }
+}

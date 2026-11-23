@@ -1,0 +1,243 @@
+image: node:22
+
+workflow:
+  rules:
+    # GitLab CI is fallback-only. Primary deploys run via GitHub Actions -> Cloudflare.
+    # Only run when manually triggered from the GitLab web UI (e.g. if GitHub is down).
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - when: never
+
+stages:
+  - deploy
+
+variables:
+  PNPM_VERSION: "9.14.4"
+
+default:
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - .pnpm-store/
+    policy: pull-push
+  before_script:
+    - npm install -g pnpm@${PNPM_VERSION} --silent
+    - pnpm config set store-dir .pnpm-store
+    - pnpm install --frozen-lockfile
+
+# Flow:
+# - Preview deploys run on GitHub Pages workflow only.
+# - GitLab CI runs production deploys from main only.
+# - Main branch: auto production deploys.
+#
+# Keep change filters selective. Root workspace files should not implicitly redeploy
+# every site; infra-only changes can be promoted manually with DEPLOY_SITE.
+
+# Temporal-Flow -> temporalflow.org
+preview-temporal:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="$CI_COMMIT_REF_SLUG" pnpm deploy:temporal
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE != "web"'
+      when: manual
+      allow_failure: true
+      changes:
+        - Temporal-Flow/**/*
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "temporal")'
+      when: manual
+      allow_failure: true
+
+promote-temporal:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:temporal
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main"'
+      when: manual
+      changes:
+        - Temporal-Flow/**/*
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - .gitlab-ci.yml
+
+deploy-temporal:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:temporal
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - Temporal-Flow/**/*
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "temporal")'
+      when: manual
+      allow_failure: true
+
+# DNDIY -> dndiy.org
+preview-dndiy:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="$CI_COMMIT_REF_SLUG" pnpm deploy:dndiy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE != "web"'
+      when: manual
+      allow_failure: true
+      changes:
+        - DNDIY.github.io/**/*
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "dndiy")'
+      when: manual
+      allow_failure: true
+
+promote-dndiy:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:dndiy
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main"'
+      when: manual
+      changes:
+        - DNDIY.github.io/**/*
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - .gitlab-ci.yml
+
+deploy-dndiy:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:dndiy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - DNDIY.github.io/**/*
+        - packages/blog-core/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "dndiy")'
+      when: manual
+      allow_failure: true
+
+# MEGAMEAL -> megameal.org (now a workspace app at apps/megameal/)
+preview-megameal:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="$CI_COMMIT_REF_SLUG" pnpm deploy:megameal
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE != "web"'
+      when: manual
+      allow_failure: true
+      changes:
+        - apps/megameal/**/*
+        - MEGAMEAL/**/*
+        - packages/blog-core/**/*
+        - packages/shared-audio/**/*
+        - packages/shared-content/**/*
+        - packages/shared-data/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - scripts/generate-post-pdfs.mjs
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "megameal")'
+      when: manual
+      allow_failure: true
+
+promote-megameal:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:megameal
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main"'
+      when: manual
+      changes:
+        - apps/megameal/**/*
+        - MEGAMEAL/**/*
+        - packages/blog-core/**/*
+        - packages/shared-audio/**/*
+        - packages/shared-content/**/*
+        - packages/shared-data/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - scripts/generate-post-pdfs.mjs
+        - .gitlab-ci.yml
+
+deploy-megameal:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:megameal
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - apps/megameal/**/*
+        - MEGAMEAL/**/*
+        - packages/blog-core/**/*
+        - packages/shared-audio/**/*
+        - packages/shared-content/**/*
+        - packages/shared-data/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - scripts/generate-post-pdfs.mjs
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "megameal")'
+      when: manual
+      allow_failure: true
+
+# Game -> game.megameal.org
+preview-game:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="$CI_COMMIT_REF_SLUG" pnpm deploy:game
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE != "web"'
+      when: manual
+      allow_failure: true
+      changes:
+        - apps/game.megameal/**/*
+        - MEGAMEAL/public/**/*
+        - packages/shared-audio/**/*
+        - packages/shared-content/**/*
+        - packages/shared-data/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "game")'
+      when: manual
+      allow_failure: true
+
+promote-game:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:game
+  rules:
+    - if: '$CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "main"'
+      when: manual
+      changes:
+        - apps/game.megameal/**/*
+        - MEGAMEAL/public/**/*
+        - packages/shared-audio/**/*
+        - packages/shared-content/**/*
+        - packages/shared-data/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - .gitlab-ci.yml
+
+deploy-game:
+  stage: deploy
+  script:
+    - DEPLOY_BRANCH="main" pnpm deploy:game
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "web"'
+      changes:
+        - apps/game.megameal/**/*
+        - MEGAMEAL/public/**/*
+        - packages/shared-audio/**/*
+        - packages/shared-content/**/*
+        - packages/shared-data/**/*
+        - scripts/deploy-pages-with-retry.sh
+        - .gitlab-ci.yml
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main" && ($DEPLOY_SITE == "all" || $DEPLOY_SITE == "game")'
+      when: manual
+      allow_failure: true

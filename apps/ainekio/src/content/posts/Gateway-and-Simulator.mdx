@@ -1,0 +1,130 @@
+---
+title: "Robot Host Gateway, Cockpit HUD, Body Control, game.megameal 3D Simulator & MuJoCo Twins"
+published: 2026-08-27T08:45:00-07:00
+updated: 2026-11-21
+description: "How Ainekio's host gateway, Body Control workbench, full-viewport Cockpit HUD, the live browser alpha 3D simulator at simulator.ainek.io (500 Hz MuJoCo WASM + compiled ESP32-P4 firmware across 6 worlds), game.megameal bridge, and 4,096-environment GPU twins manage robot sessions and neural gaits."
+image: "/posts/gateway-sim/megameal-sim-bridge-architecture.webp"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, Gateway, Cockpit HUD, Simulator, MuJoCo, Dashboard, WebSocket, Body Control, Ainekio OS]
+category: "Robot Runtime"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: control
+  generation: both
+  kind: reference
+  next: ainekio-cockpit
+  related: ["ainekio-cockpit", "jam-protection-and-thermal-safety", "three-system-neural-architecture", "2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim"]
+---
+import SimulatorCta from '../../components/SimulatorCta.astro'
+
+<SimulatorCta />
+
+> **Dedicated Cockpit HUD Guide:** For a complete tour of **Ainekio Cockpit** (`#cockpit-section`)—including one-tap **`Tap to Talk`**, the translucent **7-graph Ainekio OS live stream** (`POST /api/metahuman-stream`), 10 immediate-apply runtime switches, and the 2D vector joystick—see **[Ainekio Cockpit: Full-Screen Camera HUD, Tap-to-Talk & Live Stream](/posts/ainekio-cockpit/)**.
+
+Four connected subsystems in [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot) and [`game.megameal`](https://game.megameal.org/) sit between the physical (or simulated) `ESP32-P4` V2 and `ESP32-S3` V1 robots and **[Ainekio OS](/posts/ainekio-os/)** ([embodied integration](/posts/metahuman-integration/)), giving both a real-time session owner and a workbench for calibration, teleoperation, and full-parity physics simulation:
+
+1. **The Host Gateway**: Maintains the authenticated `protocol-v1` WebSocket link (`40` commands, `24` feature flags) with the robot, tracks command sequence numbers and connection epochs, streams camera frames and bidirectional `16 kHz` PCM audio, commands on-chip `50 Hz` clean-room `MicroDuck` velocity twists, or streams `50 Hz` host neural gait and `NeuralPose v8` posture frames.
+2. **The Embodied Adapter**: Translates high-level intents from Ainekio OS into capability-checked robot commands, persists crash-safe SQLite action receipts, exposes a one-click pause/resume switch for Ainekio OS control, and forwards structured telemetry and body-contact events upward.
+3. **Body Control & Cockpit HUD**: Serves both a full-viewport **Cockpit HUD** for live driving and obstacle awareness (with Apache-2.0 **RT-DETRv2 + OWLv2** detection) and engineering workspaces for 12-channel servo calibration, IMU leveling, Freestyle authoring, and over-the-air firmware staging.
+4. **Live Browser 3D Simulator ([`simulator.ainek.io`](https://simulator.ainek.io/)) & `4,096`-Env MuJoCo Twins**: Runs real `ESP32-P4` C firmware (`ainekio-v2-firmware.wasm`) atop `500 Hz` MuJoCo WASM (`mujoco_wasm.js`) directly in a browser Web Worker across 6 playable 3D worlds (`#game-megameal-simulator`)—with optional WebSocket attachment to Body Control—alongside the native `libgait_native.so` daemon bridge and `4,096` parallel GPU MuJoCo environments for `MicroDuck` and `NeuralPose v8` training.
+
+The gateway stack runs on a desktop workstation or an offboard `Radxa Dragon Q6A` single-board computer, supporting direct local LAN access, automatic Wi-Fi hotspot fallback when away from a router, or connection through an optional remote tunnel.
+
+## Cockpit HUD and Body Control workbench
+
+For a visual tour of the Body Control &amp; Cockpit UI panels, see **[Ainekio Cockpit: Full-Screen Camera HUD, Tap-to-Talk &amp; Live Ainekio OS Stream](/posts/ainekio-cockpit/)**.
+
+| Workspace | What It Provides on V2 |
+| --- | --- |
+| **Cockpit HUD** | Full-viewport live view from the chin-mounted `OV5647` camera overlaid with **Apache-2.0 `RT-DETRv2` + `OWLv2` (`detector_backend.py`)**, **pyramidal Lucas-Kanade optical-flow + `< 0.30 m` `MoGe-2` forward corridor braking**, one-tap **`Tap to Talk`** (`gate: "open"` wake bypass), a translucent **live Ainekio OS text stream (`environment.text_stream`)**, compact 12-servo tracking health, `208 Hz` `LSM6DS3` attitude readouts (`battery_available = false` on V2; `2S` battery ADC telemetry is V1-only), an **On-chip MicroDuck vs. Host neural gait** selector, and a top-bar **Ainekio OS control** toggle |
+| **Manual Locomotion & Postures** | Direct triggers and live parameter sliders (`Speed`, `Stride %`, `Motion rate`, steering heading, speed multiplier, and clean gait `Finish`) for `Stand`, `Walk`, `Run`, `Crawl`, 6-direction `Crab`, and 23 finite gestures |
+| **12-Channel Servo Feedback** | Live commanded-versus-measured shaft angles across `CD74HC4067` channels `C4–C15` (`GPIO27–30` → `GPIO49` / `ADC2_CH0`), One-Euro velocity filter diagnostics, per-servo calibration curves, and closed-loop `Stand` (`2 mm` settle) / `Walk` arrival checks |
+| **IMU Attitude & Leveling** | Live `208 Hz` `LSM6DS3` roll/pitch telemetry, one-click level-reference capture, 256-sample stationary gyro bias calibration, and self-leveling gain/damping tuning |
+| **Freestyle, `50 Hz` NeuralPose v8 & Presence** | SQLite-backed editor over **`939` clean choreography rows** (`828` synthetic recovery rows pruned when `library_recovery.py` retired), `:8794` `Qwen3.5-0.8B` generator, **`50 Hz` `neural-pose-v8-calibrated`** (`2.46M` GPU MuJoCo steps, `826,776` params, Schmitt-trigger single-leg carpet stepping `> 6.5°` / `<= 3.0°`, `CARRIER_HOME_MARGIN_DEG = 3.0` clamping carrier `>= -27.87°`, `18–20 mm` step lift, and `mid_step_active` terminal stance settling `<= 5.5°` / `<= 3.5°`), plus **`50 Hz` `NeuralPosePresence`** (motor-silent during `vad_open`, sagittal speech nods with `0.0°` shoulder scrub) |
+| **Neural Gait & OTA Maintenance** | Compiles clean-room **`110,432 B` (`107.8 KB`) `int8` `MicroDuck` policies** (`microduck-v18-p4` & `microduck-v19-snag-p4`) for Core 1 `50 Hz` on-chip execution, streams host `MicroDuck` RL policies (GPL-3.0 `pupper-mjx` retired in `68a325b`) with synchronized telemetry logging, manages microSD video clips, and stages `ESP32-P4` firmware updates over Wi-Fi |
+
+## Command translation and idempotent receipts
+
+When Ainekio OS dispatches an intent across the embodied bridge, the gateway adapter maps it onto the connected robot's verified capabilities:
+
+| Cognitive Intent / Event | Gateway & Adapter Execution Path |
+| --- | --- |
+| **Postures & Locomotion Goals** | Dispatches a checked posture, gesture, or measured distance/turn/visual walk (analytical solver or on-chip `50 Hz` `MicroDuck v19-snag-p4` with `1.8 s` firmware carpet-unsnag reflex and `< 0.30 m` `MoGe-2` corridor braking) and monitors progress until terminal `Finish` |
+| **Freestyle Programs** | Synthesizes or selects from the `939`-row clean choreography library and tracks 12-DOF targets closed-loop at `50 Hz` via `neural-pose-v8-calibrated` (`stand_enabled: false` single posture owner with `jam_enabled: true` `I²t` fuse active; `Bridge` interrupts active jobs **only** on genuine hardware thermal cutoff `outputs_released: true`) |
+| **Correlated Snapshots** | Captures an explicit still frame—or attaches a post-motion verification photo immediately before `done`—and returns the matched JPEG |
+| **Robot Speech (TTS)** | Paces synthesized Kokoro or Piper `16 kHz` PCM bursts to the `ES8311` / `NS4150B` speaker queue while driving `50 Hz` `NeuralPosePresence` pure sagittal nods (`±2.5 mm` Z, `±4.5°` pitch, `0.0°` shoulder scrub) and holding a self-speech suppression window |
+| **Spoken Utterances (STT)** | Packages **`microWakeWord` + WebRTC VAD** (or Cockpit `Tap to Talk`) speech segments as WAV audio while `NeuralPosePresence` holds motor-silent (never cutting off the mic with `stop`) for local or LAN Whisper transcription |
+| **Body-Contact Events** | Forwards thresholded `tipped`, `shaken`, and hardware thermal-cutoff `servo_stall` (`outputs_released: true`) events to Ainekio OS's fast 6-turn reflex workflow while absorbing routine health ticks into live status |
+
+To guarantee that a brief Wi-Fi drop never triggers duplicate physical motion, every dispatched action is recorded in SQLite with its action ID, payload hash, connection epoch, and sequence number before transmission. Late completions settle the waiting task cleanly without re-sending the movement command.
+
+## Game Megameal Simulator
+
+<SimulatorCta
+  heading="Launch Ainekio V2 in Yggdrasil & 5 More 3D Worlds"
+  description="Drive the 12-servo Ainekio V2 directly in your browser with WASD/Arrows or the Cockpit joystick, switch into chin-camera Robot POV, trigger MicroDuck neural walking & NeuralPose emotes, or pin/jam individual servos J0–J11."
+  buttonLabel="Try the Simulator Now"
+/>
+
+This page's URL (`gateway-and-simulator`) originally referred to a July 2026 browser keyframe viewer that lacked contact physics and was retired once physical V1 and V2 bring-up began (early notes remain in [July 2026 Motion Systems](/posts/archive/motion-systems/)). In November 2026 ([Milestone #20](/posts/2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim/)), browser-based 3D simulation returned on top of real rigid-body contact dynamics and compiled `ESP32-P4` C firmware—first as a local **[`game.megameal`](https://game.megameal.org/)** daemon proof-of-concept and now as a **live, standalone WebAssembly alpha at [`simulator.ainek.io`](https://simulator.ainek.io/)**.
+
+### Live standalone browser alpha (`simulator.ainek.io`)
+
+[`simulator.ainek.io`](https://simulator.ainek.io/) compiles the `500 Hz` MuJoCo physics plant (`mujoco_wasm.js`) and real `ESP32-P4` C firmware (`ainekio-v2-firmware.wasm`, `virtual_body.c`, `face.c`, `protocol-v1`, 4th-wire ADC, `LSM6DS3` IMU, and per-channel `I²t` protection) directly into a client-side Web Worker alongside Three.js (`ainekio-v2.glb` + closed-form `35/20/28/38 mm` four-bar solver):
+
+- **In-browser neural & native controllers**: Runs `microduck-v19-snag-p4` neural walking and `neural-pose-v7-hysteresis` expressive poses (`Sit`, `Lay Down`, `Wave`, `Bow`, `Stretch`, `Shake`, `Dance`, `Cute`, `Nod`, `Point`, `Celebrate`, `Push-Up`, `Crouch`), with a live switch back to analytical native firmware gaits.
+- **Six on-demand 3D worlds**: **V2 Robotics Lab**, **Yggdrasil (Tree of Life)** (`27 m` Norse World Tree, Bifrost bridge, cable thresholds, cathedral roots & spatial audio wells), **Observatory** (chunked terrain + MuJoCo heightfield), **Miranda Wreck**, **Solitude (Stonehenge Plain)**, and **Sci Fi Room**.
+- **Orbit, Follow V2 & Robot POV controls**: Drag freely in `Orbit` (including full upward look pitch) or drive Ainekio V2 in `Follow V2` and first-person chin-camera `Robot POV` via `WASD` / Arrow keys + `Q`/`E` strafe or the 2D HUD joystick.
+- **Standalone or live Body Control WebSocket**: Works standalone in any desktop browser, or connects directly via **`Connect Body Control`** (`ws://` / `wss://` `/robot`) speaking authentic `protocol-v1` JSON and binary streams so [Ainekio OS](/posts/ainekio-os/) can pilot the browser robot directly.
+
+<figure className="my-6">
+  <img src="/posts/gateway-sim/simulator-yggdrasil-follow.webp" alt="Live Follow V2 capture from simulator.ainek.io showing the current red 12-servo Ainekio V2 quadruped standing on the rainbow Bifrost bridge inside Yggdrasil (Tree of Life) facing the cable thresholds and glowing cyan World Tree crystal." width="1600" height="1000" loading="lazy" className="w-full rounded-xl" />
+  <figcaption>Live <strong>Follow V2</strong> view on <a href="https://simulator.ainek.io/"><code>simulator.ainek.io</code></a> in <strong>Yggdrasil (Tree of Life)</strong>: the real red 12-servo Ainekio V2 four-bar rig on the Bifrost bridge with live <code>ST7789</code> happy eyes, virtual <code>OV5647</code> chin cam, <code>WASD</code>/Arrow keyboard driving, and 12 live servo pin/jam gauges.</figcaption>
+</figure>
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <figure>
+    <img src="/posts/gateway-sim/simulator-yggdrasil-pov.webp" alt="First-person Robot POV view from live simulator.ainek.io looking through Ainekio V2's chin-mounted OV5647 camera down the rainbow Bifrost bridge toward the glowing Yggdrasil crystal, with WASD/Arrow driving controls and 12 live servo gauges." width="1600" height="1000" loading="lazy" />
+    <figcaption><strong>Robot POV (Chin Camera):</strong> Looking directly out of Ainekio V2's virtual <code>OV5647</code> camera across the Bifrost cable thresholds toward Yggdrasil.</figcaption>
+  </figure>
+  <figure>
+    <img src="/posts/gateway-sim/simulator-observatory-live.webp" alt="Live capture from simulator.ainek.io in the Observatory world showing the current red 12-servo Ainekio V2 with curious question-mark ST7789 eyes balancing on sloped MuJoCo heightfield terrain (Roll -3.0 deg, Pitch 1.3 deg)." width="1600" height="1000" loading="lazy" />
+    <figcaption><strong>Observatory MuJoCo Heightfield:</strong> Real-time sloped terrain contact (<code>Roll -3.0°</code>, <code>Pitch 1.3°</code>) with curious <code>ST7789</code> eyes on the 3D faceplate.</figcaption>
+  </figure>
+</div>
+
+<figure className="my-6">
+  <img src="/posts/gateway-sim/megameal-sim-bridge-architecture.webp" alt="Architecture diagram of the game.megameal 3D web robot simulator showing Three.js/ECS/Rapier in the browser, the 50 Hz binary WebSocket bridge (0x01 ST7789 RGBA, 0x02 virtual OV5647 JPEG, 0x03/0x04 16 kHz audio), the 500 Hz MuJoCo + compiled ESP32-P4 libgait_native.so daemon, and Body Control / Ainekio OS." width="3200" height="1920" loading="lazy" className="w-full rounded-xl" />
+  <figcaption>End-to-end hardware-parity bridge architecture: browser 3D rig &amp; virtual <code>OV5647</code> camera (left) ↔ <code>500 Hz</code> MuJoCo 4-bar physics + compiled real <code>ESP32-P4</code> C firmware (WebAssembly on <code>simulator.ainek.io</code> or native <code>libgait_native.so</code> daemon) (center) ↔ Body Control &amp; Ainekio OS (right).</figcaption>
+</figure>
+
+### Full-parity MuJoCo + real `ESP32-P4` firmware bridge
+
+Launched via `Master/start-virtual-robot.sh` (`Master/gateway/neural_gait/simulator_bridge.py` + `virtual_body.c`) for native desktop sessions—or compiled directly to WebAssembly on [`simulator.ainek.io`](https://simulator.ainek.io/)—the virtual robot is not a simplified kinematic puppet; it executes the production C firmware inside a `500 Hz` MuJoCo loop:
+
+- **Compiled `ESP32-P4` C firmware (`ainekio-v2-firmware.wasm` / `libgait_native.so`, `full_parity=True`)**: Compiles real `ESP32-P4` firmware modules (`face.c`, `face_timeline.c`, `protocol-v1` `40` commands and `24` feature flags, the 12-channel 4th-wire ADC model, `LSM6DS3` IMU, and the per-joint `I²t` winding thermal fuse) directly atop a **`500 Hz` MuJoCo** closed-chain four-bar plant (`collision_profile="locomotion"`).
+- **Dual WebSocket topology**: Connects simultaneously as `ainekio-v2-sim` to Body Control (`ws://127.0.0.1:8790/robot`—so Body Control, Cockpit HUD, and Ainekio OS treat it identically to a physical Wi-Fi unit) and via a binary WebSocket relay (`/__megameal-dev-bridge`) to `game.megameal`'s `1:1` metric lab scene (`?scene=v2_lab_runtime`, complete with `15/16 mm` power-cable strips, a corridor brake-test obstacle, and visual landmarks).
+- **Bidirectional `50 Hz` pose, LCD, virtual camera & Web Audio multiplex**:
+  - Streams `50 Hz` closed-loop `35/20/28/38 mm` four-bar leg poses (`virtualRobotRig.ts`) to articulate the 3D browser rig.
+  - Streams `0x01` `320 × 170` RGBA `ST7789` procedural LCD face frames directly onto the 3D robot's faceplate.
+  - Renders `0x02` virtual `OV5647` chin-camera JPEGs *inside the 3D Three.js world* and streams them **back** into Body Control, `RT-DETRv2 + OWLv2` object tracking, `MoGe-2` corridor braking, and Ainekio OS multimodal vision.
+  - Bridges `0x03` / `0x04` `16 kHz` Web Audio speaker playback and browser microphone `Tap to Talk` PCM end-to-end.
+- **Interactive perturbation & fault-injection HUD**: Switch between `Orbit`, `Follow V2`, and `Robot POV` views; trigger `Push +X / +Y / -Y` lateral/fore-aft wrenches or `Pick Up & Shake` (vertical lift + torque impulse to trigger IMU `rapid_movement` / `tipped` reflexes); toggle **per-servo `J0–J11` pin/jam faults** (verifying 4th-wire stall sensing and selective `8–10 s` `I²t` thermal cutoff safely in software); and record `50 Hz` `.jsonl` RL rollouts.
+
+## MuJoCo GPU hardware twins (`4,096` parallel environments)
+
+Alongside interactive single-robot testing in [`simulator.ainek.io`](https://simulator.ainek.io/) and `game.megameal`, massive-scale policy training for Ainekio V2 runs headless in **MuJoCo (`MJCF`) and GPU-batched rollout workers** across **`4,096` parallel hardware-twin environments**:
+
+<figure className="my-6">
+  <img src="/posts/gateway-sim/simulator-v2-mujoco-twin.webp" alt="Clean HUD-hidden close-up from simulator.ainek.io showing the current red 650 g 12-servo Ainekio V2 MuJoCo hardware twin with glowing cyan happy ST7789 eyes, red 4-bar linkages, and 500 Hz MuJoCo WASM telemetry." width="1600" height="1000" loading="lazy" className="w-full rounded-xl" />
+  <figcaption>Current <code>650 g</code> red <strong>Ainekio V2</strong> MuJoCo hardware twin (<code>12</code> servo actuators, <code>8</code> passive hinges, and <code>4</code> planar four-bar equality constraints) running live at <code>500 Hz</code> on <a href="https://simulator.ainek.io/"><code>simulator.ainek.io</code></a> and batched across <code>4,096</code> parallel GPU environments for RL training.</figcaption>
+</figure>
+
+- **Exact 375-mesh CAD & four-bar physics**: Exports the `650 g` V2 assembly directly from Blender with closed-loop `35/20/28/38/55 mm` equality constraints, curved 3D-printed rocking soles, and Conjugate Gradient contact solving (`500 Hz` physics / `50 Hz` control).
+- **Sensor, carpet-pile & actuator fidelity**: Replicates the `MG90S` speed-torque ceiling, `PCA9685` `4.07 µs` PWM quantization, 12-bit `CD74HC4067` ADC scan with rail sag and One-Euro filtering, `208 Hz` `LSM6DS3` attitude projection, re-locking carpet pile (`mu = 0.10..2.05`), and `21–40 mm` cable/rug ledges—matched against the C firmware so distilled `110,432 B` (`107.8 KB`) `MicroDuck` and `826,776`-parameter `NeuralPose v8` policies transfer straight onto physical hardware. See the [Gait Development Guide](/posts/gait-development/) for training results and floor videos.

@@ -1,0 +1,276 @@
+﻿    /* ===================================================================
+     * CARD SYSTEM - UNIFIED DESIGN COMPONENTS
+     * ===================================================================
+     */
+    .card-base {
+        @apply rounded-xl overflow-hidden transition-all duration-300;
+        background-color: color-mix(in srgb, var(--card-bg), transparent calc((1 - var(--bg-opacity)) * 100%));
+        backdrop-filter: blur(3px);
+        box-sizing: border-box;
+        border: none;
+        box-shadow:
+            inset 0 0 0 2px transparent,
+            inset 0 0 0 2px color-mix(in srgb, var(--primary) calc(var(--card-border-opacity) * 100%), transparent),
+            inset 0 0 5px 3px color-mix(in srgb, var(--primary) calc(var(--card-border-opacity) * 70%), transparent),
+            inset 0 0 7px 3px color-mix(in srgb, var(--primary) calc(var(--card-border-opacity) * 40%), transparent);
+    }
+
+    .card-base2 {
+        @apply rounded-xl overflow-hidden transition-all duration-300;
+        background-color: color-mix(in srgb, var(--card-bg), transparent calc((1 - var(--bg-opacity)) * 100%));
+        backdrop-filter: blur(3px);
+        box-sizing: border-box;
+        border: 1px solid color-mix(in srgb, var(--primary) calc(var(--card-border-subtle-opacity) * 100%), transparent);
+    }
+
+    /* ===================================================================
+     * TYPOGRAPHY SYSTEM - CONSISTENT TEXT UTILITIES
+     * ===================================================================
+     */
+    h1, h2, h3, h4, h5, h6, p, a, span, li, ul, ol, blockquote, code, pre, table, th, td, strong {
+        transition: color var(--transition-fast);
+    }
+
+    /* ðŸŽ¯ TEXT OPACITY UTILITIES - Tailwind-aligned naming */
+    .text-90 { @apply text-black/90 dark:text-white/90; }
+    .text-75 { @apply text-black/75 dark:text-white/75; }
+    .text-50 { @apply text-black/50 dark:text-white/50; }
+    .text-30 { @apply text-black/30 dark:text-white/30; }
+    .text-25 { @apply text-black/25 dark:text-white/25; }
+
+    /* ===================================================================
+     * ANIMATION SYSTEM - CONSISTENT & PERFORMANT
+     * ===================================================================
+     */
+    :is(.expand-animation, .link, .link-lg, .btn-plain.scale-animation) {
+        @apply relative z-0 transition-all duration-300;
+        
+        &::before {
+            @apply absolute inset-0 -z-10 rounded-[inherit] transition-all duration-300 ease-out;
+            content: '';
+            transform: scale(0.85);
+            background: transparent;
+        }
+        
+        &:hover::before {
+            transform: scale(1);
+            background: var(--btn-plain-bg-hover);
+        }
+        
+        &:active::before {
+            background: var(--btn-plain-bg-active);
+        }
+    }
+
+    /* ðŸŽ¯ ONLOAD ANIMATION - Consistent page loading */
+    .onload-animation {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity var(--transition-slow), transform var(--transition-slow);
+    }
+
+    .onload-animation.loaded {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Non-blocking first-paint reassurance; safety-critical rules stay inline. */
+    .megameal-arrival-status {
+        overflow: hidden;
+        user-select: none;
+        text-align: left;
+        background:
+            radial-gradient(circle at 90% 10%, rgb(30 64 175 / 0.28), transparent 9rem),
+            linear-gradient(160deg, rgb(2 6 23 / 0.94), rgb(8 15 31 / 0.9));
+        border: 1px solid rgb(103 232 249 / 0.18);
+        border-radius: 0.85rem;
+        box-shadow:
+            0 0 0 1px rgb(244 63 94 / 0.08),
+            0 1rem 2.5rem rgb(0 0 0 / 0.36);
+        backdrop-filter: blur(10px) saturate(1.1);
+    }
+
+    .megameal-arrival-status::before {
+        position: absolute;
+        inset: 0;
+        content: '';
+        background: repeating-linear-gradient(
+            180deg,
+            transparent 0,
+            transparent 3px,
+            rgb(148 163 184 / 0.025) 4px
+        );
+    }
+
+    .megameal-arrival-status__content {
+        position: relative;
+    }
+
+    .megameal-arrival-status__kicker,
+    .megameal-arrival-status__message,
+    .megameal-arrival-status__detail,
+    .megameal-arrival-status__wordmark {
+        margin: 0;
+    }
+
+    .megameal-arrival-status__kicker {
+        color: rgb(103 232 249 / 0.88);
+        font: 700 0.7rem/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    .megameal-arrival-status__wordmark {
+        margin-top: 0.35rem;
+        color: rgb(248 250 252);
+        font: 900 1.65rem/0.95 Arial Black, Arial, sans-serif;
+        letter-spacing: -0.06em;
+        text-shadow: 0 0 1.25rem rgb(56 189 248 / 0.2);
+    }
+
+    .megameal-arrival-status__wordmark span {
+        color: rgb(244 63 94);
+        text-shadow: 0 0 2rem rgb(244 63 94 / 0.28);
+    }
+
+    .megameal-arrival-status__signal {
+        display: flex;
+        align-items: end;
+        justify-content: flex-start;
+        gap: 0.28rem;
+        height: 1.1rem;
+        margin: 0.75rem 0 0.6rem;
+    }
+
+    .megameal-arrival-status__signal span {
+        width: 0.28rem;
+        height: 38%;
+        border-radius: 999px;
+        background: rgb(34 211 238);
+        box-shadow: 0 0 0.65rem rgb(34 211 238 / 0.55);
+        animation: megameal-arrival-signal 900ms ease-in-out infinite alternate;
+    }
+
+    .megameal-arrival-status__signal span:nth-child(2),
+    .megameal-arrival-status__signal span:nth-child(4) {
+        animation-delay: 180ms;
+    }
+
+    .megameal-arrival-status__signal span:nth-child(3) {
+        animation-delay: 360ms;
+    }
+
+    .megameal-arrival-status__message {
+        color: rgb(241 245 249 / 0.94);
+        font: 700 0.82rem/1.4 system-ui, sans-serif;
+    }
+
+    .megameal-arrival-status__detail {
+        margin: 0.3rem 0 0;
+        color: rgb(148 163 184 / 0.88);
+        font: 500 0.7rem/1.45 system-ui, sans-serif;
+    }
+
+    @keyframes megameal-arrival-signal {
+        to {
+            height: 100%;
+            background: rgb(244 63 94);
+            box-shadow: 0 0 0.8rem rgb(244 63 94 / 0.6);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .megameal-arrival-status__signal span {
+            height: 62%;
+            animation: none;
+        }
+    }
+
+    /* ===================================================================
+     * LINK SYSTEM - SIMPLIFIED & CONSISTENT
+     * ===================================================================
+     */
+    .link {
+        @apply transition-all duration-200 rounded-md p-1 -m-1;
+    }
+    
+    .link-lg {
+        @apply transition-all duration-200 rounded-md p-1.5 -m-1.5;
+    }
+
+    .link-underline {
+        @apply transition-all duration-200 underline decoration-2 decoration-dashed underline-offset-1;
+        text-decoration-color: var(--link-underline);
+        
+        &:hover { text-decoration-color: var(--link-hover); }
+        &:active { text-decoration-color: var(--link-active); }
+    }
+
+    /* ===================================================================
+     * BUTTON SYSTEM - UNIFIED & RESPONSIVE
+     * ===================================================================
+     */
+    .btn-card {
+        @apply transition-all duration-200 flex items-center justify-center;
+        background-color: var(--card-bg);
+        
+        &:hover { background-color: var(--btn-card-bg-hover); }
+        &:active { background-color: var(--btn-card-bg-active); }
+        &.disabled { @apply pointer-events-none text-black/10 dark:text-white/10; }
+    }
+
+    .btn-plain {
+        @apply transition-all duration-200 relative flex items-center justify-center bg-transparent;
+        @apply text-black/75 dark:text-white/75;
+        
+        &:hover {
+            color: var(--primary);
+        }
+        
+        &:not(.scale-animation) {
+            &:hover { background-color: var(--btn-plain-bg-hover); }
+            &:active { background-color: var(--btn-plain-bg-active); }
+        }
+        
+        &.scale-animation {
+            &.current-theme-btn {
+                color: var(--primary);
+                
+                &::before {
+                    transform: scale(1);
+                    opacity: 1;
+                    background: var(--btn-plain-bg-hover);
+                }
+            }
+        }
+    }
+
+    .btn-regular {
+        @apply transition-all duration-200 flex items-center justify-center;
+        background-color: var(--btn-regular-bg);
+        color: var(--btn-content);
+        
+        &:hover { background-color: var(--btn-regular-bg-hover); }
+        &:active { background-color: var(--btn-regular-bg-active); }
+        
+        @apply dark:text-white/75;
+    }
+
+    .btn-regular-dark {
+        @apply flex items-center justify-center transition-all duration-200;
+        background: oklch(0.45 0.01 var(--hue));
+        
+        &:hover { background: oklch(0.50 0.01 var(--hue)); }
+        &:active { background: oklch(0.55 0.01 var(--hue)); }
+        
+        @media (prefers-color-scheme: dark) {
+            background: oklch(0.30 0.02 var(--hue));
+            
+            &:hover { background: oklch(0.35 0.03 var(--hue)); }
+            &:active { background: oklch(0.40 0.03 var(--hue)); }
+        }
+        
+        &.success {
+            background: oklch(0.75 0.14 var(--hue)) !important;
+        }
+    }

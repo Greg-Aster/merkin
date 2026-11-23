@@ -1,0 +1,284 @@
+/* first-contact-manual.css
+   Shared style system for First Contact Manual MDX chapters.
+
+   Purpose:
+   - Provide a reusable rounded technical-window style language for chapter indexes,
+     panels, notices, grids, routing tables, and reference blocks.
+   - Keep colors controlled by semantic variables and tone classes.
+   - Avoid one-off hand-styled MDX divs drifting away from the book's visual system.
+
+   Usage:
+   1. Import once in the MDX chapter, layout, or reader shell:
+      import "../../../styles/reader/first-contact-manual.css";
+   2. Wrap custom MDX layouts in the classes below instead of long Tailwind class piles.
+   3. Use fcmi-tone-* on semantic section wrappers when a block needs a different color family.
+*/
+
+/* --------------------------------------------------------------------------
+   Design tokens
+   -------------------------------------------------------------------------- */
+
+:where(.first-contact-manual, .fcmi-scope, .fcmi-index, .fcmi-window, .fcmi-panel, .fcmi-card) {
+  /* Color-agnostic semantic tokens. Defaults match the current forward/index mood,
+     but future sections may override these without changing component geometry. */
+  --fcmi-text-rgb: 235 245 255;
+  --fcmi-muted-rgb: 190 207 225;
+  --fcmi-dim-rgb: 135 158 184;
+
+  --fcmi-surface-rgb: 4 8 18;
+  --fcmi-surface-2-rgb: 12 28 52;
+  --fcmi-surface-3-rgb: 2 8 18;
+
+  --fcmi-accent-rgb: 125 178 235;
+  --fcmi-accent-2-rgb: 77 96 170;
+  --fcmi-glow-rgb: 69 143 220;
+
+  --fcmi-cream: rgb(var(--fcmi-text-rgb) / 0.94);
+  --fcmi-muted: rgb(var(--fcmi-muted-rgb) / 0.70);
+  --fcmi-dim: rgb(var(--fcmi-dim-rgb) / 0.52);
+
+  --fcmi-line: rgb(var(--fcmi-accent-rgb) / 0.22);
+  --fcmi-line-soft: rgb(var(--fcmi-accent-rgb) / 0.10);
+  --fcmi-panel-bg: rgb(var(--fcmi-surface-rgb) / 0.82);
+  --fcmi-panel-soft: rgb(var(--fcmi-surface-2-rgb) / 0.38);
+  --fcmi-glow: rgb(var(--fcmi-glow-rgb) / 0.18);
+
+  --fcmi-radius-xl: 1.45rem;
+  --fcmi-radius-lg: 1rem;
+  --fcmi-radius-md: 0.75rem;
+  --fcmi-radius-sm: 0.45rem;
+
+  --fcmi-shadow-window:
+    0 30px 90px rgb(0 0 0 / 0.48),
+    0 0 42px rgb(var(--fcmi-glow-rgb) / 0.12),
+    inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.05);
+
+  --fcmi-shadow-inner:
+    inset 0 0 52px rgb(var(--fcmi-glow-rgb) / 0.09),
+    inset 0 1px 0 rgb(var(--fcmi-text-rgb) / 0.08);
+
+  --fcmi-mono: var(--font-jetbrains-mono, "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
+  --fcmi-sans: var(--font-sans, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+}
+
+/* Tone modifiers: these change meaning/color, not geometry. */
+.fcmi-tone-red,
+.fcmi-entry--red {
+  --fcmi-accent-rgb: 248 95 95;
+  --fcmi-accent-2-rgb: 136 30 45;
+  --fcmi-glow-rgb: 255 45 45;
+}
+
+.fcmi-tone-orange,
+.fcmi-entry--orange {
+  --fcmi-accent-rgb: 245 151 88;
+  --fcmi-accent-2-rgb: 139 72 28;
+  --fcmi-glow-rgb: 245 115 55;
+}
+
+.fcmi-tone-yellow,
+.fcmi-entry--yellow {
+  --fcmi-accent-rgb: 226 207 102;
+  --fcmi-accent-2-rgb: 130 105 35;
+  --fcmi-glow-rgb: 240 210 70;
+}
+
+.fcmi-tone-blue,
+.fcmi-entry--blue {
+  --fcmi-accent-rgb: 118 170 255;
+  --fcmi-accent-2-rgb: 58 86 168;
+  --fcmi-glow-rgb: 69 143 220;
+}
+
+.fcmi-tone-cyan,
+.fcmi-entry--cyan {
+  --fcmi-accent-rgb: 105 218 232;
+  --fcmi-accent-2-rgb: 42 130 150;
+  --fcmi-glow-rgb: 65 210 230;
+}
+
+.fcmi-tone-purple,
+.fcmi-entry--purple {
+  --fcmi-accent-rgb: 174 145 255;
+  --fcmi-accent-2-rgb: 92 60 170;
+  --fcmi-glow-rgb: 150 105 255;
+}
+
+.fcmi-tone-green,
+.fcmi-entry--green {
+  --fcmi-accent-rgb: 115 218 160;
+  --fcmi-accent-2-rgb: 44 130 76;
+  --fcmi-glow-rgb: 80 220 135;
+}
+
+.fcmi-tone-gray,
+.fcmi-entry--gray {
+  --fcmi-accent-rgb: 170 184 200;
+  --fcmi-accent-2-rgb: 76 86 100;
+  --fcmi-glow-rgb: 145 165 185;
+}
+
+/* --------------------------------------------------------------------------
+   Shared technical-window primitives
+   -------------------------------------------------------------------------- */
+
+.fcmi-window {
+  position: relative;
+  margin: clamp(2.5rem, 6vw, 4.75rem) 0;
+  padding: 1px;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.34);
+  border-radius: var(--fcmi-radius-xl);
+  background:
+    radial-gradient(circle at 18% 0%, rgb(var(--fcmi-accent-rgb) / 0.22), transparent 34%),
+    radial-gradient(circle at 88% 12%, rgb(var(--fcmi-accent-2-rgb) / 0.20), transparent 38%),
+    linear-gradient(135deg, rgb(var(--fcmi-accent-rgb) / 0.20), rgb(var(--fcmi-surface-2-rgb) / 0.06) 36%, rgb(var(--fcmi-accent-rgb) / 0.12));
+  box-shadow: var(--fcmi-shadow-window);
+  overflow: hidden;
+}
+
+.fcmi-window::before,
+.fcmi-has-scanlines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--fcmi-scanline-opacity, 0.13);
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgb(var(--fcmi-accent-rgb) / 0.15) 0px,
+      rgb(var(--fcmi-accent-rgb) / 0.15) 1px,
+      transparent 1px,
+      transparent 6px
+    );
+  mix-blend-mode: screen;
+}
+
+.fcmi-window::after,
+.fcmi-has-noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--fcmi-noise-opacity, 0.075);
+  background-image:
+    radial-gradient(circle at 18% 22%, rgb(var(--fcmi-text-rgb) / 0.55) 0 1px, transparent 1px),
+    radial-gradient(circle at 78% 62%, rgb(var(--fcmi-accent-rgb) / 0.35) 0 1px, transparent 1px),
+    radial-gradient(circle at 38% 84%, rgb(var(--fcmi-accent-rgb) / 0.28) 0 1px, transparent 1px);
+  background-size: 19px 19px, 31px 31px, 47px 47px;
+}
+
+.fcmi-shell {
+  position: relative;
+  z-index: 1;
+  border-radius: calc(var(--fcmi-radius-xl) - 1px);
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-text-rgb) / 0.04), rgb(var(--fcmi-text-rgb) / 0.012)),
+    linear-gradient(135deg, rgb(var(--fcmi-surface-2-rgb) / 0.94), rgb(var(--fcmi-surface-rgb) / 0.96) 56%, rgb(var(--fcmi-surface-3-rgb) / 0.93));
+  box-shadow: var(--fcmi-shadow-inner);
+  padding: clamp(1rem, 3vw, 1.6rem);
+}
+
+.fcmi-frame {
+  position: relative;
+  border: 1px solid var(--fcmi-line);
+  border-radius: var(--fcmi-radius-lg);
+  padding: clamp(1.1rem, 3vw, 2rem);
+  background:
+    radial-gradient(circle at 50% -10%, rgb(var(--fcmi-accent-rgb) / 0.10), transparent 34%),
+    radial-gradient(circle at 105% 110%, rgb(var(--fcmi-accent-2-rgb) / 0.10), transparent 38%),
+    rgb(var(--fcmi-surface-3-rgb) / 0.30);
+}
+
+.fcmi-corner,
+.fcmi-frame-corner {
+  position: absolute;
+  width: 2.05rem;
+  height: 2.05rem;
+  pointer-events: none;
+  opacity: 0.68;
+  color: rgb(var(--fcmi-accent-rgb) / 0.54);
+}
+
+.fcmi-corner--tl,
+.fcmi-frame-corner--tl {
+  top: 0.68rem;
+  left: 0.68rem;
+  border-top: 1px solid currentColor;
+  border-left: 1px solid currentColor;
+  border-top-left-radius: 0.35rem;
+}
+
+.fcmi-corner--tr,
+.fcmi-frame-corner--tr {
+  top: 0.68rem;
+  right: 0.68rem;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  border-top-right-radius: 0.35rem;
+}
+
+.fcmi-corner--bl,
+.fcmi-frame-corner--bl {
+  bottom: 0.68rem;
+  left: 0.68rem;
+  border-bottom: 1px solid currentColor;
+  border-left: 1px solid currentColor;
+  border-bottom-left-radius: 0.35rem;
+}
+
+.fcmi-corner--br,
+.fcmi-frame-corner--br {
+  right: 0.68rem;
+  bottom: 0.68rem;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  border-bottom-right-radius: 0.35rem;
+}
+
+.fcmi-kicker,
+.fcmi-eyebrow,
+.fcmi-label {
+  margin: 0 0 0.35rem;
+  color: rgb(var(--fcmi-accent-rgb) / 0.64);
+  font-family: var(--fcmi-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.fcmi-title {
+  margin: 0;
+  color: var(--fcmi-cream);
+  font-size: clamp(1.35rem, 3vw, 2.05rem);
+  line-height: 1;
+  letter-spacing: -0.025em;
+  text-shadow: 0 0 22px rgb(var(--fcmi-glow-rgb) / 0.14);
+}
+
+.fcmi-meta {
+  margin: 0.15rem 0 0;
+  padding: 0.48rem 0.7rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.16);
+  border-radius: 0.7rem;
+  background: rgb(var(--fcmi-accent-rgb) / 0.045);
+  color: rgb(var(--fcmi-muted-rgb) / 0.52);
+  font-family: var(--fcmi-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.fcmi-divider {
+  height: 1px;
+  margin: clamp(1rem, 3vw, 1.5rem) 0;
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.68), rgb(var(--fcmi-accent-rgb) / 0.16), transparent);
+  box-shadow: 0 0 14px rgb(var(--fcmi-glow-rgb) / 0.22);
+}
+
+.fcmi-technical-rule {
+  border-bottom: 1px solid var(--fcmi-line);
+}
+

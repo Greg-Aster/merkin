@@ -1,0 +1,761 @@
+model,recording,joint,units,minimum,maximum,source,source_sha256
+V1,rest,0,logical degrees,90.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,rest,1,logical degrees,90.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,rest,2,logical degrees,90.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,rest,3,logical degrees,90.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,rest,4,logical degrees,90.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,rest,5,logical degrees,90.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,rest,6,logical degrees,90.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,rest,7,logical degrees,90.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stand,0,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stand,1,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stand,2,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stand,3,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stand,4,logical degrees,0.0,0.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stand,5,logical degrees,180.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stand,6,logical degrees,0.0,0.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stand,7,logical degrees,180.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,wave,0,logical degrees,100.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,wave,1,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,wave,2,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,wave,3,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,wave,4,logical degrees,0.0,80.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,wave,5,logical degrees,180.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,wave,6,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,wave,7,logical degrees,180.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dance,0,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dance,1,logical degrees,45.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dance,2,logical degrees,45.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dance,3,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dance,4,logical degrees,0.0,160.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dance,5,logical degrees,115.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dance,6,logical degrees,0.0,65.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dance,7,logical degrees,10.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,swim,0,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,swim,1,logical degrees,45.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,swim,2,logical degrees,45.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,swim,3,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,swim,4,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,swim,5,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,swim,6,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,swim,7,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,point,0,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,point,1,logical degrees,45.0,100.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,point,2,logical degrees,25.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,point,3,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,point,4,logical degrees,0.0,80.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,point,5,logical degrees,170.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,point,6,logical degrees,0.0,145.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,point,7,logical degrees,180.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,pushup,0,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,pushup,1,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,pushup,2,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,pushup,3,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,pushup,4,logical degrees,0.0,0.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,pushup,5,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,pushup,6,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,pushup,7,logical degrees,180.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,bow,0,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,bow,1,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,bow,2,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,bow,3,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,bow,4,logical degrees,0.0,0.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,bow,5,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,bow,6,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,bow,7,logical degrees,180.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,cute,0,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,cute,1,logical degrees,20.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,cute,2,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,cute,3,logical degrees,135.0,160.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,cute,4,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,cute,5,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,cute,6,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,cute,7,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,freaky,0,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,freaky,1,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,freaky,2,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,freaky,3,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,freaky,4,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,freaky,5,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,freaky,6,logical degrees,0.0,0.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,freaky,7,logical degrees,180.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,worm,0,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,worm,1,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,worm,2,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,worm,3,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,worm,4,logical degrees,0.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,worm,5,logical degrees,45.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,worm,6,logical degrees,0.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,worm,7,logical degrees,45.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shake,0,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shake,1,logical degrees,45.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shake,2,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shake,3,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shake,4,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shake,5,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shake,6,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shake,7,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shrug,0,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shrug,1,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shrug,2,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shrug,3,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shrug,4,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shrug,5,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shrug,6,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,shrug,7,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dead,0,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dead,1,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dead,2,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dead,3,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dead,4,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dead,5,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dead,6,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,dead,7,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,crab,0,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,crab,1,logical degrees,45.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,crab,2,logical degrees,45.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,crab,3,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,crab,4,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,crab,5,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,crab,6,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,crab,7,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_forward,0,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_forward,1,logical degrees,45.0,100.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_forward,2,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_forward,3,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_forward,4,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_forward,5,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_forward,6,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_forward,7,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_backward,0,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_backward,1,logical degrees,45.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_backward,2,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_backward,3,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_backward,4,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_backward,5,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_backward,6,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_backward,7,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left,0,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left,1,logical degrees,45.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left,2,logical degrees,45.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left,3,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left,4,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left,5,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left,6,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left,7,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right,0,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right,1,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right,2,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right,3,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right,4,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right,5,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right,6,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right,7,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sit,0,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sit,1,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sit,2,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sit,3,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sit,4,logical degrees,60.0,60.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sit,5,logical degrees,180.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sit,6,logical degrees,0.0,0.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sit,7,logical degrees,120.0,120.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,nod,0,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,nod,1,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,nod,2,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,nod,3,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,nod,4,logical degrees,0.0,0.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,nod,5,logical degrees,104.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,nod,6,logical degrees,0.0,76.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,nod,7,logical degrees,180.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,celebrate,0,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,celebrate,1,logical degrees,20.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,celebrate,2,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,celebrate,3,logical degrees,135.0,160.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,celebrate,4,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,celebrate,5,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,celebrate,6,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,celebrate,7,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stretch,0,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stretch,1,logical degrees,45.0,60.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stretch,2,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stretch,3,logical degrees,120.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stretch,4,logical degrees,0.0,37.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stretch,5,logical degrees,72.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stretch,6,logical degrees,0.0,108.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,stretch,7,logical degrees,142.5,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,macarena,0,logical degrees,85.0,150.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,macarena,1,logical degrees,30.0,60.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,macarena,2,logical degrees,30.0,95.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,macarena,3,logical degrees,120.0,150.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,macarena,4,logical degrees,0.0,25.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,macarena,5,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,macarena,6,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,macarena,7,logical degrees,160.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,salsa,0,logical degrees,115.0,150.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,salsa,1,logical degrees,45.0,65.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,salsa,2,logical degrees,25.0,65.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,salsa,3,logical degrees,115.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,salsa,4,logical degrees,0.0,35.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,salsa,5,logical degrees,130.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,salsa,6,logical degrees,0.0,50.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,salsa,7,logical degrees,145.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,surprised,0,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,surprised,1,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,surprised,2,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,surprised,3,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,surprised,4,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,surprised,5,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,surprised,6,logical degrees,0.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,surprised,7,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sad,0,logical degrees,135.0,172.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sad,1,logical degrees,45.0,52.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sad,2,logical degrees,7.5,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sad,3,logical degrees,127.5,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sad,4,logical degrees,0.0,15.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sad,5,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sad,6,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,sad,7,logical degrees,165.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,curious,0,logical degrees,112.5,157.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,curious,1,logical degrees,22.5,67.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,curious,2,logical degrees,22.5,67.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,curious,3,logical degrees,112.5,157.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,curious,4,logical degrees,0.0,26.2,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,curious,5,logical degrees,153.8,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,curious,6,logical degrees,0.0,26.2,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,curious,7,logical degrees,153.8,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_45,0,logical degrees,135.0,157.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_45,1,logical degrees,45.0,67.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_45,2,logical degrees,45.0,67.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_45,3,logical degrees,135.0,157.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_45,4,logical degrees,0.0,26.2,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_45,5,logical degrees,153.8,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_45,6,logical degrees,0.0,26.2,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_45,7,logical degrees,153.8,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_45,0,logical degrees,112.5,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_45,1,logical degrees,22.5,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_45,2,logical degrees,22.5,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_45,3,logical degrees,112.5,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_45,4,logical degrees,0.0,26.2,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_45,5,logical degrees,153.8,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_45,6,logical degrees,0.0,26.2,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_45,7,logical degrees,153.8,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_90,0,logical degrees,135.0,157.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_90,1,logical degrees,45.0,67.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_90,2,logical degrees,45.0,67.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_90,3,logical degrees,135.0,157.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_90,4,logical degrees,0.0,26.2,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_90,5,logical degrees,153.8,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_90,6,logical degrees,0.0,26.2,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_90,7,logical degrees,153.8,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_90,0,logical degrees,112.5,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_90,1,logical degrees,22.5,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_90,2,logical degrees,22.5,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_90,3,logical degrees,112.5,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_90,4,logical degrees,0.0,26.2,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_90,5,logical degrees,153.8,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_90,6,logical degrees,0.0,26.2,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_90,7,logical degrees,153.8,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_180,0,logical degrees,135.0,157.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_180,1,logical degrees,45.0,67.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_180,2,logical degrees,45.0,67.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_180,3,logical degrees,135.0,157.5,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_180,4,logical degrees,0.0,26.2,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_180,5,logical degrees,153.8,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_180,6,logical degrees,0.0,26.2,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_left_180,7,logical degrees,153.8,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_180,0,logical degrees,112.5,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_180,1,logical degrees,22.5,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_180,2,logical degrees,22.5,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_180,3,logical degrees,112.5,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_180,4,logical degrees,0.0,26.2,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_180,5,logical degrees,153.8,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_180,6,logical degrees,0.0,26.2,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,turn_right_180,7,logical degrees,153.8,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_slow,0,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_slow,1,logical degrees,45.0,100.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_slow,2,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_slow,3,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_slow,4,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_slow,5,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_slow,6,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,walk_slow,7,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,run,0,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,run,1,logical degrees,45.0,100.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,run,2,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,run,3,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,run,4,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,run,5,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,run,6,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,run,7,logical degrees,135.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_one,0,logical degrees,112.5,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_one,1,logical degrees,22.5,100.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_one,2,logical degrees,0.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_one,3,logical degrees,90.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_one,4,logical degrees,0.0,80.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_one,5,logical degrees,90.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_one,6,logical degrees,0.0,90.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_one,7,logical degrees,35.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_two,0,logical degrees,135.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_two,1,logical degrees,45.0,80.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_two,2,logical degrees,45.0,45.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_two,3,logical degrees,100.0,135.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_two,4,logical degrees,0.0,65.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_two,5,logical degrees,180.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_two,6,logical degrees,0.0,0.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V1,number_two,7,logical degrees,115.0,180.0,Slave/software/assets/seed/motions-v1.json,958986b944646471065d5bc6e3586e698b0fed0921fbe2f482f914c1d6eeb5c7
+V2,sit,FL:h_Part002,signed CAD degrees,-0.000001,0.000002,Slave/software/models/v2-12servo/motions/gestures/sit/source.json,07e253c0c9ce6beddf64355bff7ace4fae9aa2d621bcbfb13f5282cf2cd90960
+V2,sit,FL:alpha_Part006,signed CAD degrees,-27.499994,1.920826,Slave/software/models/v2-12servo/motions/gestures/sit/source.json,07e253c0c9ce6beddf64355bff7ace4fae9aa2d621bcbfb13f5282cf2cd90960
+V2,sit,FL:theta_Part005,signed CAD degrees,-6.676877,17.127263,Slave/software/models/v2-12servo/motions/gestures/sit/source.json,07e253c0c9ce6beddf64355bff7ace4fae9aa2d621bcbfb13f5282cf2cd90960
+V2,sit,FR:h_Part002,signed CAD degrees,-0.000008,0.000004,Slave/software/models/v2-12servo/motions/gestures/sit/source.json,07e253c0c9ce6beddf64355bff7ace4fae9aa2d621bcbfb13f5282cf2cd90960
+V2,sit,FR:alpha_Part006,signed CAD degrees,-30.529359,1.920816,Slave/software/models/v2-12servo/motions/gestures/sit/source.json,07e253c0c9ce6beddf64355bff7ace4fae9aa2d621bcbfb13f5282cf2cd90960
+V2,sit,FR:theta_Part005,signed CAD degrees,-16.774611,1.545805,Slave/software/models/v2-12servo/motions/gestures/sit/source.json,07e253c0c9ce6beddf64355bff7ace4fae9aa2d621bcbfb13f5282cf2cd90960
+V2,sit,RL:h_Part002,signed CAD degrees,0.000000,0.000008,Slave/software/models/v2-12servo/motions/gestures/sit/source.json,07e253c0c9ce6beddf64355bff7ace4fae9aa2d621bcbfb13f5282cf2cd90960
+V2,sit,RL:alpha_Part006,signed CAD degrees,-6.546653,5.963328,Slave/software/models/v2-12servo/motions/gestures/sit/source.json,07e253c0c9ce6beddf64355bff7ace4fae9aa2d621bcbfb13f5282cf2cd90960
+V2,sit,RL:theta_Part005,signed CAD degrees,-21.360499,0.443391,Slave/software/models/v2-12servo/motions/gestures/sit/source.json,07e253c0c9ce6beddf64355bff7ace4fae9aa2d621bcbfb13f5282cf2cd90960
+V2,sit,RR:h_Part002,signed CAD degrees,-0.000000,0.000003,Slave/software/models/v2-12servo/motions/gestures/sit/source.json,07e253c0c9ce6beddf64355bff7ace4fae9aa2d621bcbfb13f5282cf2cd90960
+V2,sit,RR:alpha_Part006,signed CAD degrees,-6.546664,5.963324,Slave/software/models/v2-12servo/motions/gestures/sit/source.json,07e253c0c9ce6beddf64355bff7ace4fae9aa2d621bcbfb13f5282cf2cd90960
+V2,sit,RR:theta_Part005,signed CAD degrees,-21.360507,0.443382,Slave/software/models/v2-12servo/motions/gestures/sit/source.json,07e253c0c9ce6beddf64355bff7ace4fae9aa2d621bcbfb13f5282cf2cd90960
+V2,rest,FL:h_Part002,signed CAD degrees,-0.000168,-0.000000,Slave/software/models/v2-12servo/motions/gestures/rest/source.json,820cfae899bc33f2d8263068534b83751357cbd59624a60e9aecdceb0648d7ad
+V2,rest,FL:alpha_Part006,signed CAD degrees,-22.820491,15.861707,Slave/software/models/v2-12servo/motions/gestures/rest/source.json,820cfae899bc33f2d8263068534b83751357cbd59624a60e9aecdceb0648d7ad
+V2,rest,FL:theta_Part005,signed CAD degrees,0.443371,22.604500,Slave/software/models/v2-12servo/motions/gestures/rest/source.json,820cfae899bc33f2d8263068534b83751357cbd59624a60e9aecdceb0648d7ad
+V2,rest,FR:h_Part002,signed CAD degrees,-0.000177,-0.000000,Slave/software/models/v2-12servo/motions/gestures/rest/source.json,820cfae899bc33f2d8263068534b83751357cbd59624a60e9aecdceb0648d7ad
+V2,rest,FR:alpha_Part006,signed CAD degrees,-22.820484,12.603566,Slave/software/models/v2-12servo/motions/gestures/rest/source.json,820cfae899bc33f2d8263068534b83751357cbd59624a60e9aecdceb0648d7ad
+V2,rest,FR:theta_Part005,signed CAD degrees,0.258766,22.604514,Slave/software/models/v2-12servo/motions/gestures/rest/source.json,820cfae899bc33f2d8263068534b83751357cbd59624a60e9aecdceb0648d7ad
+V2,rest,RL:h_Part002,signed CAD degrees,-0.000154,0.000000,Slave/software/models/v2-12servo/motions/gestures/rest/source.json,820cfae899bc33f2d8263068534b83751357cbd59624a60e9aecdceb0648d7ad
+V2,rest,RL:alpha_Part006,signed CAD degrees,-22.820481,6.263958,Slave/software/models/v2-12servo/motions/gestures/rest/source.json,820cfae899bc33f2d8263068534b83751357cbd59624a60e9aecdceb0648d7ad
+V2,rest,RL:theta_Part005,signed CAD degrees,-0.852040,22.604489,Slave/software/models/v2-12servo/motions/gestures/rest/source.json,820cfae899bc33f2d8263068534b83751357cbd59624a60e9aecdceb0648d7ad
+V2,rest,RR:h_Part002,signed CAD degrees,-0.000009,0.000002,Slave/software/models/v2-12servo/motions/gestures/rest/source.json,820cfae899bc33f2d8263068534b83751357cbd59624a60e9aecdceb0648d7ad
+V2,rest,RR:alpha_Part006,signed CAD degrees,-22.820632,1.920847,Slave/software/models/v2-12servo/motions/gestures/rest/source.json,820cfae899bc33f2d8263068534b83751357cbd59624a60e9aecdceb0648d7ad
+V2,rest,RR:theta_Part005,signed CAD degrees,-3.897820,22.604448,Slave/software/models/v2-12servo/motions/gestures/rest/source.json,820cfae899bc33f2d8263068534b83751357cbd59624a60e9aecdceb0648d7ad
+V2,wave,FL:h_Part002,signed CAD degrees,-0.000001,0.000002,Slave/software/models/v2-12servo/motions/gestures/wave/source.json,e051a59136d8d75461c3595477932f49001b433f9df1fb8f040fe4b838ae07b9
+V2,wave,FL:alpha_Part006,signed CAD degrees,-27.499994,1.920826,Slave/software/models/v2-12servo/motions/gestures/wave/source.json,e051a59136d8d75461c3595477932f49001b433f9df1fb8f040fe4b838ae07b9
+V2,wave,FL:theta_Part005,signed CAD degrees,-6.676877,17.127263,Slave/software/models/v2-12servo/motions/gestures/wave/source.json,e051a59136d8d75461c3595477932f49001b433f9df1fb8f040fe4b838ae07b9
+V2,wave,FR:h_Part002,signed CAD degrees,-0.000008,0.000004,Slave/software/models/v2-12servo/motions/gestures/wave/source.json,e051a59136d8d75461c3595477932f49001b433f9df1fb8f040fe4b838ae07b9
+V2,wave,FR:alpha_Part006,signed CAD degrees,-30.529359,1.920816,Slave/software/models/v2-12servo/motions/gestures/wave/source.json,e051a59136d8d75461c3595477932f49001b433f9df1fb8f040fe4b838ae07b9
+V2,wave,FR:theta_Part005,signed CAD degrees,-16.774611,1.545805,Slave/software/models/v2-12servo/motions/gestures/wave/source.json,e051a59136d8d75461c3595477932f49001b433f9df1fb8f040fe4b838ae07b9
+V2,wave,RL:h_Part002,signed CAD degrees,-83.000000,0.000008,Slave/software/models/v2-12servo/motions/gestures/wave/source.json,e051a59136d8d75461c3595477932f49001b433f9df1fb8f040fe4b838ae07b9
+V2,wave,RL:alpha_Part006,signed CAD degrees,-15.000000,51.000000,Slave/software/models/v2-12servo/motions/gestures/wave/source.json,e051a59136d8d75461c3595477932f49001b433f9df1fb8f040fe4b838ae07b9
+V2,wave,RL:theta_Part005,signed CAD degrees,-25.000000,40.000000,Slave/software/models/v2-12servo/motions/gestures/wave/source.json,e051a59136d8d75461c3595477932f49001b433f9df1fb8f040fe4b838ae07b9
+V2,wave,RR:h_Part002,signed CAD degrees,-0.000000,0.000003,Slave/software/models/v2-12servo/motions/gestures/wave/source.json,e051a59136d8d75461c3595477932f49001b433f9df1fb8f040fe4b838ae07b9
+V2,wave,RR:alpha_Part006,signed CAD degrees,-6.546664,5.963324,Slave/software/models/v2-12servo/motions/gestures/wave/source.json,e051a59136d8d75461c3595477932f49001b433f9df1fb8f040fe4b838ae07b9
+V2,wave,RR:theta_Part005,signed CAD degrees,-21.360507,0.443382,Slave/software/models/v2-12servo/motions/gestures/wave/source.json,e051a59136d8d75461c3595477932f49001b433f9df1fb8f040fe4b838ae07b9
+V2,dance,FL:h_Part002,signed CAD degrees,-16.964567,15.863127,Slave/software/models/v2-12servo/motions/gestures/dance/source.json,059cb599dc8fd29d9d44cd157d0e6929ff03f4a3751be4e41a6ac4724d1bafde
+V2,dance,FL:alpha_Part006,signed CAD degrees,-21.437744,1.920714,Slave/software/models/v2-12servo/motions/gestures/dance/source.json,059cb599dc8fd29d9d44cd157d0e6929ff03f4a3751be4e41a6ac4724d1bafde
+V2,dance,FL:theta_Part005,signed CAD degrees,-15.070058,1.531203,Slave/software/models/v2-12servo/motions/gestures/dance/source.json,059cb599dc8fd29d9d44cd157d0e6929ff03f4a3751be4e41a6ac4724d1bafde
+V2,dance,FR:h_Part002,signed CAD degrees,-15.600201,17.566235,Slave/software/models/v2-12servo/motions/gestures/dance/source.json,059cb599dc8fd29d9d44cd157d0e6929ff03f4a3751be4e41a6ac4724d1bafde
+V2,dance,FR:alpha_Part006,signed CAD degrees,-39.891505,1.920703,Slave/software/models/v2-12servo/motions/gestures/dance/source.json,059cb599dc8fd29d9d44cd157d0e6929ff03f4a3751be4e41a6ac4724d1bafde
+V2,dance,FR:theta_Part005,signed CAD degrees,-28.546155,4.644069,Slave/software/models/v2-12servo/motions/gestures/dance/source.json,059cb599dc8fd29d9d44cd157d0e6929ff03f4a3751be4e41a6ac4724d1bafde
+V2,dance,RL:h_Part002,signed CAD degrees,-8.109150,8.533544,Slave/software/models/v2-12servo/motions/gestures/dance/source.json,059cb599dc8fd29d9d44cd157d0e6929ff03f4a3751be4e41a6ac4724d1bafde
+V2,dance,RL:alpha_Part006,signed CAD degrees,-25.105100,1.920730,Slave/software/models/v2-12servo/motions/gestures/dance/source.json,059cb599dc8fd29d9d44cd157d0e6929ff03f4a3751be4e41a6ac4724d1bafde
+V2,dance,RL:theta_Part005,signed CAD degrees,-18.361925,0.859257,Slave/software/models/v2-12servo/motions/gestures/dance/source.json,059cb599dc8fd29d9d44cd157d0e6929ff03f4a3751be4e41a6ac4724d1bafde
+V2,dance,RR:h_Part002,signed CAD degrees,-8.461483,8.192141,Slave/software/models/v2-12servo/motions/gestures/dance/source.json,059cb599dc8fd29d9d44cd157d0e6929ff03f4a3751be4e41a6ac4724d1bafde
+V2,dance,RR:alpha_Part006,signed CAD degrees,-23.738079,1.920721,Slave/software/models/v2-12servo/motions/gestures/dance/source.json,059cb599dc8fd29d9d44cd157d0e6929ff03f4a3751be4e41a6ac4724d1bafde
+V2,dance,RR:theta_Part005,signed CAD degrees,-16.129133,0.443372,Slave/software/models/v2-12servo/motions/gestures/dance/source.json,059cb599dc8fd29d9d44cd157d0e6929ff03f4a3751be4e41a6ac4724d1bafde
+V2,swim,FL:h_Part002,signed CAD degrees,-76.333246,-0.000000,Slave/software/models/v2-12servo/motions/gestures/swim/source.json,5c65ee82bf6a18f05085b0b9c4a5fec08206050957092469ed86d664591acc3b
+V2,swim,FL:alpha_Part006,signed CAD degrees,-24.598797,36.677170,Slave/software/models/v2-12servo/motions/gestures/swim/source.json,5c65ee82bf6a18f05085b0b9c4a5fec08206050957092469ed86d664591acc3b
+V2,swim,FL:theta_Part005,signed CAD degrees,-12.840006,15.754719,Slave/software/models/v2-12servo/motions/gestures/swim/source.json,5c65ee82bf6a18f05085b0b9c4a5fec08206050957092469ed86d664591acc3b
+V2,swim,FR:h_Part002,signed CAD degrees,-76.333256,0.000000,Slave/software/models/v2-12servo/motions/gestures/swim/source.json,5c65ee82bf6a18f05085b0b9c4a5fec08206050957092469ed86d664591acc3b
+V2,swim,FR:alpha_Part006,signed CAD degrees,-24.598820,36.677145,Slave/software/models/v2-12servo/motions/gestures/swim/source.json,5c65ee82bf6a18f05085b0b9c4a5fec08206050957092469ed86d664591acc3b
+V2,swim,FR:theta_Part005,signed CAD degrees,-12.840018,15.754708,Slave/software/models/v2-12servo/motions/gestures/swim/source.json,5c65ee82bf6a18f05085b0b9c4a5fec08206050957092469ed86d664591acc3b
+V2,swim,RL:h_Part002,signed CAD degrees,-73.439425,0.000006,Slave/software/models/v2-12servo/motions/gestures/swim/source.json,5c65ee82bf6a18f05085b0b9c4a5fec08206050957092469ed86d664591acc3b
+V2,swim,RL:alpha_Part006,signed CAD degrees,-25.511413,35.971283,Slave/software/models/v2-12servo/motions/gestures/swim/source.json,5c65ee82bf6a18f05085b0b9c4a5fec08206050957092469ed86d664591acc3b
+V2,swim,RL:theta_Part005,signed CAD degrees,-13.614223,15.342565,Slave/software/models/v2-12servo/motions/gestures/swim/source.json,5c65ee82bf6a18f05085b0b9c4a5fec08206050957092469ed86d664591acc3b
+V2,swim,RR:h_Part002,signed CAD degrees,-73.439437,0.000001,Slave/software/models/v2-12servo/motions/gestures/swim/source.json,5c65ee82bf6a18f05085b0b9c4a5fec08206050957092469ed86d664591acc3b
+V2,swim,RR:alpha_Part006,signed CAD degrees,-25.511450,35.971245,Slave/software/models/v2-12servo/motions/gestures/swim/source.json,5c65ee82bf6a18f05085b0b9c4a5fec08206050957092469ed86d664591acc3b
+V2,swim,RR:theta_Part005,signed CAD degrees,-13.614256,15.342542,Slave/software/models/v2-12servo/motions/gestures/swim/source.json,5c65ee82bf6a18f05085b0b9c4a5fec08206050957092469ed86d664591acc3b
+V2,point,FL:h_Part002,signed CAD degrees,-6.265537,-0.000000,Slave/software/models/v2-12servo/motions/gestures/point/source.json,27ababa8e086f6feb73081a8bc752ca0233ab35c5a7fd672ee9e51a4c6c60a9e
+V2,point,FL:alpha_Part006,signed CAD degrees,-7.351558,1.920852,Slave/software/models/v2-12servo/motions/gestures/point/source.json,27ababa8e086f6feb73081a8bc752ca0233ab35c5a7fd672ee9e51a4c6c60a9e
+V2,point,FL:theta_Part005,signed CAD degrees,-0.897808,8.731357,Slave/software/models/v2-12servo/motions/gestures/point/source.json,27ababa8e086f6feb73081a8bc752ca0233ab35c5a7fd672ee9e51a4c6c60a9e
+V2,point,FR:h_Part002,signed CAD degrees,-0.000000,10.170384,Slave/software/models/v2-12servo/motions/gestures/point/source.json,27ababa8e086f6feb73081a8bc752ca0233ab35c5a7fd672ee9e51a4c6c60a9e
+V2,point,FR:alpha_Part006,signed CAD degrees,-31.097419,1.920842,Slave/software/models/v2-12servo/motions/gestures/point/source.json,27ababa8e086f6feb73081a8bc752ca0233ab35c5a7fd672ee9e51a4c6c60a9e
+V2,point,FR:theta_Part005,signed CAD degrees,-8.310615,0.443401,Slave/software/models/v2-12servo/motions/gestures/point/source.json,27ababa8e086f6feb73081a8bc752ca0233ab35c5a7fd672ee9e51a4c6c60a9e
+V2,point,RL:h_Part002,signed CAD degrees,-56.114946,8.000023,Slave/software/models/v2-12servo/motions/gestures/point/source.json,27ababa8e086f6feb73081a8bc752ca0233ab35c5a7fd672ee9e51a4c6c60a9e
+V2,point,RL:alpha_Part006,signed CAD degrees,-8.555312,135.371044,Slave/software/models/v2-12servo/motions/gestures/point/source.json,27ababa8e086f6feb73081a8bc752ca0233ab35c5a7fd672ee9e51a4c6c60a9e
+V2,point,RL:theta_Part005,signed CAD degrees,-128.113331,11.857948,Slave/software/models/v2-12servo/motions/gestures/point/source.json,27ababa8e086f6feb73081a8bc752ca0233ab35c5a7fd672ee9e51a4c6c60a9e
+V2,point,RR:h_Part002,signed CAD degrees,-0.000000,3.912781,Slave/software/models/v2-12servo/motions/gestures/point/source.json,27ababa8e086f6feb73081a8bc752ca0233ab35c5a7fd672ee9e51a4c6c60a9e
+V2,point,RR:alpha_Part006,signed CAD degrees,-6.690773,1.920860,Slave/software/models/v2-12servo/motions/gestures/point/source.json,27ababa8e086f6feb73081a8bc752ca0233ab35c5a7fd672ee9e51a4c6c60a9e
+V2,point,RR:theta_Part005,signed CAD degrees,-0.731504,4.930525,Slave/software/models/v2-12servo/motions/gestures/point/source.json,27ababa8e086f6feb73081a8bc752ca0233ab35c5a7fd672ee9e51a4c6c60a9e
+V2,nod,FL:h_Part002,signed CAD degrees,-3.640515,-0.000000,Slave/software/models/v2-12servo/motions/gestures/nod/source.json,a5ab9286250e9cbd319de4dc953ca8d2d948c7e24755316cd7ec2116f6d93cdc
+V2,nod,FL:alpha_Part006,signed CAD degrees,-17.974317,5.803823,Slave/software/models/v2-12servo/motions/gestures/nod/source.json,a5ab9286250e9cbd319de4dc953ca8d2d948c7e24755316cd7ec2116f6d93cdc
+V2,nod,FL:theta_Part005,signed CAD degrees,-20.401696,0.443371,Slave/software/models/v2-12servo/motions/gestures/nod/source.json,a5ab9286250e9cbd319de4dc953ca8d2d948c7e24755316cd7ec2116f6d93cdc
+V2,nod,FR:h_Part002,signed CAD degrees,-0.000000,4.565225,Slave/software/models/v2-12servo/motions/gestures/nod/source.json,a5ab9286250e9cbd319de4dc953ca8d2d948c7e24755316cd7ec2116f6d93cdc
+V2,nod,FR:alpha_Part006,signed CAD degrees,-36.636686,1.920703,Slave/software/models/v2-12servo/motions/gestures/nod/source.json,a5ab9286250e9cbd319de4dc953ca8d2d948c7e24755316cd7ec2116f6d93cdc
+V2,nod,FR:theta_Part005,signed CAD degrees,-28.389282,0.443368,Slave/software/models/v2-12servo/motions/gestures/nod/source.json,a5ab9286250e9cbd319de4dc953ca8d2d948c7e24755316cd7ec2116f6d93cdc
+V2,nod,RL:h_Part002,signed CAD degrees,-4.959300,0.000007,Slave/software/models/v2-12servo/motions/gestures/nod/source.json,a5ab9286250e9cbd319de4dc953ca8d2d948c7e24755316cd7ec2116f6d93cdc
+V2,nod,RL:alpha_Part006,signed CAD degrees,-31.415586,21.103804,Slave/software/models/v2-12servo/motions/gestures/nod/source.json,a5ab9286250e9cbd319de4dc953ca8d2d948c7e24755316cd7ec2116f6d93cdc
+V2,nod,RL:theta_Part005,signed CAD degrees,-15.976284,0.443374,Slave/software/models/v2-12servo/motions/gestures/nod/source.json,a5ab9286250e9cbd319de4dc953ca8d2d948c7e24755316cd7ec2116f6d93cdc
+V2,nod,RR:h_Part002,signed CAD degrees,-0.000000,6.579369,Slave/software/models/v2-12servo/motions/gestures/nod/source.json,a5ab9286250e9cbd319de4dc953ca8d2d948c7e24755316cd7ec2116f6d93cdc
+V2,nod,RR:alpha_Part006,signed CAD degrees,-67.088130,14.213900,Slave/software/models/v2-12servo/motions/gestures/nod/source.json,a5ab9286250e9cbd319de4dc953ca8d2d948c7e24755316cd7ec2116f6d93cdc
+V2,nod,RR:theta_Part005,signed CAD degrees,-53.296319,0.443372,Slave/software/models/v2-12servo/motions/gestures/nod/source.json,a5ab9286250e9cbd319de4dc953ca8d2d948c7e24755316cd7ec2116f6d93cdc
+V2,pushup,FL:h_Part002,signed CAD degrees,-0.000007,-0.000000,Slave/software/models/v2-12servo/motions/gestures/pushup/source.json,58aa76bdf77a212570bd3f0f232ab41cbc471beff74f16da6b3e6281372b1b61
+V2,pushup,FL:alpha_Part006,signed CAD degrees,-79.022983,1.920714,Slave/software/models/v2-12servo/motions/gestures/pushup/source.json,58aa76bdf77a212570bd3f0f232ab41cbc471beff74f16da6b3e6281372b1b61
+V2,pushup,FL:theta_Part005,signed CAD degrees,-72.792127,0.443371,Slave/software/models/v2-12servo/motions/gestures/pushup/source.json,58aa76bdf77a212570bd3f0f232ab41cbc471beff74f16da6b3e6281372b1b61
+V2,pushup,FR:h_Part002,signed CAD degrees,-0.000002,0.000014,Slave/software/models/v2-12servo/motions/gestures/pushup/source.json,58aa76bdf77a212570bd3f0f232ab41cbc471beff74f16da6b3e6281372b1b61
+V2,pushup,FR:alpha_Part006,signed CAD degrees,-79.023025,1.920703,Slave/software/models/v2-12servo/motions/gestures/pushup/source.json,58aa76bdf77a212570bd3f0f232ab41cbc471beff74f16da6b3e6281372b1b61
+V2,pushup,FR:theta_Part005,signed CAD degrees,-72.792159,0.443368,Slave/software/models/v2-12servo/motions/gestures/pushup/source.json,58aa76bdf77a212570bd3f0f232ab41cbc471beff74f16da6b3e6281372b1b61
+V2,pushup,RL:h_Part002,signed CAD degrees,0.000000,0.000008,Slave/software/models/v2-12servo/motions/gestures/pushup/source.json,58aa76bdf77a212570bd3f0f232ab41cbc471beff74f16da6b3e6281372b1b61
+V2,pushup,RL:alpha_Part006,signed CAD degrees,-26.127402,15.667173,Slave/software/models/v2-12servo/motions/gestures/pushup/source.json,58aa76bdf77a212570bd3f0f232ab41cbc471beff74f16da6b3e6281372b1b61
+V2,pushup,RL:theta_Part005,signed CAD degrees,-21.765564,0.443374,Slave/software/models/v2-12servo/motions/gestures/pushup/source.json,58aa76bdf77a212570bd3f0f232ab41cbc471beff74f16da6b3e6281372b1b61
+V2,pushup,RR:h_Part002,signed CAD degrees,-0.000000,0.000005,Slave/software/models/v2-12servo/motions/gestures/pushup/source.json,58aa76bdf77a212570bd3f0f232ab41cbc471beff74f16da6b3e6281372b1b61
+V2,pushup,RR:alpha_Part006,signed CAD degrees,-26.127413,15.667163,Slave/software/models/v2-12servo/motions/gestures/pushup/source.json,58aa76bdf77a212570bd3f0f232ab41cbc471beff74f16da6b3e6281372b1b61
+V2,pushup,RR:theta_Part005,signed CAD degrees,-21.765573,0.443372,Slave/software/models/v2-12servo/motions/gestures/pushup/source.json,58aa76bdf77a212570bd3f0f232ab41cbc471beff74f16da6b3e6281372b1b61
+V2,bow,FL:h_Part002,signed CAD degrees,-0.000005,-0.000000,Slave/software/models/v2-12servo/motions/gestures/bow/source.json,1b313035a9ec4f92b88bece1b072ef3d28d64dcdb12ca42756d9f93c85ab6d95
+V2,bow,FL:alpha_Part006,signed CAD degrees,-5.451771,42.621271,Slave/software/models/v2-12servo/motions/gestures/bow/source.json,1b313035a9ec4f92b88bece1b072ef3d28d64dcdb12ca42756d9f93c85ab6d95
+V2,bow,FL:theta_Part005,signed CAD degrees,-1.944160,31.038660,Slave/software/models/v2-12servo/motions/gestures/bow/source.json,1b313035a9ec4f92b88bece1b072ef3d28d64dcdb12ca42756d9f93c85ab6d95
+V2,bow,FR:h_Part002,signed CAD degrees,-0.000004,0.000005,Slave/software/models/v2-12servo/motions/gestures/bow/source.json,1b313035a9ec4f92b88bece1b072ef3d28d64dcdb12ca42756d9f93c85ab6d95
+V2,bow,FR:alpha_Part006,signed CAD degrees,-5.451775,42.621264,Slave/software/models/v2-12servo/motions/gestures/bow/source.json,1b313035a9ec4f92b88bece1b072ef3d28d64dcdb12ca42756d9f93c85ab6d95
+V2,bow,FR:theta_Part005,signed CAD degrees,-1.944150,31.038677,Slave/software/models/v2-12servo/motions/gestures/bow/source.json,1b313035a9ec4f92b88bece1b072ef3d28d64dcdb12ca42756d9f93c85ab6d95
+V2,bow,RL:h_Part002,signed CAD degrees,0.000000,0.000005,Slave/software/models/v2-12servo/motions/gestures/bow/source.json,1b313035a9ec4f92b88bece1b072ef3d28d64dcdb12ca42756d9f93c85ab6d95
+V2,bow,RL:alpha_Part006,signed CAD degrees,-5.451760,120.000000,Slave/software/models/v2-12servo/motions/gestures/bow/source.json,1b313035a9ec4f92b88bece1b072ef3d28d64dcdb12ca42756d9f93c85ab6d95
+V2,bow,RL:theta_Part005,signed CAD degrees,-1.944156,101.294998,Slave/software/models/v2-12servo/motions/gestures/bow/source.json,1b313035a9ec4f92b88bece1b072ef3d28d64dcdb12ca42756d9f93c85ab6d95
+V2,bow,RR:h_Part002,signed CAD degrees,-0.000000,0.000002,Slave/software/models/v2-12servo/motions/gestures/bow/source.json,1b313035a9ec4f92b88bece1b072ef3d28d64dcdb12ca42756d9f93c85ab6d95
+V2,bow,RR:alpha_Part006,signed CAD degrees,-5.451770,120.000000,Slave/software/models/v2-12servo/motions/gestures/bow/source.json,1b313035a9ec4f92b88bece1b072ef3d28d64dcdb12ca42756d9f93c85ab6d95
+V2,bow,RR:theta_Part005,signed CAD degrees,-1.944163,101.294998,Slave/software/models/v2-12servo/motions/gestures/bow/source.json,1b313035a9ec4f92b88bece1b072ef3d28d64dcdb12ca42756d9f93c85ab6d95
+V2,cute,FL:h_Part002,signed CAD degrees,-76.394812,-0.000000,Slave/software/models/v2-12servo/motions/gestures/cute/source.json,9cebddc53e40d021986610b7aa5c6848046545c2ea49a0f931183fb8ea6df0a3
+V2,cute,FL:alpha_Part006,signed CAD degrees,-23.960150,24.170739,Slave/software/models/v2-12servo/motions/gestures/cute/source.json,9cebddc53e40d021986610b7aa5c6848046545c2ea49a0f931183fb8ea6df0a3
+V2,cute,FL:theta_Part005,signed CAD degrees,-15.575040,6.223109,Slave/software/models/v2-12servo/motions/gestures/cute/source.json,9cebddc53e40d021986610b7aa5c6848046545c2ea49a0f931183fb8ea6df0a3
+V2,cute,FR:h_Part002,signed CAD degrees,-76.394822,0.000000,Slave/software/models/v2-12servo/motions/gestures/cute/source.json,9cebddc53e40d021986610b7aa5c6848046545c2ea49a0f931183fb8ea6df0a3
+V2,cute,FR:alpha_Part006,signed CAD degrees,-23.960172,24.170721,Slave/software/models/v2-12servo/motions/gestures/cute/source.json,9cebddc53e40d021986610b7aa5c6848046545c2ea49a0f931183fb8ea6df0a3
+V2,cute,FR:theta_Part005,signed CAD degrees,-15.575052,6.223109,Slave/software/models/v2-12servo/motions/gestures/cute/source.json,9cebddc53e40d021986610b7aa5c6848046545c2ea49a0f931183fb8ea6df0a3
+V2,cute,RL:h_Part002,signed CAD degrees,-76.177994,0.000006,Slave/software/models/v2-12servo/motions/gestures/cute/source.json,9cebddc53e40d021986610b7aa5c6848046545c2ea49a0f931183fb8ea6df0a3
+V2,cute,RL:alpha_Part006,signed CAD degrees,-15.394849,24.170757,Slave/software/models/v2-12servo/motions/gestures/cute/source.json,9cebddc53e40d021986610b7aa5c6848046545c2ea49a0f931183fb8ea6df0a3
+V2,cute,RL:theta_Part005,signed CAD degrees,-10.690327,6.223121,Slave/software/models/v2-12servo/motions/gestures/cute/source.json,9cebddc53e40d021986610b7aa5c6848046545c2ea49a0f931183fb8ea6df0a3
+V2,cute,RR:h_Part002,signed CAD degrees,-76.178005,0.000001,Slave/software/models/v2-12servo/motions/gestures/cute/source.json,9cebddc53e40d021986610b7aa5c6848046545c2ea49a0f931183fb8ea6df0a3
+V2,cute,RR:alpha_Part006,signed CAD degrees,-15.394877,24.170737,Slave/software/models/v2-12servo/motions/gestures/cute/source.json,9cebddc53e40d021986610b7aa5c6848046545c2ea49a0f931183fb8ea6df0a3
+V2,cute,RR:theta_Part005,signed CAD degrees,-10.690351,6.223108,Slave/software/models/v2-12servo/motions/gestures/cute/source.json,9cebddc53e40d021986610b7aa5c6848046545c2ea49a0f931183fb8ea6df0a3
+V2,freaky,FL:h_Part002,signed CAD degrees,-0.000000,6.181058,Slave/software/models/v2-12servo/motions/gestures/freaky/source.json,8145723c6aec3dd9193c0538c1195466eddf5978815ab2096b84055955420d0b
+V2,freaky,FL:alpha_Part006,signed CAD degrees,-36.959640,1.920714,Slave/software/models/v2-12servo/motions/gestures/freaky/source.json,8145723c6aec3dd9193c0538c1195466eddf5978815ab2096b84055955420d0b
+V2,freaky,FL:theta_Part005,signed CAD degrees,-14.673378,0.443371,Slave/software/models/v2-12servo/motions/gestures/freaky/source.json,8145723c6aec3dd9193c0538c1195466eddf5978815ab2096b84055955420d0b
+V2,freaky,FR:h_Part002,signed CAD degrees,-5.778656,-0.000000,Slave/software/models/v2-12servo/motions/gestures/freaky/source.json,8145723c6aec3dd9193c0538c1195466eddf5978815ab2096b84055955420d0b
+V2,freaky,FR:alpha_Part006,signed CAD degrees,-25.699517,1.920703,Slave/software/models/v2-12servo/motions/gestures/freaky/source.json,8145723c6aec3dd9193c0538c1195466eddf5978815ab2096b84055955420d0b
+V2,freaky,FR:theta_Part005,signed CAD degrees,-4.382417,0.443384,Slave/software/models/v2-12servo/motions/gestures/freaky/source.json,8145723c6aec3dd9193c0538c1195466eddf5978815ab2096b84055955420d0b
+V2,freaky,RL:h_Part002,signed CAD degrees,0.000000,6.181073,Slave/software/models/v2-12servo/motions/gestures/freaky/source.json,8145723c6aec3dd9193c0538c1195466eddf5978815ab2096b84055955420d0b
+V2,freaky,RL:alpha_Part006,signed CAD degrees,-36.959621,1.920730,Slave/software/models/v2-12servo/motions/gestures/freaky/source.json,8145723c6aec3dd9193c0538c1195466eddf5978815ab2096b84055955420d0b
+V2,freaky,RL:theta_Part005,signed CAD degrees,-14.673352,0.443374,Slave/software/models/v2-12servo/motions/gestures/freaky/source.json,8145723c6aec3dd9193c0538c1195466eddf5978815ab2096b84055955420d0b
+V2,freaky,RR:h_Part002,signed CAD degrees,-71.078112,-0.000000,Slave/software/models/v2-12servo/motions/gestures/freaky/source.json,8145723c6aec3dd9193c0538c1195466eddf5978815ab2096b84055955420d0b
+V2,freaky,RR:alpha_Part006,signed CAD degrees,-25.699516,1.920721,Slave/software/models/v2-12servo/motions/gestures/freaky/source.json,8145723c6aec3dd9193c0538c1195466eddf5978815ab2096b84055955420d0b
+V2,freaky,RR:theta_Part005,signed CAD degrees,-36.126701,0.443372,Slave/software/models/v2-12servo/motions/gestures/freaky/source.json,8145723c6aec3dd9193c0538c1195466eddf5978815ab2096b84055955420d0b
+V2,worm,FL:h_Part002,signed CAD degrees,-0.000000,0.000005,Slave/software/models/v2-12servo/motions/gestures/worm/source.json,1d5a14a2aaaa590556fe80c34dbba3dcf154ce09a99f1edb99cff8cc678c59e3
+V2,worm,FL:alpha_Part006,signed CAD degrees,-46.073868,13.335352,Slave/software/models/v2-12servo/motions/gestures/worm/source.json,1d5a14a2aaaa590556fe80c34dbba3dcf154ce09a99f1edb99cff8cc678c59e3
+V2,worm,FL:theta_Part005,signed CAD degrees,-34.160293,16.640490,Slave/software/models/v2-12servo/motions/gestures/worm/source.json,1d5a14a2aaaa590556fe80c34dbba3dcf154ce09a99f1edb99cff8cc678c59e3
+V2,worm,FR:h_Part002,signed CAD degrees,-0.000000,0.000011,Slave/software/models/v2-12servo/motions/gestures/worm/source.json,1d5a14a2aaaa590556fe80c34dbba3dcf154ce09a99f1edb99cff8cc678c59e3
+V2,worm,FR:alpha_Part006,signed CAD degrees,-46.073902,13.335342,Slave/software/models/v2-12servo/motions/gestures/worm/source.json,1d5a14a2aaaa590556fe80c34dbba3dcf154ce09a99f1edb99cff8cc678c59e3
+V2,worm,FR:theta_Part005,signed CAD degrees,-34.160328,16.640490,Slave/software/models/v2-12servo/motions/gestures/worm/source.json,1d5a14a2aaaa590556fe80c34dbba3dcf154ce09a99f1edb99cff8cc678c59e3
+V2,worm,RL:h_Part002,signed CAD degrees,-0.000005,0.000000,Slave/software/models/v2-12servo/motions/gestures/worm/source.json,1d5a14a2aaaa590556fe80c34dbba3dcf154ce09a99f1edb99cff8cc678c59e3
+V2,worm,RL:alpha_Part006,signed CAD degrees,-45.401414,2.479001,Slave/software/models/v2-12servo/motions/gestures/worm/source.json,1d5a14a2aaaa590556fe80c34dbba3dcf154ce09a99f1edb99cff8cc678c59e3
+V2,worm,RL:theta_Part005,signed CAD degrees,-24.573564,1.361966,Slave/software/models/v2-12servo/motions/gestures/worm/source.json,1d5a14a2aaaa590556fe80c34dbba3dcf154ce09a99f1edb99cff8cc678c59e3
+V2,worm,RR:h_Part002,signed CAD degrees,-0.000001,0.000009,Slave/software/models/v2-12servo/motions/gestures/worm/source.json,1d5a14a2aaaa590556fe80c34dbba3dcf154ce09a99f1edb99cff8cc678c59e3
+V2,worm,RR:alpha_Part006,signed CAD degrees,-45.401470,2.478992,Slave/software/models/v2-12servo/motions/gestures/worm/source.json,1d5a14a2aaaa590556fe80c34dbba3dcf154ce09a99f1edb99cff8cc678c59e3
+V2,worm,RR:theta_Part005,signed CAD degrees,-24.573626,1.361957,Slave/software/models/v2-12servo/motions/gestures/worm/source.json,1d5a14a2aaaa590556fe80c34dbba3dcf154ce09a99f1edb99cff8cc678c59e3
+V2,shake,FL:h_Part002,signed CAD degrees,-0.000007,-0.000000,Slave/software/models/v2-12servo/motions/gestures/shake/source.json,905aa48065d1110f669a0e3b7c6385e12f3b7a6e4f8463c55d62fc5ea52f621f
+V2,shake,FL:alpha_Part006,signed CAD degrees,-7.250098,11.214912,Slave/software/models/v2-12servo/motions/gestures/shake/source.json,905aa48065d1110f669a0e3b7c6385e12f3b7a6e4f8463c55d62fc5ea52f621f
+V2,shake,FL:theta_Part005,signed CAD degrees,0.443371,22.758289,Slave/software/models/v2-12servo/motions/gestures/shake/source.json,905aa48065d1110f669a0e3b7c6385e12f3b7a6e4f8463c55d62fc5ea52f621f
+V2,shake,FR:h_Part002,signed CAD degrees,-0.000001,0.000004,Slave/software/models/v2-12servo/motions/gestures/shake/source.json,905aa48065d1110f669a0e3b7c6385e12f3b7a6e4f8463c55d62fc5ea52f621f
+V2,shake,FR:alpha_Part006,signed CAD degrees,-7.250094,11.214915,Slave/software/models/v2-12servo/motions/gestures/shake/source.json,905aa48065d1110f669a0e3b7c6385e12f3b7a6e4f8463c55d62fc5ea52f621f
+V2,shake,FR:theta_Part005,signed CAD degrees,0.443368,22.758312,Slave/software/models/v2-12servo/motions/gestures/shake/source.json,905aa48065d1110f669a0e3b7c6385e12f3b7a6e4f8463c55d62fc5ea52f621f
+V2,shake,RL:h_Part002,signed CAD degrees,0.000000,0.000011,Slave/software/models/v2-12servo/motions/gestures/shake/source.json,905aa48065d1110f669a0e3b7c6385e12f3b7a6e4f8463c55d62fc5ea52f621f
+V2,shake,RL:alpha_Part006,signed CAD degrees,-36.340220,1.920730,Slave/software/models/v2-12servo/motions/gestures/shake/source.json,905aa48065d1110f669a0e3b7c6385e12f3b7a6e4f8463c55d62fc5ea52f621f
+V2,shake,RL:theta_Part005,signed CAD degrees,-15.235626,0.770607,Slave/software/models/v2-12servo/motions/gestures/shake/source.json,905aa48065d1110f669a0e3b7c6385e12f3b7a6e4f8463c55d62fc5ea52f621f
+V2,shake,RR:h_Part002,signed CAD degrees,-0.000000,0.000011,Slave/software/models/v2-12servo/motions/gestures/shake/source.json,905aa48065d1110f669a0e3b7c6385e12f3b7a6e4f8463c55d62fc5ea52f621f
+V2,shake,RR:alpha_Part006,signed CAD degrees,-36.340248,1.920721,Slave/software/models/v2-12servo/motions/gestures/shake/source.json,905aa48065d1110f669a0e3b7c6385e12f3b7a6e4f8463c55d62fc5ea52f621f
+V2,shake,RR:theta_Part005,signed CAD degrees,-15.235660,0.770596,Slave/software/models/v2-12servo/motions/gestures/shake/source.json,905aa48065d1110f669a0e3b7c6385e12f3b7a6e4f8463c55d62fc5ea52f621f
+V2,shrug,FL:h_Part002,signed CAD degrees,-2.394087,2.356805,Slave/software/models/v2-12servo/motions/gestures/shrug/source.json,81b8058260992d15b8da60ea28a67547a8b420b57dc33702326edb4379e8f4d9
+V2,shrug,FL:alpha_Part006,signed CAD degrees,-40.654065,1.920714,Slave/software/models/v2-12servo/motions/gestures/shrug/source.json,81b8058260992d15b8da60ea28a67547a8b420b57dc33702326edb4379e8f4d9
+V2,shrug,FL:theta_Part005,signed CAD degrees,-32.729570,17.127262,Slave/software/models/v2-12servo/motions/gestures/shrug/source.json,81b8058260992d15b8da60ea28a67547a8b420b57dc33702326edb4379e8f4d9
+V2,shrug,FR:h_Part002,signed CAD degrees,-2.394096,2.356797,Slave/software/models/v2-12servo/motions/gestures/shrug/source.json,81b8058260992d15b8da60ea28a67547a8b420b57dc33702326edb4379e8f4d9
+V2,shrug,FR:alpha_Part006,signed CAD degrees,-40.654059,1.920703,Slave/software/models/v2-12servo/motions/gestures/shrug/source.json,81b8058260992d15b8da60ea28a67547a8b420b57dc33702326edb4379e8f4d9
+V2,shrug,FR:theta_Part005,signed CAD degrees,-32.729558,1.545216,Slave/software/models/v2-12servo/motions/gestures/shrug/source.json,81b8058260992d15b8da60ea28a67547a8b420b57dc33702326edb4379e8f4d9
+V2,shrug,RL:h_Part002,signed CAD degrees,-66.000000,0.000008,Slave/software/models/v2-12servo/motions/gestures/shrug/source.json,81b8058260992d15b8da60ea28a67547a8b420b57dc33702326edb4379e8f4d9
+V2,shrug,RL:alpha_Part006,signed CAD degrees,-6.470186,45.000000,Slave/software/models/v2-12servo/motions/gestures/shrug/source.json,81b8058260992d15b8da60ea28a67547a8b420b57dc33702326edb4379e8f4d9
+V2,shrug,RL:theta_Part005,signed CAD degrees,-21.360498,30.000000,Slave/software/models/v2-12servo/motions/gestures/shrug/source.json,81b8058260992d15b8da60ea28a67547a8b420b57dc33702326edb4379e8f4d9
+V2,shrug,RR:h_Part002,signed CAD degrees,-66.000000,0.000002,Slave/software/models/v2-12servo/motions/gestures/shrug/source.json,81b8058260992d15b8da60ea28a67547a8b420b57dc33702326edb4379e8f4d9
+V2,shrug,RR:alpha_Part006,signed CAD degrees,-6.470197,45.000000,Slave/software/models/v2-12servo/motions/gestures/shrug/source.json,81b8058260992d15b8da60ea28a67547a8b420b57dc33702326edb4379e8f4d9
+V2,shrug,RR:theta_Part005,signed CAD degrees,-21.360506,30.000000,Slave/software/models/v2-12servo/motions/gestures/shrug/source.json,81b8058260992d15b8da60ea28a67547a8b420b57dc33702326edb4379e8f4d9
+V2,dead,FL:h_Part002,signed CAD degrees,-35.000000,-0.000000,Slave/software/models/v2-12servo/motions/gestures/dead/source.json,8915e82d0ea0d3e1e758d3bd3ea9c64112a3bb44ab9e9e818279bb362c0ffb27
+V2,dead,FL:alpha_Part006,signed CAD degrees,1.920714,35.059561,Slave/software/models/v2-12servo/motions/gestures/dead/source.json,8915e82d0ea0d3e1e758d3bd3ea9c64112a3bb44ab9e9e818279bb362c0ffb27
+V2,dead,FL:theta_Part005,signed CAD degrees,0.443371,66.768545,Slave/software/models/v2-12servo/motions/gestures/dead/source.json,8915e82d0ea0d3e1e758d3bd3ea9c64112a3bb44ab9e9e818279bb362c0ffb27
+V2,dead,FR:h_Part002,signed CAD degrees,-35.000000,-0.000000,Slave/software/models/v2-12servo/motions/gestures/dead/source.json,8915e82d0ea0d3e1e758d3bd3ea9c64112a3bb44ab9e9e818279bb362c0ffb27
+V2,dead,FR:alpha_Part006,signed CAD degrees,1.920703,35.059512,Slave/software/models/v2-12servo/motions/gestures/dead/source.json,8915e82d0ea0d3e1e758d3bd3ea9c64112a3bb44ab9e9e818279bb362c0ffb27
+V2,dead,FR:theta_Part005,signed CAD degrees,0.443368,66.768528,Slave/software/models/v2-12servo/motions/gestures/dead/source.json,8915e82d0ea0d3e1e758d3bd3ea9c64112a3bb44ab9e9e818279bb362c0ffb27
+V2,dead,RL:h_Part002,signed CAD degrees,-36.943665,0.000007,Slave/software/models/v2-12servo/motions/gestures/dead/source.json,8915e82d0ea0d3e1e758d3bd3ea9c64112a3bb44ab9e9e818279bb362c0ffb27
+V2,dead,RL:alpha_Part006,signed CAD degrees,1.920730,105.980971,Slave/software/models/v2-12servo/motions/gestures/dead/source.json,8915e82d0ea0d3e1e758d3bd3ea9c64112a3bb44ab9e9e818279bb362c0ffb27
+V2,dead,RL:theta_Part005,signed CAD degrees,0.443374,91.175775,Slave/software/models/v2-12servo/motions/gestures/dead/source.json,8915e82d0ea0d3e1e758d3bd3ea9c64112a3bb44ab9e9e818279bb362c0ffb27
+V2,dead,RR:h_Part002,signed CAD degrees,-36.943689,0.000000,Slave/software/models/v2-12servo/motions/gestures/dead/source.json,8915e82d0ea0d3e1e758d3bd3ea9c64112a3bb44ab9e9e818279bb362c0ffb27
+V2,dead,RR:alpha_Part006,signed CAD degrees,1.920722,105.981006,Slave/software/models/v2-12servo/motions/gestures/dead/source.json,8915e82d0ea0d3e1e758d3bd3ea9c64112a3bb44ab9e9e818279bb362c0ffb27
+V2,dead,RR:theta_Part005,signed CAD degrees,0.443372,91.175786,Slave/software/models/v2-12servo/motions/gestures/dead/source.json,8915e82d0ea0d3e1e758d3bd3ea9c64112a3bb44ab9e9e818279bb362c0ffb27
+V2,celebrate,FL:h_Part002,signed CAD degrees,-76.779283,-0.000000,Slave/software/models/v2-12servo/motions/gestures/celebrate/source.json,2ecbf52a62bfb7846449f49bbe919e521a69910038680f0bf3e705f5295e89fa
+V2,celebrate,FL:alpha_Part006,signed CAD degrees,-23.960150,24.641121,Slave/software/models/v2-12servo/motions/gestures/celebrate/source.json,2ecbf52a62bfb7846449f49bbe919e521a69910038680f0bf3e705f5295e89fa
+V2,celebrate,FL:theta_Part005,signed CAD degrees,-15.575040,6.223109,Slave/software/models/v2-12servo/motions/gestures/celebrate/source.json,2ecbf52a62bfb7846449f49bbe919e521a69910038680f0bf3e705f5295e89fa
+V2,celebrate,FR:h_Part002,signed CAD degrees,-76.779293,0.000000,Slave/software/models/v2-12servo/motions/gestures/celebrate/source.json,2ecbf52a62bfb7846449f49bbe919e521a69910038680f0bf3e705f5295e89fa
+V2,celebrate,FR:alpha_Part006,signed CAD degrees,-23.960172,24.641099,Slave/software/models/v2-12servo/motions/gestures/celebrate/source.json,2ecbf52a62bfb7846449f49bbe919e521a69910038680f0bf3e705f5295e89fa
+V2,celebrate,FR:theta_Part005,signed CAD degrees,-15.575052,6.223109,Slave/software/models/v2-12servo/motions/gestures/celebrate/source.json,2ecbf52a62bfb7846449f49bbe919e521a69910038680f0bf3e705f5295e89fa
+V2,celebrate,RL:h_Part002,signed CAD degrees,-77.888839,0.000006,Slave/software/models/v2-12servo/motions/gestures/celebrate/source.json,2ecbf52a62bfb7846449f49bbe919e521a69910038680f0bf3e705f5295e89fa
+V2,celebrate,RL:alpha_Part006,signed CAD degrees,-15.394849,24.978144,Slave/software/models/v2-12servo/motions/gestures/celebrate/source.json,2ecbf52a62bfb7846449f49bbe919e521a69910038680f0bf3e705f5295e89fa
+V2,celebrate,RL:theta_Part005,signed CAD degrees,-10.690327,6.223121,Slave/software/models/v2-12servo/motions/gestures/celebrate/source.json,2ecbf52a62bfb7846449f49bbe919e521a69910038680f0bf3e705f5295e89fa
+V2,celebrate,RR:h_Part002,signed CAD degrees,-77.888851,0.000001,Slave/software/models/v2-12servo/motions/gestures/celebrate/source.json,2ecbf52a62bfb7846449f49bbe919e521a69910038680f0bf3e705f5295e89fa
+V2,celebrate,RR:alpha_Part006,signed CAD degrees,-15.394877,24.978109,Slave/software/models/v2-12servo/motions/gestures/celebrate/source.json,2ecbf52a62bfb7846449f49bbe919e521a69910038680f0bf3e705f5295e89fa
+V2,celebrate,RR:theta_Part005,signed CAD degrees,-10.690351,6.223108,Slave/software/models/v2-12servo/motions/gestures/celebrate/source.json,2ecbf52a62bfb7846449f49bbe919e521a69910038680f0bf3e705f5295e89fa
+V2,stretch,FL:h_Part002,signed CAD degrees,-0.000004,-0.000000,Slave/software/models/v2-12servo/motions/gestures/stretch/source.json,bdba196ac206cfe7fc2e4c5d19cbceb51846984130066eff613118683a6be2d3
+V2,stretch,FL:alpha_Part006,signed CAD degrees,-5.322310,12.978366,Slave/software/models/v2-12servo/motions/gestures/stretch/source.json,bdba196ac206cfe7fc2e4c5d19cbceb51846984130066eff613118683a6be2d3
+V2,stretch,FL:theta_Part005,signed CAD degrees,-1.905484,31.475498,Slave/software/models/v2-12servo/motions/gestures/stretch/source.json,bdba196ac206cfe7fc2e4c5d19cbceb51846984130066eff613118683a6be2d3
+V2,stretch,FR:h_Part002,signed CAD degrees,-0.000001,0.000004,Slave/software/models/v2-12servo/motions/gestures/stretch/source.json,bdba196ac206cfe7fc2e4c5d19cbceb51846984130066eff613118683a6be2d3
+V2,stretch,FR:alpha_Part006,signed CAD degrees,-5.322314,12.978367,Slave/software/models/v2-12servo/motions/gestures/stretch/source.json,bdba196ac206cfe7fc2e4c5d19cbceb51846984130066eff613118683a6be2d3
+V2,stretch,FR:theta_Part005,signed CAD degrees,-1.905474,31.475515,Slave/software/models/v2-12servo/motions/gestures/stretch/source.json,bdba196ac206cfe7fc2e4c5d19cbceb51846984130066eff613118683a6be2d3
+V2,stretch,RL:h_Part002,signed CAD degrees,0.000000,0.000008,Slave/software/models/v2-12servo/motions/gestures/stretch/source.json,bdba196ac206cfe7fc2e4c5d19cbceb51846984130066eff613118683a6be2d3
+V2,stretch,RL:alpha_Part006,signed CAD degrees,-5.322298,14.723314,Slave/software/models/v2-12servo/motions/gestures/stretch/source.json,bdba196ac206cfe7fc2e4c5d19cbceb51846984130066eff613118683a6be2d3
+V2,stretch,RL:theta_Part005,signed CAD degrees,-1.905480,63.310170,Slave/software/models/v2-12servo/motions/gestures/stretch/source.json,bdba196ac206cfe7fc2e4c5d19cbceb51846984130066eff613118683a6be2d3
+V2,stretch,RR:h_Part002,signed CAD degrees,-0.000000,0.000011,Slave/software/models/v2-12servo/motions/gestures/stretch/source.json,bdba196ac206cfe7fc2e4c5d19cbceb51846984130066eff613118683a6be2d3
+V2,stretch,RR:alpha_Part006,signed CAD degrees,-5.322309,14.723303,Slave/software/models/v2-12servo/motions/gestures/stretch/source.json,bdba196ac206cfe7fc2e4c5d19cbceb51846984130066eff613118683a6be2d3
+V2,stretch,RR:theta_Part005,signed CAD degrees,-1.905488,63.310156,Slave/software/models/v2-12servo/motions/gestures/stretch/source.json,bdba196ac206cfe7fc2e4c5d19cbceb51846984130066eff613118683a6be2d3
+V2,surprised,FL:h_Part002,signed CAD degrees,-73.889354,-0.000000,Slave/software/models/v2-12servo/motions/gestures/surprised/source.json,8baa241f1ae52950e762da06b6b41c64c80b5ddc81aa23cb2c8847c1293ecb5d
+V2,surprised,FL:alpha_Part006,signed CAD degrees,-24.577684,24.170739,Slave/software/models/v2-12servo/motions/gestures/surprised/source.json,8baa241f1ae52950e762da06b6b41c64c80b5ddc81aa23cb2c8847c1293ecb5d
+V2,surprised,FL:theta_Part005,signed CAD degrees,-16.098968,6.223109,Slave/software/models/v2-12servo/motions/gestures/surprised/source.json,8baa241f1ae52950e762da06b6b41c64c80b5ddc81aa23cb2c8847c1293ecb5d
+V2,surprised,FR:h_Part002,signed CAD degrees,-73.889363,0.000001,Slave/software/models/v2-12servo/motions/gestures/surprised/source.json,8baa241f1ae52950e762da06b6b41c64c80b5ddc81aa23cb2c8847c1293ecb5d
+V2,surprised,FR:alpha_Part006,signed CAD degrees,-24.577707,24.170721,Slave/software/models/v2-12servo/motions/gestures/surprised/source.json,8baa241f1ae52950e762da06b6b41c64c80b5ddc81aa23cb2c8847c1293ecb5d
+V2,surprised,FR:theta_Part005,signed CAD degrees,-16.098980,6.223109,Slave/software/models/v2-12servo/motions/gestures/surprised/source.json,8baa241f1ae52950e762da06b6b41c64c80b5ddc81aa23cb2c8847c1293ecb5d
+V2,surprised,RL:h_Part002,signed CAD degrees,-96.990900,0.000007,Slave/software/models/v2-12servo/motions/gestures/surprised/source.json,8baa241f1ae52950e762da06b6b41c64c80b5ddc81aa23cb2c8847c1293ecb5d
+V2,surprised,RL:alpha_Part006,signed CAD degrees,-15.394847,24.170757,Slave/software/models/v2-12servo/motions/gestures/surprised/source.json,8baa241f1ae52950e762da06b6b41c64c80b5ddc81aa23cb2c8847c1293ecb5d
+V2,surprised,RL:theta_Part005,signed CAD degrees,-12.386860,6.223121,Slave/software/models/v2-12servo/motions/gestures/surprised/source.json,8baa241f1ae52950e762da06b6b41c64c80b5ddc81aa23cb2c8847c1293ecb5d
+V2,surprised,RR:h_Part002,signed CAD degrees,-96.990920,0.000002,Slave/software/models/v2-12servo/motions/gestures/surprised/source.json,8baa241f1ae52950e762da06b6b41c64c80b5ddc81aa23cb2c8847c1293ecb5d
+V2,surprised,RR:alpha_Part006,signed CAD degrees,-15.394875,24.170737,Slave/software/models/v2-12servo/motions/gestures/surprised/source.json,8baa241f1ae52950e762da06b6b41c64c80b5ddc81aa23cb2c8847c1293ecb5d
+V2,surprised,RR:theta_Part005,signed CAD degrees,-12.386879,6.223108,Slave/software/models/v2-12servo/motions/gestures/surprised/source.json,8baa241f1ae52950e762da06b6b41c64c80b5ddc81aa23cb2c8847c1293ecb5d
+V2,sad,FL:h_Part002,signed CAD degrees,-3.980341,3.958460,Slave/software/models/v2-12servo/motions/gestures/sad/source.json,1897d2d41a733b3bb1696200e87e81af1ffca0e231d5c695e52ce8e84ecb4445
+V2,sad,FL:alpha_Part006,signed CAD degrees,-5.538735,1.937150,Slave/software/models/v2-12servo/motions/gestures/sad/source.json,1897d2d41a733b3bb1696200e87e81af1ffca0e231d5c695e52ce8e84ecb4445
+V2,sad,FL:theta_Part005,signed CAD degrees,-2.238055,20.107647,Slave/software/models/v2-12servo/motions/gestures/sad/source.json,1897d2d41a733b3bb1696200e87e81af1ffca0e231d5c695e52ce8e84ecb4445
+V2,sad,FR:h_Part002,signed CAD degrees,-3.980602,3.958211,Slave/software/models/v2-12servo/motions/gestures/sad/source.json,1897d2d41a733b3bb1696200e87e81af1ffca0e231d5c695e52ce8e84ecb4445
+V2,sad,FR:alpha_Part006,signed CAD degrees,-5.538733,1.939626,Slave/software/models/v2-12servo/motions/gestures/sad/source.json,1897d2d41a733b3bb1696200e87e81af1ffca0e231d5c695e52ce8e84ecb4445
+V2,sad,FR:theta_Part005,signed CAD degrees,-2.238036,20.102702,Slave/software/models/v2-12servo/motions/gestures/sad/source.json,1897d2d41a733b3bb1696200e87e81af1ffca0e231d5c695e52ce8e84ecb4445
+V2,sad,RL:h_Part002,signed CAD degrees,-0.141889,0.544047,Slave/software/models/v2-12servo/motions/gestures/sad/source.json,1897d2d41a733b3bb1696200e87e81af1ffca0e231d5c695e52ce8e84ecb4445
+V2,sad,RL:alpha_Part006,signed CAD degrees,-10.582358,1.920730,Slave/software/models/v2-12servo/motions/gestures/sad/source.json,1897d2d41a733b3bb1696200e87e81af1ffca0e231d5c695e52ce8e84ecb4445
+V2,sad,RL:theta_Part005,signed CAD degrees,-2.238052,29.398533,Slave/software/models/v2-12servo/motions/gestures/sad/source.json,1897d2d41a733b3bb1696200e87e81af1ffca0e231d5c695e52ce8e84ecb4445
+V2,sad,RR:h_Part002,signed CAD degrees,-0.140689,0.545669,Slave/software/models/v2-12servo/motions/gestures/sad/source.json,1897d2d41a733b3bb1696200e87e81af1ffca0e231d5c695e52ce8e84ecb4445
+V2,sad,RR:alpha_Part006,signed CAD degrees,-10.563700,1.920721,Slave/software/models/v2-12servo/motions/gestures/sad/source.json,1897d2d41a733b3bb1696200e87e81af1ffca0e231d5c695e52ce8e84ecb4445
+V2,sad,RR:theta_Part005,signed CAD degrees,-2.238062,29.390631,Slave/software/models/v2-12servo/motions/gestures/sad/source.json,1897d2d41a733b3bb1696200e87e81af1ffca0e231d5c695e52ce8e84ecb4445
+V2,curious,FL:h_Part002,signed CAD degrees,-5.003905,7.205539,Slave/software/models/v2-12servo/motions/gestures/curious/source.json,baa86ca3bea4daefc5af122f255712c3bb6fb86a19851510b339ce1ccccf17ee
+V2,curious,FL:alpha_Part006,signed CAD degrees,-25.245700,7.671638,Slave/software/models/v2-12servo/motions/gestures/curious/source.json,baa86ca3bea4daefc5af122f255712c3bb6fb86a19851510b339ce1ccccf17ee
+V2,curious,FL:theta_Part005,signed CAD degrees,-25.215836,16.253450,Slave/software/models/v2-12servo/motions/gestures/curious/source.json,baa86ca3bea4daefc5af122f255712c3bb6fb86a19851510b339ce1ccccf17ee
+V2,curious,FR:h_Part002,signed CAD degrees,-5.003898,7.205548,Slave/software/models/v2-12servo/motions/gestures/curious/source.json,baa86ca3bea4daefc5af122f255712c3bb6fb86a19851510b339ce1ccccf17ee
+V2,curious,FR:alpha_Part006,signed CAD degrees,-25.245700,7.671641,Slave/software/models/v2-12servo/motions/gestures/curious/source.json,baa86ca3bea4daefc5af122f255712c3bb6fb86a19851510b339ce1ccccf17ee
+V2,curious,FR:theta_Part005,signed CAD degrees,-25.215821,16.253471,Slave/software/models/v2-12servo/motions/gestures/curious/source.json,baa86ca3bea4daefc5af122f255712c3bb6fb86a19851510b339ce1ccccf17ee
+V2,curious,RL:h_Part002,signed CAD degrees,-9.840882,12.256356,Slave/software/models/v2-12servo/motions/gestures/curious/source.json,baa86ca3bea4daefc5af122f255712c3bb6fb86a19851510b339ce1ccccf17ee
+V2,curious,RL:alpha_Part006,signed CAD degrees,-23.266264,1.920730,Slave/software/models/v2-12servo/motions/gestures/curious/source.json,baa86ca3bea4daefc5af122f255712c3bb6fb86a19851510b339ce1ccccf17ee
+V2,curious,RL:theta_Part005,signed CAD degrees,-18.816000,13.020432,Slave/software/models/v2-12servo/motions/gestures/curious/source.json,baa86ca3bea4daefc5af122f255712c3bb6fb86a19851510b339ce1ccccf17ee
+V2,curious,RR:h_Part002,signed CAD degrees,-9.840887,12.256349,Slave/software/models/v2-12servo/motions/gestures/curious/source.json,baa86ca3bea4daefc5af122f255712c3bb6fb86a19851510b339ce1ccccf17ee
+V2,curious,RR:alpha_Part006,signed CAD degrees,-23.266281,1.920721,Slave/software/models/v2-12servo/motions/gestures/curious/source.json,baa86ca3bea4daefc5af122f255712c3bb6fb86a19851510b339ce1ccccf17ee
+V2,curious,RR:theta_Part005,signed CAD degrees,-18.816014,13.020421,Slave/software/models/v2-12servo/motions/gestures/curious/source.json,baa86ca3bea4daefc5af122f255712c3bb6fb86a19851510b339ce1ccccf17ee
+V2,crouch,FL:h_Part002,signed CAD degrees,-0.000000,0.000006,Slave/software/models/v2-12servo/motions/gestures/crouch/source.json,e7af65658cbd8a87c1e9ab19ffa6f2f303afb84c47808e664f2ea8e099cc942e
+V2,crouch,FL:alpha_Part006,signed CAD degrees,-37.569153,1.920852,Slave/software/models/v2-12servo/motions/gestures/crouch/source.json,e7af65658cbd8a87c1e9ab19ffa6f2f303afb84c47808e664f2ea8e099cc942e
+V2,crouch,FL:theta_Part005,signed CAD degrees,-20.474841,0.443402,Slave/software/models/v2-12servo/motions/gestures/crouch/source.json,e7af65658cbd8a87c1e9ab19ffa6f2f303afb84c47808e664f2ea8e099cc942e
+V2,crouch,FR:h_Part002,signed CAD degrees,-0.000000,0.000012,Slave/software/models/v2-12servo/motions/gestures/crouch/source.json,e7af65658cbd8a87c1e9ab19ffa6f2f303afb84c47808e664f2ea8e099cc942e
+V2,crouch,FR:alpha_Part006,signed CAD degrees,-37.569182,1.920842,Slave/software/models/v2-12servo/motions/gestures/crouch/source.json,e7af65658cbd8a87c1e9ab19ffa6f2f303afb84c47808e664f2ea8e099cc942e
+V2,crouch,FR:theta_Part005,signed CAD degrees,-20.474871,0.443400,Slave/software/models/v2-12servo/motions/gestures/crouch/source.json,e7af65658cbd8a87c1e9ab19ffa6f2f303afb84c47808e664f2ea8e099cc942e
+V2,crouch,RL:h_Part002,signed CAD degrees,-0.000003,0.000000,Slave/software/models/v2-12servo/motions/gestures/crouch/source.json,e7af65658cbd8a87c1e9ab19ffa6f2f303afb84c47808e664f2ea8e099cc942e
+V2,crouch,RL:alpha_Part006,signed CAD degrees,-37.569106,1.920867,Slave/software/models/v2-12servo/motions/gestures/crouch/source.json,e7af65658cbd8a87c1e9ab19ffa6f2f303afb84c47808e664f2ea8e099cc942e
+V2,crouch,RL:theta_Part005,signed CAD degrees,-20.474791,0.443404,Slave/software/models/v2-12servo/motions/gestures/crouch/source.json,e7af65658cbd8a87c1e9ab19ffa6f2f303afb84c47808e664f2ea8e099cc942e
+V2,crouch,RR:h_Part002,signed CAD degrees,-0.000000,0.000006,Slave/software/models/v2-12servo/motions/gestures/crouch/source.json,e7af65658cbd8a87c1e9ab19ffa6f2f303afb84c47808e664f2ea8e099cc942e
+V2,crouch,RR:alpha_Part006,signed CAD degrees,-37.569132,1.920860,Slave/software/models/v2-12servo/motions/gestures/crouch/source.json,e7af65658cbd8a87c1e9ab19ffa6f2f303afb84c47808e664f2ea8e099cc942e
+V2,crouch,RR:theta_Part005,signed CAD degrees,-20.474816,0.443403,Slave/software/models/v2-12servo/motions/gestures/crouch/source.json,e7af65658cbd8a87c1e9ab19ffa6f2f303afb84c47808e664f2ea8e099cc942e
+V2,upright,FL:h_Part002,signed CAD degrees,-0.000001,0.000002,Slave/software/models/v2-12servo/motions/gestures/upright/source.json,7622fbd68590a1ff60601d7abeca2660d5c209407e1ef56199629711da7d4835
+V2,upright,FL:alpha_Part006,signed CAD degrees,-49.150070,41.753772,Slave/software/models/v2-12servo/motions/gestures/upright/source.json,7622fbd68590a1ff60601d7abeca2660d5c209407e1ef56199629711da7d4835
+V2,upright,FL:theta_Part005,signed CAD degrees,-80.863575,41.379080,Slave/software/models/v2-12servo/motions/gestures/upright/source.json,7622fbd68590a1ff60601d7abeca2660d5c209407e1ef56199629711da7d4835
+V2,upright,FR:h_Part002,signed CAD degrees,-0.000022,0.000004,Slave/software/models/v2-12servo/motions/gestures/upright/source.json,7622fbd68590a1ff60601d7abeca2660d5c209407e1ef56199629711da7d4835
+V2,upright,FR:alpha_Part006,signed CAD degrees,-49.150074,41.753777,Slave/software/models/v2-12servo/motions/gestures/upright/source.json,7622fbd68590a1ff60601d7abeca2660d5c209407e1ef56199629711da7d4835
+V2,upright,FR:theta_Part005,signed CAD degrees,-80.863571,41.379088,Slave/software/models/v2-12servo/motions/gestures/upright/source.json,7622fbd68590a1ff60601d7abeca2660d5c209407e1ef56199629711da7d4835
+V2,upright,RL:h_Part002,signed CAD degrees,0.000000,8.000000,Slave/software/models/v2-12servo/motions/gestures/upright/source.json,7622fbd68590a1ff60601d7abeca2660d5c209407e1ef56199629711da7d4835
+V2,upright,RL:alpha_Part006,signed CAD degrees,-45.531639,5.963328,Slave/software/models/v2-12servo/motions/gestures/upright/source.json,7622fbd68590a1ff60601d7abeca2660d5c209407e1ef56199629711da7d4835
+V2,upright,RL:theta_Part005,signed CAD degrees,-118.784996,0.443391,Slave/software/models/v2-12servo/motions/gestures/upright/source.json,7622fbd68590a1ff60601d7abeca2660d5c209407e1ef56199629711da7d4835
+V2,upright,RR:h_Part002,signed CAD degrees,-0.000001,8.000000,Slave/software/models/v2-12servo/motions/gestures/upright/source.json,7622fbd68590a1ff60601d7abeca2660d5c209407e1ef56199629711da7d4835
+V2,upright,RR:alpha_Part006,signed CAD degrees,-31.336901,23.991641,Slave/software/models/v2-12servo/motions/gestures/upright/source.json,7622fbd68590a1ff60601d7abeca2660d5c209407e1ef56199629711da7d4835
+V2,upright,RR:theta_Part005,signed CAD degrees,-112.483605,0.443382,Slave/software/models/v2-12servo/motions/gestures/upright/source.json,7622fbd68590a1ff60601d7abeca2660d5c209407e1ef56199629711da7d4835
+V2,lay_down,FL:h_Part002,signed CAD degrees,-35.000000,-0.000000,Slave/software/models/v2-12servo/motions/gestures/lay_down/source.json,238f5b5de9555b5da0436afb65c3448a928c838d5cf20cfe0281811299ce735b
+V2,lay_down,FL:alpha_Part006,signed CAD degrees,1.920714,35.059561,Slave/software/models/v2-12servo/motions/gestures/lay_down/source.json,238f5b5de9555b5da0436afb65c3448a928c838d5cf20cfe0281811299ce735b
+V2,lay_down,FL:theta_Part005,signed CAD degrees,0.443371,66.768545,Slave/software/models/v2-12servo/motions/gestures/lay_down/source.json,238f5b5de9555b5da0436afb65c3448a928c838d5cf20cfe0281811299ce735b
+V2,lay_down,FR:h_Part002,signed CAD degrees,-35.000000,-0.000000,Slave/software/models/v2-12servo/motions/gestures/lay_down/source.json,238f5b5de9555b5da0436afb65c3448a928c838d5cf20cfe0281811299ce735b
+V2,lay_down,FR:alpha_Part006,signed CAD degrees,1.920703,35.059512,Slave/software/models/v2-12servo/motions/gestures/lay_down/source.json,238f5b5de9555b5da0436afb65c3448a928c838d5cf20cfe0281811299ce735b
+V2,lay_down,FR:theta_Part005,signed CAD degrees,0.443368,66.768528,Slave/software/models/v2-12servo/motions/gestures/lay_down/source.json,238f5b5de9555b5da0436afb65c3448a928c838d5cf20cfe0281811299ce735b
+V2,lay_down,RL:h_Part002,signed CAD degrees,-35.000000,0.000000,Slave/software/models/v2-12servo/motions/gestures/lay_down/source.json,238f5b5de9555b5da0436afb65c3448a928c838d5cf20cfe0281811299ce735b
+V2,lay_down,RL:alpha_Part006,signed CAD degrees,1.920730,35.059603,Slave/software/models/v2-12servo/motions/gestures/lay_down/source.json,238f5b5de9555b5da0436afb65c3448a928c838d5cf20cfe0281811299ce735b
+V2,lay_down,RL:theta_Part005,signed CAD degrees,0.443374,66.768568,Slave/software/models/v2-12servo/motions/gestures/lay_down/source.json,238f5b5de9555b5da0436afb65c3448a928c838d5cf20cfe0281811299ce735b
+V2,lay_down,RR:h_Part002,signed CAD degrees,-35.000000,-0.000000,Slave/software/models/v2-12servo/motions/gestures/lay_down/source.json,238f5b5de9555b5da0436afb65c3448a928c838d5cf20cfe0281811299ce735b
+V2,lay_down,RR:alpha_Part006,signed CAD degrees,1.920722,35.059563,Slave/software/models/v2-12servo/motions/gestures/lay_down/source.json,238f5b5de9555b5da0436afb65c3448a928c838d5cf20cfe0281811299ce735b
+V2,lay_down,RR:theta_Part005,signed CAD degrees,0.443372,66.768547,Slave/software/models/v2-12servo/motions/gestures/lay_down/source.json,238f5b5de9555b5da0436afb65c3448a928c838d5cf20cfe0281811299ce735b
+V2,crab,FL:h_Part002,signed CAD degrees,-35.221865,-0.000006,Slave/software/models/v2-12servo/motions/locomotion/crab/source.json,aa9b2c9aff31b12170c082dcc864d56f9fee499ded688b108d8e3f2f84e150b9
+V2,crab,FL:alpha_Part006,signed CAD degrees,-17.216257,21.810816,Slave/software/models/v2-12servo/motions/locomotion/crab/source.json,aa9b2c9aff31b12170c082dcc864d56f9fee499ded688b108d8e3f2f84e150b9
+V2,crab,FL:theta_Part005,signed CAD degrees,-6.033366,5.308778,Slave/software/models/v2-12servo/motions/locomotion/crab/source.json,aa9b2c9aff31b12170c082dcc864d56f9fee499ded688b108d8e3f2f84e150b9
+V2,crab,FR:h_Part002,signed CAD degrees,-35.223087,0.000011,Slave/software/models/v2-12servo/motions/locomotion/crab/source.json,aa9b2c9aff31b12170c082dcc864d56f9fee499ded688b108d8e3f2f84e150b9
+V2,crab,FR:alpha_Part006,signed CAD degrees,-17.228032,21.791227,Slave/software/models/v2-12servo/motions/locomotion/crab/source.json,aa9b2c9aff31b12170c082dcc864d56f9fee499ded688b108d8e3f2f84e150b9
+V2,crab,FR:theta_Part005,signed CAD degrees,-6.039253,5.301757,Slave/software/models/v2-12servo/motions/locomotion/crab/source.json,aa9b2c9aff31b12170c082dcc864d56f9fee499ded688b108d8e3f2f84e150b9
+V2,crab,RL:h_Part002,signed CAD degrees,-35.352431,-0.000004,Slave/software/models/v2-12servo/motions/locomotion/crab/source.json,aa9b2c9aff31b12170c082dcc864d56f9fee499ded688b108d8e3f2f84e150b9
+V2,crab,RL:alpha_Part006,signed CAD degrees,-17.227991,21.816526,Slave/software/models/v2-12servo/motions/locomotion/crab/source.json,aa9b2c9aff31b12170c082dcc864d56f9fee499ded688b108d8e3f2f84e150b9
+V2,crab,RL:theta_Part005,signed CAD degrees,-6.039185,5.310841,Slave/software/models/v2-12servo/motions/locomotion/crab/source.json,aa9b2c9aff31b12170c082dcc864d56f9fee499ded688b108d8e3f2f84e150b9
+V2,crab,RR:h_Part002,signed CAD degrees,-35.223081,0.000013,Slave/software/models/v2-12servo/motions/locomotion/crab/source.json,aa9b2c9aff31b12170c082dcc864d56f9fee499ded688b108d8e3f2f84e150b9
+V2,crab,RR:alpha_Part006,signed CAD degrees,-17.228005,21.791268,Slave/software/models/v2-12servo/motions/locomotion/crab/source.json,aa9b2c9aff31b12170c082dcc864d56f9fee499ded688b108d8e3f2f84e150b9
+V2,crab,RR:theta_Part005,signed CAD degrees,-6.039199,5.301784,Slave/software/models/v2-12servo/motions/locomotion/crab/source.json,aa9b2c9aff31b12170c082dcc864d56f9fee499ded688b108d8e3f2f84e150b9
+V2,crab_backward,FL:h_Part002,signed CAD degrees,-31.423190,-0.000006,Slave/software/models/v2-12servo/motions/locomotion/crab_backward/source.json,818b1483f9db5859989e03a82535ccbd2fabfaef2489a0b309cbbaba113538b5
+V2,crab_backward,FL:alpha_Part006,signed CAD degrees,-17.216257,27.268998,Slave/software/models/v2-12servo/motions/locomotion/crab_backward/source.json,818b1483f9db5859989e03a82535ccbd2fabfaef2489a0b309cbbaba113538b5
+V2,crab_backward,FL:theta_Part005,signed CAD degrees,-21.464853,24.723509,Slave/software/models/v2-12servo/motions/locomotion/crab_backward/source.json,818b1483f9db5859989e03a82535ccbd2fabfaef2489a0b309cbbaba113538b5
+V2,crab_backward,FR:h_Part002,signed CAD degrees,-31.584564,0.000011,Slave/software/models/v2-12servo/motions/locomotion/crab_backward/source.json,818b1483f9db5859989e03a82535ccbd2fabfaef2489a0b309cbbaba113538b5
+V2,crab_backward,FR:alpha_Part006,signed CAD degrees,-17.228032,25.189505,Slave/software/models/v2-12servo/motions/locomotion/crab_backward/source.json,818b1483f9db5859989e03a82535ccbd2fabfaef2489a0b309cbbaba113538b5
+V2,crab_backward,FR:theta_Part005,signed CAD degrees,-23.033187,22.385030,Slave/software/models/v2-12servo/motions/locomotion/crab_backward/source.json,818b1483f9db5859989e03a82535ccbd2fabfaef2489a0b309cbbaba113538b5
+V2,crab_backward,RL:h_Part002,signed CAD degrees,-31.586500,-0.000004,Slave/software/models/v2-12servo/motions/locomotion/crab_backward/source.json,818b1483f9db5859989e03a82535ccbd2fabfaef2489a0b309cbbaba113538b5
+V2,crab_backward,RL:alpha_Part006,signed CAD degrees,-17.227991,31.668254,Slave/software/models/v2-12servo/motions/locomotion/crab_backward/source.json,818b1483f9db5859989e03a82535ccbd2fabfaef2489a0b309cbbaba113538b5
+V2,crab_backward,RL:theta_Part005,signed CAD degrees,-22.917498,29.259397,Slave/software/models/v2-12servo/motions/locomotion/crab_backward/source.json,818b1483f9db5859989e03a82535ccbd2fabfaef2489a0b309cbbaba113538b5
+V2,crab_backward,RR:h_Part002,signed CAD degrees,-31.296801,0.000013,Slave/software/models/v2-12servo/motions/locomotion/crab_backward/source.json,818b1483f9db5859989e03a82535ccbd2fabfaef2489a0b309cbbaba113538b5
+V2,crab_backward,RR:alpha_Part006,signed CAD degrees,-17.228005,27.139483,Slave/software/models/v2-12servo/motions/locomotion/crab_backward/source.json,818b1483f9db5859989e03a82535ccbd2fabfaef2489a0b309cbbaba113538b5
+V2,crab_backward,RR:theta_Part005,signed CAD degrees,-22.933986,24.537140,Slave/software/models/v2-12servo/motions/locomotion/crab_backward/source.json,818b1483f9db5859989e03a82535ccbd2fabfaef2489a0b309cbbaba113538b5
+V2,crab_forward,FL:h_Part002,signed CAD degrees,-31.608930,-0.000006,Slave/software/models/v2-12servo/motions/locomotion/crab_forward/source.json,c5a13e61ee9f13005d561db39bf1c035ba91d7e91a212f3720d8f5f3497ba6d2
+V2,crab_forward,FL:alpha_Part006,signed CAD degrees,-17.216257,28.312664,Slave/software/models/v2-12servo/motions/locomotion/crab_forward/source.json,c5a13e61ee9f13005d561db39bf1c035ba91d7e91a212f3720d8f5f3497ba6d2
+V2,crab_forward,FL:theta_Part005,signed CAD degrees,-26.760763,25.788704,Slave/software/models/v2-12servo/motions/locomotion/crab_forward/source.json,c5a13e61ee9f13005d561db39bf1c035ba91d7e91a212f3720d8f5f3497ba6d2
+V2,crab_forward,FR:h_Part002,signed CAD degrees,-31.600840,0.000011,Slave/software/models/v2-12servo/motions/locomotion/crab_forward/source.json,c5a13e61ee9f13005d561db39bf1c035ba91d7e91a212f3720d8f5f3497ba6d2
+V2,crab_forward,FR:alpha_Part006,signed CAD degrees,-17.228032,28.332963,Slave/software/models/v2-12servo/motions/locomotion/crab_forward/source.json,c5a13e61ee9f13005d561db39bf1c035ba91d7e91a212f3720d8f5f3497ba6d2
+V2,crab_forward,FR:theta_Part005,signed CAD degrees,-22.967276,25.816011,Slave/software/models/v2-12servo/motions/locomotion/crab_forward/source.json,c5a13e61ee9f13005d561db39bf1c035ba91d7e91a212f3720d8f5f3497ba6d2
+V2,crab_forward,RL:h_Part002,signed CAD degrees,-31.600820,-0.000004,Slave/software/models/v2-12servo/motions/locomotion/crab_forward/source.json,c5a13e61ee9f13005d561db39bf1c035ba91d7e91a212f3720d8f5f3497ba6d2
+V2,crab_forward,RL:alpha_Part006,signed CAD degrees,-17.227991,28.320833,Slave/software/models/v2-12servo/motions/locomotion/crab_forward/source.json,c5a13e61ee9f13005d561db39bf1c035ba91d7e91a212f3720d8f5f3497ba6d2
+V2,crab_forward,RL:theta_Part005,signed CAD degrees,-23.042558,25.838250,Slave/software/models/v2-12servo/motions/locomotion/crab_forward/source.json,c5a13e61ee9f13005d561db39bf1c035ba91d7e91a212f3720d8f5f3497ba6d2
+V2,crab_forward,RR:h_Part002,signed CAD degrees,-31.600823,0.000013,Slave/software/models/v2-12servo/motions/locomotion/crab_forward/source.json,c5a13e61ee9f13005d561db39bf1c035ba91d7e91a212f3720d8f5f3497ba6d2
+V2,crab_forward,RR:alpha_Part006,signed CAD degrees,-17.228005,28.315096,Slave/software/models/v2-12servo/motions/locomotion/crab_forward/source.json,c5a13e61ee9f13005d561db39bf1c035ba91d7e91a212f3720d8f5f3497ba6d2
+V2,crab_forward,RR:theta_Part005,signed CAD degrees,-22.967235,25.804318,Slave/software/models/v2-12servo/motions/locomotion/crab_forward/source.json,c5a13e61ee9f13005d561db39bf1c035ba91d7e91a212f3720d8f5f3497ba6d2
+V2,crab_right,FL:h_Part002,signed CAD degrees,-36.156300,-0.000006,Slave/software/models/v2-12servo/motions/locomotion/crab_right/source.json,380389dcbdd5537625edf86f81c7c119e2325dcf43624a93a0fa1828bae48402
+V2,crab_right,FL:alpha_Part006,signed CAD degrees,-17.216257,24.053426,Slave/software/models/v2-12servo/motions/locomotion/crab_right/source.json,380389dcbdd5537625edf86f81c7c119e2325dcf43624a93a0fa1828bae48402
+V2,crab_right,FL:theta_Part005,signed CAD degrees,-6.033366,6.174286,Slave/software/models/v2-12servo/motions/locomotion/crab_right/source.json,380389dcbdd5537625edf86f81c7c119e2325dcf43624a93a0fa1828bae48402
+V2,crab_right,FR:h_Part002,signed CAD degrees,-35.382272,0.000011,Slave/software/models/v2-12servo/motions/locomotion/crab_right/source.json,380389dcbdd5537625edf86f81c7c119e2325dcf43624a93a0fa1828bae48402
+V2,crab_right,FR:alpha_Part006,signed CAD degrees,-17.228032,21.831224,Slave/software/models/v2-12servo/motions/locomotion/crab_right/source.json,380389dcbdd5537625edf86f81c7c119e2325dcf43624a93a0fa1828bae48402
+V2,crab_right,FR:theta_Part005,signed CAD degrees,-6.039253,5.316127,Slave/software/models/v2-12servo/motions/locomotion/crab_right/source.json,380389dcbdd5537625edf86f81c7c119e2325dcf43624a93a0fa1828bae48402
+V2,crab_right,RL:h_Part002,signed CAD degrees,-35.436541,-0.000004,Slave/software/models/v2-12servo/motions/locomotion/crab_right/source.json,380389dcbdd5537625edf86f81c7c119e2325dcf43624a93a0fa1828bae48402
+V2,crab_right,RL:alpha_Part006,signed CAD degrees,-17.227991,21.791254,Slave/software/models/v2-12servo/motions/locomotion/crab_right/source.json,380389dcbdd5537625edf86f81c7c119e2325dcf43624a93a0fa1828bae48402
+V2,crab_right,RL:theta_Part005,signed CAD degrees,-6.039185,5.301770,Slave/software/models/v2-12servo/motions/locomotion/crab_right/source.json,380389dcbdd5537625edf86f81c7c119e2325dcf43624a93a0fa1828bae48402
+V2,crab_right,RR:h_Part002,signed CAD degrees,-35.259513,0.000013,Slave/software/models/v2-12servo/motions/locomotion/crab_right/source.json,380389dcbdd5537625edf86f81c7c119e2325dcf43624a93a0fa1828bae48402
+V2,crab_right,RR:alpha_Part006,signed CAD degrees,-17.228005,21.812455,Slave/software/models/v2-12servo/motions/locomotion/crab_right/source.json,380389dcbdd5537625edf86f81c7c119e2325dcf43624a93a0fa1828bae48402
+V2,crab_right,RR:theta_Part005,signed CAD degrees,-6.039199,5.309379,Slave/software/models/v2-12servo/motions/locomotion/crab_right/source.json,380389dcbdd5537625edf86f81c7c119e2325dcf43624a93a0fa1828bae48402
+V2,crab_turn_left,FL:h_Part002,signed CAD degrees,-32.237841,-0.000006,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_left/source.json,8a329d5be5cb01894e84ebbf29247932727b23449e9802f580c09711e63b4e3e
+V2,crab_turn_left,FL:alpha_Part006,signed CAD degrees,-19.127357,42.525912,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_left/source.json,8a329d5be5cb01894e84ebbf29247932727b23449e9802f580c09711e63b4e3e
+V2,crab_turn_left,FL:theta_Part005,signed CAD degrees,-29.975631,33.377823,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_left/source.json,8a329d5be5cb01894e84ebbf29247932727b23449e9802f580c09711e63b4e3e
+V2,crab_turn_left,FR:h_Part002,signed CAD degrees,-32.334751,0.000011,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_left/source.json,8a329d5be5cb01894e84ebbf29247932727b23449e9802f580c09711e63b4e3e
+V2,crab_turn_left,FR:alpha_Part006,signed CAD degrees,-19.114872,37.756364,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_left/source.json,8a329d5be5cb01894e84ebbf29247932727b23449e9802f580c09711e63b4e3e
+V2,crab_turn_left,FR:theta_Part005,signed CAD degrees,-29.983779,29.447937,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_left/source.json,8a329d5be5cb01894e84ebbf29247932727b23449e9802f580c09711e63b4e3e
+V2,crab_turn_left,RL:h_Part002,signed CAD degrees,-35.390082,-0.000004,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_left/source.json,8a329d5be5cb01894e84ebbf29247932727b23449e9802f580c09711e63b4e3e
+V2,crab_turn_left,RL:alpha_Part006,signed CAD degrees,-17.227991,17.846137,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_left/source.json,8a329d5be5cb01894e84ebbf29247932727b23449e9802f580c09711e63b4e3e
+V2,crab_turn_left,RL:theta_Part005,signed CAD degrees,-21.833369,28.963240,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_left/source.json,8a329d5be5cb01894e84ebbf29247932727b23449e9802f580c09711e63b4e3e
+V2,crab_turn_left,RR:h_Part002,signed CAD degrees,-35.298168,0.000013,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_left/source.json,8a329d5be5cb01894e84ebbf29247932727b23449e9802f580c09711e63b4e3e
+V2,crab_turn_left,RR:alpha_Part006,signed CAD degrees,-17.228005,17.832640,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_left/source.json,8a329d5be5cb01894e84ebbf29247932727b23449e9802f580c09711e63b4e3e
+V2,crab_turn_left,RR:theta_Part005,signed CAD degrees,-21.792729,28.929772,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_left/source.json,8a329d5be5cb01894e84ebbf29247932727b23449e9802f580c09711e63b4e3e
+V2,crab_turn_right,FL:h_Part002,signed CAD degrees,-31.952810,-0.000006,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_right/source.json,115ecf5158ba0be744aad4f8e36f4673f56f094e3d1dee2c7d556f1eadc43d81
+V2,crab_turn_right,FL:alpha_Part006,signed CAD degrees,-23.181430,37.729951,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_right/source.json,115ecf5158ba0be744aad4f8e36f4673f56f094e3d1dee2c7d556f1eadc43d81
+V2,crab_turn_right,FL:theta_Part005,signed CAD degrees,-35.183145,29.417188,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_right/source.json,115ecf5158ba0be744aad4f8e36f4673f56f094e3d1dee2c7d556f1eadc43d81
+V2,crab_turn_right,FR:h_Part002,signed CAD degrees,-31.951379,0.000011,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_right/source.json,115ecf5158ba0be744aad4f8e36f4673f56f094e3d1dee2c7d556f1eadc43d81
+V2,crab_turn_right,FR:alpha_Part006,signed CAD degrees,-19.152247,37.758870,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_right/source.json,115ecf5158ba0be744aad4f8e36f4673f56f094e3d1dee2c7d556f1eadc43d81
+V2,crab_turn_right,FR:theta_Part005,signed CAD degrees,-30.002733,29.441339,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_right/source.json,115ecf5158ba0be744aad4f8e36f4673f56f094e3d1dee2c7d556f1eadc43d81
+V2,crab_turn_right,RL:h_Part002,signed CAD degrees,-35.429455,-0.000004,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_right/source.json,115ecf5158ba0be744aad4f8e36f4673f56f094e3d1dee2c7d556f1eadc43d81
+V2,crab_turn_right,RL:alpha_Part006,signed CAD degrees,-17.227991,17.843063,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_right/source.json,115ecf5158ba0be744aad4f8e36f4673f56f094e3d1dee2c7d556f1eadc43d81
+V2,crab_turn_right,RL:theta_Part005,signed CAD degrees,-21.792702,28.975985,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_right/source.json,115ecf5158ba0be744aad4f8e36f4673f56f094e3d1dee2c7d556f1eadc43d81
+V2,crab_turn_right,RR:h_Part002,signed CAD degrees,-35.298168,0.000013,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_right/source.json,115ecf5158ba0be744aad4f8e36f4673f56f094e3d1dee2c7d556f1eadc43d81
+V2,crab_turn_right,RR:alpha_Part006,signed CAD degrees,-17.228005,17.846137,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_right/source.json,115ecf5158ba0be744aad4f8e36f4673f56f094e3d1dee2c7d556f1eadc43d81
+V2,crab_turn_right,RR:theta_Part005,signed CAD degrees,-21.793358,28.945140,Slave/software/models/v2-12servo/motions/locomotion/crab_turn_right/source.json,115ecf5158ba0be744aad4f8e36f4673f56f094e3d1dee2c7d556f1eadc43d81
+V2,crawl_backward,FL:h_Part002,signed CAD degrees,-0.959864,0.951653,Slave/software/models/v2-12servo/motions/locomotion/crawl_backward/source.json,234c180c9f77326dd894baf7aa555a41bcad2beb1336ae793c638827c1261aae
+V2,crawl_backward,FL:alpha_Part006,signed CAD degrees,-63.434116,1.920852,Slave/software/models/v2-12servo/motions/locomotion/crawl_backward/source.json,234c180c9f77326dd894baf7aa555a41bcad2beb1336ae793c638827c1261aae
+V2,crawl_backward,FL:theta_Part005,signed CAD degrees,-57.752691,0.443402,Slave/software/models/v2-12servo/motions/locomotion/crawl_backward/source.json,234c180c9f77326dd894baf7aa555a41bcad2beb1336ae793c638827c1261aae
+V2,crawl_backward,FR:h_Part002,signed CAD degrees,-0.959858,0.951659,Slave/software/models/v2-12servo/motions/locomotion/crawl_backward/source.json,234c180c9f77326dd894baf7aa555a41bcad2beb1336ae793c638827c1261aae
+V2,crawl_backward,FR:alpha_Part006,signed CAD degrees,-63.429701,1.920842,Slave/software/models/v2-12servo/motions/locomotion/crawl_backward/source.json,234c180c9f77326dd894baf7aa555a41bcad2beb1336ae793c638827c1261aae
+V2,crawl_backward,FR:theta_Part005,signed CAD degrees,-57.749732,6.831595,Slave/software/models/v2-12servo/motions/locomotion/crawl_backward/source.json,234c180c9f77326dd894baf7aa555a41bcad2beb1336ae793c638827c1261aae
+V2,crawl_backward,RL:h_Part002,signed CAD degrees,-0.966299,0.952023,Slave/software/models/v2-12servo/motions/locomotion/crawl_backward/source.json,234c180c9f77326dd894baf7aa555a41bcad2beb1336ae793c638827c1261aae
+V2,crawl_backward,RL:alpha_Part006,signed CAD degrees,-62.990282,1.920867,Slave/software/models/v2-12servo/motions/locomotion/crawl_backward/source.json,234c180c9f77326dd894baf7aa555a41bcad2beb1336ae793c638827c1261aae
+V2,crawl_backward,RL:theta_Part005,signed CAD degrees,-57.232479,0.443404,Slave/software/models/v2-12servo/motions/locomotion/crawl_backward/source.json,234c180c9f77326dd894baf7aa555a41bcad2beb1336ae793c638827c1261aae
+V2,crawl_backward,RR:h_Part002,signed CAD degrees,-0.966289,0.952033,Slave/software/models/v2-12servo/motions/locomotion/crawl_backward/source.json,234c180c9f77326dd894baf7aa555a41bcad2beb1336ae793c638827c1261aae
+V2,crawl_backward,RR:alpha_Part006,signed CAD degrees,-63.057153,1.920860,Slave/software/models/v2-12servo/motions/locomotion/crawl_backward/source.json,234c180c9f77326dd894baf7aa555a41bcad2beb1336ae793c638827c1261aae
+V2,crawl_backward,RR:theta_Part005,signed CAD degrees,-57.281431,0.443403,Slave/software/models/v2-12servo/motions/locomotion/crawl_backward/source.json,234c180c9f77326dd894baf7aa555a41bcad2beb1336ae793c638827c1261aae
+V2,crawl_forward,FL:h_Part002,signed CAD degrees,-0.957768,0.952427,Slave/software/models/v2-12servo/motions/locomotion/crawl_forward/source.json,91d459614c94d9273d771f2a50572c977158196b60b0d93788c3fc0275873201
+V2,crawl_forward,FL:alpha_Part006,signed CAD degrees,-62.902040,1.920852,Slave/software/models/v2-12servo/motions/locomotion/crawl_forward/source.json,91d459614c94d9273d771f2a50572c977158196b60b0d93788c3fc0275873201
+V2,crawl_forward,FL:theta_Part005,signed CAD degrees,-57.241628,0.443402,Slave/software/models/v2-12servo/motions/locomotion/crawl_forward/source.json,91d459614c94d9273d771f2a50572c977158196b60b0d93788c3fc0275873201
+V2,crawl_forward,FR:h_Part002,signed CAD degrees,-0.957762,0.952433,Slave/software/models/v2-12servo/motions/locomotion/crawl_forward/source.json,91d459614c94d9273d771f2a50572c977158196b60b0d93788c3fc0275873201
+V2,crawl_forward,FR:alpha_Part006,signed CAD degrees,-62.901814,1.920842,Slave/software/models/v2-12servo/motions/locomotion/crawl_forward/source.json,91d459614c94d9273d771f2a50572c977158196b60b0d93788c3fc0275873201
+V2,crawl_forward,FR:theta_Part005,signed CAD degrees,-57.241658,0.443400,Slave/software/models/v2-12servo/motions/locomotion/crawl_forward/source.json,91d459614c94d9273d771f2a50572c977158196b60b0d93788c3fc0275873201
+V2,crawl_forward,RL:h_Part002,signed CAD degrees,-0.969171,0.951551,Slave/software/models/v2-12servo/motions/locomotion/crawl_forward/source.json,91d459614c94d9273d771f2a50572c977158196b60b0d93788c3fc0275873201
+V2,crawl_forward,RL:alpha_Part006,signed CAD degrees,-64.164914,1.920867,Slave/software/models/v2-12servo/motions/locomotion/crawl_forward/source.json,91d459614c94d9273d771f2a50572c977158196b60b0d93788c3fc0275873201
+V2,crawl_forward,RL:theta_Part005,signed CAD degrees,-58.434605,0.443404,Slave/software/models/v2-12servo/motions/locomotion/crawl_forward/source.json,91d459614c94d9273d771f2a50572c977158196b60b0d93788c3fc0275873201
+V2,crawl_forward,RR:h_Part002,signed CAD degrees,-0.969159,0.951553,Slave/software/models/v2-12servo/motions/locomotion/crawl_forward/source.json,91d459614c94d9273d771f2a50572c977158196b60b0d93788c3fc0275873201
+V2,crawl_forward,RR:alpha_Part006,signed CAD degrees,-64.164947,1.920860,Slave/software/models/v2-12servo/motions/locomotion/crawl_forward/source.json,91d459614c94d9273d771f2a50572c977158196b60b0d93788c3fc0275873201
+V2,crawl_forward,RR:theta_Part005,signed CAD degrees,-58.434635,0.443403,Slave/software/models/v2-12servo/motions/locomotion/crawl_forward/source.json,91d459614c94d9273d771f2a50572c977158196b60b0d93788c3fc0275873201
+V2,crawl_turn_left,FL:h_Part002,signed CAD degrees,-3.178286,2.886039,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_left/source.json,db8b665ed90dc4a4e1a7a05f6f5085a6e81de47d154ceee7255335ad4eb068ac
+V2,crawl_turn_left,FL:alpha_Part006,signed CAD degrees,-51.286834,1.920852,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_left/source.json,db8b665ed90dc4a4e1a7a05f6f5085a6e81de47d154ceee7255335ad4eb068ac
+V2,crawl_turn_left,FL:theta_Part005,signed CAD degrees,-37.490293,0.443402,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_left/source.json,db8b665ed90dc4a4e1a7a05f6f5085a6e81de47d154ceee7255335ad4eb068ac
+V2,crawl_turn_left,FR:h_Part002,signed CAD degrees,-4.202353,3.828470,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_left/source.json,db8b665ed90dc4a4e1a7a05f6f5085a6e81de47d154ceee7255335ad4eb068ac
+V2,crawl_turn_left,FR:alpha_Part006,signed CAD degrees,-50.832898,1.920842,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_left/source.json,db8b665ed90dc4a4e1a7a05f6f5085a6e81de47d154ceee7255335ad4eb068ac
+V2,crawl_turn_left,FR:theta_Part005,signed CAD degrees,-37.009178,0.443400,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_left/source.json,db8b665ed90dc4a4e1a7a05f6f5085a6e81de47d154ceee7255335ad4eb068ac
+V2,crawl_turn_left,RL:h_Part002,signed CAD degrees,-5.582136,5.264859,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_left/source.json,db8b665ed90dc4a4e1a7a05f6f5085a6e81de47d154ceee7255335ad4eb068ac
+V2,crawl_turn_left,RL:alpha_Part006,signed CAD degrees,-45.626644,1.920867,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_left/source.json,db8b665ed90dc4a4e1a7a05f6f5085a6e81de47d154ceee7255335ad4eb068ac
+V2,crawl_turn_left,RL:theta_Part005,signed CAD degrees,-30.038460,0.443404,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_left/source.json,db8b665ed90dc4a4e1a7a05f6f5085a6e81de47d154ceee7255335ad4eb068ac
+V2,crawl_turn_left,RR:h_Part002,signed CAD degrees,-7.229691,5.912310,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_left/source.json,db8b665ed90dc4a4e1a7a05f6f5085a6e81de47d154ceee7255335ad4eb068ac
+V2,crawl_turn_left,RR:alpha_Part006,signed CAD degrees,-46.130546,1.920860,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_left/source.json,db8b665ed90dc4a4e1a7a05f6f5085a6e81de47d154ceee7255335ad4eb068ac
+V2,crawl_turn_left,RR:theta_Part005,signed CAD degrees,-31.278973,0.443403,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_left/source.json,db8b665ed90dc4a4e1a7a05f6f5085a6e81de47d154ceee7255335ad4eb068ac
+V2,crawl_turn_right,FL:h_Part002,signed CAD degrees,-4.195713,3.828462,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_right/source.json,6960ddcf505c6f3fe4fe3dd3a284defca192c149264ee753fa6a7e0e7bdb5de7
+V2,crawl_turn_right,FL:alpha_Part006,signed CAD degrees,-50.833182,1.920852,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_right/source.json,6960ddcf505c6f3fe4fe3dd3a284defca192c149264ee753fa6a7e0e7bdb5de7
+V2,crawl_turn_right,FL:theta_Part005,signed CAD degrees,-37.009194,0.443402,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_right/source.json,6960ddcf505c6f3fe4fe3dd3a284defca192c149264ee753fa6a7e0e7bdb5de7
+V2,crawl_turn_right,FR:h_Part002,signed CAD degrees,-3.178282,2.833745,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_right/source.json,6960ddcf505c6f3fe4fe3dd3a284defca192c149264ee753fa6a7e0e7bdb5de7
+V2,crawl_turn_right,FR:alpha_Part006,signed CAD degrees,-51.486978,1.920842,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_right/source.json,6960ddcf505c6f3fe4fe3dd3a284defca192c149264ee753fa6a7e0e7bdb5de7
+V2,crawl_turn_right,FR:theta_Part005,signed CAD degrees,-37.608206,0.443400,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_right/source.json,6960ddcf505c6f3fe4fe3dd3a284defca192c149264ee753fa6a7e0e7bdb5de7
+V2,crawl_turn_right,RL:h_Part002,signed CAD degrees,-6.371248,5.912299,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_right/source.json,6960ddcf505c6f3fe4fe3dd3a284defca192c149264ee753fa6a7e0e7bdb5de7
+V2,crawl_turn_right,RL:alpha_Part006,signed CAD degrees,-45.804035,1.920867,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_right/source.json,6960ddcf505c6f3fe4fe3dd3a284defca192c149264ee753fa6a7e0e7bdb5de7
+V2,crawl_turn_right,RL:theta_Part005,signed CAD degrees,-30.399609,0.443404,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_right/source.json,6960ddcf505c6f3fe4fe3dd3a284defca192c149264ee753fa6a7e0e7bdb5de7
+V2,crawl_turn_right,RR:h_Part002,signed CAD degrees,-5.582127,6.389468,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_right/source.json,6960ddcf505c6f3fe4fe3dd3a284defca192c149264ee753fa6a7e0e7bdb5de7
+V2,crawl_turn_right,RR:alpha_Part006,signed CAD degrees,-45.626672,1.920860,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_right/source.json,6960ddcf505c6f3fe4fe3dd3a284defca192c149264ee753fa6a7e0e7bdb5de7
+V2,crawl_turn_right,RR:theta_Part005,signed CAD degrees,-29.982791,0.443403,Slave/software/models/v2-12servo/motions/locomotion/crawl_turn_right/source.json,6960ddcf505c6f3fe4fe3dd3a284defca192c149264ee753fa6a7e0e7bdb5de7
+V2,walk_backward,FL:h_Part002,signed CAD degrees,-4.400813,4.198749,Slave/software/models/v2-12servo/motions/locomotion/walk_backward/source.json,5dd2a014758959172ef2834441b1d354a7af823ef6003356e6abef7b406a809c
+V2,walk_backward,FL:alpha_Part006,signed CAD degrees,-41.088455,22.102027,Slave/software/models/v2-12servo/motions/locomotion/walk_backward/source.json,5dd2a014758959172ef2834441b1d354a7af823ef6003356e6abef7b406a809c
+V2,walk_backward,FL:theta_Part005,signed CAD degrees,-105.161167,26.387277,Slave/software/models/v2-12servo/motions/locomotion/walk_backward/source.json,5dd2a014758959172ef2834441b1d354a7af823ef6003356e6abef7b406a809c
+V2,walk_backward,FR:h_Part002,signed CAD degrees,-4.400812,4.198750,Slave/software/models/v2-12servo/motions/locomotion/walk_backward/source.json,5dd2a014758959172ef2834441b1d354a7af823ef6003356e6abef7b406a809c
+V2,walk_backward,FR:alpha_Part006,signed CAD degrees,-40.971657,23.470097,Slave/software/models/v2-12servo/motions/locomotion/walk_backward/source.json,5dd2a014758959172ef2834441b1d354a7af823ef6003356e6abef7b406a809c
+V2,walk_backward,FR:theta_Part005,signed CAD degrees,-105.056516,27.950403,Slave/software/models/v2-12servo/motions/locomotion/walk_backward/source.json,5dd2a014758959172ef2834441b1d354a7af823ef6003356e6abef7b406a809c
+V2,walk_backward,RL:h_Part002,signed CAD degrees,-4.324759,4.233864,Slave/software/models/v2-12servo/motions/locomotion/walk_backward/source.json,5dd2a014758959172ef2834441b1d354a7af823ef6003356e6abef7b406a809c
+V2,walk_backward,RL:alpha_Part006,signed CAD degrees,-44.484822,20.246558,Slave/software/models/v2-12servo/motions/locomotion/walk_backward/source.json,5dd2a014758959172ef2834441b1d354a7af823ef6003356e6abef7b406a809c
+V2,walk_backward,RL:theta_Part005,signed CAD degrees,-108.527816,28.608010,Slave/software/models/v2-12servo/motions/locomotion/walk_backward/source.json,5dd2a014758959172ef2834441b1d354a7af823ef6003356e6abef7b406a809c
+V2,walk_backward,RR:h_Part002,signed CAD degrees,-4.324760,4.233867,Slave/software/models/v2-12servo/motions/locomotion/walk_backward/source.json,5dd2a014758959172ef2834441b1d354a7af823ef6003356e6abef7b406a809c
+V2,walk_backward,RR:alpha_Part006,signed CAD degrees,-44.465532,39.840685,Slave/software/models/v2-12servo/motions/locomotion/walk_backward/source.json,5dd2a014758959172ef2834441b1d354a7af823ef6003356e6abef7b406a809c
+V2,walk_backward,RR:theta_Part005,signed CAD degrees,-108.518006,47.658588,Slave/software/models/v2-12servo/motions/locomotion/walk_backward/source.json,5dd2a014758959172ef2834441b1d354a7af823ef6003356e6abef7b406a809c
+V2,walk_forward,FL:h_Part002,signed CAD degrees,-4.274873,4.247853,Slave/software/models/v2-12servo/motions/locomotion/walk_forward/source.json,ff28418703aac467f394e421139a49a01ccb4ae9f02d77b493fd6f786084fa0b
+V2,walk_forward,FL:alpha_Part006,signed CAD degrees,-40.480201,21.294802,Slave/software/models/v2-12servo/motions/locomotion/walk_forward/source.json,ff28418703aac467f394e421139a49a01ccb4ae9f02d77b493fd6f786084fa0b
+V2,walk_forward,FL:theta_Part005,signed CAD degrees,-107.480107,28.862145,Slave/software/models/v2-12servo/motions/locomotion/walk_forward/source.json,ff28418703aac467f394e421139a49a01ccb4ae9f02d77b493fd6f786084fa0b
+V2,walk_forward,FR:h_Part002,signed CAD degrees,-4.274873,4.247853,Slave/software/models/v2-12servo/motions/locomotion/walk_forward/source.json,ff28418703aac467f394e421139a49a01ccb4ae9f02d77b493fd6f786084fa0b
+V2,walk_forward,FR:alpha_Part006,signed CAD degrees,-40.480225,21.716574,Slave/software/models/v2-12servo/motions/locomotion/walk_forward/source.json,ff28418703aac467f394e421139a49a01ccb4ae9f02d77b493fd6f786084fa0b
+V2,walk_forward,FR:theta_Part005,signed CAD degrees,-107.480121,29.560803,Slave/software/models/v2-12servo/motions/locomotion/walk_forward/source.json,ff28418703aac467f394e421139a49a01ccb4ae9f02d77b493fd6f786084fa0b
+V2,walk_forward,RL:h_Part002,signed CAD degrees,-4.469607,4.202844,Slave/software/models/v2-12servo/motions/locomotion/walk_forward/source.json,ff28418703aac467f394e421139a49a01ccb4ae9f02d77b493fd6f786084fa0b
+V2,walk_forward,RL:alpha_Part006,signed CAD degrees,-46.045404,22.787074,Slave/software/models/v2-12servo/motions/locomotion/walk_forward/source.json,ff28418703aac467f394e421139a49a01ccb4ae9f02d77b493fd6f786084fa0b
+V2,walk_forward,RL:theta_Part005,signed CAD degrees,-106.890291,25.469519,Slave/software/models/v2-12servo/motions/locomotion/walk_forward/source.json,ff28418703aac467f394e421139a49a01ccb4ae9f02d77b493fd6f786084fa0b
+V2,walk_forward,RR:h_Part002,signed CAD degrees,-4.469599,4.202845,Slave/software/models/v2-12servo/motions/locomotion/walk_forward/source.json,ff28418703aac467f394e421139a49a01ccb4ae9f02d77b493fd6f786084fa0b
+V2,walk_forward,RR:alpha_Part006,signed CAD degrees,-46.045430,22.884766,Slave/software/models/v2-12servo/motions/locomotion/walk_forward/source.json,ff28418703aac467f394e421139a49a01ccb4ae9f02d77b493fd6f786084fa0b
+V2,walk_forward,RR:theta_Part005,signed CAD degrees,-106.768544,25.623602,Slave/software/models/v2-12servo/motions/locomotion/walk_forward/source.json,ff28418703aac467f394e421139a49a01ccb4ae9f02d77b493fd6f786084fa0b
+V2,walk_turn_left,FL:h_Part002,signed CAD degrees,-3.506734,3.033550,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_left/source.json,02625de45a8ec950bcec17ae5ff3a6058fc36ce2d3fd28250b0b8f7cebc8bae6
+V2,walk_turn_left,FL:alpha_Part006,signed CAD degrees,-12.582866,11.046986,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_left/source.json,02625de45a8ec950bcec17ae5ff3a6058fc36ce2d3fd28250b0b8f7cebc8bae6
+V2,walk_turn_left,FL:theta_Part005,signed CAD degrees,-11.329483,10.895354,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_left/source.json,02625de45a8ec950bcec17ae5ff3a6058fc36ce2d3fd28250b0b8f7cebc8bae6
+V2,walk_turn_left,FR:h_Part002,signed CAD degrees,-7.554203,6.119239,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_left/source.json,02625de45a8ec950bcec17ae5ff3a6058fc36ce2d3fd28250b0b8f7cebc8bae6
+V2,walk_turn_left,FR:alpha_Part006,signed CAD degrees,-11.913432,9.940725,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_left/source.json,02625de45a8ec950bcec17ae5ff3a6058fc36ce2d3fd28250b0b8f7cebc8bae6
+V2,walk_turn_left,FR:theta_Part005,signed CAD degrees,-11.725131,12.593708,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_left/source.json,02625de45a8ec950bcec17ae5ff3a6058fc36ce2d3fd28250b0b8f7cebc8bae6
+V2,walk_turn_left,RL:h_Part002,signed CAD degrees,-6.835593,3.359830,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_left/source.json,02625de45a8ec950bcec17ae5ff3a6058fc36ce2d3fd28250b0b8f7cebc8bae6
+V2,walk_turn_left,RL:alpha_Part006,signed CAD degrees,-14.923559,4.679876,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_left/source.json,02625de45a8ec950bcec17ae5ff3a6058fc36ce2d3fd28250b0b8f7cebc8bae6
+V2,walk_turn_left,RL:theta_Part005,signed CAD degrees,-12.323518,10.717902,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_left/source.json,02625de45a8ec950bcec17ae5ff3a6058fc36ce2d3fd28250b0b8f7cebc8bae6
+V2,walk_turn_left,RR:h_Part002,signed CAD degrees,-10.156212,6.871726,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_left/source.json,02625de45a8ec950bcec17ae5ff3a6058fc36ce2d3fd28250b0b8f7cebc8bae6
+V2,walk_turn_left,RR:alpha_Part006,signed CAD degrees,-15.593512,6.270796,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_left/source.json,02625de45a8ec950bcec17ae5ff3a6058fc36ce2d3fd28250b0b8f7cebc8bae6
+V2,walk_turn_left,RR:theta_Part005,signed CAD degrees,-12.581782,9.799574,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_left/source.json,02625de45a8ec950bcec17ae5ff3a6058fc36ce2d3fd28250b0b8f7cebc8bae6
+V2,walk_turn_right,FL:h_Part002,signed CAD degrees,-7.554426,6.119238,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_right/source.json,b80aa4e7000eca09e80b44dd314d264bb5fca6f8b7b303b40c409d321cb5f139
+V2,walk_turn_right,FL:alpha_Part006,signed CAD degrees,-11.913423,9.922371,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_right/source.json,b80aa4e7000eca09e80b44dd314d264bb5fca6f8b7b303b40c409d321cb5f139
+V2,walk_turn_right,FL:theta_Part005,signed CAD degrees,-11.725129,12.489696,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_right/source.json,b80aa4e7000eca09e80b44dd314d264bb5fca6f8b7b303b40c409d321cb5f139
+V2,walk_turn_right,FR:h_Part002,signed CAD degrees,-3.506735,3.033549,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_right/source.json,b80aa4e7000eca09e80b44dd314d264bb5fca6f8b7b303b40c409d321cb5f139
+V2,walk_turn_right,FR:alpha_Part006,signed CAD degrees,-13.071128,11.046975,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_right/source.json,b80aa4e7000eca09e80b44dd314d264bb5fca6f8b7b303b40c409d321cb5f139
+V2,walk_turn_right,FR:theta_Part005,signed CAD degrees,-11.329486,10.895353,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_right/source.json,b80aa4e7000eca09e80b44dd314d264bb5fca6f8b7b303b40c409d321cb5f139
+V2,walk_turn_right,RL:h_Part002,signed CAD degrees,-10.053646,6.871725,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_right/source.json,b80aa4e7000eca09e80b44dd314d264bb5fca6f8b7b303b40c409d321cb5f139
+V2,walk_turn_right,RL:alpha_Part006,signed CAD degrees,-15.522721,6.270805,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_right/source.json,b80aa4e7000eca09e80b44dd314d264bb5fca6f8b7b303b40c409d321cb5f139
+V2,walk_turn_right,RL:theta_Part005,signed CAD degrees,-12.505919,9.799578,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_right/source.json,b80aa4e7000eca09e80b44dd314d264bb5fca6f8b7b303b40c409d321cb5f139
+V2,walk_turn_right,RR:h_Part002,signed CAD degrees,-6.835594,3.359829,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_right/source.json,b80aa4e7000eca09e80b44dd314d264bb5fca6f8b7b303b40c409d321cb5f139
+V2,walk_turn_right,RR:alpha_Part006,signed CAD degrees,-14.923569,4.679866,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_right/source.json,b80aa4e7000eca09e80b44dd314d264bb5fca6f8b7b303b40c409d321cb5f139
+V2,walk_turn_right,RR:theta_Part005,signed CAD degrees,-12.323519,10.910732,Slave/software/models/v2-12servo/motions/locomotion/walk_turn_right/source.json,b80aa4e7000eca09e80b44dd314d264bb5fca6f8b7b303b40c409d321cb5f139
+V2,run,FL:h_Part002,signed CAD degrees,-9.379170,4.249093,Slave/software/models/v2-12servo/motions/run/source.json,5e11071844e6c7dc8d64c38b40835e05e67af5b744ebf9a5fe3b1b0410649b61
+V2,run,FL:alpha_Part006,signed CAD degrees,-62.098201,67.381875,Slave/software/models/v2-12servo/motions/run/source.json,5e11071844e6c7dc8d64c38b40835e05e67af5b744ebf9a5fe3b1b0410649b61
+V2,run,FL:theta_Part005,signed CAD degrees,-115.083225,63.891673,Slave/software/models/v2-12servo/motions/run/source.json,5e11071844e6c7dc8d64c38b40835e05e67af5b744ebf9a5fe3b1b0410649b61
+V2,run,FR:h_Part002,signed CAD degrees,-9.380100,4.249093,Slave/software/models/v2-12servo/motions/run/source.json,5e11071844e6c7dc8d64c38b40835e05e67af5b744ebf9a5fe3b1b0410649b61
+V2,run,FR:alpha_Part006,signed CAD degrees,-62.097668,67.377441,Slave/software/models/v2-12servo/motions/run/source.json,5e11071844e6c7dc8d64c38b40835e05e67af5b744ebf9a5fe3b1b0410649b61
+V2,run,FR:theta_Part005,signed CAD degrees,-115.083235,63.891678,Slave/software/models/v2-12servo/motions/run/source.json,5e11071844e6c7dc8d64c38b40835e05e67af5b744ebf9a5fe3b1b0410649b61
+V2,run,RL:h_Part002,signed CAD degrees,-4.470407,8.777902,Slave/software/models/v2-12servo/motions/run/source.json,5e11071844e6c7dc8d64c38b40835e05e67af5b744ebf9a5fe3b1b0410649b61
+V2,run,RL:alpha_Part006,signed CAD degrees,-66.122466,68.592381,Slave/software/models/v2-12servo/motions/run/source.json,5e11071844e6c7dc8d64c38b40835e05e67af5b744ebf9a5fe3b1b0410649b61
+V2,run,RL:theta_Part005,signed CAD degrees,-123.623738,55.397212,Slave/software/models/v2-12servo/motions/run/source.json,5e11071844e6c7dc8d64c38b40835e05e67af5b744ebf9a5fe3b1b0410649b61
+V2,run,RR:h_Part002,signed CAD degrees,-4.470399,8.777916,Slave/software/models/v2-12servo/motions/run/source.json,5e11071844e6c7dc8d64c38b40835e05e67af5b744ebf9a5fe3b1b0410649b61
+V2,run,RR:alpha_Part006,signed CAD degrees,-65.393301,68.592380,Slave/software/models/v2-12servo/motions/run/source.json,5e11071844e6c7dc8d64c38b40835e05e67af5b744ebf9a5fe3b1b0410649b61
+V2,run,RR:theta_Part005,signed CAD degrees,-117.248531,55.397210,Slave/software/models/v2-12servo/motions/run/source.json,5e11071844e6c7dc8d64c38b40835e05e67af5b744ebf9a5fe3b1b0410649b61

@@ -1,0 +1,12 @@
+---
+import { url } from '../utils/url-utils'
+interface Props {
+  item: { title: string; caption: string; variants?: { src: string; width: number; height: number }[] }
+  eager?: boolean
+  sizes?: string
+}
+const { item, eager = false, sizes = '(max-width: 640px) 100vw, (max-width: 1000px) 50vw, 33vw' } = Astro.props
+if (!item.variants?.length) throw new Error(`Gallery image missing variants: ${item.title}`)
+const display = item.variants[1] ?? item.variants[0]
+---
+<img src={url(display.src)} srcset={item.variants.map(v => `${url(v.src)} ${v.width}w`).join(', ')} sizes={sizes} width={display.width} height={display.height} alt={item.caption} loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : 'auto'} decoding="async" />

@@ -1,0 +1,13 @@
+body:has([data-videos-archive]) #banner-container {
+  margin-top: 0;
+}
+
+body:has([data-videos-archive]) #main-panel-wrapper {
+  top: 54px;
+}
+
+@media (min-width: 768px) {
+  body:has([data-videos-archive]) #main-panel-wrapper {
+    top: 4.5rem;
+  }
+}

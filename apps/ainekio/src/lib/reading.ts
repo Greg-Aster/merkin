@@ -1,0 +1,42 @@
+import { z } from 'astro:content'
+
+export const topicIds = ['overview', 'legs', 'body', 'control', 'perception', 'metahuman', 'v1'] as const
+export const topics = {
+  overview: { title: 'Understanding Ainekio', description: 'The project, its three robot generations (V1, V2 & V3), and how the systems fit together.', reference: 'project-overview' },
+  legs: { title: 'Legs & gait', description: 'Linkage geometry, printed prototypes, movement ranges, and walking experiments.', reference: 'gait-development' },
+  body: { title: 'Chassis, shell & power', description: 'Parts, packaging, weight, battery choices, and the evolving assembly.', reference: 'ainekio-v2' },
+  control: { title: 'Firmware & connections', description: 'Body control, commands, safety, wired and wireless links.', reference: 'protocol-and-safety' },
+  perception: { title: 'Vision, face & voice', description: 'Camera observations, target tracking, display, listening, and speech.', reference: 'vision-loop' },
+  metahuman: { title: 'Ainekio OS (The Mind)', description: 'Local-first companion software for persistent memory, conversation, nightly consolidation, and robot reflexes.', reference: 'ainekio-os' },
+  v1: { title: 'Ainekio V1 (8-servo)', description: 'The active eight-servo spider quadruped: functioning ESP32-S3 floor robot, 59-face OLED & 38-motion repertoire, and ongoing ESP32-P4 / 683ZZ / 4th-wire hardware & CAD development.', reference: 'ainekio-v1' },
+} satisfies Record<typeof topicIds[number], { title: string; description: string; reference: string }>
+export const generations = { v1: 'V1 · 8 servos', v2: 'V2 · 12 servos', v3: 'V3 · DS3235 (In Dev)', both: 'V1 · V2 · V3' }
+export const kinds = { journal: 'Dated experiment', reference: 'Build reference', original: 'Early planning note' }
+
+export const readingSchema = z.object({
+  topic: z.enum(topicIds),
+  generation: z.enum(['v1', 'v2', 'v3', 'both']),
+  kind: z.enum(['journal', 'reference', 'original']),
+  next: z.string().min(1).optional(),
+  related: z.array(z.string().min(1)).default([]),
+})
+export type Reading = z.infer<typeof readingSchema>
+type ReadingPost = { slug: string; data: { reading?: Reading; title: string } }
+
+export function getReading(post: ReadingPost): Reading {
+  if (!post.data.reading) throw new Error(`Published article needs reading context: ${post.slug}`)
+  return post.data.reading
+}
+
+export function validateReadingPaths(posts: ReadingPost[]) {
+  const slugs = new Set(posts.map(post => post.slug))
+  for (const post of posts) {
+    const reading = getReading(post)
+    for (const target of [reading.next, ...reading.related, topics[reading.topic].reference].filter(Boolean)) {
+      if (!slugs.has(target!)) throw new Error(`${post.slug}: missing reading destination ${target}`)
+    }
+    if (reading.next === post.slug || reading.related.includes(post.slug)) {
+      throw new Error(`${post.slug}: reading links must not point to the same article`)
+    }
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "reviewed": "2026-11-01",
+  "owner_report": "Body prototype complete; most recent work concentrated on walking. No new physical gait measurement supplied.",
+  "repositories": {
+    "Ainekio": "0b14c5e8e4d776841fddf691be12e30ebe7edf66",
+    "metahuman": "7f51dfba3e94062fb064beafeeb68bcbeba1db4a"
+  },
+  "note": "Research includes uncommitted local source and experiment records. Training was not operated for this website update.",
+  "files": [
+    {
+      "repository": "Ainekio",
+      "path": "docs/v2-12servo/GAIT_RESEARCH_JOURNAL.md",
+      "sha256": "bb04166018984bfce1302a2a6688a86d0d8e9e41baa531b422fb7a3c1d2139ae"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "docs/v2-12servo/SPECIFICATIONS.md",
+      "sha256": "ff40f2561b3b48b81d7b0a0448556fc6342da338ea56e2af62222e8a478b36a8"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/README.md",
+      "sha256": "7bba2946ec3f85f6ee0cf43019c56924e9be2db78c08e8e342a88157363dfa89"
+    },
+    {
+      "repository": "metahuman",
+      "path": "brain/agents/environment-bridge/core.ts",
+      "sha256": "9b63aadd84edb9a9821f5c3ef5dbcaa861eddbeeb0845c9b33e9ef37b2711f72"
+    },
+    {
+      "repository": "metahuman",
+      "path": "brain/training/environment-action-selector/README.md",
+      "sha256": "dfad5c36d97941b837a9d054d5232cd2cf2debdebf5c88b1b8ebe425e2eb1b2e"
+    },
+    {
+      "repository": "metahuman",
+      "path": "external/llama.cpp/server-cancellation.patch",
+      "sha256": "58cd64f55f10d090b3e55d40be1649b7bc032f4fc417ab27e41b9ada679d4ecc"
+    },
+    {
+      "repository": "metahuman",
+      "path": "packages/core/src/api/handlers/environment-bridge.ts",
+      "sha256": "ed8b43c232939432040d483764c53e79276e139806f01d46b34be46abedf8699"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "build/neural-gait/16fa88334085443e9a3e8b2a90808b72/evaluation.json",
+      "sha256": "a35b076b574b96cd5e3b227ea2816b60e25e5f9da436abc8a916a491ba195b2b"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "build/neural-gait/trials/20261101-body-control/evaluation.json",
+      "sha256": "ef66d310e737e5bf902d079e6c5871fd4dcbd12e079a3dd2cdd62a9b596a878c"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "build/neural-gait/16fa88334085443e9a3e8b2a90808b72/progress-video.json",
+      "sha256": "27e251c840612ae221de802b0baaf3583abb5849616340ef89205a6e53f8b648"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "build/neural-gait/16fa88334085443e9a3e8b2a90808b72/progress-video.mp4",
+      "sha256": "2f4d6e2c304f4b810028eaf4f794664ebcb7277b87ef35737d67bf2c25900349"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/hardware/v2-12servo/STL/Red/fash shell pices/front-shell-fixes-Cheek.Fang.L.001.stl",
+      "sha256": "548dd8216bdfac272e37624c636d1bcc3bd367c24ba22d7613910bd6fd5bd98b"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/hardware/v2-12servo/STL/Red/fash shell pices/front-shell-fixes-Cheek.Fang.R.001.stl",
+      "sha256": "58bd48737868bc4afe9c6fd8f156af9c167e8d2a59bafa0996105b0ecd30dc0b"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/hardware/v2-12servo/STL/Red/fash shell pices/front-shell-fixes-Chin.L.001.stl",
+      "sha256": "d58ef7e7806350b4a908afc7d40832e720cc0e2d05d0bc765aaad95a9191327e"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/hardware/v2-12servo/STL/Red/fash shell pices/front-shell-fixes-Chin.R.001.stl",
+      "sha256": "1bef0b3e919363280bb9cffca5d6848c96e120a5abf1edb3337da9c3efb538ee"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/hardware/v2-12servo/STL/Red/fash shell pices/front-shell-fixes-Side.Guard.L.001.stl",
+      "sha256": "6a74e5e2ec253ccc8b62bd7c7d5fc6b10dd57d50fba9703beaba470e89290030"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/hardware/v2-12servo/STL/Red/fash shell pices/front-shell-fixes-Side.Guard.R.002.stl",
+      "sha256": "10ca26488b326c087ab5c74d56ee610f9b709fb01892ee751e9eddf7ebaa6dcf"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/hardware/v2-12servo/STL/Red/lcd-carrier/front-shell-fixes-MASK  Recessed LCD bezel.stl",
+      "sha256": "be8d1edc148caf313ccf051787355f7fc4722eb59805f8825413f8c072862841"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/hardware/v2-12servo/STL/Red/lcd-carrier/front-shell-fixes-TESTS  Body - Front End Panel - Compact.stl",
+      "sha256": "f8f18c5c11c876b98df7f79b0e39ff779f882ee28b40f2546860d74c07121758"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/hardware/v2-12servo/STL/Red/lcd-carrier/front-shell-fixes-TESTS  Face - Black LCD Carrier.stl",
+      "sha256": "d785ee6fdf939befa27251282a55f928daa9ac98ac11743282a3aab84b65bee0"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/hardware/v2-12servo/STL/Red/servo-cap/front-shell-fixes-MG90S  Lower housing.stl",
+      "sha256": "8427c94ed09594d7139c9929a577ecb2fffd7c00ab68379281d68fcfaa38b72f"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/hardware/v2-12servo/STL/Red/basec combo/front-shell-fixes-STRUCTURAL  Battery floor and power module cradle.stl",
+      "sha256": "3c32abc9a3644ecda18febe59822723276eea011bba77e300bed58c50f92faee"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/hardware/v2-12servo/STL/Red/powercarrier/front-shell-fixes-STRUCTURAL  Rear power carrier - charger retainer.stl",
+      "sha256": "e9098d711da3f8ab91fbcc036f848c2090257dfed394e273575cb0da8a64aa65"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+# Level shafts, direct linkage screws, separate rectangular shims
+
+Implemented 2026-09-18 from the recessed-horn design and its level-shaft demo.
+
+## Open and inspect
+
+`Ainekio-Level-Shafts-Direct-Screws.blend` contains:
+
+- **01 - Implemented level-shaft leg:** the complete assembly. Frame 1 is neutral;
+  Space plays the retained eight-second illustrative loop.
+- **02 - Print parts and rectangular shims:** separate printable meshes laid flat.
+
+The existing robot file and earlier demo file are preserved. When installed into
+the live session with the demo scene present, the installer also writes
+`Before-Implementation-Demo.blend` before adding the revised scenes.
+
+## Changes
+
+- Both servo shafts are at the same height, with 12.5 mm horizontal spacing.
+- The 24 mm input, 24 mm pickup, 41 mm rod, 40 mm carrier and 60 mm distal
+  dimensions are retained.
+- Three added M3 nuts and the hex nut pockets in Parts 009, 023 and 027 are
+  removed. Their plain nominal **3 mm** linkage bores match the original source
+  geometry. The later 3.2 mm clearance bores are reduced to that source size.
+- The three long joint screw/bolt references are replaced by **M3 x 6 mm screw
+  envelopes**, entering the printed supports directly, without separate nuts.
+  Nominal support engagement is 2.7 mm after the bearing and washer stack.
+- Recessed horn screw heads, horn pockets, bearing seats, short support collars
+  and the inner connecting rod are retained.
+- Part_027's round pickup eye now blends into the shaft over a smooth 10 mm
+  taper, replacing the abrupt circular shoulder. Its 10 mm eye diameter, 3 mm
+  hole, pivot positions and underside joint support are preserved; the new
+  outline retains the 0.5 mm edge bevel.
+- Parts_009 and _023 have matching smooth 10 mm transitions into their curved
+  shafts, with 0.5 mm edge bevels. Joint locations, 3 mm bores, support collars,
+  shaft slots, horn pockets and screw recesses are retained. Both assembly and
+  print-layout meshes, source arrays and STL exports include this revision.
+- Part_003 is restored from the original mount mesh, removing the two added
+  circular offset pads. Small zero-area source triangles were cleaned up.
+- Two identical, separate rectangular shims maintain the refined **5.25 mm** servo006
+  offset along its shaft. Each is **12.4 x 4.2 x 5.25 mm**, with a **2.2 mm** mounting
+  screw clearance hole. Use one beneath each mounting ear. Their compact shape
+  avoids adding a connecting bar through the adjacent servo/case space.
+- Bearing-support refinement: three **5.1 mm** support collars with **6 mm**
+  flared roots; **5 mm** Part 026 with unchanged rod bearing-stop datums; outer
+  leg moved outward **0.5 mm**. The input/output/knee plate gaps are **0.25 mm**.
+  See `bearing-support-refinement-20260918/REFINEMENT.md` for the measured stack.
+- Part_026's middle is widened from **5.015 to 7.015 mm**. Its sides now use
+  continuous circular arcs (24.019 mm inner radius, 49.623 mm outer radius)
+  tangent to the round ends, replacing the earlier bulged taper. Its oval
+  cutouts, bearing seats, 41 mm joint spacing and 5 mm axial thickness are unchanged.
+  See `../robot-part026-smooth-curve-20260918/` for the generator and comparison.
+
+## Printable files
+
+`STLs-mm/` contains six STL files in millimeters:
+
+1. Part_003.stl — original mount; print one.
+2. Part_003_Rectangular_Shim_5p25mm.stl — print **two**.
+3. Part_009.stl — input crank; print one.
+4. Part_023.stl — carrier; print one.
+5. Part_026.stl — connecting rod; print one.
+6. Part_027.stl — lower leg; print one.
+
+The shims have flat faces and straight through holes. Other source part features
+remain; this does not establish support-free printing for the whole assembly.
+
+## Scope
+
+All seven printable assembly meshes (including both shim instances) are checked
+as one closed component each, with positive volume and no zero-area triangles.
+The animation solves the unchanged linkage closure and retains the concept path.
+No new full-range collision, torque, load, or hardware qualification was run.
+
+**Screw fit:** the original nominal 3 mm holes are faithfully restored, without
+modeled threads. That nominal diameter alone does not demonstrate thread grip
+for an actual M3 screw. Match the print/actual screws before loading the leg;
+no different pilot size has been silently substituted. Hardware meshes are
+clearance references rather than manufactured thread models.
+
+The calculated planar workspace remains that of the equal-height 24/24/41
+linkage. Actual usable travel still depends on assembled clearance and servo
+calibration; the retained animation is not a maximum-range test.
+
+## Sources and reproduction
+
+- `build_geometry.py`: regenerates the part meshes and STL files from the saved
+  recessed-horn mesh arrays and original RR mesh snapshot.
+- `install_blender.py`: installs the isolated assembly/print scenes and writes
+  the standalone Blender file. Run inside Blender's Python environment.
+- `design-report.json`: dimensions, removed hardware and basic mesh results.
+- `index.json`, `geometry.npz`: generated source geometry.
+- `smooth_driven_arms.py`: end-profile construction for Parts 009 and 023.
+- `Parts_009_023-transition-before-after.png`: comparison of their revised ends.
+- `bearing-support-refinement-20260918/`: preserved user edits, dimensional
+  refinement generator, configuration and saved-artifact checks.
+
+Run the geometry generator using a Python environment with NumPy, trimesh,
+Shapely and manifold3d. It does not run or edit Blender. The Blender installer reads this
+folder and adds new scenes without modifying existing robot geometry.

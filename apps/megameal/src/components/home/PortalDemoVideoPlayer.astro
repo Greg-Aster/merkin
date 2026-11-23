@@ -1,0 +1,493 @@
+---
+const demoVideos = [
+  {
+    src: '/assets/portal-demo/democlip1.webm',
+    poster: '/assets/portal-demo/democlip1.webp',
+  },
+  {
+    src: '/assets/portal-demo/democlip2.webm',
+    poster: '/assets/portal-demo/democlip2.webp',
+  },
+  {
+    src: '/assets/portal-demo/democlip3.webm',
+    poster: '/assets/portal-demo/democlip3.webp',
+  },
+  {
+    src: '/assets/portal-demo/democlip4.webm',
+    poster: '/assets/portal-demo/democlip4.webp',
+  },
+  {
+    src: '/assets/portal-demo/democlip5.webm',
+    poster: '/assets/portal-demo/democlip5.webp',
+  },
+  {
+    src: '/assets/portal-demo/democlip6.webm',
+    poster: '/assets/portal-demo/democlip6.webp',
+  },
+  {
+    src: '/assets/portal-demo/snuggaloids.webm',
+    poster: '/assets/portal-demo/snuggaloids.webp',
+  },
+  {
+    src: '/assets/portal-demo/fud.webm',
+    poster: '/assets/portal-demo/fud.webp',
+  },
+  {
+    src: '/assets/portal-demo/slave.webm',
+    poster: '/assets/portal-demo/slave.webp',
+  },
+] as const
+---
+
+<section
+  class="portal-demo-player absolute inset-0 isolate cursor-pointer overflow-hidden bg-black text-white"
+  aria-label="MEGAMEAL demo video"
+  data-portal-demo-player
+  data-videos={JSON.stringify(demoVideos)}
+>
+  <video
+    class="portal-demo-player__video absolute inset-0 h-full w-full bg-black object-contain"
+    playsinline
+    preload="none"
+    data-portal-demo-video
+  ></video>
+  <img
+    class="portal-demo-player__overlay absolute inset-0 h-full w-full object-fill"
+    src="/assets/portal-demo/portal-overlay.webp"
+    alt=""
+    decoding="async"
+    draggable="false"
+    aria-hidden="true"
+  />
+  <div class="portal-demo-player__glitch" aria-hidden="true">
+    <span class="portal-demo-player__glitch-band portal-demo-player__glitch-band--one"></span>
+    <span class="portal-demo-player__glitch-band portal-demo-player__glitch-band--two"></span>
+    <span class="portal-demo-player__glitch-band portal-demo-player__glitch-band--three"></span>
+  </div>
+</section>
+
+<script>
+  import {
+    homePortalEvents,
+    homePortalWindowKeys,
+    portalDemoState,
+    portalDemoStorageKeys,
+    type PortalAudioSuspensionDetail,
+    type PortalBannerSelectSceneDetail,
+  } from '../../contracts/homePortal'
+  import { readSiteAudioVolume, siteAudioConfig } from '../../config/audio'
+  import {
+    addSiteAudioActivationListeners,
+    hasSiteAudioUserActivation,
+    siteAudioUnlockedEvent,
+  } from '../../utils/site-audio-activation'
+  import { siteSfxManager } from '../../utils/site-sfx'
+
+  type PortalDemoClip = {
+    src: string
+    poster: string
+  }
+
+  const cleanupKey = homePortalWindowKeys.portalDemoPlayerCleanup
+  const boundKey = homePortalWindowKeys.portalDemoPlayerBound
+  const lastIndexStorageKey = portalDemoStorageKeys.lastIndex
+  const demoActiveClass = portalDemoState.activeClass
+  const demoAudioSuspensionReason = portalDemoState.audioSuspensionReason
+  const audioConfigChangeEvent = homePortalEvents.audioConfigChange
+  const channelGlitchClass = 'is-channel-glitching'
+  const handoffGlitchStartProgress = 0.78
+  const handoffGlitchResetProgress = 0.38
+  const initialGlitchDurationMs = 900
+  const clipGlitchDurationMs = 1450
+  const clipSwapDelayMs = 720
+
+  const getStoredLastIndex = () => {
+    try {
+      const value = window.localStorage.getItem(lastIndexStorageKey)
+      const index = Number(value)
+      return Number.isInteger(index) ? index : -1
+    } catch {
+      return -1
+    }
+  }
+
+  const storeLastIndex = (index: number) => {
+    try {
+      window.localStorage.setItem(lastIndexStorageKey, String(index))
+    } catch {
+      // localStorage can be unavailable in restricted browser modes.
+    }
+  }
+
+  const pickRandomClipIndex = (clipCount: number) => {
+    if (clipCount <= 1) return 0
+
+    const lastIndex = getStoredLastIndex()
+    let nextIndex = Math.floor(Math.random() * clipCount)
+    if (nextIndex === lastIndex) {
+      nextIndex = (nextIndex + 1 + Math.floor(Math.random() * (clipCount - 1))) % clipCount
+    }
+
+    storeLastIndex(nextIndex)
+    return nextIndex
+  }
+
+  const getStoredSiteAudioEnabled = () => {
+    try {
+      const stored = window.localStorage.getItem(siteAudioConfig.storageKey)
+      if (stored === null) return siteAudioConfig.enabledByDefault
+      return stored === 'true'
+    } catch {
+      return siteAudioConfig.enabledByDefault
+    }
+  }
+
+  const getStoredMasterVolume = () => {
+    try {
+      const stored = readSiteAudioVolume(
+        window.localStorage.getItem(siteAudioConfig.masterVolumeStorageKey),
+      )
+      if (stored !== null) {
+        return stored
+      }
+    } catch {
+      // localStorage can be unavailable in restricted browser modes.
+    }
+
+    return siteAudioConfig.defaultMasterVolume
+  }
+
+  const initPortalDemoPlayer = () => {
+    ;(window as any)[cleanupKey]?.()
+
+    const container = document.querySelector<HTMLElement>('[data-portal-demo-player]')
+    if (!container) {
+      ;(window as any)[cleanupKey] = null
+      return
+    }
+
+    const slide = container.closest<HTMLElement>('.banner-slide')
+    const video = container.querySelector<HTMLVideoElement>('[data-portal-demo-video]')
+    if (!slide || !video) return
+
+    let clips: PortalDemoClip[] = []
+    try {
+      clips = JSON.parse(container.dataset.videos || '[]')
+    } catch {
+      clips = []
+    }
+    if (clips.length === 0) return
+
+    const abortController = new AbortController()
+    const { signal } = abortController
+    let hasLoadedClip = false
+    let hasSuspendedSiteAudio = false
+    let selectedClip: PortalDemoClip | null = null
+    let isSwitchingClips = false
+    let hasStartedDemoPlayback = false
+    let siteAudioActivated = hasSiteAudioUserActivation()
+    let handoffGlitchTriggered = false
+    let clipTransitionToken = 0
+    let clipSwapTimeout = 0
+    let glitchClearTimeout = 0
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+    const clearClipSwapTimer = () => {
+      if (!clipSwapTimeout) return
+
+      window.clearTimeout(clipSwapTimeout)
+      clipSwapTimeout = 0
+    }
+
+    const clearGlitchClearTimer = () => {
+      if (!glitchClearTimeout) return
+
+      window.clearTimeout(glitchClearTimeout)
+      glitchClearTimeout = 0
+    }
+
+    const prefersReducedMotion = () => reducedMotionQuery.matches
+
+    const setChannelGlitching = (isGlitching: boolean) => {
+      container.classList.toggle(
+        channelGlitchClass,
+        isGlitching && !prefersReducedMotion(),
+      )
+    }
+
+    const triggerChannelGlitch = (durationMs: number) => {
+      if (prefersReducedMotion()) {
+        setChannelGlitching(false)
+        return
+      }
+
+      clearGlitchClearTimer()
+      siteSfxManager.playIfUnlocked('portal-glitch')
+      setChannelGlitching(true)
+      glitchClearTimeout = window.setTimeout(() => {
+        glitchClearTimeout = 0
+        setChannelGlitching(false)
+      }, durationMs)
+    }
+
+    const setSiteAudioSuspended = (isSuspended: boolean) => {
+      if (hasSuspendedSiteAudio === isSuspended) return
+      hasSuspendedSiteAudio = isSuspended
+      window.dispatchEvent(
+        new CustomEvent<PortalAudioSuspensionDetail>(
+          isSuspended
+            ? homePortalEvents.audioSuspend
+            : homePortalEvents.audioResume,
+          {
+            detail: {
+              reason: demoAudioSuspensionReason,
+            },
+          },
+        ),
+      )
+    }
+
+    const hasAudiblePlaybackActivation = () => {
+      return siteAudioActivated || hasSiteAudioUserActivation()
+    }
+
+    const applyDemoAudioPreference = () => {
+      const siteAudioEnabled = getStoredSiteAudioEnabled()
+      const masterVolume = siteAudioEnabled ? getStoredMasterVolume() : 0
+      const isAudible =
+        hasAudiblePlaybackActivation() && siteAudioEnabled && masterVolume > 0
+
+      video.controls = false
+      video.defaultMuted = !isAudible
+      video.muted = !isAudible
+      video.volume = masterVolume
+
+      if (slide.dataset.active === 'true' && !video.paused) {
+        setSiteAudioSuspended(isAudible)
+      }
+    }
+
+    const markSiteAudioActivated = () => {
+      siteAudioActivated = true
+      applyDemoAudioPreference()
+    }
+
+    const unlockDemoAudioFromGesture = () => {
+      markSiteAudioActivated()
+    }
+
+    const getSelectedClip = () => {
+      if (selectedClip) return selectedClip
+
+      selectedClip = clips[pickRandomClipIndex(clips.length)] || null
+      return selectedClip
+    }
+
+    const setVideoClip = (clip: PortalDemoClip) => {
+      if (video.poster !== clip.poster) {
+        video.poster = clip.poster
+      }
+
+      video.preload = 'auto'
+      video.src = clip.src
+      video.load()
+      hasLoadedClip = true
+    }
+
+    const prepareRandomClip = () => {
+      if (hasLoadedClip) return
+
+      const clip = getSelectedClip()
+      if (!clip) return
+
+      setVideoClip(clip)
+    }
+
+    const playDemoVideo = () => {
+      applyDemoAudioPreference()
+      return video
+        .play()
+        .then(() => {
+          isSwitchingClips = false
+        })
+        .catch(() => {
+          isSwitchingClips = false
+          setSiteAudioSuspended(false)
+        })
+    }
+
+    const playInitialDemoVideo = () => {
+      hasStartedDemoPlayback = true
+      handoffGlitchTriggered = true
+      triggerChannelGlitch(initialGlitchDurationMs)
+      void playDemoVideo()
+    }
+
+    const toggleDemoPlayback = () => {
+      if (slide.dataset.active !== 'true') return
+      if (isSwitchingClips) return
+
+      if (video.paused) {
+        void playDemoVideo()
+      } else {
+        video.pause()
+      }
+    }
+
+    const loadRandomClip = (force = false, withTransition = false) => {
+      if (hasLoadedClip && !force) return
+      if (force) {
+        selectedClip = null
+      }
+
+      const clip = getSelectedClip()
+      if (!clip) return
+
+      if (withTransition && !prefersReducedMotion()) {
+        const transitionToken = ++clipTransitionToken
+        isSwitchingClips = true
+        clearClipSwapTimer()
+        triggerChannelGlitch(clipGlitchDurationMs)
+        video.pause()
+        clipSwapTimeout = window.setTimeout(() => {
+          clipSwapTimeout = 0
+          if (transitionToken !== clipTransitionToken) return
+          if (slide.dataset.active !== 'true') return
+
+          setVideoClip(clip)
+          void playDemoVideo()
+        }, clipSwapDelayMs)
+        return
+      }
+
+      isSwitchingClips = true
+      video.pause()
+      setVideoClip(clip)
+      void playDemoVideo()
+    }
+
+    const syncDemoActiveState = () => {
+      const isActive = slide.dataset.active === 'true'
+      document.documentElement.classList.toggle(demoActiveClass, isActive)
+      if (!isActive) {
+        video.pause()
+        setSiteAudioSuspended(false)
+      }
+      return isActive
+    }
+
+    const activateIfVisible = () => {
+      if (!syncDemoActiveState()) return
+      if (!hasLoadedClip) {
+        prepareRandomClip()
+      }
+
+      if (!video.paused) return
+
+      if (!hasStartedDemoPlayback) {
+        playInitialDemoVideo()
+        return
+      }
+
+      void playDemoVideo()
+    }
+
+    const syncDemoHandoffGlitch = (progress: number) => {
+      if (hasStartedDemoPlayback || prefersReducedMotion()) return
+
+      if (progress < handoffGlitchResetProgress) {
+        handoffGlitchTriggered = false
+        setChannelGlitching(false)
+        return
+      }
+
+      if (handoffGlitchTriggered || progress < handoffGlitchStartProgress) {
+        return
+      }
+
+      handoffGlitchTriggered = true
+      triggerChannelGlitch(initialGlitchDurationMs)
+    }
+
+    video.addEventListener('play', applyDemoAudioPreference, { signal })
+    video.addEventListener('playing', applyDemoAudioPreference, { signal })
+    video.addEventListener(
+      'pause',
+      () => {
+        if (!isSwitchingClips) {
+          setSiteAudioSuspended(false)
+        }
+      },
+      { signal },
+    )
+    video.addEventListener('ended', () => loadRandomClip(true, true), { signal })
+    container.addEventListener(
+      'click',
+      event => {
+        event.preventDefault()
+        event.stopPropagation()
+        void siteSfxManager.unlockFromGesture()
+        markSiteAudioActivated()
+        toggleDemoPlayback()
+      },
+      { signal },
+    )
+    window.addEventListener(audioConfigChangeEvent, applyDemoAudioPreference, {
+      signal,
+    })
+    window.addEventListener(siteAudioUnlockedEvent, markSiteAudioActivated, {
+      signal,
+    })
+    addSiteAudioActivationListeners(unlockDemoAudioFromGesture, { signal })
+
+    const observer = new MutationObserver(activateIfVisible)
+    observer.observe(slide, {
+      attributes: true,
+      attributeFilter: ['data-active', 'style', 'class'],
+    })
+
+    window.addEventListener(
+      homePortalEvents.bannerSelectScene,
+      event => {
+        const detail = (event as CustomEvent<PortalBannerSelectSceneDetail>)
+          .detail
+        if (detail?.phase !== 'standard-banner') return
+        const progress = Number(detail.progress) || 0
+
+        syncDemoHandoffGlitch(progress)
+        if (progress > 0.08) {
+          prepareRandomClip()
+        }
+        if (progress < 0.96) return
+
+        window.requestAnimationFrame(activateIfVisible)
+      },
+      { signal },
+    )
+
+    activateIfVisible()
+
+    ;(window as any)[cleanupKey] = () => {
+      observer.disconnect()
+      abortController.abort()
+      clearClipSwapTimer()
+      clearGlitchClearTimer()
+      clipTransitionToken += 1
+      handoffGlitchTriggered = false
+      setChannelGlitching(false)
+      document.documentElement.classList.remove(demoActiveClass)
+      video.pause()
+      setSiteAudioSuspended(false)
+    }
+  }
+
+  initPortalDemoPlayer()
+
+  if (!(window as any)[boundKey]) {
+    document.addEventListener('astro:page-load', initPortalDemoPlayer)
+    document.addEventListener('astro:before-preparation', () => {
+      ;(window as any)[cleanupKey]?.()
+    })
+    ;(window as any)[boundKey] = true
+  }
+</script>

@@ -1,0 +1,37 @@
+# Part_023 horn-arm fit correction
+
+The user reported that the printed cylindrical horn seat fits, but the arm
+cannot enter its cavity. The exact previously successful printed revision
+could not be identified from the available history.
+
+## Source finding
+
+The horn's exterior was not shrunk: the original and current reference
+outlines agree within 0.00004 mm after rigid alignment. Earlier work changed
+pilot holes, and replaced Part_023's cavity with the Part_009 cavity during
+the recessed-horn redesign. The angled-link redesign then rebuilt the pocket
+from the modeled horn silhouette with 0.12 mm perimeter clearance. The
+original Part_023 cavity profile was therefore not preserved.
+
+## Correction
+
+- Only the horn-arm cavity is enlarged, by 5% in its plane, including length.
+- The enlargement blends in near the hub; the cylindrical mating region
+  within a 4.05 mm radius is excluded from all material removal.
+- Cavity floor, external carrier shape, pivot axes and mounting-hole positions
+  are retained. The real horn reference is unchanged.
+- Four live Part_023 objects and the Part_023 print-layout object are updated.
+- The other leg designs and motions are retained, including the shorter
+  Part_027 legs and the single-leg Part_026 curve test.
+
+Use `Part_023-Horn-Arm-Clearance-Plus5pct.stl` for the corrected print. Units
+are millimetres; the STL is placed on its flat printing face. Historical
+STLs in older revision folders remain unchanged.
+
+`design-report.json` contains measured cavity widths and removed volume;
+`application.json` identifies the live file, pre-edit backup and object hashes.
+`capture.py`, `build.py`, and `apply.py` document the edit.
+
+Closed-mesh and cylindrical-region preservation checks passed. Physical fit
+with the user's purchased horn still requires a new print; the earlier
+printed failure is not treated as a passed fit check.

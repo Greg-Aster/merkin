@@ -1,0 +1,20 @@
+{
+  "name": "@merkin/shared-content",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./normalize-post": "./src/normalize-post.ts",
+    "./normalize-product": "./src/normalize-product.ts",
+    "./normalize-quiz": "./src/normalize-quiz.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

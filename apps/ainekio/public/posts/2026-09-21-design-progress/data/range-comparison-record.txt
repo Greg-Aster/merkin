@@ -1,0 +1,58 @@
+# Earlier versus current limb travel — 2026-09-19
+
+## Result
+
+The compact front-left test reproduces the tested articulation of the earlier design. Its shorter lower leg reduces foot excursion modestly. This comparison does **not** establish either design's maximum safe mechanical travel.
+
+| Quantity | Earlier | Current front-left test |
+|---|---:|---:|
+| Part 009 crank, axis spacing | 24 mm | 22 mm |
+| Part 026 rod, axis spacing | 41 mm | 36 mm |
+| Part 023 upper link | 40 mm | 40 mm |
+| Part 027 pickup spacing | 24 mm | 24 mm |
+| Part 027 knee-to-foot bolt projected spacing | 60 mm | 55 mm |
+| Upper-link rotation in matched exercise | 90.00° | 90.00° |
+| Lower-link orientation change in matched exercise | 54.00° | 54.00° |
+| Part 005 input rotation required for that exercise | 98.12° | 100.81° |
+| Foot bolt horizontal extent in exercise | 67.268 mm | 66.248 mm |
+| Foot bolt vertical extent in exercise | 45.383 mm | 41.200 mm |
+
+Horizontal extent decreased 1.019 mm (1.5%); vertical extent decreased 4.183 mm (9.2%). Lower-link length decreased 8.3%. The planar upper-plus-lower length sum is 100 mm versus 95 mm, a 5% reduction in the geometric reach ceiling; the straight configuration itself has not been qualified as reachable or collision-free.
+
+The longer lower leg gives larger gestures at equal joint poses. The smaller crank and rod do not remove angular articulation along this tested path, but their full workspace can differ. The additional Part 005 rotation is an input requirement, not additional foot articulation.
+
+## Source and scope
+
+- Earlier saved file: `../robot-front-mask-narrowing-20260918/Ainekio-Front-Mask-Narrowed.blend`, scene `AINEKIO - Motion Library`, frame 1. Read in one background Blender process, without saving changes.
+- Current live file: `../robot-helmet-rollback-20260919/Ainekio-Helmet-Restored.blend`, scene `ANGLED REFINED - Robot`, frame 1, including unsaved changes. Inspected through MCP without changing pose, geometry, UI or file.
+- Scene scale is 0.001 metres per Blender unit in both files: distances reported here are millimetres.
+- Physical front-left is CAD RL. Only this leg has the 22/36 compact crank/rod. The other three current legs retain 24/41 crank/rod and also have 55 mm lower legs. All four earlier legs measure 24/41 with 60 mm lower legs.
+- Part names retain historical lengths. Measured joint centres and solver expressions were used rather than names.
+- Neither file has an action assigned to its visible refined-leg actuator controls. Earlier legacy animation markers are not range measurements for the visible mechanism. Legacy clips require retargeting.
+
+## Method
+
+Measured each model's neutral joint centres, foot-bolt centre and driver equations. Compared the front-left mechanism using the nine established reference poses from `../robot-compact-22-36-test-20260919/retargeted-reference-poses.json`, then sampled 65 linearly interpolated actuator pairs per interval: 520 samples including duplicate boundaries.
+
+For each earlier pose, solved the current crank angle to retain the same upper and passive lower-link orientation, preserving the installed four-bar assembly branch. Maximum calculated pickup mismatch was below 0.000000001 mm. Used each model's measured knee-to-foot vector to obtain foot positions in its fixed mechanism coordinate frame. The current model's full evaluated-pose checks from the previous compact-leg task are recorded separately in `../robot-compact-22-36-test-20260919/saved-verification.json`.
+
+This is a matched articulation exercise, **not a walking stride**. Horizontal extent is max foot-bolt X minus min X; vertical extent is max Z minus min Z. Neither is sole clearance. Shoulder is fixed at zero. The lower-link orientation sweep is relative to the mechanism frame, not knee flexion relative to the upper link. All actuator angles are geometric offsets from each design's neutral, not calibrated servo angles or PWM commands.
+
+## Limits
+
+Full collision-free range, shoulder clearance, physical servo end stops, singularity margins, ground contact and loaded torque capability were not established by this comparison. The shoulder control relationship remains unchanged in both files, but this does not prove identical physical clearance after the outward-angle modifications. Existing conservative walking probe sizes are not maximum limb-range measurements.
+
+## Files
+
+- `earlier-measurements.json`, `current-measurements.json`: measured source geometry, rig equations and scene identity.
+- `comparison.json`: computed results and scope.
+- `capture_measurements.py`: read-only Blender measurement helper.
+- `compare.py`: reproducible kinematic comparison using NumPy and the compact-leg retarget helper.
+- `densified_linear_actuator_path-*.csv`: geometric joint angles and foot-bolt X/Z in mm for both designs.
+- `nine_reference_poses-*.csv`: original nine-pose samples.
+
+Recompute results from the captured measurements with:
+
+```sh
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 workspace/ComfyUI/venv/bin/python Blender workspace/robot-range-comparison-20260919/compare.py
+```

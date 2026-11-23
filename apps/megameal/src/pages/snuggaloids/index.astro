@@ -1,0 +1,85 @@
+---
+import { getCollection } from 'astro:content'
+import { Icon } from 'astro-icon/components'
+import SnuggaloidRegistryList from '../../components/snuggaloids/SnuggaloidRegistryList.svelte'
+import ProductCustomizer from '../../components/store/ProductCustomizer.svelte'
+import { buildSnuggaloidCustomizerConfig } from '../../config/snuggaloidCustomizer'
+import { publicCollectionFilter } from '../../contracts/content'
+import { publicProductCollectionFilter } from '../../contracts/products'
+import StoreLayout from '../../layouts/store/StoreLayout.astro'
+import { routeStyleHref } from '../../styles/routeStyleBundles'
+
+const units = (await getCollection('snuggaloids', publicCollectionFilter)).sort(
+  (a, b) => a.data.unitId.localeCompare(b.data.unitId),
+)
+const products = await getCollection('products', publicProductCollectionFilter)
+const snuggaloidsProduct = products.find(product => {
+  const slug = product.data.slug ?? product.id.replace(/\.(md|mdx)$/, '')
+  return slug === 'snuggaloids'
+})
+const snuggaloidsPrice = snuggaloidsProduct?.data.price ?? 104.99
+const snuggaloidsStoreHref = '/store/snuggaloids/'
+const snuggaloidsCustomizer = buildSnuggaloidCustomizerConfig({
+  basePrice: snuggaloidsPrice,
+  href: snuggaloidsStoreHref,
+  image: snuggaloidsProduct?.data.image,
+})
+
+const statusLabels: Record<string, string> = {
+  preview: 'Preview Only',
+  available: 'Available',
+  reserved: 'Reserved',
+  adopted: 'Adopted',
+  not_available: 'Not Available',
+}
+
+const registryUnits = units.map(unit => ({
+  id: unit.id,
+  name: unit.data.name,
+  unitId: unit.data.unitId,
+  adoptionStatus: unit.data.adoptionStatus,
+  statusLabel: statusLabels[unit.data.adoptionStatus],
+  image: unit.data.image,
+  price: unit.data.price,
+  sku: unit.data.sku,
+  temperament: unit.data.temperament,
+  size: unit.data.size,
+  exterior: unit.data.exterior,
+  traits: unit.data.traits,
+  registryNote: unit.data.registryNote,
+  adoptionNote: unit.data.adoptionNote,
+  warnings: unit.data.warnings,
+  easterEgg: unit.data.easterEgg,
+}))
+---
+
+<StoreLayout
+  title="Snuggaloid Registry"
+  description="Known Snuggaloid units, adoption status, bios, photos, and registry notes."
+>
+  <Fragment slot="head">
+    <link rel="stylesheet" href={routeStyleHref('snuggaloids')} data-route-style="snuggaloids" />
+  </Fragment>
+  <div class="container mx-auto max-w-6xl px-3 py-5 sm:px-4 md:py-6">
+    <nav class="mb-5 flex flex-wrap items-center gap-2 text-sm text-slate-500 md:mb-6" aria-label="Breadcrumb">
+      <a href="/" class="transition hover:text-[var(--primary)]">Home</a>
+      <Icon name="mdi:chevron-right" class="h-4 w-4" />
+      <a href="/store/" class="transition hover:text-[var(--primary)]">Store</a>
+      <Icon name="mdi:chevron-right" class="h-4 w-4" />
+      <span class="text-slate-300">Snuggaloid Registry</span>
+    </nav>
+
+    <section class="rounded-2xl border border-slate-700/50 bg-slate-950/80 p-4 shadow-2xl shadow-slate-950/30 sm:p-6 md:rounded-3xl md:p-8">
+      <SnuggaloidRegistryList
+        client:load
+        units={registryUnits}
+        adoptionPrice={snuggaloidsPrice}
+        productHref={snuggaloidsStoreHref}
+      />
+    </section>
+
+    <div id="customize" class="mt-6 scroll-mt-24 md:mt-8">
+      <ProductCustomizer client:load config={snuggaloidsCustomizer} />
+    </div>
+  </div>
+</StoreLayout>

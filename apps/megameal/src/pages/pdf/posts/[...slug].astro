@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content'
+import { publicCollectionFilter } from '../../../contracts/content'
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', publicCollectionFilter)
+
+  return posts
+    .filter(post => post.data.downloadable === true)
+    .map(post => ({
+      params: { slug: post.slug },
+      props: { post },
+    }))
+}
+
+const { post } = Astro.props
+const { Content } = await post.render()
+
+const publishedDate =
+  post.data.published instanceof Date
+    ? post.data.published.toISOString().slice(0, 10)
+    : String(post.data.published)
+import '../../../styles/pages/pdf-post.css'
+---
+<html lang={post.data.lang || 'en'} class="pdf-export-page">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{post.data.title} - PDF</title>
+</head>
+  <body class="pdf-export-body">
+    <article class="pdf-article">
+      <h1>{post.data.title}</h1>
+      <p class="meta">Published: {publishedDate}</p>
+      {post.data.description && <p class="description">{post.data.description}</p>}
+      {post.data.image && post.data.showImageOnPost !== false && (
+        <img src={post.data.image} alt={post.data.title} loading="eager" />
+      )}
+      <Content />
+    </article>
+  </body>
+</html>

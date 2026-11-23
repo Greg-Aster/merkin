@@ -1,0 +1,15 @@
+packages:
+  - 'apps/game.megameal'
+  - 'apps/simulator.ainek.io'
+  - 'apps/megameal'
+  - 'apps/ainekio'
+  - 'apps/docs-editor-bridge'
+  # Sites - blog-only sites in workspace
+  - 'Temporal-Flow'
+  - 'DNDIY.github.io'
+  # Legacy MEGAMEAL folder is archived and excluded from workspace builds.
+  # Active megameal app lives at apps/megameal.
+  # (Legacy folder also has Threlte pre-compiled Svelte that conflicts with workspace resolution.)
+  # - 'MEGAMEAL'
+  # Shared packages
+  - 'packages/*'

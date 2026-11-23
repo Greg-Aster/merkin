@@ -1,0 +1,114 @@
+---
+title: "Standing, Walking, LCD Face, and Responsive Command Routing"
+published: 2026-10-08
+updated: 2026-10-08
+description: "The rebuilt 12-servo Ainekio V2 stands, walks, and responds to commands with an illuminated 1.9-inch ST7789 LCD face, 59 procedural expressions, and split MetaHuman task/conversation routing."
+image: "/posts/2026-10-08-progress/standing-prototype.jpg"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V2, Gait, Display, Camera, Audio, Firmware, MetaHuman OS]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: legs
+  generation: v2
+  kind: journal
+  next: 2026-10-12-shell-power-and-motion
+  related: ["gait-development", "ainekio-v2", "metahuman-integration"]
+---
+
+Two days after the first chassis failed its standing test, the rebuilt twelve-servo
+robot can **stand, walk, and respond to commands**. The lighter frame, 35/20/28 mm
+compact leg linkage, and discrete battery arrangement from the
+[October 6 rebuild](/posts/2026-10-06-compact-linkage/) put the physical robot on
+its feet with its wide cyan LCD face lit and running.
+
+<figure>
+  <img src="/posts/2026-10-08-progress/standing-prototype.jpg" alt="October 8 physical Ainekio V2 standing on a desk, with exposed wiring, printed leg linkages and an illuminated cyan face; the carapace is not attached." width="1244" height="868" loading="eager" />
+  <figcaption>October 8: Ainekio V2 standing on the workbench with the 1.9-inch ST7789 LCD face active and outer carapace panels off.</figcaption>
+</figure>
+
+## Two days of hardware progress
+
+| Milestone | October 6 | October 8 |
+| --- | --- | --- |
+| Standing on MG90 servos | Could not stand with heavy power bank and 40 mm carriers | Stands cleanly on the 35/20/28 mm linkage |
+| Locomotion | Replacement parts still printing | Walking on the physical assembly |
+| Command response & audio | Bench networking checks only | Responds to commands; speaker tone and wake-word capture verified |
+| Display & camera | Unmounted in chassis test | 1.9-inch ST7789 LCD (320×170 landscape) and OV5647 camera upright and active |
+
+### Printed hardware additions on the workbench
+
+The physical build brings together three updated part groups:
+
+- **Compact legs:** 35 mm carriers, 20 mm recessed-horn cranks, and 28 mm pickup parts.
+- **Electronics & power packaging:** Wireless bridge, board retainers, battery cradle,
+  and rear power-carrier parts.
+- **Display & speaker mounts:** Left/right front-panel braces, LCD carrier,
+  and the 20×30 speaker housing.
+
+## 1.9-inch ST7789 face renderer and 59 expressions
+
+The physical robot uses a **XIITIA 1.9-inch ST7789** SPI panel in **320 × 170
+landscape** orientation (wired via SPI despite its PCB pins being silkscreened `SCL`
+and `SDA`; see the [LCD wiring guide](https://github.com/Greg-Aster/Ainekio-bot/blob/dev/docs/v2-12servo/LCD_FACE.md)).
+
+The C firmware face engine drives **59 selectable expressions** at a stepped **15 fps**
+(66 ms frame interval) outside the servo loop, including resting eyes, speaking
+voice-bar overlays, workflow status halos, and motion-linked faces:
+
+<figure>
+  <img src="/posts/2026-10-08-progress/contact-sheet.png" alt="Sixteen examples from Ainekio's wide LCD renderer, including cyan resting eyes, happy and sad faces, colored hearts, stars, thinking, wave and run expressions." width="1360" height="920" loading="lazy" />
+  <figcaption>16 of the 59 procedural expressions rendered directly by the C firmware engine.</figcaption>
+</figure>
+
+<details>
+  <summary>Open six animated expression previews (320×170)</summary>
+  <div className="grid grid-cols-2 gap-3">
+    <figure><img src="/posts/2026-10-08-progress/default.webp" alt="Animated cyan resting face" width="320" height="170" loading="lazy" /><figcaption>Resting</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/happy.webp" alt="Animated happy face" width="320" height="170" loading="lazy" /><figcaption>Happy</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/thinking.webp" alt="Thinking eyes and traveling dots" width="320" height="170" loading="lazy" /><figcaption>Thinking (7.2 s loop)</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/listening.webp" alt="Attentive listening expression" width="320" height="170" loading="lazy" /><figcaption>Listening (2.4 s pulse)</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/wave.webp" alt="Animated wave expression" width="320" height="170" loading="lazy" /><figcaption>Wave</figcaption></figure>
+    <figure><img src="/posts/2026-10-08-progress/run.webp" alt="Animated run expression" width="320" height="170" loading="lazy" /><figcaption>Run</figcaption></figure>
+  </div>
+</details>
+
+### Onboard camera, speaker, and wake-word fixes
+
+- **Display & camera orientation:** Confirmed upright LCD rendering and fresh camera
+  stills on the assembled head, replacing the old status-text footer with compact
+  corner fault icons.
+- **Speaker & wake-word capture:** Verified speaker tone output and fixed wake-word
+  audio capture by emitting a recording-start event alongside the wake trigger.
+  Enlarging the microphone task stack cured a live inference stack overflow and left
+  3,712 bytes of free margin across a 60-second continuous check.
+- **Token-scoped workflow faces:** Temporary workflow expressions (`Thinking`,
+  `Listening`) now carry a unique token and local timeout so stale release messages
+  cannot overwrite a newer expression.
+
+## Responsive command routing and specialist split in MetaHuman OS
+
+Alongside the hardware bring-up, updates across
+[MetaHuman OS](https://github.com/Greg-Aster/ainekio-os) and
+[Ainekio-bot](https://github.com/Greg-Aster/Ainekio-bot) separated request routing,
+task planning, and conversation so spoken replies no longer wait behind slow planning
+passes:
+
+| Responsibility | Earlier path | October 8 architecture |
+| --- | --- | --- |
+| Request routing | Context selection and action/reply coupled | Fast initial request pass selects context for task and conversation consumers |
+| Task planning vs reply | Shared response generation path | Dedicated **Task specialist** produces an ordered action program; **Conversation** runs on its own workflow and streams speech chunks as they synthesize |
+| Model selection | Single global backend | Per-node model assignment with separate **Qwen3.5 0.8B** Intent and Task LoRA training lanes and larger-model planner delegation |
+| Input during active motion | Slow interpretation could block active work | Read-only interpretation runs in the background while the active execution retains feedback and manual-takeover guards |
+| Connection selector | Manual bridge configuration | Saved startup and dashboard selectors (`This computer`, `LAN / Wi-Fi`, `Cloudflare`) in both Body Control and MetaHuman's Agent Monitor |
+
+I also wired a baseline local YOLO person-segmentation detector into the gateway camera
+worker—benchmarking at a 210 ms median (4.64 fps on 4 desktop CPU threads)—ahead of the
+open-vocabulary YOLOE upgrade in the
+[October 12 update](/posts/2026-10-12-shell-power-and-motion/).

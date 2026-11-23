@@ -1,0 +1,148 @@
+---
+title: "V1 ESP32-P4 CAD Revisit, NeuralPose v5 Adaptive Recovery, V3 Motion Transfer & Interactive 3D Studio"
+published: 2026-11-18T18:30:00-08:00
+updated: 2026-11-18
+description: "November 17–18 workbench milestone: modernizing Ainekio V1's Blender CAD around ESP32-P4, 4th-wire servos, 683ZZ counter-bearings, coaxial torsion wiring, and 59 derived OLED expressions; training NeuralPose v5-adaptive (2,322 Freestyle rows), retrained 20 Hz Living Presence, and v26 specialist LoRAs with physical V2 floor capability videos; expanding V3 to 608 meshes with a cross-body motion-transfer study; and launching the interactive Three.js 1:1 3D CAD viewer."
+image: "/posts/2026-11-18-progress/three-generation-3d-lineup.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V1, V2, V3, ESP32-P4, NeuralPose, Living Presence, Freestyle, Three.js, Blender, Ainekio OS]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: overview
+  generation: both
+  kind: journal
+  next: 2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim
+  related: ["ainekio-v1", "three-system-neural-architecture", "jam-protection-and-thermal-safety", "ainekio-v3-preview", "ainekio-v2"]
+---
+import RobotModelViewer from '../../components/RobotModelViewer.svelte'
+
+Between November 17 and November 18, work across [`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot), [`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os), the multi-scene `v3-2.blend` CAD file, and this site converged across all three robot generations at once:
+
+1. **[Ainekio V1](/posts/ainekio-v1/) received a comprehensive `Scene 'v1'` CAD revisit (`196.7 × 186.5 × 78.1 mm`) and 59-face OLED expansion:** While preserving the Summer 2026 `ESP32-S3` physical carpet baseline, V1's CAD assembly now seats the low-profile `Frame8` top enclosure cap over `Frame7` in matte charcoal with cyan-blue serrated lower legs, adds **8× `683ZZ` hip/knee counter-bearings** and **tucked coaxial 4-wire hip harnesses**, upgrades the internal electronics bay to the unified **`Waveshare ESP32-P4-WIFI6` + `PCA9685` + 8× 4th-wire analog sense leads + `GY-LSM6DS3` IMU + `Arducam B0066`**, and derives all **`59` procedural V2 expressions (`303` `.bin` frames)** down to V1's `128 × 64` `SSD1306` OLED.
+2. **[Ainekio V2](/posts/ainekio-v2/) advanced its neural motion stack, specialist LoRAs, and physical floor capability checks:** System 2 evolved from `v3-jam-compliant` and `v4-equivariant` to **`NeuralPose v5-adaptive`** (`6.7 mm` ground-friction snag micro-step unloading, `7/7` qualification scenarios with `0` falls, plus multi-joint stance jam `replan_recovery` escalation verified on physical floor roleplay runs) paired with an expanded **`2,322`-example (`94`-family) `Qwen3.5-0.8B` Freestyle LoRA**; System 3 (`20 Hz` `Living Presence`) was retrained on `72,000` sequences (`99.65%` face accuracy, `14 mm` vertical yield, and a silent-lock `~0.42 s` wake-word nose-up perk); [Ainekio OS](/posts/ainekio-os/) shipped deduplicated **`v26` Intent & Task specialist LoRAs** (`661` source cases / `2,941` dev records); and three physical floor capability videos were recorded on carpet.
+3. **[Ainekio V3](/posts/ainekio-v3-preview/) expanded to `608` clean CAD meshes alongside a 47-chapter cross-morphology motion-transfer study:** `Scene 'v3'` added a **3-part rear clamshell `2.0 mm`-pin piano hinge**, a **`38`-part `M3` rear subframe fastener assembly**, and a segmented **6-louver rear vent bumper**, while a full Blender replay of V2's 47-motion library onto V3 (`v3-gaits-and-motions-2x-standard.mp4`) visually demonstrates why non-isomorphic four-bar ratios and square-cube inertia scaling require every robot body to learn its own policies.
+4. **Interactive Three.js 1:1 Scale 3D CAD Studio:** Compressed glTF `.glb` exports of **V1**, **V2**, and **V3** now render live in the browser at exact 1:1 millimeter scale with `Full Shell`, `X-Ray`, and `Bare Core` inspection modes.
+
+---
+
+## 1. Revisiting Ainekio V1: `Scene 'v1'` `ESP32-P4` CAD modernization, coaxial torsion wiring & `59` OLED faces
+
+Revisiting the eight-servo spider-stance **[Ainekio V1](/posts/ainekio-v1/)** solved two longstanding mechanical and electrical pain points from the original Summer 2026 `ESP32-S3` prototype—single-shear servo horn sag and cyclic hip-wire fatigue—while bringing V1 onto the same `ESP32-P4` + `PCA9685` + 4th-wire sensing architecture as V2:
+
+![X-Ray view of the modernized Scene 'v1' CAD assembly showing the seated Frame8 cap, cyan-blue serrated lower legs, 683ZZ counter-bearings, tucked coaxial Hip-Z wiring, Waveshare ESP32-P4-WIFI6, PCA9685, and dual flank 2S battery bays](/posts/2026-11-18-progress/v1-p4-revisit-xray.webp)
+
+- **Seated `Frame8` enclosure, cyan-blue serrated legs & `8× 683ZZ` counter-bearings:** In `Scene 'v1'` (`196.7 × 186.5 × 78.1 mm` assembled envelope), the low-profile `Frame8` top cap (`121.7 × 79.7 × 22.0 mm`) locks flush over `Frame7` (`122.0 × 92.0 × 37.5 mm`) and the trussed `R2V10` upper leg brackets in matte charcoal, contrasted against cyan-blue serrated 2-DOF lower legs and `[ •   • ]` cyan OLED bracket eyes. Every hip and knee joint now adds a rear **`683ZZ` (`3 × 7 × 3 mm`) ball-bearing counter-support** opposite the `MG90S` output spline so radial walking loads no longer pry single-shear plastic horns off the servo shafts.
+- **Zero-bending coaxial torsion wire routing (`v1_dynamic_wiring.py`):** On the original build, servo leads crossing the hip joints flexed sharply on every stride. Routing each 4-conductor knee bundle vertically (`44.8 mm` arch span) directly along the exact Hip Z rotation axis (`±48.35, ±38.50 mm`) converts `±47.5°` of horizontal hip sweep into pure axial torsion (`0.415 rad` distributed twist = `0.009 rad/mm`), yielding **`0.00 mm` endpoint push-pull** and **`0.000 1/mm` cyclic bending curvature**—captured cleanly by 9 printable `Wire Clips` (`4` inner chassis reliefs, `4` outer bracket guides, and `1` central spine clip).
+- **Unified `ESP32-P4` + 4th-wire + `LSM6DS3` electronics bay:** Beneath `Frame8`, the modernized interior packages a `Waveshare ESP32-P4-WIFI6`, an `Adafruit PCA9685` (`I2C1` + `OE` safety cutoff), **8× soldered 4th-wire analog potentiometer leads (`J0–J7`)**, a central **`GY-LSM6DS3` 6-axis IMU** (`I2C0`) for closed-loop pitch/roll self-leveling and pickup/shake reflexes, a front **`Arducam B0066` (`OV5647` MIPI-CSI)** camera module, a `20 × 30 mm` speaker cradle, dual ventilated flank `2S` `1000 mAh` (`2× 14500`) battery bays, a rear `19 × 12 mm` master rocker switch, and a `Mini560` `5 V / 5 A` buck + `HiLetgo` `2S` USB-C boost charger.
+- **All `59` V2 expressions derived for V1's `128 × 64` `SSD1306` OLED:** Rather than maintaining two divergent face libraries (`52` hand-authored V1 bitmaps vs. `59` procedural V2 `ST7789` expressions), `derive_v1_oled.py` now renders V2's procedural `320 × 170` `RGB565` eye geometry and downsamples/thresholds all **`59` expressions (`303` animation frames, `1,024 B` per `.bin` frame + `manifest.json`)** into crisp `1-bit` `128 × 64` `SSD1306` assets (`firmware/v1-8servo/spiffs/faces/`), adding `cosmic_horror`, `silly`, `listening`, `speaking`, `idle_subtle`, `blink_Single`, and `blink_double` to V1.
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <figure>
+    <img src="/gallery/v1-p4-revisit-4view-cad-1600.webp" alt="Four-panel CAD layout of modernized Ainekio V1 showing top orthographic ESP32-P4 and 8 direct-ADC 4th-wire sense leads, rear rocker switch and 2S charge jack, speaker bridge cradle over GY-LSM6DS3 IMU, and front B0066 CSI + OLED assembly." width="1600" height="1254" loading="lazy" />
+    <figcaption>Modernized V1 four-view interior layout: <code>ESP32-P4-WIFI6</code>, <code>PCA9685</code>, 8× 4th-wire sense leads, bridge-mounted <code>20×30 mm</code> speaker over <code>GY-LSM6DS3</code> IMU, rear master rocker switch + external <code>2S</code> charge jack, and coaxial Hip-Z torsion arches.</figcaption>
+  </figure>
+  <figure>
+    <img src="/gallery/v1-oled-59-expressions-1600.webp" alt="Complete 59-expression 128x64 monochrome SSD1306 OLED contact sheet derived from V2 for Ainekio V1." width="1600" height="1565" loading="lazy" />
+    <figcaption>All <code>59</code> monochrome <code>128 × 64</code> <code>SSD1306</code> OLED expressions (<code>303</code> frames) generated by <code>derive_v1_oled.py</code> for full V1/V2 facial parity.</figcaption>
+  </figure>
+</div>
+
+---
+
+## 2. V2 neural refinements (`NeuralPose v5`, `2,322`-row Freestyle, `Living Presence` & `v26` LoRAs) and floor capability checks
+
+On the active `650 g` **[Ainekio V2](/posts/ainekio-v2/)** robot, two days of closed-loop floor testing drove rapid iteration across all three neural motion controllers and Ainekio OS's local specialist adapters:
+
+### `NeuralPose v5-adaptive` & the `2,322`-example (`94`-family) Freestyle curriculum
+
+- **From `v3-jam-compliant` & `v4-equivariant` to `v5-adaptive` (`50 Hz` System 2):** Early `NeuralPose` policies could exhibit slight left/right posture bias (`v4-equivariant` enforced exact bilateral mirror symmetry) or push stubbornly sideways when a stance foot caught high-pile carpet during a wide posture transition. Trained across `1,228,800` steps (`7/7` qualification scenarios passed with **`0` falls**), **`NeuralPose v5-adaptive`** learns an emergent **`6.7 mm` vertical unloading micro-step** when `4th-wire` shaft error indicates a ground-friction foot snag—lifting the snagged foot just enough to clear carpet fibers before settling onto target.
+- **Multi-joint stance jam `replan_recovery` escalation:** Single-joint mid-air snags still resolve silently via `280 ms` manifold recoil (`recoil_deg`), while sustained single-servo hard locks remain protected by the [per-joint `8–10 s` `I²t` winding thermal fuse](/posts/jam-protection-and-thermal-safety/). However, live floor roleplay runs exposed an intermediate case: if **`>= 2` stance joints jam simultaneously** or bilateral **L/R recoil asymmetry exceeds `12°`** during a deep posture hold, local recoil alone leaves the body twisted. `body_gateway` now detects multi-joint stance jam asymmetry and triggers a one-shot **`replan_recovery`** back to balanced stance—verified live on November 18 across physical *tea-service* and *mountain-pass* enactment runs (`pose_jam_recoil` → `replan_recovery` → clean stance recovery without tripping the thermal fuse).
+- **`2,322`-example Freestyle LoRA (`freestyle-curriculum-20261119T023053Z`):** The `Qwen3.5-0.8B` (`BF16` + rank-16 LoRA) Freestyle generator grew from `1,812` to **`2,322` physics-validated training rows** across **`94` motion families** (`1,510` ordinary choreography rows + **`812` awkward-pose recovery rows** across 18 recovery families starting from `splayed_stand`, `lay_down`, and `dead`), converging to a **`0.0009636`** final loss.
+- **Firmware `stand_hold_replans` guard & 34 `Red/` STLs:** Onboard `body.c` added a `!actively_leveling` guard so `LSM6DS3` attitude self-leveling trims are never miscounted as stalled shaft arrivals, and exported **34 print-ready `Red/` STLs** (`22` `full carapace/`, `4` `boots/`, and `6` `blue-carrier/` brackets).
+
+### Retrained `20 Hz` `Living Presence` & Ainekio OS `v26` specialist LoRAs
+
+- **System 3 `Living Presence` (`56,382` params / `56.4 KB` `int8`):** Retrained on `72,000` sequences across `12/12` passing disturbance scenarios (`0` falls), achieving **`99.65%` facial expression accuracy**, **`64.1%` tracking-error reduction** and **`31.1%` torque drop** under simulated carrier jams, **`14 mm` vertical `_common_mode_drift()` yield** (letting a human hand press gently down on the back without all four legs fighting or sinking), and a crisp **`~0.42 s` one-shot wake-word nose-up perk + `listening` face** that immediately locks `stop(detach=False)` completely silent while `microWakeWord` + WebRTC VAD capture room speech so servo gear noise never holds the voice gate open.
+- **Ainekio OS `v25/v26` Action Selector LoRAs & offline-first Whisper:** Added `embodied-enactment-cases.ts` (`v25`, separating physical roleplay enactments from plain verbal Q&A) and deduplicated the `v26` Action Selector dataset (`661` curated source cases → **`2,941` dev records** [`1,372` Intent / `1,569` Task], `814` eval, and `134` regression records), deploying `intent-clean-v26-20261118` (`242–408 ms`) and `task-clean-v26-20261118` (`703–713 ms`) on local `Qwen3.5-0.8B` alongside offline-first `WhisperModel(..., local_files_only=True)` startup so expired Hugging Face tokens never stall boot.
+
+### Physical V2 capability check videos on carpet
+
+Three floor verification clips from the living-room carpet test series exercise end-to-end boot, speech, IMU reflex interruption, and 4th-wire jam detection on the untethered `650 g` V2 build:
+
+<figure>
+  <video controls playsinline preload="none" width="960" height="540" poster="/gallery/v2-shake-and-greet-test-poster.webp">
+    <source src="/gallery/v2-shake-and-greet-test.mp4" type="video/mp4" />
+    <a href="/gallery/v2-shake-and-greet-test.mp4">Download V2 wake-up, greet, and physical shake reflex video (MP4)</a>
+  </video>
+  <figcaption><strong>Capability check 1 — Wake-up stretch, IMU shake reflex &amp; conversational continuity:</strong> Ainekio boots on carpet, stretches, chats, gets picked up and shaken mid-turn—firing an immediate snarky vocal and LCD reaction via <code>fast-body-event-mode</code>—and cleanly resumes conversation once set back down.</figcaption>
+</figure>
+
+<figure>
+  <video controls playsinline preload="none" width="960" height="540" poster="/gallery/v2-jam-protection-test-poster.webp">
+    <source src="/gallery/v2-jam-protection-test.mp4" type="video/mp4" />
+    <a href="/gallery/v2-jam-protection-test.mp4">Download V2 boot, stretch, and 4th-wire jam detection video (MP4)</a>
+  </video>
+  <figcaption><strong>Capability check 2 — Closed-loop 4th-wire jam detection:</strong> During its post-boot stretch and room greeting, a leg hits mechanical resistance; onboard <code>CD74HC4067</code> (`GPIO27–30` → `GPIO49`) potentiometer feedback flags the shaft tracking error, backs off before winding heat builds up, and prompts Ainekio to report the fault aloud.</figcaption>
+</figure>
+
+<figure>
+  <video controls playsinline preload="none" width="960" height="540" poster="/gallery/v2-basic-motion-test-poster.webp">
+    <source src="/gallery/v2-basic-motion-test.mp4" type="video/mp4" />
+    <a href="/gallery/v2-basic-motion-test.mp4">Download V2 spoken prompt, thinking face, and gesture video (MP4)</a>
+  </video>
+  <figcaption><strong>Capability check 3 — Voice prompt → thinking face → physical gesture:</strong> Single-turn baseline verifying room microphone capture, animated <code>thinking</code> expression on the 1.9" <code>ST7789</code> LCD during specialist routing, synchronized body gesture execution, and spoken reply.</figcaption>
+</figure>
+
+---
+
+## 3. V3 `608`-mesh mechanical detailing & why motions don't translate across bodies
+
+In `v3-2.blend`, the active **[Ainekio V3](/posts/ainekio-v3-preview/)** `Scene 'v3'` assembly (`436.3 × 236.5 × 381.4 mm` neutral exported CAD envelope including whip antenna; `12×` waterproof `DS3235` servos, `Radxa Dragon Q6A` Linux SBC + `ESP32-P4`, and `4× 21700` belly pack) grew from `293` meshes (preserved in the frozen `V3 - Motion Library` rig) to **`608` clean visible production meshes**:
+
+- **Clamshell servicing, dorsal isogrid, rear armor & `MSP2807` Cyclops eye:** Added a **3-part rear clamshell `Piano Hinge`** pinned by a `2.0 mm × 72.0 mm` stainless wire core (`Piano_Hinge_Pin_Core`) so all `132` upper dorsal/ROPS/fender/subframe components swing open `50°–60°` without loose lid screws, lightened the dorsal `Radxa Q6A` spine with an internal `1.0 mm` triangular isogrid, added a **`38`-part `M3` rear subframe fastener assembly** (`M3×6` and `M3×8` socket-head bolts and hex nuts) plus a **6-louver rear exhaust vent bumper** and dual taillight housings, and fitted a high-contrast **cyan-phosphor Cyclops eye (`(( ◉ ))`)** onto the recessed `2.8"` `MSP2807` vault TFT.
+
+<figure className="my-6">
+  <img src="/gallery/v3-clamshell-service-hood-1600.webp" alt="Three-panel CAD sequence showing Ainekio V3 closed at 0 degrees and opened 50 degrees on its rear 2.0 mm piano hinge to expose the Radxa Dragon Q6A and 21700 battery bay." width="1600" height="431" loading="lazy" />
+  <figcaption><code>Scene 'v3'</code> rear-hinged clamshell hood pivoting open <code>50°</code> on its <code>Ø2.0 × 72 mm</code> stainless wire pin, revealing the internal triangular dorsal isogrid and <code>Radxa Dragon Q6A</code> compute bay.</figcaption>
+</figure>
+
+<figure className="my-6">
+  <img src="/gallery/v3-msp2807-cyclops-eye-1600.webp" alt="Head-on and three-quarter CAD renders of Ainekio V3's recessed 2.8-inch MSP2807 display showing its glowing cyan-phosphor Cyclops eye inside the 4-bolt cast-gunmetal bezel." width="1280" height="540" loading="lazy" />
+  <figcaption>Recessed <code>2.8"</code> <code>MSP2807</code> vault screen updated with V3's cyan-phosphor Cyclops eye display behind the 4-bolt cast-gunmetal bezel and swept ROPS bull-bar.</figcaption>
+</figure>
+- **Why V2 motions fail when replayed directly onto V3:** Before training V3's dedicated `MJX` policies, we replayed all **47 analytical gaits and gestures** from V2's motion library directly onto V3's rig at `2×` speed:
+
+<figure>
+  <video controls playsinline preload="none" width="1280" height="720" poster="/gallery/v3-gaits-and-motions-2x-standard-poster.webp">
+    <source src="/gallery/v3-gaits-and-motions-2x-standard.mp4" type="video/mp4" />
+    <a href="/gallery/v3-gaits-and-motions-2x-standard.mp4">Download V3 47-motion cross-morphology transfer study (MP4, 2×)</a>
+  </video>
+  <figcaption><strong>Cross-morphology motion-transfer study (47 chapters, 2×):</strong> Replaying Ainekio V2's joint-space gaits and emotes directly onto V3 produces foot scrubbing, pitch oscillation, and workspace distortion—demonstrating why locomotion and posture policies cannot simply be copied across robot generations.</figcaption>
+</figure>
+
+Two concrete physical mechanisms break direct joint-angle transfer between V2 and V3:
+
+1. **Non-isomorphic nonlinear four-bar linkage ratios:** V3 is not a uniform `1.44×` geometric scale-up of V2. Its carrier-to-crank ratio jumps from **`1.75`** (`35.0 / 20.0 mm` on V2) to **`2.19`** (`87.65 / 40.0 mm` on V3), while its coupler-to-bell-crank-pickup ratio shifts from **`1.36`** (`38.0 / 28.0 mm`) to **`1.67`** (`93.55 / 56.0 mm`). Identical servo crank angles therefore trace a measurably different nonlinear transmission curve at the shin and toe.
+2. **Square-cube inertia scaling & wide-pad scrubbing torque:** Scaling linear dimensions by `~1.8×` multiplies volume and structural mass roughly **`5×`** once `12×` metal-case `DS3235` servos, `4× 21700` cells, and the `Radxa Q6A` heatsink stack are included, while `80.9 × 44.7 mm` flat crawler pads generate far higher yaw scrubbing torque than V2's narrow rounded TPU toes—requiring V3's own `MJX` reinforcement-learning and `NeuralPose` curricula tailored to `DS3235` slew bandwidth and mass distribution.
+
+---
+
+## 4. Interactive Three.js 1:1 scale 3D CAD studio
+
+To make mechanical packaging, linkage geometry, and scale differences directly inspectable in the browser—on both desktop and mobile—we built a dedicated Three.js CAD studio (`RobotModelViewer.svelte`) backed by Meshopt- and WebP-compressed glTF `.glb` exports of all three generations (`ainekio-v1.glb` at `1.99 MB`, `ainekio-v2.glb` at `4.08 MB`, and `ainekio-v3.glb` at `3.11 MB`, grounded to `Z = 0.000 mm` on a `100 mm` major / `20 mm` minor studio grid), plus an expandable **Motions & Gaits** side drawer driving V1 (`38` clips) and V2 (`47` clips) directly from their Blender kinematic rigs:
+
+<RobotModelViewer
+  client:visible
+  initialModel="lineup"
+  compact={true}
+  caption="Interactive 1:1 millimeter-scale lineup of Ainekio V1 (left, 196.7 mm), Ainekio V2 (center, 244.9 mm · 650 g), and Ainekio V3 (right, 436.3 mm armored DS3235 CAD). Open Motions & Gaits to play gaits, poses, and emotes on V1 and V2, or toggle X-Ray and Bare Core to inspect internal boards, batteries, and four-bar linkages."
+/>
+
+Each `.glb` separates `ExteriorShell` armor and carapace meshes from `InteriorCore` frames, electronics (`ESP32-P4`, `PCA9685`, `Radxa Dragon Q6A`, `ST7789` / `MSP2807` / `SSD1306` displays), battery packs, and servo linkages—allowing instant switching between **Full Shell**, translucent **X-Ray**, and **Bare Core** views on the [homepage](/), [Ainekio V1](/posts/ainekio-v1/), [Ainekio V2](/posts/ainekio-v2/), and [Ainekio V3](/posts/ainekio-v3-preview/) guides.

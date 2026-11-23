@@ -1,0 +1,70 @@
+{
+  "lay_down": {
+    "previous": {
+      "command": "lay_down",
+      "samples": 841,
+      "duration_s": 7.0,
+      "sample_hz": 120,
+      "geometry_id": "upright-24-38-24-55-visible-20260929",
+      "min_sole_height_mm": -0.06685800496098793,
+      "minimum_body_ground_clearance_mm": 0.14999922979689018,
+      "minimum_closure_triangle_height_mm": 18.690593405417903,
+      "hardware_qualified": false,
+      "collision_checked": false,
+      "reviewed_joint_keys_preserved": true,
+      "motion_end_s": 7.0,
+      "max_target_error_mm": 0.0,
+      "peak_joint_speed_deg_s": 216.36015274892856
+    },
+    "october12": {
+      "command": "lay_down",
+      "samples": 841,
+      "duration_s": 7.0,
+      "sample_hz": 120,
+      "geometry_id": "upright-24-38-24-55-visible-20260929",
+      "min_sole_height_mm": -7.879918939579511e-12,
+      "minimum_body_ground_clearance_mm": 0.14999922979689018,
+      "minimum_closure_triangle_height_mm": 8.504769331735828,
+      "hardware_qualified": false,
+      "collision_checked": false,
+      "reviewed_joint_keys_preserved": true,
+      "motion_end_s": 7.0,
+      "max_target_error_mm": 0.0,
+      "peak_joint_speed_deg_s": 137.5871266941769
+    }
+  },
+  "dead": {
+    "previous": {
+      "command": "dead",
+      "samples": 841,
+      "duration_s": 7.0,
+      "sample_hz": 120,
+      "geometry_id": "upright-24-38-24-55-visible-20260929",
+      "min_sole_height_mm": -0.24011874355033846,
+      "minimum_body_ground_clearance_mm": 0.14999922979649227,
+      "minimum_closure_triangle_height_mm": 6.177800825744381,
+      "hardware_qualified": false,
+      "collision_checked": false,
+      "reviewed_joint_keys_preserved": true,
+      "motion_end_s": 7.0,
+      "max_target_error_mm": 0.0,
+      "peak_joint_speed_deg_s": 308.62138215460357
+    },
+    "october12": {
+      "command": "dead",
+      "samples": 841,
+      "duration_s": 7.0,
+      "sample_hz": 120,
+      "geometry_id": "upright-24-38-24-55-visible-20260929",
+      "min_sole_height_mm": -7.922551503725117e-12,
+      "minimum_body_ground_clearance_mm": 0.14999922979649227,
+      "minimum_closure_triangle_height_mm": 7.649848966817195,
+      "hardware_qualified": false,
+      "collision_checked": false,
+      "reviewed_joint_keys_preserved": true,
+      "motion_end_s": 7.0,
+      "max_target_error_mm": 0.0,
+      "peak_joint_speed_deg_s": 156.16079272924452
+    }
+  }
+}

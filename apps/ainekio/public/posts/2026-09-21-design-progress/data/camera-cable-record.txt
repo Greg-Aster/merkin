@@ -1,0 +1,21 @@
+# Front-panel camera cable recess — 2026-09-18
+
+Closed the old top-center recess and cut the cable recess into the bottom edge, as requested. Only the front panel mesh was replaced; object transforms and parenting were preserved.
+
+The underside recess retains the original 22.35768 mm mouth width. Its inner flat is widened to 17 mm and its depth increased from 4 to 4.8 mm to accommodate the current chin-camera cable preview. A direct mirror of the old recess still intersected the wider cable tail; the fitted profile removes that interference.
+
+The two middle ventilation slots start 2.8 mm higher, leaving a 2 mm solid bridge above the recess. These inner slots are now 18.2 mm high; the outer pair remain 21 mm high. All four retain their 4 mm width, R2 rounded ends and original top positions.
+
+Panel dimensions, flat front face, 3 mm center wall, mounting holes and bearing interfaces remain unchanged. The original lower foot surfaces remain coplanar for standing the panel upright, with the requested notch between them. The carapace, LCD carrier, camera and holders were not repositioned. Leg linkages were untouched.
+
+Verification found one connected solid, zero nonmanifold edges and zero zero-area faces. Original end mounting regions have zero changed volume. There is no modeled overlap with the current cable preview, bottom cover or LCD carrier. Final cable routing and physical bend allowance remain provisional.
+
+The saved snapshot was reopened separately and matched the prepared panel geometry exactly. All 26 active panel/face-assembly object transforms and parent relationships match the pre-edit state. Animation action inventory and frame were preserved. Hidden legacy variants were excluded from world-transform checks because their unevaluated cached matrices differ after reopening; those variants were not edited.
+
+Live file: `Blender workspace/robot-motion-batch-20260916/Ainekio-Motion-Library.blend`.
+
+Before-edit backup: `Blender workspace/robot-front-panel-cable-recess-20260918/Before-camera-cable-recess-110419.blend`.
+
+Verified snapshot: `Blender workspace/robot-front-panel-cable-recess-20260918/Ainekio-Front-Panel-Cable-Recess.blend`.
+
+Evidence: `geometry-report.json`, `live-application.json`, `saved-verification.json`.

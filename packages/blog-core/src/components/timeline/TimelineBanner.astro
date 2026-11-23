@@ -1,0 +1,146 @@
+---
+import {
+  type EraConfigMap,
+  type TimelineConnectionPatternMap,
+  type TimelineConstellationConfigMap,
+  type TimelineConstellationPatternMap,
+  type TimelineEvent,
+  defaultTimelineViewConfig,
+} from '../../services/TimelineConfig'
+import TimelineView from './TimelineViewModes/TimelineView.astro'
+import timelineFeatureStyles from '../../styles/timeline-feature.css?inline'
+import timelineStyles from '../../styles/timeline-styles.css?inline'
+
+export interface Props {
+  id?: string
+  class?: string
+  category?: string
+  startYear?: number
+  endYear?: number
+  background?: string
+  backgroundVideo?: string
+  backgroundVideoPlaybackRate?: number
+  compact?: boolean
+  asBanner?: boolean
+  bannerHeight?: string
+  mobileHeight?: string
+  initialViewMode?: 'timeline' | 'list' | 'tree' | 'map'
+  initialScale?: number
+  initialOffsetX?: number
+  initialOffsetY?: number
+  useEraColors?: boolean
+  events?: TimelineEvent[]
+  eraConfig?: EraConfigMap
+  constellationConfig?: TimelineConstellationConfigMap
+  constellationPatterns?: TimelineConstellationPatternMap
+  connectionPatterns?: TimelineConnectionPatternMap
+}
+
+const {
+  id = 'unified-timeline-area',
+  class: classList = '',
+  startYear: propStartYear,
+  endYear: propEndYear,
+  background = '/assets/banner/posters/universe-poster.webp',
+  backgroundVideo,
+  backgroundVideoPlaybackRate = 1,
+  compact = false,
+  asBanner = true,
+  bannerHeight = '500px',
+  mobileHeight = '400px',
+  initialViewMode = 'timeline',
+  useEraColors = false,
+  initialScale = defaultTimelineViewConfig.defaultZoom,
+  initialOffsetX = 0,
+  initialOffsetY = 0,
+  events = [],
+  eraConfig = {},
+  constellationConfig = {},
+  constellationPatterns = {},
+  connectionPatterns = {},
+} = Astro.props
+
+const years = events.map(event => event.year)
+const computedStartYear =
+  propStartYear ??
+  (years.length > 0
+    ? Math.min(...years) -
+      Math.max(5, Math.ceil((Math.max(...years) - Math.min(...years)) * 0.1))
+    : 2000)
+const computedEndYear =
+  propEndYear ??
+  (years.length > 0
+    ? Math.max(...years) +
+      Math.max(5, Math.ceil((Math.max(...years) - Math.min(...years)) * 0.1))
+    : 2100)
+
+const eraEntries = Object.entries(eraConfig).filter(
+  ([eraKey]) => eraKey !== 'all-time' && eraKey !== 'all-eras',
+)
+const initialEra = eraConfig['all-eras'] ? 'all-eras' : eraEntries[0]?.[0] ?? ''
+const menuEntries = [
+  ...(eraConfig['all-eras'] ? [{ key: 'all-eras', label: 'All Eras' }] : []),
+  ...eraEntries.map(([eraKey, config]) => ({
+    key: eraKey,
+    label: config.displayName || eraKey,
+  })),
+]
+const timelineStyleText = [timelineStyles, timelineFeatureStyles].join('\n')
+---
+
+<style is:inline set:html={timelineStyleText} data-feature-style="timeline-banner"></style>
+
+<section
+  id={`${id}-wrapper`}
+  class:list={['timeline-wrapper relative w-full overflow-hidden', asBanner ? 'timeline-banner-mode' : '', classList]}
+  style={`height: ${bannerHeight}; --timeline-mobile-height: ${mobileHeight};`}
+  data-timeline-banner-wrapper="true"
+  data-timeline-id={`${id}-timeline`}
+  data-initial-era={initialEra}
+>
+  <div class="timeline-map-controls">
+    <div class="timeline-zoom-controls">
+      <button type="button" class="timeline-control-button" data-action="zoom-out" aria-label="Zoom out">-</button>
+      <button type="button" class="timeline-control-button" data-action="reset-view">Reset</button>
+      <button type="button" class="timeline-control-button" data-action="zoom-in" aria-label="Zoom in">+</button>
+    </div>
+    <div class="timeline-era-filter" role="group" aria-label="Select era">
+      {menuEntries.map((entry) => (
+        <button
+          type="button"
+          class:list={['timeline-era-option', entry.key === initialEra ? 'is-active' : '']}
+          data-era-option={entry.key}
+        >
+          {entry.label}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <TimelineView
+    id={`${id}-timeline`}
+    events={events}
+    background={background}
+    backgroundVideo={backgroundVideo}
+    backgroundVideoPlaybackRate={backgroundVideoPlaybackRate}
+    compact={compact}
+    initialScale={initialScale}
+    initialOffsetX={initialOffsetX}
+    initialOffsetY={initialOffsetY}
+    useEraColors={useEraColors}
+    startYear={computedStartYear}
+    endYear={computedEndYear}
+    eraConfig={eraConfig}
+    constellationConfig={constellationConfig}
+    constellationPatterns={constellationPatterns}
+    connectionPatterns={connectionPatterns}
+    selectedEventSlug={null}
+  />
+</section>
+
+<script>
+  import { initTimelineBannerControls } from './timelineBannerClient.js'
+
+  initTimelineBannerControls()
+  document.addEventListener('astro:page-load', initTimelineBannerControls)
+</script>

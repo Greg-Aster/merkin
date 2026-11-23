@@ -1,0 +1,183 @@
+---
+title: "V1 Clock-Spring Arms, Hunting Phantom Leg Jams (NeuralPose v8), V3 Option A-1 Legs & the game.megameal 3D Web Simulator"
+published: 2026-11-20T17:00:00-08:00
+updated: 2026-11-21
+description: "November 19–21 workbench milestone: redesigning Ainekio V1 around vertical-knee R2V10 arms and concentric under-arm 4-wire clock-springs; resolving seven interacting phantom leg-jam root causes across ESP32-P4 firmware and NeuralPose v5→v8 calibrated Schmitt-trigger carpet recovery; rescaling Ainekio V3 onto the Option A-1 5-link pantograph (+120% lift, 0.93:1 servo balance) with lap-joint belly armor and Clip 26 latches; and launching the live standalone browser alpha of the 3D robot simulator at simulator.ainek.io."
+image: "/posts/2026-11-20-progress/cover-nov20-triptych.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V1, V2, V3, Clock-Spring, NeuralPose, Phantom Jam, MuJoCo, Megameal, WebGL, ESP32-P4, Blender]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: overview
+  generation: both
+  kind: journal
+  next: project-overview
+  related: ["ainekio-v1", "ainekio-v3-preview", "jam-protection-and-thermal-safety", "gait-development", "gateway-and-simulator"]
+---
+import RobotModelViewer from '../../components/RobotModelViewer.svelte'
+import SimulatorCta from '../../components/SimulatorCta.astro'
+
+The past three days on the workbench split across four tightly connected fronts—two mechanical CAD leaps in `v3-2.blend`, a deep multi-layer firmware and reinforcement-learning hunt to eliminate phantom leg jams on physical carpet, and an alpha proof-of-concept for building and simulating robots directly in a browser 3D world:
+
+1. **[Ainekio V1](/posts/ainekio-v1/) received a vertical-knee arm setup and concentric under-arm 4-wire clock-springs (`174.8 × 155.5 × 84.1 mm`, `174` active meshes):** `R2V10` upper arms were shortened and squared (`36.17 × 36.17 × 37.50 mm`) to hold the knee `MG90S` servos vertically at the elbow, paired with standardized `21,216`-vertex sculpted spiked lower legs and a **3-part rotary clock-spring assembly** under each arm that winds and unwinds all four conductors (`PWM + 5V + GND + 4th-wire sense`) internally without exposed wire loops.
+2. **Seven interacting causes of "phantom leg jams" were traced and eliminated across ESP32-P4 C firmware and `NeuralPose` (`v5` → `v8-calibrated`):** What looked on the floor like mysterious leg stalls and crooked post-walk freezes turned out to be seven stacked interactions between C-side balance trims, inverted-carrier calibration ceilings (`above_calibration`), duplicate Python stall detectors, and re-locking carpet pile—now consolidated into **`neural-pose-v8-calibrated`** (`2.46M` GPU MuJoCo steps, Schmitt-trigger single-leg carpet stepping, `above_calibration_mask = 0`, `stalled_joints = 0`) and **`50 Hz` `NeuralPosePresence`**, while keeping the hardware **`I²t` winding thermal fuse** (`8–10 s` per-channel cutoff) 100% intact.
+3. **[Ainekio V3](/posts/ainekio-v3-preview/) adopted the `Option A-1` compact 5-link pantograph (`54 / 22 / 46 / 56 / 135 mm`) and unified printable armor (`402.0 × 236.5 × 343.1 mm`, `537` active meshes):** After evaluating over `5,000` linkage geometries against `DS3235` torque/speed curves, V3 replaced its tall baseline legs with `Option A-1`—delivering **`+120%` vertical lift**, **`+116%` running thrust**, **`0.93:1` dual-servo load balance**, and **`-48.6 mm` shorter rear overhang**—alongside a `3,860`-vert lap-jointed belly chassis tub, `40°` sloped `F688ZZ` rear bearing undertray, functional `Clip 26` leaf-spring clamshell latches, and recessed `AINEKIO V-003` front fender arches.
+4. **[`simulator.ainek.io`](https://simulator.ainek.io/) 3D Web Robot Simulator (Live Browser Alpha — Evolved from `game.megameal`):** What started two days ago as a local `game.megameal` (`?scene=v2_lab_runtime`) daemon proof-of-concept is now live as a **zero-install browser alpha at [`simulator.ainek.io`](https://simulator.ainek.io/)**. It compiles the real `ESP32-P4` C firmware (`ainekio-v2-firmware.wasm`) and **`500 Hz` MuJoCo physics (`mujoco_wasm.js`)** directly into a browser Web Worker alongside Three.js, quantized **`microduck-v19-snag-p4`** neural walking, **`NeuralPose`** emotes, six playable 3D worlds (including **Yggdrasil**, **Observatory**, **Miranda Wreck**, **Solitude**, **Sci Fi Room**, and the **V2 Robotics Lab**), live `320 × 170` `ST7789` LCD faces, virtual `OV5647` chin-cam vision, force-wrench perturbations, and `J0–J11` servo pin/jam tests—with optional WebSocket attachment back to local Body Control / Ainekio OS.
+
+---
+
+## 1. Ainekio V1: Vertical-Knee `R2V10` Arms, Sculpted Spiked Legs & Under-Arm 4-Wire Clock-Springs
+
+While the active eight-servo [Ainekio V1](/posts/ainekio-v1/) continues running floor gaits and 59 `SSD1306` OLED expressions, its mechanical assembly in `Scene 'v1'` took another major step forward to solve the classic 2-DOF spider-quadruped headache: exposed knee servo leads snagging or fatiguing across repeated `90°+` hip sweeps.
+
+<div className="grid grid-cols-1 gap-4 my-6 md:grid-cols-2">
+  <figure className="m-0">
+    <img src="/posts/ainekio-v1/v1-clockspring-open-deck.webp" alt="Overhead open-deck CAD view of Ainekio V1 with the Frame8 cap hidden, revealing all four concentric under-arm 4-wire clock-springs, Waveshare ESP32-P4-WIFI6, Adafruit PCA9685, and dual 2S 14500 battery bays." width="1600" height="1100" loading="lazy" className="w-full rounded-xl" />
+    <figcaption>With Frame8 hidden: all four hip-coaxial clock-spring rotor cups, stationary servo-snout stators, coiled 4-wire harnesses, ESP32-P4-WIFI6, PCA9685, and dual 2S 14500 bays.</figcaption>
+  </figure>
+  <figure className="m-0">
+    <img src="/posts/ainekio-v1/v1-sculpted-leg-parity.webp" alt="Three-panel studio comparison of Ainekio V1's sculpted cobalt-blue spiked lower leg showing reference profile, revised printable mesh, and 32-degree oblique horn-pocket view." width="1572" height="1114" loading="lazy" className="w-full rounded-xl" />
+    <figcaption>Parity study for V1's standardized 21,216-vertex sculpted spiked lower leg (39.3 × 5.3 × 79.2 mm) with recessed MG90S horn pocket and screw clearances.</figcaption>
+  </figure>
+</div>
+
+### Key Mechanical Changes in `Scene 'v1'`
+- **Compact Vertical-Knee Upper Arm (`R2V10`):** Shortened and squared from `[37.32, 60.43, 37.50 mm]` (horizontal knee pocket) to **`36.17 × 36.17 × 37.50 mm`** (`1,419` vertices), orienting each knee `MG90S` (`L3, R3, L4, R4`) **vertically** at `(±59.14, ±67.30, 74.48 mm)` with recessed hip-horn pockets and fastener clearances while keeping `683ZZ` counter-bearings on all four hip axes (`(±48.35, ±38.50 mm)`).
+- **3-Part Coaxial Under-Arm Clock-Spring:** Replaced airborne wire arches and external snap-clips with a rotary clock-spring concentric with each Hip-Z shaft:
+  1. **`Clockspring Rotor Cup (Under-Arm)`** (`33.90 × 33.79 × 5.30 mm`, `r = 9.30..19.88 mm`): Mounts underneath the rotating `R2V10` upper arm with a tangential side-exit slot feeding the vertical knee servo.
+  2. **`Clockspring Snout Stator`** (`26.45 × 17.90 × 5.13 mm`, `r = 6.07..17.79 mm`): Anchors to the stationary hip servo snout and guides the inner harness cleanly into the `Frame7` chassis.
+  3. **`4-Wire Spiral Ribbon Harness`** (`15,520` vertices per corner): Coils `PWM + 5V + GND` plus the white **4th-wire potentiometer tap** inside the enclosed rotor/stator cavity so hip rotation winds and unwinds the spiral internally with zero exposed slack.
+- **Clock-Spring Bay `Frame8` Cap & Sculpted Lower Legs:** The `22.0 mm`-tall `Frame8` enclosure cap (`121.7 × 79.7 × 22.0 mm`, `1,045` vertices) adds four scalloped corner clock-spring clearance bays (`r = 32.5..66.5 mm`), while all four lower legs standardize on a unified **`21,216`-vertex (`39.30 × 5.30 × 79.17 mm`)** sculpted spiked profile (`knee` pivot at `(±72.92, ±53.53, 70.12 mm)`).
+
+---
+
+## 2. Three Days Hunting Phantom Leg Jams & Reworking Neural Gait (`NeuralPose v5` → `v8`)
+
+On physical carpet runs with [Ainekio V2](/posts/ainekio-v2/), fast limb swings, overhead-stretch returns, and post-walk stops intermittently triggered **phantom leg-jam recoveries**, infinite unloaded stepping loops, or crooked mid-air freezes—even when no physical obstacle was blocking the leg.
+
+Tracing every state owner from the `ESP32-P4` ADC/PWM loop up through `Body Control` and `Freestyle` uncovered **seven distinct, interacting root causes** masquerading as a single "jam" bug:
+
+<figure className="my-6">
+  <img src="/posts/2026-11-20-progress/phantom-jam-7layer-diagnosis.webp" alt="Engineering root-cause diagram showing the 7-layer phantom leg-jam stack from ESP32-P4 ADC/PWM up to 50 Hz NeuralPosePresence, the goals.py inverted carrier calibration ceiling clamp (CARRIER_HOME_MARGIN_DEG = 3.0), and NeuralPose v8's Schmitt-trigger carpet sequencer." width="3200" height="2040" loading="lazy" className="w-full rounded-xl" />
+  <figcaption>Three-day root-cause breakdown: (A) the seven stacked firmware, gateway, and RL interactions behind phantom carpet jams; (B) why +61 mm step lifts pushed inverted carriers past -30.87° Home into <code>above_calibration</code>; and (C) how <code>neural-pose-v8-calibrated</code> settles in a single Schmitt-trigger step (&gt;6.5° start, &lt;=3.0° latch-off) inside firmware's 7.0° zero-heat band.</figcaption>
+</figure>
+
+| Layer | Symptom Seen on Floor | Actual Root Cause | Canonical Fix (`Ainekio-bot` & `ainekio-os`) |
+| --- | --- | --- | --- |
+| **1. P4 Streaming Progress (`servo_feedback_position.c`)** | False `1000 ms` `no_progress` stalls during 50 Hz cyclic reversals | Reversing a target under load without crossing `measured_us` left stale high-water `best` marks | `80 µs` deadband, `80 µs/s` active-slew window reset, `25 µs` target-shift unlock, and rejection of clipped (`0`/`4095`) or extrapolated ADC reads; hardware **`I²t` thermal fuse** (`>7.0°` error & `<12°/s` slew, `8–10 s` per-channel `LEDn_OFF_H = 0x10` cutoff) preserved intact |
+| **2. P4 `stand_hold_recover` (`body.c`)** | Immediate post-walk re-stepping & crooked `[14.7°, -48.9°, ...]` mid-air freezes | Active IMU leveling trims (`!balance_settled` at `~5°` roll) shifted target pulses mid-debounce; exhausted `STAND_MAX_REPLANS` (`2`) deadlocked `entering = true` | Added `actively_leveling` guard, `stand_hold_replans` cap (`2`) disarming autonomous catch until re-settled, and `0.8 s` `ARRIVAL_WAIT_TIMEOUT_US` smooth `500 ms` fallback to symmetric Stand |
+| **3. Dual Recovery Owners (`bridge.py`)** | Firmware `sequence = 0` posture replans fighting host `50 Hz` `NeuralPose` | Persistent NVS `stand_enabled: true` armed C-side `stand_hold_recover` behind host `NeuralPose` | `_sync_neural_pose_servo_feedback()` sets `stand_enabled: false` per connection epoch while keeping 4th-wire telemetry and `jam_enabled: true` (`I²t` fuse) active |
+| **4. Host Python Recoil (`executor.py`)** | Fast loaded swings clamped mid-gesture after `280 ms` | Hardcoded Python `_detect_stalled_recoils` (`>=10°` lag for `14` ticks) mistook loaded servo slewing for rigid jams | Deleted `_detect_stalled_recoils` (`-167` lines); added `mid_step_active` terminal stance settling (`<=5.5°` stance / `<=3.5°` shoulder error, safely inside the `7.0°` zero-heat thermal deadband) |
+| **5. Inverted Carrier Ceiling (`goals.py`)** | Rear/front carrier `above_calibration` faults blinding closed-loop control | `+61 mm` Z foot-lift drove inverted carriers (`home = -30.87°` at `~2745 µs`) toward `2950 µs` past the 4th-wire calibration ceiling (`usable_mask = 0`) | Added `PoseManifold.CARRIER_HOME_MARGIN_DEG = 3.0` (clamping `carrier >= -27.87°`) and right-sized carpet step lift to `18–20 mm` (`z_norm +0.11`) → **`above_calibration_mask = 0`** |
+| **6. `0.8B` LLM Event Loop (`library_recovery.py`)** | Non-terminal `servo_stall` / `tipped` cancelling active `50 Hz` RL streams | Legacy `recover_events` re-invoked the `0.8B` Freestyle LoRA with open-loop `library_recovery.py` heuristics | Deleted `library_recovery.py` (`-747` lines) and pruned `828` synthetic recovery rows (`1,767 → 939` clean choreography rows); `Bridge` aborts **only** on real `I²t` cutoff (`outputs_released: true`) |
+| **7. Legacy 20 Hz Presence (`presence.py`)** | Carpet shoulder scrubbing `0.65 s` after gestures & `stop` cutting off wake-word mic | `Master/gateway/presence/` (`3,343` lines) ran a competing 20 Hz loop and sent `AINEKIO_COMMAND_STOP` on `vad_open` | Replaced with `872`-line **`50 Hz` `NeuralPosePresence`**: motor-silent during `vad_open`/wake-word, driving pure sagittal speech nods (`±2.5 mm` Z, `±4.5°` pitch) with **`0.0°` shoulder targets** |
+
+### Four Iterations of Neural Gait & `NeuralPose` (`v5` → `v6` → `v7` → `v8-calibrated`)
+Alongside retiring legacy `pupper-mjx` patches in favor of clean-room **MicroDuck PPO** (`microduck-v18-p4` & `microduck-v19-snag-p4` `107.8 KB` `int8` L2-cached policy + `1.8 s` firmware reverse-unsnag reflex) and Apache-2.0 **RT-DETRv2 + OWLv2** local vision (`detector_backend.py`), `NeuralPose` (`826,776` parameters, `50 Hz`) went through four full GPU MuJoCo training cycles:
+
+1. **`v5-adaptive` (`1.23M` steps):** Introduced unilateral shoulder friction snags, but unlocked carpet pile permanently on first lift.
+2. **`v6-relock` (`1.35M` steps):** Modeled **re-locking carpet pile** (lifting frees the foot, but touching down with `>2.6°` error re-locks pile at the landed angle), exposing sub-`6.5°` continuous micro-stepping ("drunk wobble") and `+61 mm` `above_calibration` carrier over-retraction on the physical robot.
+3. **`v7-hysteresis` (`1.23M` steps) → `neural-pose-v8-calibrated` (`2.46M` steps, active):**
+   - **Stand-Before-Step Gate:** Blocks shoulder stepping while any stance carrier error exceeds `14°`, forcing folded or crouched legs to stand on all four feet before lifting a paw.
+   - **Schmitt-Trigger Single-Leg Sequencer:** Initiates a single-leg step strictly when shoulder splay exceeds **`6.5°`** and latches that leg down to **`<= 3.0°`**; sub-`6.5°` splays hold calm zero-lift stance inside firmware's `7.0°` zero-heat band.
+   - **Tripod CoM Shift & Wide Friction Envelope:** Combines `±14 mm` lateral and `±9 mm` longitudinal CoM shifts, `-8 mm` diagonal brace press, `18–20 mm` calibrated Z lift (`carrier >= -27.87°`), decoupled loaded servo damping (`135–210°/s`), and floor friction `µ = 0.10..2.05` (slick tile through deep carpet), passing **`12/12` 3D MuJoCo qualification scenarios with `0` falls** and **`stalled_joints = 0`** on live hardware.
+
+---
+
+## 3. Ainekio V3: `Option A-1` Compact 5-Link Pantograph & Printable Hull Engineering
+
+Earlier in the week, viewing **V1 · V2 · V3** side-by-side in the 1:1 3D lineup made an engineering problem visually obvious: V3's initial `87.7 / 40 / 93.6 / 158.4 mm` legs forced long moment arms (`105 N·mm/N`, operating near `84%` of `DS3235` stall torque during bounding), protruded `-148 mm` behind the hip, and risked crank-to-fender contact at extreme upstroke.
+
+<figure className="my-6">
+  <img src="/posts/ainekio-v3/v3-opt-a1-rear34.webp" alt="Rear-left three-quarter Blender render of Ainekio V3 showing the shortened -48.6 mm rear leg overhang, 40-degree sloped F688ZZ rear bearing undertray, telescoped twin thigh struts, and ribbed cargo trunk." width="960" height="640" loading="lazy" className="w-full rounded-xl" />
+  <figcaption>Ainekio V3 (402.0 × 236.5 × 343.1 mm w/ whip, 537 active meshes) in rear three-quarter view: Option A-1 5-link legs with -48.6 mm shorter rear overhang, 8.4 mm full-sweep fender clearance, telescoped twin thigh struts, and 40° sloped F688ZZ rear bearing undertray.</figcaption>
+</figure>
+
+### `>5,000`-Candidate 5-Link Optimization → `Option A-1` (`54 / 22 / 46 / 56 / 135 mm`)
+Sweeping more than `5,000` candidate 5-link geometries across full `270°` `DS3235` travel (`Part_009` `22.0 mm` flanged crank, `Part_023` `54.0 mm` trussed carrier, `-35°` angled bellcrank, `Part_026` `56.0 mm` trussed rod, and `Part_027` `109.0 mm` angled lower leg / `135 mm` effective foot vector) transformed V3's stance and actuator margin:
+- **`+120%` vertical support lift** (`56 N·mm/N` vs. `105 N·mm/N` bottleneck torque) and **`+116%` running push-off thrust** (`65 N·mm/N` vs. `123 N·mm/N`), shifting bounding load from the slow, hot `84%` stall zone right into the **`46%` peak mechanical output power zone (`99% P_max`)**.
+- **`0.93:1` dual-servo load sharing** between the `Part_005` crank and `Part_006` carrier servos, exploiting up to `215°–268°` of `DS3235` shaft travel across running and emotes with **`8.4 mm` minimum fender clearance** and **`-48.6 mm` less rear overhang**.
+
+<div className="grid grid-cols-1 gap-4 my-6 md:grid-cols-2">
+  <figure className="m-0">
+    <img src="/posts/ainekio-v3/v3-opt-a1-workspaces.webp" alt="Four-panel sagittal 270-degree foot workspace point-cloud study comparing Baseline V3 (fender collision) against Option A compact pantograph, Option B zero-tail tucked, and Option C symmetric diamond 5-bar." width="1600" height="1200" loading="lazy" className="w-full rounded-xl" />
+    <figcaption>Sagittal 270° workspace point clouds: eliminating the red fender-collision zone while preserving forward-knee stance geometry in Option A-1.</figcaption>
+  </figure>
+  <figure className="m-0">
+    <img src="/posts/ainekio-v3/v3-opt-a1-torque-charts.webp" alt="Four-panel DS3235 engineering charts showing weakest-servo bottleneck torque, running push-off torque, 270-degree travel utilization, and shift from 84% stall torque to 46% peak motor power." width="1600" height="1200" loading="lazy" className="w-full rounded-xl" />
+    <figcaption>DS3235 torque &amp; mechanical power curves: halving moment arms shifts high-speed bounding from 84% τ_stall into the 46% peak-power sweet spot.</figcaption>
+  </figure>
+</div>
+
+### Unified Belly Chassis Tub, `Clip 26` Clamshell Latch & Symmetric `AINEKIO V-003` Hull
+- **Continuous Armored Belly Tub (`3,860` vertices):** Merged 21 fragmented underside pieces into a sealed skid-ribbed structural tub with integrated `4.24 mm` outer servo support walls, front/rear `F688ZZ` bearing cups, a `40°` sloped rear bearing tray (`1,173` vertices + `46` `M3` fasteners), and `8×` inside-out `M3×8` sponson base-lip screws.
+- **Functional `Clip 26` Leaf-Spring Clamshell Latch:** Secures the `50°–60°` rear-hinged service hood via a hidden `M3×6` anchor foot, `1.8 mm` stress-relieved spring neck, molded `45°` striker catch bar, and upper thumb-pull release lip.
+- **Planar Front Fender Brows & Badging:** Extended both front fender arches and angled yellow side sponsons symmetrically with `79 × 16.4 mm` recessed **`AINEKIO`** and **`V-003 Field Companion Unit`** FDM lettering.
+
+<div className="grid grid-cols-1 gap-4 my-6 md:grid-cols-2">
+  <figure className="m-0">
+    <img src="/posts/ainekio-v3/v3-belly-chassis-tub.webp" alt="Four-panel CAD view of V3's continuous armored belly chassis tub, 4x DS3235 portal bulkheads, F688ZZ bearing cups, and inside-out M3x8 sponson screw channels." width="1210" height="800" loading="lazy" className="w-full rounded-xl" />
+    <figcaption>Continuous sealed belly chassis tub, DS3235 portal bulkheads, F688ZZ bearing cups, and inside-out M3×8 sponson screw channels.</figcaption>
+  </figure>
+  <figure className="m-0">
+    <img src="/posts/ainekio-v3/v3-clamshell-clip26-latch.webp" alt="Four-panel CAD cutaway and exterior view of V3's functional Clip 26 leaf-spring clamshell latch with hidden M3 anchor, 1.8 mm spring neck, and 45-degree striker catch." width="1560" height="1080" loading="lazy" className="w-full rounded-xl" />
+    <figcaption>Functional Clip 26 service-hood latch: hidden M3 anchor, 1.8 mm leaf spring, 45° striker catch bar, and clean thumb-pull lip.</figcaption>
+  </figure>
+</div>
+
+<RobotModelViewer
+  client:visible
+  initialModel="lineup"
+  caption="Updated 1:1 true-scale 3D lineup: inspect V1's vertical-knee arms & under-arm clock-springs (left), V2's 650 g four-bar body (center), and V3's compact Option A-1 5-link crawler (right)."
+/>
+
+---
+
+## 4. `simulator.ainek.io` & `game.megameal`: Live Browser Alpha 3D Robot Simulator
+
+<SimulatorCta />
+
+Not everyone has a calibrated FDM printer, twelve modified 4th-wire servos, and an `ESP32-P4` bench ready on day one. What began on November 20 by adapting **[`game.megameal`](https://game.megameal.org/)**—a clean-sheet Three.js + pure-TypeScript ECS + Rapier WASM + WebRTC multiplayer 3D world/MMORPG engine—into a local `v2_lab_runtime` robotics testbed has now graduated into a **working, publicly live browser alpha at [`simulator.ainek.io`](https://simulator.ainek.io/)**.
+
+You can now drop Ainekio V2 straight into six full 3D worlds in a desktop browser, walk it around with `WASD` / Arrow keys or the Cockpit vector joystick, switch into first-person chin-camera **Robot POV**, fire neural emotes and facial expressions, or shove and jam individual servos to test firmware fault recovery in real time:
+
+<figure className="my-6">
+  <img src="/posts/2026-11-20-progress/simulator-yggdrasil-live.webp" alt="Live WebGL capture from simulator.ainek.io showing the red 12-servo Ainekio V2 quadruped standing on the rainbow Bifrost bridge inside the Yggdrasil (Tree of Life) world, with the full Ainekio V2 Simulator HUD displaying 500 Hz MuJoCo WASM telemetry, happy ST7789 LCD eyes, live OV5647 chin-camera feed, microduck-v19-snag-p4 neural gait controls, and 12 interactive servo pin/jam gauges." width="1600" height="1000" loading="lazy" className="w-full rounded-xl" />
+  <figcaption>Live capture from <a href="https://simulator.ainek.io/"><code>simulator.ainek.io</code></a> in the <strong>Yggdrasil (Tree of Life)</strong> level: Ainekio V2 on the Bifrost bridge facing the <code>27 m</code> Norse World Tree, driven 100% client-side by <code>500 Hz</code> MuJoCo WASM, compiled <code>ESP32-P4</code> C firmware, and <code>microduck-v19-snag-p4</code> neural walking.</figcaption>
+</figure>
+
+### What Is Working Live Today on [`simulator.ainek.io`](https://simulator.ainek.io/) (Nov 21 Update)
+Rather than faking animations or approximating closed-loop four-bar linkages with game-ragdoll hinges, the live alpha compiles the **same `ESP32-P4` C firmware and `500 Hz` MuJoCo physics** into WebAssembly inside a dedicated browser Web Worker:
+
+1. **100% Client-Side `500 Hz` MuJoCo WASM + Compiled `ESP32-P4` Firmware (`mujoco_wasm.js` + `ainekio-v2-firmware.wasm`):** Executes real `ESP32-P4` firmware modules (`virtual_body.c`, `face.c`, `face_timeline.c`, `protocol-v1` commands, 4th-wire `CD74HC4067` ADC feedback, `LSM6DS3` IMU attitude, and per-channel `I²t` winding thermal cutoff) inside a browser worker—paired with analytical closed-form `35 / 20 / 28 / 38 mm` four-bar loop closure on `/assets/robots/ainekio-v2.glb`.
+2. **In-Browser Neural Gait & `NeuralPose` Emotes (Plus Classic Firmware Gaits):** Runs **`microduck-v19-snag-p4`** neural walking and **`neural-pose-v7-hysteresis`** expressive motions (`Sit`, `Lay Down`, `Wave`, `Bow`, `Stretch`, `Shake`, `Dance`, `Cute`, `Nod`, `Point`, `Celebrate`, `Push-Up`, `Crouch`) directly in the browser, with a live toggle back to native analytical firmware gaits (`Walk`, `Run`, `Crab`).
+3. **Six On-Demand 3D Worlds Adapted from `game.megameal`:**
+   - **V2 Robotics Lab:** `1:1` metric testbed with `15/16 mm` cable strips, corridor curb, and optical landmarks.
+   - **Yggdrasil (Tree of Life):** Colossal `27 m` Norse World Tree with the rainbow Bifrost bridge, cable thresholds, stone rune archway, cathedral roots, ramps, slalom, and spatial audio wells.
+   - **Observatory:** Coastal stone observatory with chunked `LOD0` terrain and a real MuJoCo heightfield.
+   - **Miranda Wreck**, **Solitude (Stonehenge Plain)**, and **Sci Fi Room:** Full-collision exploration decks, rolling grassy plains, and biomechanical lab interiors loaded lazily on demand.
+4. **Full Camera Suite, Keyboard Driving & Interactive Fault Injection:**
+   - **`Orbit`**, **`Follow V2`**, and **`Robot POV`**: Drag smoothly in Orbit (including looking upward at tall structures like Yggdrasil without floor clipping), or drive directly from `Follow V2` / `Robot POV` using **`WASD` / Arrow keys + `Q`/`E` strafe** synced to the HUD joystick.
+   - **Live `ST7789` LCD Face, Virtual `OV5647` Chin Cam & Audio:** Renders procedural `320 × 170` facial expressions onto the 3D faceplate and HUD, captures live chin-cam snapshots, and plays spatial world audio with `Tap to Talk` microphone support.
+   - **Perturbations & `J0–J11` Pin/Jam Grid:** Click `Push +X / +Y / -Y` or **`Pick Up & Shake`** to trigger firmware IMU reflexes, or click any of the 12 servo bars (`J0–J11`) to pin/jam a joint and watch 4th-wire stall detection and `I²t` protection trip safely in software.
+5. **Dual-Mode Transport (`Standalone` or Live `Body Control` WebSocket):** Works standalone with zero local software, or click **`Connect Body Control`** to link the browser robot over `ws://` / `wss://` (`protocol-v1` JSON + binary frames) to a local Body Control / [Ainekio OS](/posts/ainekio-os/) instance—the same bridge architecture proved in the original `game.megameal` `?scene=v2_lab_runtime` daemon PoC below.
+
+<div className="grid grid-cols-1 gap-4 my-6 md:grid-cols-2">
+  <figure className="m-0">
+    <img src="/posts/2026-11-20-progress/simulator-v2-lab-live.webp" alt="Live WebGL capture from simulator.ainek.io in the V2 Robotics Lab showing the current red 12-servo Ainekio V2 quadruped with glowing golden star ST7789 eyes alongside the active Physics & RL panel (Push +X/+Y/-Y, Pick Up & Shake, Self-Level, and 50 Hz RL Rollout Recorder)." width="1600" height="1000" loading="lazy" className="w-full rounded-xl" />
+    <figcaption>Live <strong>V2 Robotics Lab</strong> on <a href="https://simulator.ainek.io/"><code>simulator.ainek.io</code></a>: the red 12-servo Ainekio V2 with live golden-star <code>ST7789</code> eyes and the <strong>Physics &amp; RL</strong> panel (wrench perturbations, self-leveling, and <code>50 Hz</code> <code>.jsonl</code> rollout recording).</figcaption>
+  </figure>
+  <figure className="m-0">
+    <img src="/posts/2026-11-20-progress/megameal-master-control-map.webp" alt="Master Control Map (/editor/) in game.megameal showing the live ECS, UI host, level package, and adapter ownership graph." width="1600" height="1000" loading="lazy" className="w-full rounded-xl" />
+    <figcaption>The <code>game.megameal</code> Master Control Map (<code>/editor/</code>): modular ECS, level-package, and Three/Rapier/Browser adapter graph powering future multi-robot worlds and builder tooling.</figcaption>
+  </figure>
+</div>
+
+See the updated **[Gateway & 3D Web Simulator Reference](/posts/gateway-and-simulator/#game-megameal-simulator)** (or launch **[`simulator.ainek.io`](https://simulator.ainek.io/)** directly), **[Jam Protection & Thermal Safety](/posts/jam-protection-and-thermal-safety/)**, **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)**, and **[Ainekio V3 Armored CAD Preview](/posts/ainekio-v3-preview/)** for complete subsystem details.

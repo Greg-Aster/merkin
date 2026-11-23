@@ -1,0 +1,52 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import { routeStyleHref } from '../styles/routeStyleBundles'
+import MainGridLayout from './MainGridLayout.astro'
+
+interface Props {
+  title?: string
+  description?: string
+  entry?: Pick<CollectionEntry<'quizzes'>, 'slug' | 'data'>
+  post?: {
+    slug: string
+    data: {
+      title?: string
+      description?: string
+      bannerType?: CollectionEntry<'quizzes'>['data']['bannerType']
+      showToc?: boolean
+      oneColumn?: boolean
+    }
+  }
+}
+
+const { entry } = Astro.props
+const title = Astro.props.title ?? entry?.data.title
+const description = Astro.props.description ?? entry?.data.description
+const layoutPost = entry
+  ? {
+      slug: entry.slug,
+      data: {
+        title: entry.data.title,
+        description: entry.data.description,
+        bannerType: entry.data.bannerType,
+        showToc: false,
+        oneColumn: true,
+      },
+    }
+  : Astro.props.post
+---
+<MainGridLayout
+  title={title}
+  description={description}
+  post={layoutPost}
+  oneColumn={true}
+>
+  <Fragment slot="head">
+    <link rel="stylesheet" href={routeStyleHref('quiz')} data-route-style="quiz" />
+  </Fragment>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+      <slot />
+    </div>
+  </div>
+</MainGridLayout>

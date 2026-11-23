@@ -1,0 +1,40 @@
+---
+import ArchivePanel from '@components/ArchivePanel.astro'
+import MainGridLayout from '@layouts/MainGridLayout.astro'
+import {
+  formatArchiveTaxonomyLabel,
+  getArchiveCategories,
+} from '@utils/archiveTaxonomy'
+
+export async function getStaticPaths() {
+  return getArchiveCategories().map(category => {
+    return {
+      params: {
+        category,
+      },
+    }
+  })
+}
+
+const category = decodeURIComponent(
+  Astro.params.category as string,
+).toLowerCase()
+const categoryLabel = formatArchiveTaxonomyLabel(category)
+const title = `Category: ${categoryLabel}`
+const description = `Archive entries filed under ${categoryLabel} in the MEGA MEAL SAGA.`
+const archiveLayoutPost = {
+  data: {
+    bannerType: 'none',
+    showToc: false,
+  },
+}
+---
+
+<MainGridLayout
+  title={title}
+  description={description}
+  post={archiveLayoutPost}
+>
+    <h1 class="sr-only">{title}</h1>
+    <ArchivePanel categories={[category]}></ArchivePanel>
+</MainGridLayout>

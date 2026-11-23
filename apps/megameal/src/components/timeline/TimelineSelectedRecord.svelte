@@ -1,0 +1,83 @@
+<script lang="ts">
+import { createEventDispatcher } from 'svelte'
+import type {
+  TimelineCarouselScreen,
+  TimelinePortalEvent,
+} from './timelinePortalCarouselModel'
+import { getTimelineRecordHref } from './timelinePortalCarouselModel'
+
+export let selectedScreen: TimelinePortalEvent | null = null
+export let selectedScreenView: TimelineCarouselScreen | null = null
+export let selectedCardStyle = ''
+export let selectedStatusStyle = ''
+
+const dispatch = createEventDispatcher<{ open: undefined }>()
+
+function cssUrl(value = '') {
+  return `url("${value.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}")`
+}
+
+function formatRecordType(event: TimelinePortalEvent) {
+  const source = event.contentType || event.sourceCollection || 'record'
+  return `${source.replaceAll('-', ' ').replaceAll('_', ' ')} record`
+}
+
+$: selectedTypeLabel = selectedScreen ? formatRecordType(selectedScreen) : ''
+$: selectedHref = getTimelineRecordHref(selectedScreen?.url)
+$: selectedBackgroundStyle = selectedScreenView?.stillSrc
+  ? `${selectedCardStyle}; --timeline-selected-bg: ${cssUrl(selectedScreenView.stillSrc)}`
+  : selectedCardStyle
+</script>
+
+{#snippet selectedRecordContent()}
+  {#if selectedScreen && selectedScreenView}
+    {#if selectedScreenView.stillSrc}
+      <div class="timeline-selected-record__background" aria-hidden="true"></div>
+    {/if}
+    <div class="timeline-selected-record__header">
+      <div class="home-intro-copy__label">{selectedTypeLabel}</div>
+    </div>
+    <div class="timeline-selected-record__body">
+      <h2>{selectedScreen.title}</h2>
+    </div>
+    {#if selectedHref}
+      <div class="timeline-selected-record__affordance" aria-hidden="true">
+        <span>Open record</span>
+        <span class="timeline-selected-record__affordance-icon">&gt;</span>
+      </div>
+    {/if}
+  {/if}
+{/snippet}
+
+{#if selectedScreen && selectedScreenView}
+  <div class="home-intro-copy home-intro-copy--status" style={selectedStatusStyle} aria-live="polite">
+    <div class="home-intro-copy__label">{selectedScreenView.kicker}</div>
+    <div class="home-intro-copy__stat">{selectedScreenView.stat}</div>
+  </div>
+
+  {#if selectedHref}
+    <a
+      href={selectedHref}
+      class="home-intro-copy home-intro-copy--feature home-intro-copy--timeline-selected home-intro-copy--timeline-link"
+      style={selectedBackgroundStyle}
+      aria-label={`Timeline event: ${selectedScreen.title}`}
+      data-timeline-selected-card
+      data-timeline-interactive
+      data-sfx-hover="portal-hover"
+      data-sfx-click="portal-activate"
+      on:click={() => dispatch('open')}
+    >
+      {@render selectedRecordContent()}
+    </a>
+  {:else}
+    <aside
+      class="home-intro-copy home-intro-copy--feature home-intro-copy--timeline-selected"
+      style={selectedBackgroundStyle}
+      aria-label={`Timeline event: ${selectedScreen.title}`}
+      data-timeline-selected-card
+      data-timeline-interactive
+    >
+      {@render selectedRecordContent()}
+    </aside>
+  {/if}
+{/if}

@@ -1,0 +1,481 @@
+/* ============================================================
+ * Cosmic review longform dossier layout
+ * ============================================================ */
+
+.review-cosmic {
+  --cosmic-ink: oklch(0.94 0.02 260);
+  --cosmic-muted: oklch(0.76 0.04 250);
+  --cosmic-cold: oklch(0.74 0.14 218);
+  --cosmic-violet: oklch(0.69 0.18 296);
+  --cosmic-amber: oklch(0.84 0.15 75);
+  --cosmic-red: oklch(0.67 0.19 24);
+  position: relative;
+  max-width: 76rem;
+  margin: 0 auto 3rem;
+  padding: 0.2rem 0 2rem;
+  color: var(--cosmic-ink);
+  isolation: isolate;
+}
+
+.review-cosmic::before {
+  position: absolute;
+  inset: -1rem -1.25rem;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 16% 8%, oklch(0.45 0.18 296 / 0.22), transparent 23rem),
+    radial-gradient(circle at 82% 24%, oklch(0.42 0.16 210 / 0.22), transparent 20rem),
+    linear-gradient(180deg, oklch(0.08 0.03 270 / 0.96), oklch(0.04 0.02 270 / 0.98) 48%, oklch(0.08 0.03 30 / 0.96));
+  border-radius: 0.75rem;
+  content: "";
+}
+
+.review-cosmic__masthead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.45fr);
+  gap: 1.15rem;
+  align-items: stretch;
+  max-width: 72rem;
+  margin: 0 auto 1rem;
+  padding: 1.25rem 0;
+  border-top: 2px solid oklch(0.74 0.14 218 / 0.72);
+  border-bottom: 2px solid oklch(0.74 0.14 218 / 0.72);
+}
+
+.review-cosmic__masthead-copy {
+  display: flex;
+  min-height: 16rem;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.25rem 1.1rem 0.25rem 0;
+}
+
+.review-cosmic__kicker,
+.review-cosmic__section-label {
+  margin: 0 0 0.65rem;
+  color: var(--cosmic-cold);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.review-cosmic__title {
+  max-width: 18ch;
+  margin: 0;
+  color: oklch(0.97 0.03 255);
+  font-size: 2.95rem;
+  line-height: 0.96;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.review-cosmic__dek {
+  max-width: 47rem;
+  margin: 1rem 0 0;
+  color: var(--cosmic-muted);
+  font-size: 1.12rem;
+  line-height: 1.58;
+}
+
+.review-cosmic__sigil {
+  display: grid;
+  align-content: end;
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid oklch(0.74 0.14 218 / 0.34);
+  border-radius: 0.5rem;
+  background: linear-gradient(180deg, oklch(0.03 0.02 270 / 0.72), oklch(0.14 0.04 296 / 0.64));
+  box-shadow: inset 0 0 42px oklch(0.48 0.18 296 / 0.18);
+}
+
+.review-cosmic__sigil-media {
+  aspect-ratio: 1.45 / 1;
+  border-radius: 0.35rem;
+  filter: brightness(0.56) contrast(1.32) saturate(1.1) hue-rotate(18deg);
+}
+
+.review-cosmic__sigil-media video,
+.review-cosmic__sigil-media img {
+  margin: 0;
+}
+
+.review-cosmic__sigil figcaption,
+.review-cosmic__offering figcaption {
+  margin: 0.65rem 0 0;
+  color: oklch(0.72 0.06 250);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.review-cosmic__threshold {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  max-width: 72rem;
+  margin: 1rem auto 1.35rem;
+}
+
+.review-cosmic__threshold div {
+  padding: 0.85rem;
+  border: 1px solid oklch(0.68 0.1 235 / 0.26);
+  border-radius: 0.45rem;
+  background: oklch(0.1 0.03 260 / 0.72);
+}
+
+.review-cosmic__threshold span {
+  display: block;
+  color: var(--cosmic-amber);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.review-cosmic__threshold p {
+  margin: 0.35rem 0 0;
+  color: var(--cosmic-muted);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.review-cosmic__opening,
+.review-cosmic__chapter,
+.review-cosmic__spread,
+.review-cosmic__dossier,
+.review-cosmic__impact,
+.review-cosmic__constellation,
+.review-cosmic__descent,
+.review-cosmic__closing,
+.review-cosmic__void,
+.review-cosmic__offering {
+  max-width: 72rem;
+  margin: 1.15rem auto;
+}
+
+.review-cosmic__opening {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.review-cosmic__opening-note,
+.review-cosmic__spread-note {
+  padding: 1rem;
+  border: 1px solid oklch(0.69 0.14 218 / 0.28);
+  border-radius: 0.45rem;
+  background: oklch(0.08 0.03 260 / 0.78);
+}
+
+.review-cosmic__image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid oklch(0.7 0.12 225 / 0.26);
+  border-radius: 0.45rem;
+  background: oklch(0.03 0.02 260);
+  box-shadow: 0 22px 46px -32px oklch(0 0 0 / 0.9);
+  filter: saturate(0.88) contrast(1.08) brightness(0.92);
+}
+
+.review-cosmic__image > img,
+.review-cosmic__image picture,
+.review-cosmic__image picture > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: cover;
+  object-position: center;
+}
+
+.review-cosmic .review-cosmic__image img {
+  margin: 0;
+}
+
+.review-cosmic__image--wide {
+  aspect-ratio: 2.3 / 1;
+}
+
+.review-cosmic__image--span {
+  grid-column: 1 / -1;
+}
+
+.review-cosmic__image--tall {
+  grid-row: span 2;
+  aspect-ratio: auto;
+}
+
+.review-cosmic__image--portrait {
+  aspect-ratio: 4 / 5;
+}
+
+.review-cosmic__image--square {
+  aspect-ratio: 1;
+}
+
+.review-cosmic__chapter {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(18rem, 0.9fr);
+  gap: 1rem;
+  align-items: start;
+  padding-top: 1rem;
+  border-top: 1px solid oklch(0.69 0.14 218 / 0.26);
+}
+
+.review-cosmic__chapter--reverse {
+  grid-template-columns: minmax(18rem, 0.9fr) minmax(0, 1.1fr);
+}
+
+.review-cosmic__chapter--reverse .review-cosmic__chapter-copy {
+  order: 2;
+}
+
+.review-cosmic__chapter--reverse .review-cosmic__image-grid {
+  order: 1;
+}
+
+.review-cosmic h3 {
+  margin: 0 0 0.75rem;
+  color: oklch(0.92 0.05 245);
+  font-size: 1.95rem;
+  line-height: 1.04;
+  letter-spacing: 0;
+}
+
+.review-cosmic__chapter-copy p:not(.review-cosmic__section-label),
+.review-cosmic__opening-note p:not(.review-cosmic__section-label),
+.review-cosmic__spread-note p:not(.review-cosmic__section-label),
+.review-cosmic__dossier-copy p:not(.review-cosmic__section-label),
+.review-cosmic__impact p,
+.review-cosmic__constellation-copy p:not(.review-cosmic__section-label),
+.review-cosmic__descent-copy p:not(.review-cosmic__section-label),
+.review-cosmic__closing-copy p:not(.review-cosmic__section-label),
+.review-cosmic__void p,
+.review-cosmic__offering p {
+  margin: 0 0 0.9rem;
+  color: var(--cosmic-muted);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.review-cosmic__designation {
+  color: oklch(0.82 0.08 235);
+  font-style: italic;
+  font-weight: 800;
+}
+
+.review-cosmic__image-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.62rem;
+}
+
+.review-cosmic__image-grid--stacked {
+  grid-template-columns: 1fr;
+}
+
+.review-cosmic__image-grid--stacked .review-cosmic__image {
+  aspect-ratio: 2.45 / 1;
+}
+
+.review-cosmic__oracle {
+  max-width: 54rem;
+  margin: 1.2rem auto;
+  padding: 0.35rem 0;
+  border-top: 2px solid oklch(0.84 0.15 75 / 0.7);
+  border-bottom: 2px solid oklch(0.84 0.15 75 / 0.7);
+}
+
+.review-cosmic__oracle blockquote {
+  margin: 0;
+}
+
+.review-cosmic__oracle p {
+  margin: 0;
+  color: oklch(0.93 0.05 70);
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.review-cosmic__oracle cite {
+  display: block;
+  margin-top: 0.55rem;
+  color: var(--cosmic-muted);
+  font-size: 0.82rem;
+  font-style: normal;
+}
+
+.review-cosmic__spread {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.84fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.review-cosmic__dossier {
+  display: grid;
+  grid-template-columns: minmax(0, 0.86fr) minmax(22rem, 1.14fr);
+  gap: 1rem;
+  align-items: start;
+  padding: 1rem;
+  border: 1px solid oklch(0.69 0.14 218 / 0.24);
+  border-radius: 0.5rem;
+  background: linear-gradient(135deg, oklch(0.08 0.03 260 / 0.84), oklch(0.12 0.04 296 / 0.64));
+}
+
+.review-cosmic__dossier-media {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.62rem;
+}
+
+.review-cosmic__dossier-media .review-cosmic__image {
+  aspect-ratio: 1.35 / 1;
+}
+
+.review-cosmic__impact {
+  display: grid;
+  grid-template-columns: minmax(20rem, 0.8fr) minmax(0, 1.2fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid oklch(0.67 0.19 24 / 0.36);
+  border-radius: 0.5rem;
+  background: oklch(0.09 0.04 24 / 0.72);
+}
+
+.review-cosmic__impact h3 {
+  color: oklch(0.83 0.16 36);
+}
+
+.review-cosmic__descent {
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.2fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.review-cosmic__closing {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.38fr);
+  gap: 1rem;
+  align-items: stretch;
+  padding-top: 1rem;
+  border-top: 1px solid oklch(0.84 0.15 75 / 0.36);
+}
+
+.review-cosmic__closing-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1rem;
+  border: 1px solid oklch(0.84 0.15 75 / 0.28);
+  border-radius: 0.5rem;
+  background: oklch(0.08 0.03 260 / 0.78);
+}
+
+.review-cosmic__closing-copy p:nth-of-type(3) {
+  color: oklch(0.96 0.03 78);
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.review-cosmic__void {
+  padding: 1.25rem;
+  border: 1px solid oklch(0.67 0.19 24 / 0.42);
+  border-radius: 0.5rem;
+  background:
+    radial-gradient(circle at 50% 0, oklch(0.44 0.18 296 / 0.18), transparent 26rem),
+    oklch(0.04 0.02 260 / 0.94);
+}
+
+.review-cosmic__void p:not(.review-cosmic__section-label) {
+  max-width: 58rem;
+  color: oklch(0.84 0.04 250);
+  font-size: 1.06rem;
+}
+
+.review-cosmic__void p:last-child {
+  color: oklch(0.94 0.04 76);
+}
+
+.review-cosmic__offering {
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.72fr) minmax(0, 1.28fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 0.95rem;
+  border: 1px solid oklch(0.74 0.14 218 / 0.25);
+  border-radius: 0.5rem;
+  background: oklch(0.09 0.03 260 / 0.72);
+}
+
+.review-cosmic__offering-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.review-cosmic__offering figure {
+  margin: 0;
+}
+
+.review-cosmic__offering figcaption {
+  color: var(--cosmic-amber);
+  font-weight: 900;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .review-cosmic__masthead,
+  .review-cosmic__opening,
+  .review-cosmic__chapter,
+  .review-cosmic__chapter--reverse,
+  .review-cosmic__spread,
+  .review-cosmic__dossier,
+  .review-cosmic__impact,
+  .review-cosmic__descent,
+  .review-cosmic__closing,
+  .review-cosmic__offering {
+    grid-template-columns: 1fr;
+  }
+
+  .review-cosmic__chapter--reverse .review-cosmic__chapter-copy,
+  .review-cosmic__chapter--reverse .review-cosmic__image-grid {
+    order: initial;
+  }
+
+  .review-cosmic__masthead-copy {
+    min-height: auto;
+    padding-right: 0;
+  }
+
+}
+
+@media (max-width: 640px) {
+  .review-cosmic {
+    padding-inline: 0.25rem;
+  }
+
+  .review-cosmic::before {
+    inset: -0.75rem -0.35rem;
+  }
+
+  .review-cosmic__title {
+    font-size: 2.15rem;
+  }
+
+  .review-cosmic__threshold,
+  .review-cosmic__image-grid,
+  .review-cosmic__dossier-media,
+  .review-cosmic__offering-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .review-cosmic__image--wide,
+  .review-cosmic__image-grid--stacked .review-cosmic__image {
+    aspect-ratio: 16 / 9;
+  }
+
+}

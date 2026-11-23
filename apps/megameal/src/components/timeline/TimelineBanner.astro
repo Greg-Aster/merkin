@@ -1,0 +1,20 @@
+---
+import { defaultEraConfig } from '@/config/timelineconfig'
+import { isPublishedManifestRecord } from '@/contracts/manifests'
+import timelineManifest from '../../../../../packages/shared-data/generated/timeline.json'
+import { routeStyleHref } from '../../styles/routeStyleBundles'
+import TimelinePortalCarousel from './TimelinePortalCarousel.svelte'
+
+const timelineEvents = timelineManifest.items.filter(isPublishedManifestRecord)
+---
+
+<link rel="stylesheet" href={routeStyleHref('timeline')} data-route-style="timeline" />
+<div class="relative h-full w-full" data-timeline-banner-wrapper="true">
+  <TimelinePortalCarousel
+    events={timelineEvents}
+    eraConfig={defaultEraConfig}
+    initialViewMode="map"
+    presentation="banner"
+    client:only="svelte"
+  />
+</div>

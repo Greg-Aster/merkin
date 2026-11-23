@@ -1,0 +1,79 @@
+# Compact front-left test leg: 22 mm crank / 36 mm rod
+
+Applied through MCP to the live **Ainekio-Helmet-Restored.blend** on September 19, 2026. CAD leg **RL**, physical **front-left**, only. The user/other agent had switched to this helmet-restored file; the unsaved live scene was captured and backed up before modification.
+
+## Geometry and seating
+
+| Dimension | Before | Test |
+|---|---:|---:|
+| Part009 input crank, joint-center spacing | 24 mm | **22 mm** |
+| Part026 connecting rod, joint-center spacing | 38 mm | **36 mm** |
+| Part023 upper carrier | 40 mm | 40 mm |
+| Part027 knee-to-linkage pickup | 24 mm | 24 mm |
+| Part027 knee-to-foot bolt projection | 55 mm | 55 mm |
+
+This revision does **not** shorten the upper or lower leg. The nine existing reference knee/foot poses are retained through a new input-angle mapping. The 95 mm sum of upper/lower link lengths is unchanged; it is a theoretical planar reach bound, not a certified collision-free extension.
+
+Part003 and both servo seating transforms remain unchanged. Part005 retains the corrected flipped orientation. The new neutral input angle is **147.344271 degrees** in the canonical plane, a further **4.968508 degrees** from the previous seated 24/38 setup. `theta_deg` is a geometric offset from this new neutral.
+
+The original full-size stock horn pocket is reconstructed with the same **0.12 mm profile clearance** and cavity floor. The stock horn and its fastening screws are not scaled or shortened. Part009 retains a 12-degree flat plate and 4.9 mm normal thickness; Part026 retains a flat print face and 5 mm normal thickness. Their outer rims are beveled with overlap clamping. Circular joint interfaces retain their diameters. Input-joint hardware moves inward **0.425113 mm** to follow the shorter inclined crank; the rod's inclination changes to **2.028917 degrees**.
+
+For compatibility, existing object names retain their earlier `24mm`/`41mm` text. **Joint spacing mm** custom properties, mesh names, current source paths and new STLs identify the actual **22/36 mm** geometry. Other three legs and 729 actions are preserved.
+
+## Stride research basis
+
+There is no universal ideal stride length or servo-angle range established by the reviewed material. Contact timing, body placement, reachable foot paths, servo behavior and support margin must be considered together.
+
+- [Spot Micro](https://github.com/mike4192/spotMicro#note-on-walking-gaits) documents an eight-phase crawl with individual leg swings and body shifts. Its structure is a useful reference; its dimensions and servo angles are not transferred to Ainekio.
+- [IIIT Hyderabad gait research](https://robotics.iiit.ac.in/publications/2015/Komal_Implementation-of-Gaits/) studies the relationship between stride length, duty factor and stability margin.
+- The user's `Ainekio/docs/GAIT_RESEARCH_REVIEW.md` recommends **10–20 mm world advance** and **5–10 mm nominal lift** as initial research targets, expressly not an optimized or hardware-approved gait.
+
+The selected starting target is **20 mm advance / 5 mm actual sole clearance / 8-second cycle**. One second of swing per eight-second leg cycle gives an 87.5% stance fraction. Equal one-second phases and the eight-second period are adjustable research choices, not literature-derived optimum values. Expected body speed would be 2.5 mm/s if implemented in a complete crawl.
+
+## Measured single-leg results
+
+All angles below are degrees relative to the compact neutral. Shoulder h is held at zero in these isolated planar tests.
+
+| Advance per cycle | Body-relative stance bolt sweep | Part006 alpha | Part005 theta | Peak estimated alpha/theta speed |
+|---:|---:|---:|---:|---:|
+| 10 mm | 8.75 mm | −6.64 to +5.22° | −8.04 to +7.92° | 31.3 / 34.7°/s |
+| **20 mm** | **17.50 mm** | **−10.37 to +10.69°** | **−16.06 to +15.62°** | **50.8 / 69.3°/s** |
+| 30 mm | 26.25 mm | −14.35 to +16.33° | −23.95 to +22.96° | 71.9 / 103.9°/s |
+
+Each probe contains 161 poses, a smooth horizontal swing transition, and a smooth 5 mm lift target. Sole height is obtained from the rotated full foot-shell geometry, not a constant bolt offset. All 483 target poses close on the existing linkage branch and return to the starting joint angles. Sampled checks of the changed links against the other link plates, servo cases, Part003, horn references and foot shells found no intersection above 0.02 mm³ at the tested poses. Intended hardware interfaces and the rest of the body were not included.
+
+The prior nine broad reference poses also close on the same branch. Their input sweep is approximately 100.807 degrees; it is not the recommended walking excursion or a full mechanical range.
+
+## Saved-file verification
+
+- Reopened the exact saved live file in a separate, single-thread Blender process.
+- Both new meshes are closed and contain no zero-area faces. Both flat-oriented STL exports reload as closed solids.
+- All 96 meshes on the other three refined legs match the pre-edit hashes. Servo and housing transforms match the capture.
+- Maximum evaluated upper/lower-leg vertex difference at the nine old reference poses: **0.0000402 mm**.
+- Rechecked 22 evaluated Blender poses per foot-path case; maximum sole-height difference from the target: **0.0000207 mm**.
+- The live viewport, selection and animation state were preserved. The tests above were not installed as a full walking animation.
+
+**Not verified:** whole-body shifts and balance, stance slip or rounded-foot rolling, continuous collisions, loaded servo speed/torque/current, calibrated servo travel, print strength or physical horn fit. The stance model keeps the bolt's world X stationary under constant assumed body speed, but rotating feet can move their actual contact point; this is not proof of no-slip stance. The research timing can be changed after hardware measurements.
+
+## Deliverables
+
+- `Part_009-22mm-Test.stl`, `Part_026-36mm-Test.stl`: millimeter, flat-oriented print meshes.
+- `parameters.json`: current compact geometry; `previous-parameters.json`: prior seated geometry.
+- `research-target.json`: selected 20 mm crawl target and explicit assumptions.
+- `retarget.py`: original geometric alpha/theta to compact theta conversion. Retains the branch and raises on unreachable poses. No PWM calibration.
+- `retargeted-reference-poses.json`: nine retargeted reference poses.
+- `isolated-leg-probes.csv`: timestamped geometric h/alpha/theta and target data for 10/20/30 mm advances.
+- `geometry-report.json`, `motion-validation.json`, `application.json`, `saved-verification.json`: measurements, scope, preserved state and backup location.
+- `before-live.npz`, `before-live.json`, `Before-Compact-22-36-*.blend`: captured source and rollback reference.
+
+## Reproduce from the workspace root
+
+```bash
+env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 workspace/ComfyUI/venv/bin/python robot-compact-22-36-test-20260919/build_slabs.py
+env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 ./blender -b --factory-startup -t 1 --python-exit-code 1 --python robot-compact-22-36-test-20260919/bevel.py
+env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 workspace/ComfyUI/venv/bin/python robot-compact-22-36-test-20260919/finish_geometry.py
+env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 workspace/ComfyUI/venv/bin/python robot-compact-22-36-test-20260919/prepare_motion.py
+env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 workspace/ComfyUI/venv/bin/python robot-compact-22-36-test-20260919/validate_motion.py
+```
+
+`apply.py` was already run and is guarded against changes since the capture. Do not rerun it on the modified live scene. It is not an idempotent updater. `verify_saved.py` changes poses only within a separate background Blender process and does not save them.

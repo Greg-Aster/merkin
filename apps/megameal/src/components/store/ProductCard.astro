@@ -1,0 +1,142 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import { communityConfig } from '../../config/community.config'
+import {
+  getAvailabilityBadge,
+  getProductCardThumbnail,
+  getProductHref,
+  getProductMediaItems,
+} from '../../contracts/products'
+import ProductCardClient from './ProductCardClient.astro'
+import ProductCardDetails from './ProductCardDetails.astro'
+import ProductCardSummary from './ProductCardSummary.astro'
+import ProductCardThumbnail from './ProductCardThumbnail.astro'
+
+export interface Props {
+  class?: string
+  product: CollectionEntry<'products'>
+  style?: string
+}
+
+const { product, style } = Astro.props
+const className = Astro.props.class
+const {
+  name,
+  tagline,
+  description,
+  price,
+  sku,
+  rating,
+  specifications,
+  qanda,
+  preWrittenReviews,
+  availability,
+  ctaMode,
+  stripePaymentLink,
+  shippingNote,
+  badge,
+} = product.data
+const formActionUrl = communityConfig.contact.formActionUrl
+
+const hasSpecifications =
+  Array.isArray(specifications) && specifications.length > 0
+const hasQandA = Array.isArray(qanda) && qanda.length > 0
+const hasPreWrittenReviews =
+  Array.isArray(preWrittenReviews) && preWrittenReviews.length > 0
+
+const mediaItems = getProductMediaItems(product)
+const cardThumbnail = getProductCardThumbnail(mediaItems)
+
+// Star rating calculation
+let calculatedFullStars = 0
+let calculatedHalfStar = false
+let calculatedEmptyStars = 5
+let isRated = false
+
+if (typeof rating === 'number' && rating >= 0 && rating <= 5) {
+  isRated = true
+  calculatedFullStars = Math.floor(rating)
+  calculatedHalfStar = rating % 1 >= 0.5
+  calculatedEmptyStars = 5 - calculatedFullStars - (calculatedHalfStar ? 1 : 0)
+}
+
+const currentAvailability = availability ?? 'coming_soon'
+const availBadge = getAvailabilityBadge(currentAvailability, badge)
+const canAddToCart = ctaMode === 'cart' && currentAvailability === 'available'
+const canBuyExternal =
+  ctaMode === 'external' &&
+  !!stripePaymentLink &&
+  currentAvailability === 'available'
+const productHref = getProductHref(product)
+const ratingLabel =
+  typeof rating === 'number'
+    ? `Rating: ${rating.toFixed(1)} out of 5 stars`
+    : 'Not rated'
+---
+
+<article
+  class:list={[
+    "card-base group flex flex-col w-full overflow-hidden relative product-card rounded-[var(--radius-large)]",
+    "transition-all duration-300 ease-in-out",
+    "cursor-pointer",
+    "hover:shadow-xl dark:hover:shadow-[0_0_20px_3px_rgba(var(--primary-rgb),0.25)]",
+    className
+  ]}
+  style={style}
+  data-product-id={product.id}
+  aria-labelledby={`product-title-${product.id}`}
+  onclick={`if (!event.target.closest('a, button, .card-expansion-trigger, .tab-link, .details-content')) { window.location.href = '${productHref}'; }`}
+>
+  <ProductCardThumbnail
+    availabilityClasses={availBadge.classes}
+    availabilityLabel={availBadge.label}
+    mediaItems={mediaItems}
+    name={name}
+    thumbnail={cardThumbnail}
+  />
+
+  <ProductCardSummary
+    emptyStars={calculatedEmptyStars}
+    fullStars={calculatedFullStars}
+    halfStar={calculatedHalfStar}
+    isRated={isRated}
+    name={name}
+    price={price}
+    productHref={productHref}
+    productId={product.id}
+    ratingLabel={ratingLabel}
+    tagline={tagline}
+  />
+
+  <ProductCardDetails
+    availabilityMessage={availBadge.ctaMessage}
+    canAddToCart={canAddToCart}
+    canBuyExternal={canBuyExternal}
+    currentAvailability={currentAvailability}
+    description={description}
+    embedOrigin={Astro.url.origin}
+    hasPreWrittenReviews={hasPreWrittenReviews}
+    hasQandA={hasQandA}
+    hasSpecifications={hasSpecifications}
+    mediaItems={mediaItems}
+    name={name}
+    price={price}
+    productHref={productHref}
+    productId={product.id}
+    shippingNote={shippingNote}
+    sku={sku}
+    stripePaymentLink={stripePaymentLink}
+  />
+</article>
+
+  <ProductCardClient
+    descriptionData={product.data.description}
+    formActionUrl={formActionUrl}
+    preWrittenReviewsData={product.data.preWrittenReviews}
+    productId={product.id}
+    productName={product.data.name}
+    qandaData={product.data.qanda}
+    realDescriptionData={product.data.realDescription}
+    shippingNoteData={product.data.shippingNote}
+    specificationsData={product.data.specifications}
+  />

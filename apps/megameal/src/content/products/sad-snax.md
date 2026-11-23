@@ -1,0 +1,138 @@
+---
+name: "Sad Snax"
+tagline: "Red nutrient paste for after optimism has left the kit."
+brand: "Emergency Nutrition Lab"
+draft: false
+showInTimeline: true
+timelineYear: 3.312e4
+timelineEra: "golden-age"
+timelineLocation: "W Corporation Morale-Neutral Test Market"
+isKeyEvent: false
+availability: "coming_soon"
+ctaMode: "none"
+image: ""
+price: 8.99
+category: "consumables"
+format: "physical"
+featured: false
+listingStyle: "showcase"
+listingLabel: "Commodity Listing"
+sku: "SDS-001"
+description: "Sad Snax is a red, low-flavor nutrient paste in a wrapper that treats opening as a structural disagreement. It waits patiently in emergency kits, outliving better rations, worse plans, and most printed expiration-label technology."
+realDescription: "Backup calories in squeeze-paste form. Less a snack than a shelf-stable admission that planning has failed."
+shippingNote: "Units ship in wrapper lots. Outer packaging may show harmless red smears from adjacent packets with weak boundaries."
+rating: 1.0
+ambientAudio:
+  id: "product:sad-snax"
+  src: "/audio/ambient/Whistling Dreams.mp3"
+  label: "Whistling Dreams"
+  volume: 0.64
+media:
+  - type: image
+    src: "/store/sad-snax/sad-snax-wrapper.webp"
+    alt: "Sad Snax red nutrient paste wrapper"
+    caption: "Sad Snax: red emergency paste with wrapper behavior best described as accusatory."
+  - type: image
+    src: "/store/sad-snax/sad-snax-package-views.webp"
+    alt: "Sad Snax package views showing front back side top bottom and perspective angles"
+    caption: "Approved package scan. Multiple angles, one bad opening strategy."
+  - type: image
+    src: "/store/sad-snax/sad-snax-nutrition-label.webp"
+    alt: "Sad Snax package back showing ingredient disclosure and nutrition data"
+    caption: "Ingredient disclosure and nutrition panel, including alien vitamins with nonlocal reference values."
+  - type: model3d
+    src: "/store/sad-snax/sad-snax-packet.glb"
+    thumbnail: "/store/sad-snax/Hy3D_textured_00063_.glb.webp"
+    alt: "Interactive three-dimensional scan of a Sad Snax packet"
+    caption: "Interactive packet scan. Drag to inspect the wrapper before it chooses a seam."
+specifications:
+  - label: "Flavor Profile"
+    value: "Dim onion, mineral tang, and the memory of better grocery decisions"
+  - label: "Net Weight"
+    value: "150g squeeze-wrapper of nutrient paste"
+  - label: "Serving Suggestion"
+    value: "Hold below shoulder height and aim away from heirlooms, tax forms, and open keyboards"
+  - label: "Wrapper Design"
+    value: "Award-losing diagonal tear geometry with multiple unplanned exit vectors"
+  - label: "Allergen Notice"
+    value: "May contain every allergen currently known, plus traces of administrative dust"
+  - label: "Texture"
+    value: "Industrial tomato frosting with survival ambitions"
+  - label: "Use Case"
+    value: "Emergency ration kit, evacuation bag, forgotten desk drawer, post-vending-machine negotiations"
+  - label: "Shelf Life"
+    value: "No known expiration date; packet may predate the kit it was found in"
+  - label: "Nutritional Value"
+    value: "Contains calories, several minerals, and at least three vitamins not approved for local alphabets"
+ingredients:
+  - "Red nutrient paste base"
+  - "Stabilized protein slurry"
+  - "Vegetable-adjacent oil gel"
+  - "Onion-like flavor compound"
+  - "Salt"
+  - "Shelf-stability system"
+  - "Natural and artificial poor choices"
+  - "May contain wheat, soy, dairy, peanuts, tree nuts, sesame, egg, shellfish, fish, mustard, and administrative residue"
+nutritionFacts:
+  - label: "Serving Size"
+    value: "One wrapper, minus exterior losses"
+  - label: "Calories"
+    value: "180"
+  - label: "Total Fat"
+    value: "4g"
+  - label: "Sodium"
+    value: "410mg"
+  - label: "Total Carbohydrate"
+    value: "26g"
+  - label: "Protein"
+    value: "8g"
+  - label: "Vitamin A"
+    value: "12% DV, mostly decorative"
+  - label: "Vitamin C"
+    value: "0% DV, emotionally suggested"
+  - label: "Vitamin Xel-9"
+    value: "34% DV, interstellar adult reference intake not established"
+  - label: "Vitamin Brakk"
+    value: "8% DV, supports antenna-adjacent cartilage where applicable"
+  - label: "Riboflavinoid Q"
+    value: "19% DV, may cause confident label copy"
+  - label: "Niacin Nebulate"
+    value: "5% DV, measured before packet rupture"
+  - label: "Trace Minerals"
+    value: "Iron, zinc, regret, and shelf dust"
+assurances:
+  - label: "Wrapper Warning"
+    value: "The wrapper may choose a seam you did not authorize. Do not challenge it near upholstery."
+  - label: "Shelf Stability"
+    value: "Long-term storage trials have failed to identify a meaningful endpoint, product decline, or sense of urgency."
+  - label: "Ration Kit Reality"
+    value: "Field reports suggest users inventory Sad Snax first, then eat everything else."
+qanda:
+  - question: "What do Sad Snax actually taste like?"
+    answer: "Like onion passed through a financial setback. The red color does more work than the seasoning."
+  - question: "Are these meant to be enjoyable?"
+    answer: "No. Enjoyment was scoped out during the early paste trials and never restored to the roadmap."
+  - question: "Are they healthy?"
+    answer: "They provide calories, protein, sodium, and alien vitamins whose recommended intake tables were not written for your species."
+  - question: "Why is the allergen statement so broad?"
+    answer: "Because the production environment is broad-minded and minimally segregated. If your body objects to common food matter, this product may agree with it."
+  - question: "When should I eat these?"
+    answer: "When hunger has become more persuasive than dignity and the vending machine is asking for credentials you do not possess."
+preWrittenReviews:
+  - author: "Lena, Break Room Vending Survivor"
+    rating: 1
+    date: "Monday, 3:14 PM"
+    comment: "I wanted chips. The machine gave me this because the chips were apparently unionized. The first squeeze went onto my keyboard and opened three spreadsheets."
+  - author: "M. Havel, Night Desk"
+    rating: 1
+    date: "Late shift"
+    comment: "The flavor arrives quietly, apologizes to nobody, and leaves behind the impression that an onion once had a disappointing internship."
+  - author: "Anonymous Apartment Pantry"
+    rating: 1
+    date: "Filed quietly"
+    comment: "I found one behind the rice after moving apartments twice. Still soft. Still red. The packet looked less expired than my lease."
+  - author: "Regional Mood Audit Desk"
+    rating: 1
+    date: "Quarterly memo"
+    comment: "Panelists described the mouthfeel as paste-forward, the aroma as legally present, and the aftertaste as a meeting that could have been cancelled."
+---

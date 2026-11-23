@@ -1,0 +1,127 @@
+---
+title: "September 15: From CAD to Printed Leg Prototypes"
+published: 2026-09-15
+updated: 2026-09-15
+description: "Printed leg prototypes with expressive movement, revised linkage geometry, horn pockets sized from real hardware, and fit lessons for the next iteration."
+image: "/photos/20260914_152101.jpg"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V2, CAD, 3D Printing, Mechanical Design, Prototypes]
+category: "Development Log"
+draft: false
+lang: "en"
+contentFormat: "update"
+reading:
+  topic: legs
+  generation: v2
+  kind: journal
+  next: 2026-09-21-compact-leg-design
+  related: ["gait-development", "2026-10-12-shell-power-and-motion"]
+---
+
+The last few days focused on the assembly that actually has to carry Ainekio V2: the
+three-servo leg. I printed the first physical prototypes and bolted them up with MG90S
+servos, bearings, linkages, and two-piece feet while iterating tolerances back in
+Blender. Even on the bench by hand, these printed legs have much more expressive range
+than the stock reference models I had seen online.
+
+<div className="grid gap-5 sm:grid-cols-3">
+  <figure>
+    <a href="/photos/20260914_152101.jpg"><img src="/photos/20260914_152101.jpg" alt="Printed robot leg partly folded, showing the servo housings, curved links, screw joints, and two-piece foot" width="744" height="992" loading="eager" /></a>
+    <figcaption>Partly folded, showing the curved links and M3 joint hardware.</figcaption>
+  </figure>
+  <figure>
+    <a href="/photos/20260914_152130.jpg"><img src="/photos/20260914_152130.jpg" alt="The printed leg folded closely alongside its servo assembly" width="744" height="992" loading="lazy" /></a>
+    <figcaption>Tucked tight against the upper servo bracket.</figcaption>
+  </figure>
+  <figure>
+    <a href="/photos/20260914_152236.jpg"><img src="/photos/20260914_152236.jpg" alt="The printed robot leg extended, with a long gray lower leg, black curved links, and a black foot" width="744" height="992" loading="lazy" /></a>
+    <figcaption>Extended, showing the gray lower leg and two-piece foot shell.</figcaption>
+  </figure>
+</div>
+
+## Finding a linkage that fits around the servos
+
+Over September 12–13 I tested several link combinations around the existing servo shaft
+spacing. Lengthening a single link can clear a bolt head locally, but it shifts mechanical
+advantage and total knee sweep everywhere else.
+
+My first pass tried using identical **40 mm, 4 mm-thick links** for both the upper and
+lower coupler rods, paired with a symmetric **20 mm relay rocker** and a shortened
+**21 mm knee crank**. Cutting down unique link parts was appealing, but a fastener head
+near the second servo still clipped the sweep.
+
+The next pass switched the upper coupler to a **24.64 mm pivot spacing (4 mm thick)**
+while keeping the **21 mm knee crank**. Flipping that short link seated the flange
+bearings from the outer face and cleared the servo bracket across the full travel, so I
+mirrored that arrangement across all four legs.
+
+![CAD view of the imported short linkage fitted to the leg assembly.](/posts/2026-09-15-leg-prototypes/imported-linkage-cad.png)
+
+*September 13 short-coupler linkage fitted in Blender.*
+
+## Opening up the foot-shell entrance
+
+On the bench, the first printed outer and inner curved foot shells refused to slide
+onto the lower leg shank—the original CAD only left **0.106 mm and 0.150 mm** of
+clearance on the two mating faces.
+
+On September 14 I opened both shell cavities to **0.30 mm per mating surface** and added
+a **0.15 mm lead-in chamfer** (~0.45 mm at the mouth). The pocket follows the full
+insertion profile of the lower leg, including its central teardrop key, while keeping
+the cavity floor, 5 mm clamping thickness, screw seats, and sole tread intact. That
+leaves thin local collar lips (~0.57 mm and 0.40 mm) backed by the main shell wall,
+which I will check on the next print.
+
+![Comparison of the original and revised shell entrances, showing 0.30 mm mating clearance and 0.45 mm at the lead-in.](/posts/2026-09-15-leg-prototypes/shell-clearance-comparison.png)
+
+*Original vs widened entrance clearance on the two-piece curved foot shells.*
+
+## Measuring the servo horn directly
+
+Another bench surprise: the physical plastic servo horns measured **2.0 mm thick** with
+calipers, whereas the imported CAD reference horns were **1.75 mm**—which explained why
+horns bottomed out proud of the printed pockets.
+
+I deepened the horn-arm pockets in both the **knee crank** and the **upper carrier** to
+**2.1 mm** (0.1 mm nominal clearance over the real horn), leaving 2.8 mm and 1.9 mm
+backing walls. Straight tapered arm slots replaced an earlier wide-shoulder cutout, and
+the upper carrier got a flat 2.1 mm pocket floor and flush outer rim around its 2.5 mm
+center screw bore.
+
+Down at the knee, I widened the **lower leg** neck to **8 mm** (keeping its 5 mm
+thickness and pivot bores) and split the **relay rocker's** outer boss into a separate
+**1.5 mm-tall spacer collar** for a longer M3 screw.
+
+## Three iterations of the foot
+
+Later on September 14, the foot shells progressed through three profiles at a
+slimmer **9.2 mm assembled width** (down from ~15 mm):
+
+| Foot revision | Geometry | Focus for next print |
+| --- | --- | --- |
+| Slim symmetric pair | Flat outer faces; 2 mm backing; 0.10 mm cavity allowance | Cavity fit and print tolerance |
+| Chevron tread | 9.2 mm width; 1 mm-deep grooves at 35°; 0.5 mm perimeter bevel | Corner crispness, fit, and grip |
+| Lugged tread with bolt recesses | 2.2 mm-deep tread gaps; 1.3 mm center channel; Ø7 × 1.5 mm bolt pockets | Pocket bridging, bolt seating, and traction |
+
+![CAD close-up of the later foot with angled tread lugs and a recessed bolt seat.](/posts/2026-09-15-leg-prototypes/offroad-foot-cad.png)
+
+*Lugged foot CAD with angled tread lugs and recessed Ø7 × 1.5 mm bolt pockets.*
+
+The lugged version increases the tread-tip radius to 11 mm (up from 9.8 mm in the
+chevron version) and leaves a minimum **0.5 mm floor** at the outer rim of the bolt
+pocket. The STLs orient the flat outer faces on the print bed with the cavities
+facing up.
+
+## Shoulder swivel envelope
+
+A parallel shoulder study is exploring a wider swivel envelope around a 270° servo
+while preserving the shaft axis and leg fold clearance. Early motion probes in CAD
+highlighted clashes between the proposed socket, servo case, and adjacent parked legs,
+which leads directly into the [September 21 compact leg and chassis revisions](/posts/2026-09-21-compact-leg-design/).
+See the [V2 build guide](/posts/ainekio-v2/) and
+[September 10 body assembly update](/posts/2026-09-10-v2-body-design/) for the
+broader mechanical layout.

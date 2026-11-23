@@ -1,0 +1,38 @@
+[
+  {
+    "id": "comparison-mujoco-showcase",
+    "src": "/posts/comparison/showcase.mp4",
+    "poster": "/posts/comparison/robot-scale-mech-lineup.webp",
+    "title": "Ainekio V2 375-mesh closed-loop four-bar MuJoCo MJCF simulation showcase",
+    "caption": "Ainekio V2's 375-mesh Blender assembly exported into MuJoCo MJCF with closed-loop four-bar equality constraints, 3D-printed rocking soles, and the MG90SActuator speed-torque model.",
+    "date": "2026-11-06",
+    "duration": 25
+  },
+  {
+    "id": "variable-gait-stride-rate-demo",
+    "src": "/posts/gait-development/2026-09-21-variable-gait/ainekio-variable-gait-demo.mp4",
+    "poster": "/posts/gait-development/2026-09-21-variable-gait/demo-poster.webp",
+    "title": "Continuous gait solver Stride % and Motion rate demonstration",
+    "caption": "Independent Stride % and Motion rate controls in the continuous gait solver, transitioning between 25% and 100% stride and 1x to 2x cadence while holding planted stance anchors fixed.",
+    "date": "2026-09-21",
+    "duration": 14.008
+  },
+  {
+    "id": "walk-run-walk-contact-blending",
+    "src": "/posts/2026-09-24-progress/walk-run-walk-2x.mp4",
+    "poster": "/posts/2026-09-24-progress/run-poster.webp",
+    "title": "Four-cycle contact blending across Walk-to-Run-to-Walk boundary",
+    "caption": "Four-cycle contact blending across the Walk to Run to Walk boundary in Ainekio's continuous gait planner.",
+    "date": "2026-09-24",
+    "duration": 15.3
+  },
+  {
+    "id": "freestyle-33-chapter-motion-showcase",
+    "src": "/posts/2026-09-24-progress/motion-showcase-2x.mp4",
+    "poster": "/posts/2026-09-24-progress/motion-showcase.webp",
+    "title": "33-chapter Blender motion showcase of Ainekio's expressive gesture repertoire",
+    "caption": "33-chapter Blender motion showcase covering Ainekio's expressive gesture repertoire and continuous gaits.",
+    "date": "2026-09-24",
+    "duration": 250.133
+  }
+]

@@ -1,0 +1,117 @@
+---
+title: "September 10: Fitting the V2 Body Together"
+published: 2026-09-10T12:00:00-07:00
+updated: 2026-09-10
+description: "Fourteen CAD revisions: chassis, electronics, linkages, covers, and a camera/display carrier, with a brief MetaHuman OS refinement update."
+image: "/posts/2026-09-10-v2-design/face-assembly.png"
+avatarImage: "/assets/avatar/avatar.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V2, CAD, Mechanical Design, Electronics, MetaHuman OS]
+category: "Development Log"
+draft: false
+lang: "en"
+contentFormat: "update"
+reading:
+  topic: body
+  generation: v2
+  kind: journal
+  next: 2026-09-15-leg-prototypes
+  related: ["ainekio-v2", "2026-10-08-standing-walking"]
+---
+
+Most of the last two days on Ainekio V2 happened in Blender: bringing all four leg
+assemblies around a single frame, widening the central bay around 3D board models, and
+fitting the leg housings, curved connecting rods, front port panel, top and bottom
+covers, and a removable camera-and-LCD face carrier.
+
+![Earlier widened-chassis CAD assembly with all four legs and exposed electronics, before the later housing, front-panel, and cover revisions.](/posts/2026-09-10-v2-design/chassis-overview.png)
+
+*Early widened-chassis pass with the central electronics bay open for fit checks.*
+
+## Making room for the electronics
+
+Pulling the four legs onto a shared frame made it obvious how tight the original narrow
+body would be once real connectors were plugged in. Importing millimeter-accurate models
+of the three candidate boards—a **Radxa Dragon Q6A** single-board computer, an
+**ESP32-P4-WIFI6** controller, and an **Adafruit PCA9685** 16-channel servo
+driver—gave concrete keep-out envelopes including overhanging headers and ports.
+
+To clear them, I widened the chassis by **40 mm (20 mm per side)**, keeping the hip
+roots, center mounts, and end-panel middle sections tied together so the bearing
+pockets and screw holes stayed aligned.
+
+![Top view of the widened CAD chassis, with the Q6A at the front and the ESP32-P4 and PCA9685 boards beside each other toward the rear.](/posts/2026-09-10-v2-design/electronics-layout.png)
+
+*Board placement inside the widened central bay.*
+
+The Q6A sits up front with its ports facing forward, while the ESP32-P4 and PCA9685 sit
+side by side toward the rear. That leaves room for a Q6A support tray and basic board
+gaps, though real cable plugs, bend radii, airflow, and final standoffs still need a
+dedicated pass.
+
+## Refining the leg parts as a set
+
+The upper servo brackets went through profile-rounding and cutout passes before I
+mirrored the updated bracket across all four corners.
+
+The curved connecting rod also needed extra clearance around the upper bracket. Moving
+its mid-span **3 mm outward** and replacing the sharp kink with a continuous arc gave a
+cleaner sweep between the two round bearing ends while keeping the 4 mm link thickness
+and twin oval weight-relief slots.
+
+![Comparison of the earlier sharply bent connecting rod and the revised continuous curve, with the two mounting ends and oval openings retained.](/posts/2026-09-10-v2-design/linkage-curve-comparison.png)
+
+*Continuous-curve connecting rod revision synchronized across all four legs.*
+
+## Fitting the front panel around the Q6A
+
+The front bulkhead closes around the Q6A’s two stacked USB blocks and Ethernet jack
+with three cutouts serving four USB ports and one RJ45 socket. An interior relief clears
+the PCB edge and underside components, leaving just the front lip of the Q6A tray to be
+trimmed where it meets the panel.
+
+![Oblique CAD view of the front panel around the Q6A’s two USB stacks and Ethernet connector.](/posts/2026-09-10-v2-design/q6a-port-panel.png)
+
+*Front bulkhead fitted around the Q6A USB and Ethernet ports.*
+
+## Bringing the covers into the assembly
+
+Next came fitted top and bottom cover plates, widened from **72 mm to 112 mm** at the
+original 3 mm thickness and aligned to the eight chassis screw bosses.
+
+![Widened cover plates before their unused openings were closed.](/posts/2026-09-10-v2-design/fitted-covers.png)
+
+*Widened top and bottom covers before closing leftover cutouts.*
+
+A cleanup pass then filled **18 leftover openings in the top plate and 15 in the
+bottom**, leaving clean 3 mm plates with eight frame screw holes, outer leg-clearance
+notches, and lower locating tabs.
+
+## Adding a removable camera and display face
+
+At the front, a single removable face carrier mounts an **OV5647 camera** (Arducam
+B0033 hole pattern) above a landscape **Waveshare 2-inch LCD module**. The carrier
+fastens to two front screws on the top cover (adding 3 mm to their stack), holding the
+LCD on four M2×6 spacers and the camera on four printed 4 mm standoffs.
+
+![Rear view of the camera/display carrier showing the standoffs and cable openings.](/posts/2026-09-10-v2-design/face-rear-detail.png)
+
+*Rear of the removable camera and LCD carrier showing standoffs and ribbon slots.*
+
+The [V2 hardware and linkage guide](/posts/ainekio-v2/#compact-leg-linkage-geometry)
+tracks where the production V2 geometry settled after these early wide-body studies,
+and the [short-rod leg mechanism study](/posts/2026-09-09-leg-mechanism-study/) covers
+the parallel stationary-knee-servo experiment.
+
+## Companion software: keeping active turns coherent
+
+Alongside the CAD work, I tightened how MetaHuman OS handles follow-up speech while a
+robot action is already running. Follow-up input now attaches cleanly to the in-flight
+request instead of spawning a competing turn, action selection separates the immediate
+next step from overall goal tracking, and image references stay attached when routing
+between vision and task nodes. See the
+[MetaHuman integration guide](/posts/metahuman-integration/) for how the companion
+workflow connects to the body.

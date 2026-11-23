@@ -1,0 +1,108 @@
+---
+import type { TimelineFact } from '../../config/timelineFacts'
+import {
+  megaMealUniverseFacts,
+  privacyNoticeTimelineFact,
+  resolveTimelineFactHref,
+} from '../../config/timelineFacts'
+import type {
+  SponsoredBloomFact,
+  SponsoredBloomPayload,
+} from './portalSponsoredBloomController'
+
+const toSponsoredFact = (
+  fact: TimelineFact,
+  id: string,
+): SponsoredBloomFact => ({
+  id,
+  eyebrow: fact.eyebrow ?? 'Sponsored Placement',
+  headline: fact.headline ?? 'Sponsored Message',
+  text: fact.text,
+  ctaText: fact.ctaText ?? 'Comply',
+  href: resolveTimelineFactHref(fact) ?? '/posts/explainer/',
+  sponsor: fact.sponsor ?? 'Consumer Satisfaction Bureau',
+  finePrint: fact.finePrint ?? '',
+  theme: fact.theme ?? 'default',
+  image: fact.image ?? '',
+  video: fact.video ?? '',
+  cookieActions: fact.cookieActions ?? [],
+})
+
+const bloomPayload: SponsoredBloomPayload = {
+  privacyNoticeFact: toSponsoredFact(
+    privacyNoticeTimelineFact,
+    'privacy-notice',
+  ),
+  sponsoredFacts: megaMealUniverseFacts
+    .filter(fact => fact.type === 'advertisement')
+    .map((fact, index) => toSponsoredFact(fact, `sponsored-${index}`)),
+}
+const bloomPayloadJson = JSON.stringify(bloomPayload).replace(/</g, '\\u003c')
+---
+
+<section
+  class="portal-sponsored-bloom"
+  data-portal-sponsored-bloom
+  data-state="waiting"
+  data-complete="false"
+  aria-hidden="true"
+>
+  <div class="portal-sponsored-bloom__stage" data-bloom-stage></div>
+  <script
+    is:inline
+    type="application/json"
+    data-bloom-payload
+    set:html={bloomPayloadJson}
+  />
+</section>
+
+<script>
+  import {
+    homePortalEvents,
+    homePortalWindowKeys,
+  } from '../../contracts/homePortal'
+  import {
+    initPortalSponsoredBloom,
+    type SponsoredBloomPayload,
+  } from './portalSponsoredBloomController'
+
+  function mountPortalSponsoredBloom() {
+    const root = document.querySelector<HTMLElement>(
+      '[data-portal-sponsored-bloom]',
+    )
+    const payloadScript = root?.querySelector<HTMLScriptElement>(
+      'script[data-bloom-payload]',
+    )
+    if (!root || !payloadScript?.textContent) return
+    if (root.dataset.bloomMounted === 'true') return
+    root.dataset.bloomMounted = 'true'
+
+    let payload: SponsoredBloomPayload
+    try {
+      payload = JSON.parse(payloadScript.textContent) as SponsoredBloomPayload
+    } catch {
+      return
+    }
+
+    initPortalSponsoredBloom({
+      root,
+      payload,
+      portalAdvanceEvent: homePortalEvents.portalAdvance,
+      portalIntroReadyEvent: homePortalEvents.portalIntroReady,
+      cleanupKey: homePortalWindowKeys.portalSponsoredBloomCleanup,
+      registerLifecycleCleanup: (stopBloom, signal) => {
+        window.addEventListener('pagehide', stopBloom, {
+          once: true,
+          signal,
+        })
+        document.addEventListener('astro:before-preparation', stopBloom, {
+          once: true,
+          signal,
+        })
+      },
+    })
+  }
+
+  mountPortalSponsoredBloom()
+  document.addEventListener('astro:page-load', mountPortalSponsoredBloom)
+</script>

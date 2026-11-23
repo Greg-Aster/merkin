@@ -1,0 +1,123 @@
+{
+  "date": "2026-10-26",
+  "website_baseline": "f13efe7c",
+  "scope": "Local source and dated test/activation records since the October 21 site update. No new robot commands or firmware changes were performed for this website update.",
+  "repositories": [
+    {
+      "name": "Ainekio",
+      "head": "3c97b08cfc24dd772cb6cef9c5d0bef341471249",
+      "files": [
+        {
+          "path": "docs/v2-12servo/SPECIFICATIONS.md",
+          "sha256": "ff40f2561b3b48b81d7b0a0448556fc6342da338ea56e2af62222e8a478b36a8",
+          "workspace_status": "??"
+        },
+        {
+          "path": "Slave/firmware/esp32p4-wifi6/README.md",
+          "sha256": "83517827419c07c8d554a61f8e3de7327a7be7d04564c8ed363e6b2e8f41d9bc",
+          "workspace_status": "M"
+        },
+        {
+          "path": "Slave/firmware/esp32p4-wifi6/CMakeLists.txt",
+          "sha256": "75952d28ba04d1bd413d50612ccfa1dc61141447116ecdc98bd3d9715fefa149",
+          "workspace_status": "M"
+        },
+        {
+          "path": "experiments/freestyle/README.md",
+          "sha256": "21d131472718c770c353fba86288e3899816b7ef611c356fe17757f78cafb7d3",
+          "workspace_status": "M"
+        },
+        {
+          "path": "experiments/freestyle/CURRICULUM.md",
+          "sha256": "4a11ed8b5f18040774f4bc2ace3fc0f7e83d0096bea954bae589e581fb3a4c04",
+          "workspace_status": "M"
+        },
+        {
+          "path": "experiments/freestyle/program.py",
+          "sha256": "44d6a9d281f954e6b320759492cf881b73e51c0e37e0dffb71f906f548424781",
+          "workspace_status": "tracked or ignored local artifact"
+        },
+        {
+          "path": "experiments/freestyle/artifacts/stand-entry-balanced/final-review.json",
+          "sha256": "552cc063cfbb8f156dea9c550c6fb4d8a728a6ab73307746c820d53870c58dbe",
+          "workspace_status": "tracked or ignored local artifact"
+        },
+        {
+          "path": "experiments/freestyle/artifacts/stand-entry-balanced/activation/verification.json",
+          "sha256": "51a7a24b35f67596b974317c8843bd8f31634151d3e31b3d8fcfd1be19068418",
+          "workspace_status": "tracked or ignored local artifact"
+        },
+        {
+          "path": "Slave/hardware/v2-12servo/STL/Training Stand/Assembly.txt",
+          "sha256": "272f3aa6a1cbbd5704572aab18fa7d8d6285d72d7209e9223ff4a62299bdb7c8",
+          "workspace_status": "??"
+        }
+      ]
+    },
+    {
+      "name": "metahuman",
+      "head": "6472be23f4508d8ad75a1fac42c0247e7798da91",
+      "files": [
+        {
+          "path": "docs/robot/ROBOT_BIBLE.md",
+          "sha256": "6399554bc8880580adef17e18b439d4c9b965f0e6d5d6769f5c7d465ba1aba48",
+          "workspace_status": "M"
+        },
+        {
+          "path": "docs/robot/QUALIFICATION.md",
+          "sha256": "c464c34c7d9de6885efe1195c4284f856b65778ce1ff165fed818de15503705e",
+          "workspace_status": "??"
+        },
+        {
+          "path": "docs/audits/AUTONOMY_CONTINUITY_REVIEW_2026-10-25.md",
+          "sha256": "75971809c4d2eae090bc4936f4749ed1bdd3bd7d43956b1ebbb2a63343af1f2d",
+          "workspace_status": "??"
+        },
+        {
+          "path": "docs/audits/QUEUE_LIFECYCLE_REPAIR_2026-10-25.md",
+          "sha256": "e86fd81595f0e7c1ebb61acdb870a1f984453338597f8e66041d90dce5860ae1",
+          "workspace_status": "??"
+        },
+        {
+          "path": "bin/llama-cpp-services",
+          "sha256": "48261e7be17d494cfeb5ebe350742c883c074735971e0fc241051cd101f9ccfe",
+          "workspace_status": "M"
+        },
+        {
+          "path": "packages/core/src/queue/queue-persister.ts",
+          "sha256": "29980b057028b520f3bbd387e2ac64b79b0f15d3556bf87566a7507ad8d5ec6a",
+          "workspace_status": "M"
+        }
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "file": "companion-continuity.svg",
+      "sha256": "356e4d55c9ed522adb0d0baebba25cf66d955de11e32bf737698b2f715de874e",
+      "bytes": 2909
+    },
+    {
+      "file": "finite-programs.svg",
+      "sha256": "65addd35d74103043e9dc5f8e3d94ff9cb92aa4ba14533ea0a5659c0dd925dcb",
+      "bytes": 2833
+    },
+    {
+      "file": "measured-targets.svg",
+      "sha256": "a4c2c05cd5833587677c5f1ea2f5a7a7f2ef79591531997d8971fa6f0744df87",
+      "bytes": 2815
+    },
+    {
+      "file": "stand-and-power-carrier.zip",
+      "sha256": "ee3c7b6ec4b8e4147b3dbeb162f269f03b877c4c14a47abaa235424e552ab92d",
+      "bytes": 64098
+    },
+    {
+      "file": "training-results.json",
+      "sha256": "7c84a4dc6e5038108dd6d044a626d98c07f382fe165b28adf1679dc2cb5c3680",
+      "bytes": 2442
+    }
+  ],
+  "refreshed": "2026-10-27",
+  "additional_evidence": "October 27 Freestyle README and CURRICULUM: finite-event model activation, supported stretch, known misses. P4 README: 0.8.128 source behavior."
+}

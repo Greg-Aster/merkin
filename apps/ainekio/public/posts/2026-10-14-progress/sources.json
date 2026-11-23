@@ -1,0 +1,123 @@
+{
+  "review_date": "2026-10-14",
+  "source_state": "Local working trees include uncommitted development. Repository HEADs do not include all reviewed changes. Paths and hashes identify the reviewed snapshot; raw private logs, profiles and training inputs are not published.",
+  "evidence_classes": {
+    "body_events": "Source and prior live observations; full wake/stretch and repeated-reaction reliability remain unresolved.",
+    "recording_and_ota": "Dated controller-only hardware records, including the 469-second 0.8.37 test. Not a fresh device test for this website update.",
+    "leveling": "October 14 journal records 0.8.46 installation and live controls; loaded leveling not qualified.",
+    "mass_and_voltage": "October 13 owner report recorded in gait journal: 566 g, 5 V, MG90. No new measurement in this website review.",
+    "models": "Two completed model-only fits and qualifications, neither deployed at review.",
+    "artwork": "Three authored SVG explanatory diagrams. Existing October 12 Blender thumbnail retained and labeled; no new physical photograph."
+  },
+  "repository_heads": {
+    "Ainekio": "436c035f17d15ed7fff9afb20f3997c432bd39ca",
+    "metahuman": "8b398f0dc2125b5698cb8d1fd0d7bdc3c3e65e10"
+  },
+  "sources": [
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/body_events.py",
+      "sha256": "3e4373b778e5d9202c42adbbbcbcc9e0dd97bbc4ab1054353355eef78dfb84b1"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/README.md",
+      "sha256": "c73d9dea313cc56f930077d6ccc74e50096c409f7f923f2120473f5b885fb8fd"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/dashboard/static/dashboard.html",
+      "sha256": "ab86e0eee09f960d74dcc210d7b46da23c163bbb90a7242dec47b162e05e2a15"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/dashboard/static/dashboard.js",
+      "sha256": "caf0d91ecd8154e8b4bc1bf7e718738c12a15dad629eba12739232fc5a24180a"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/environment_adapter/server.py",
+      "sha256": "82a55ab17aeda631d074416028748963e5bab7e797db09c2c98339f0f22268ee"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/server/service.py",
+      "sha256": "c858e2e830005ac676d1b7edbe5a37f53895d7c0b4e838c3a422e4e32b0fbef5"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/RECORDING_OTA.md",
+      "sha256": "e12c956400de9473d58c6d2cdafccd5bec4453b10cce89a372df399e2e2e6000"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/main/storage.c",
+      "sha256": "9d0df1bd8a37aac00b4921e1979c6dcc94066b150c62993b69f1fae6df604938"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/main/ota.c",
+      "sha256": "1b8c66bc45c476fde0e0a496711e8e1d1063e159111c5c8cbbab5e23046aff0b"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/main/body.c",
+      "sha256": "8c974631237de4e0813f31f9c7fd92d2298375c32071389b7490e222f7eac1a2"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/software/models/v2-12servo/balance.c",
+      "sha256": "f11433d97d4fe32dc8b4eea041e80e563f5829e903c38673e2382b7e1e03598d"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "docs/v2-12servo/GAIT_RESEARCH_JOURNAL.md",
+      "sha256": "eabc4e2ee4ff0ae3e200df1208c8c8e87d17ec1e28913bf4556f3b3a1f4b42a0"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "tools/leg-geometry-calculator/README.md",
+      "sha256": "d27be30097cf80f2fa7d80c862b666318670d514574b040d47c99fd4affa2d93"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "tools/leg-geometry-calculator/mechanics.js",
+      "sha256": "4019a83345b2ae1c6e910259fd73c7e46483920d3e0b6acc970f2ad02d3f4504"
+    },
+    {
+      "repository": "metahuman",
+      "path": "etc/cognitive-graphs/body-event-trigger-mode.json",
+      "sha256": "695764a440a021b718461c83fed87f2c488bce03970ec59ed353c130704685e0"
+    },
+    {
+      "repository": "metahuman",
+      "path": "apps/site/public/cognitive-graphs/body-event-trigger-mode.json",
+      "sha256": "695764a440a021b718461c83fed87f2c488bce03970ec59ed353c130704685e0"
+    },
+    {
+      "repository": "metahuman",
+      "path": "etc/cognitive-graphs/environment-mode.json",
+      "sha256": "13dbf2e3b92a6934f91745fabc9f6ea1c2e6818667715a3b70991e7201dec080"
+    },
+    {
+      "repository": "metahuman",
+      "path": "packages/core/src/nodes/environment/body-event.node.ts",
+      "sha256": "e847dc33a36e5c1875d2360d651f49eda8542aeb0c2bdaa357117a2e00cb824e"
+    },
+    {
+      "repository": "metahuman",
+      "path": "packages/core/src/robot-status-live.ts",
+      "sha256": "b0c6527249f93b3b4040f0ccfdf5dd2558e677691b8376b11b29435a1aef4843"
+    },
+    {
+      "repository": "metahuman",
+      "path": "out/environment-action-selector/training/speech-action-boundary-20261014-r2/qualification-summary.json",
+      "sha256": "7efddfca4fbfd44d5767bc386c048a8c4531212c1f7a9415eedbf2d5bac6b0c5"
+    },
+    {
+      "repository": "metahuman",
+      "path": "out/environment-action-selector/training/quoted-imperative-20261014/qualification-summary.json",
+      "sha256": "377501c46a7ac4542500a077e6dbcd8e01db97a0e3955e31d815ee80dab455f4"
+    }
+  ]
+}

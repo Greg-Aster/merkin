@@ -1,0 +1,576 @@
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Alert,
+  Linking,
+  Clipboard,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { loadSettings, saveSettings } from '../utils/storage'
+import { CONTENT_TYPES, getContentTypeMeta, getSiteContentPath } from '../utils/contentTargets'
+import { THEME_PREFERENCES, useAppTheme, useThemePreference } from '../utils/theme'
+
+export default function SettingsScreen({ navigation }) {
+  const { preference, setPreference } = useThemePreference()
+  const theme = useAppTheme()
+  const colors = theme.colors
+  const styles = useMemo(() => createStyles(colors), [colors])
+  const insets = useSafeAreaInsets()
+  const [settings, setSettings] = useState(null)
+  const [tokenVisible, setTokenVisible] = useState({
+    gitlab: false,
+    github: false,
+  })
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    navigation.setOptions({ headerShown: false })
+    loadSettings().then(setSettings)
+  }, [])
+
+  function updateSiteContentPath(id, contentType, value) {
+    setSettings(prev => ({
+      ...prev,
+      sites: prev.sites.map(s => {
+        if (s.id !== id) return s
+        const contentPaths = {
+          ...(s.contentPaths || {}),
+          [contentType]: value,
+        }
+        return {
+          ...s,
+          path: contentType === 'posts' ? value : (contentPaths.posts || s.path),
+          contentPaths,
+        }
+      }),
+    }))
+  }
+
+  function updateProvider(provider, field, value) {
+    setSettings(prev => ({
+      ...prev,
+      providers: {
+        ...prev.providers,
+        [provider]: {
+          ...(prev.providers?.[provider] || {}),
+          [field]: value,
+        },
+      },
+    }))
+  }
+
+  function updateAppearance(value) {
+    setSettings(prev => ({
+      ...prev,
+      appearance: value,
+    }))
+    setPreference(value)
+  }
+
+  function toggleToken(provider) {
+    setTokenVisible(prev => ({
+      ...prev,
+      [provider]: !prev[provider],
+    }))
+  }
+
+  function copyToken(provider) {
+    const token = settings?.providers?.[provider]?.token || ''
+    if (!token) {
+      Alert.alert('No token', 'Nothing to copy yet.')
+      return
+    }
+    Clipboard.setString(token)
+    Alert.alert('Copied', `${provider === 'github' ? 'GitHub' : 'GitLab'} token copied to clipboard.`)
+  }
+
+  async function handleSave() {
+    await saveSettings(settings)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  async function handleTestConnection(provider) {
+    if (provider === 'github') {
+      const github = settings.providers?.github || {}
+      if (!github.token) {
+        Alert.alert('No GitHub token', 'Enter your GitHub token first.')
+        return
+      }
+      if (!github.owner || !github.repo) {
+        Alert.alert('Missing repo', 'Enter GitHub owner and repo first.')
+        return
+      }
+
+      try {
+        const owner = encodeURIComponent(github.owner.trim())
+        const repo = encodeURIComponent(github.repo.trim())
+        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+          headers: {
+            Authorization: `Bearer ${github.token}`,
+            Accept: 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+          },
+        })
+        if (res.ok) {
+          const data = await res.json()
+          Alert.alert('GitHub works!', `Connected to repo: ${data.full_name}`)
+        } else if (res.status === 401 || res.status === 403) {
+          Alert.alert('Invalid token', 'GitHub rejected this token or scope is insufficient.')
+        } else if (res.status === 404) {
+          Alert.alert('Repo not found', 'Could not find that GitHub repo, or token has no access.')
+        } else {
+          Alert.alert('Error', `GitHub status ${res.status}`)
+        }
+      } catch {
+        Alert.alert('Network error', 'Could not reach GitHub. Are you online?')
+      }
+      return
+    }
+
+    const gitlab = settings.providers?.gitlab || {}
+    if (!gitlab.token) {
+      Alert.alert('No GitLab token', 'Enter your GitLab token first.')
+      return
+    }
+    if (!gitlab.project) {
+      Alert.alert('No project path', 'Enter your GitLab project path first.')
+      return
+    }
+
+    try {
+      const encoded = encodeURIComponent(gitlab.project)
+      const res = await fetch(`https://gitlab.com/api/v4/projects/${encoded}`, {
+        headers: { 'PRIVATE-TOKEN': gitlab.token },
+      })
+      if (res.ok) {
+        const data = await res.json()
+        Alert.alert('GitLab works!', `Connected to project: ${data.name_with_namespace}`)
+      } else if (res.status === 401) {
+        Alert.alert('Invalid token', 'GitLab rejected this token. Check it and try again.')
+      } else if (res.status === 404) {
+        Alert.alert('Project not found', `Could not find project "${gitlab.project}".`)
+      } else {
+        Alert.alert('Error', `GitLab status ${res.status}`)
+      }
+    } catch {
+      Alert.alert('Network error', 'Could not reach GitLab. Are you online?')
+    }
+  }
+
+  if (!settings) return null
+
+  const gitlab = settings.providers?.gitlab || {}
+  const github = settings.providers?.github || {}
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+    >
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="arrow-back" size={24} color={colors.headerText} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Settings</Text>
+        <View style={{ width: 24 }} />
+      </View>
+
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingBottom: 40 + insets.bottom }]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        automaticallyAdjustKeyboardInsets
+      >
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Appearance</Text>
+          <Text style={styles.hint}>
+            Choose whether Blog Pusher should follow your phone theme or stay in one mode.
+          </Text>
+          <View style={styles.appearanceRow}>
+            {THEME_PREFERENCES.map(option => {
+              const selected = (settings.appearance || preference || 'system') === option.id
+              return (
+                <TouchableOpacity
+                  key={option.id}
+                  style={[
+                    styles.appearanceChip,
+                    selected && styles.appearanceChipActive,
+                  ]}
+                  onPress={() => updateAppearance(option.id)}
+                >
+                  <Text style={[
+                    styles.appearanceChipText,
+                    selected && styles.appearanceChipTextActive,
+                  ]}>
+                    {option.label}
+                  </Text>
+                  <Text style={styles.appearanceChipHint}>{option.description}</Text>
+                </TouchableOpacity>
+              )
+            })}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>GitLab Access</Text>
+
+          <Text style={styles.label}>Personal Access Token</Text>
+          <View style={styles.tokenRow}>
+            <TextInput
+              style={[styles.input, { flex: 1 }]}
+              value={gitlab.token}
+              onChangeText={v => updateProvider('gitlab', 'token', v)}
+              placeholder="glpat-xxxxxxxxxxxxxxxxxxxx"
+              placeholderTextColor={colors.placeholder}
+              secureTextEntry={!tokenVisible.gitlab}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <TouchableOpacity style={styles.eyeBtn} onPress={() => toggleToken('gitlab')}>
+              <Ionicons
+                name={tokenVisible.gitlab ? 'eye-off-outline' : 'eye-outline'}
+                size={20}
+                color={colors.textMuted}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.eyeBtn} onPress={() => copyToken('gitlab')}>
+              <Ionicons name="copy-outline" size={20} color={colors.textMuted} />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            style={styles.linkBtn}
+            onPress={() =>
+              Linking.openURL('https://gitlab.com/-/user_settings/personal_access_tokens')
+            }
+          >
+            <Ionicons name="open-outline" size={14} color={colors.link} />
+            <Text style={styles.linkText}>Create a GitLab token (needs `api` scope)</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.label}>Project Path</Text>
+          <TextInput
+            style={styles.input}
+            value={gitlab.project}
+            onChangeText={v => updateProvider('gitlab', 'project', v)}
+            placeholder="username/repo-name"
+            placeholderTextColor={colors.placeholder}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+
+          <Text style={styles.label}>Branch</Text>
+          <TextInput
+            style={styles.input}
+            value={gitlab.branch}
+            onChangeText={v => updateProvider('gitlab', 'branch', v)}
+            placeholder="main"
+            placeholderTextColor={colors.placeholder}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+
+          <TouchableOpacity style={styles.testBtn} onPress={() => handleTestConnection('gitlab')}>
+            <Ionicons name="checkmark-circle-outline" size={16} color={colors.accent} />
+            <Text style={styles.testBtnText}>Test GitLab Connection</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>GitHub Access</Text>
+
+          <Text style={styles.label}>Personal Access Token</Text>
+          <View style={styles.tokenRow}>
+            <TextInput
+              style={[styles.input, { flex: 1 }]}
+              value={github.token}
+              onChangeText={v => updateProvider('github', 'token', v)}
+              placeholder="github_pat_xxxxxxxxxxxxxxxxxxxx"
+              placeholderTextColor={colors.placeholder}
+              secureTextEntry={!tokenVisible.github}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <TouchableOpacity style={styles.eyeBtn} onPress={() => toggleToken('github')}>
+              <Ionicons
+                name={tokenVisible.github ? 'eye-off-outline' : 'eye-outline'}
+                size={20}
+                color={colors.textMuted}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.eyeBtn} onPress={() => copyToken('github')}>
+              <Ionicons name="copy-outline" size={20} color={colors.textMuted} />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            style={styles.linkBtn}
+            onPress={() =>
+              Linking.openURL('https://github.com/settings/personal-access-tokens/new')
+            }
+          >
+            <Ionicons name="open-outline" size={14} color={colors.link} />
+            <Text style={styles.linkText}>Create a GitHub token (needs `repo` access)</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.label}>Owner</Text>
+          <TextInput
+            style={styles.input}
+            value={github.owner}
+            onChangeText={v => updateProvider('github', 'owner', v)}
+            placeholder="Greg.Aster"
+            placeholderTextColor={colors.placeholder}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+
+          <Text style={styles.label}>Repository</Text>
+          <TextInput
+            style={styles.input}
+            value={github.repo}
+            onChangeText={v => updateProvider('github', 'repo', v)}
+            placeholder="merkin"
+            placeholderTextColor={colors.placeholder}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+
+          <Text style={styles.label}>Branch</Text>
+          <TextInput
+            style={styles.input}
+            value={github.branch}
+            onChangeText={v => updateProvider('github', 'branch', v)}
+            placeholder="main"
+            placeholderTextColor={colors.placeholder}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+
+          <TouchableOpacity style={styles.testBtn} onPress={() => handleTestConnection('github')}>
+            <Ionicons name="checkmark-circle-outline" size={16} color={colors.accent} />
+            <Text style={styles.testBtnText}>Test GitHub Connection</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Site Content Paths</Text>
+          <Text style={styles.hint}>
+            Configure both collections for each site so Blog Pusher can target posts or update journals.
+          </Text>
+
+          {settings.sites.map(site => (
+            <View key={site.id}>
+              <Text style={styles.label}>{site.name}</Text>
+              {CONTENT_TYPES.map(contentType => {
+                const meta = getContentTypeMeta(contentType.id)
+                const value = getSiteContentPath(site, contentType.id)
+                return (
+                  <View key={`${site.id}-${contentType.id}`}>
+                    <Text style={styles.subLabel}>{meta.label}</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={value}
+                      onChangeText={v => updateSiteContentPath(site.id, contentType.id, v)}
+                      placeholder={`path/to/content/${contentType.id}`}
+                      placeholderTextColor={colors.placeholder}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                  </View>
+                )
+              })}
+            </View>
+          ))}
+        </View>
+
+        <TouchableOpacity
+          style={[styles.saveBtn, saved && styles.saveBtnDone]}
+          onPress={handleSave}
+          activeOpacity={0.8}
+        >
+          <Ionicons
+            name={saved ? 'checkmark' : 'save-outline'}
+            size={18}
+            color={colors.headerText}
+          />
+          <Text style={styles.saveBtnText}>
+            {saved ? 'Saved!' : 'Save Settings'}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  )
+}
+
+const createStyles = (colors) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.backgroundAlt,
+  },
+  header: {
+    backgroundColor: colors.header,
+    paddingTop: 50,
+    paddingBottom: 14,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerTitle: {
+    color: colors.headerText,
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  content: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+  section: {
+    backgroundColor: colors.surface,
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 14,
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 6,
+    marginTop: 12,
+  },
+  subLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.textSoft,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginBottom: 6,
+    marginTop: 10,
+  },
+  hint: {
+    fontSize: 13,
+    color: colors.textMuted,
+    marginBottom: 4,
+    lineHeight: 18,
+  },
+  input: {
+    backgroundColor: colors.inputBg,
+    borderRadius: 8,
+    padding: 11,
+    fontSize: 14,
+    color: colors.inputText,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  tokenRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  eyeBtn: {
+    padding: 11,
+    backgroundColor: colors.inputBg,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  linkBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  linkText: {
+    fontSize: 13,
+    color: colors.link,
+  },
+  appearanceRow: {
+    gap: 10,
+    marginTop: 8,
+  },
+  appearanceChip: {
+    backgroundColor: colors.inputBg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  appearanceChipActive: {
+    borderColor: colors.accent,
+    backgroundColor: colors.surfaceMuted,
+  },
+  appearanceChipText: {
+    color: colors.textStrong,
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  appearanceChipTextActive: {
+    color: colors.accent,
+  },
+  appearanceChipHint: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  testBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: colors.accent,
+    alignSelf: 'flex-start',
+  },
+  testBtnText: {
+    color: colors.accent,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  saveBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: colors.accent,
+    borderRadius: 12,
+    paddingVertical: 16,
+    marginTop: 4,
+  },
+  saveBtnDone: {
+    backgroundColor: '#4a9e6f',
+  },
+  saveBtnText: {
+    color: colors.headerText,
+    fontWeight: '700',
+    fontSize: 16,
+  },
+})

@@ -1,0 +1,715 @@
+export interface SponsoredBloomFact {
+  id: string
+  eyebrow: string
+  headline: string
+  text: string
+  ctaText: string
+  href: string
+  sponsor: string
+  finePrint: string
+  theme: string
+  image: string
+  video: string
+  cookieActions: string[]
+}
+
+export interface SponsoredBloomPayload {
+  privacyNoticeFact: SponsoredBloomFact
+  sponsoredFacts: SponsoredBloomFact[]
+}
+
+export interface SponsoredBloomOptions {
+  root: HTMLElement
+  payload: SponsoredBloomPayload
+  portalAdvanceEvent: string
+  portalIntroReadyEvent: string
+  cleanupKey: string
+  registerLifecycleCleanup: (stop: () => void, signal: AbortSignal) => void
+}
+
+interface PlacementRecord {
+  centerX: number
+  centerY: number
+  radius: number
+}
+
+interface PlacementCandidate extends PlacementRecord {
+  leftPx: number
+  topPx: number
+  widthRem: number
+  widthPx: number
+  estimatedHeightPx: number
+  compact: boolean
+  viewportWidth: number
+  viewportHeight: number
+}
+
+interface PlacementMetrics {
+  compact: boolean
+  rootFontSize: number
+  viewportWidth: number
+  viewportHeight: number
+  margin: number
+  maxWidthRem: number
+}
+
+const movementKeys = new Set([
+  'ArrowDown',
+  'ArrowUp',
+  'ArrowLeft',
+  'ArrowRight',
+  'PageDown',
+  'PageUp',
+  'Home',
+  'End',
+  ' ',
+  'Spacebar',
+])
+
+const INITIAL_SPAWN_DELAY_MS = 5000
+const MIN_SPAWN_DELAY_MS = 8000
+const MAX_SPAWN_DELAY_MS = 12000
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), Math.max(min, max))
+
+const createText = <K extends keyof HTMLElementTagNameMap>(
+  tagName: K,
+  className: string,
+  text: string,
+) => {
+  const element = document.createElement(tagName)
+  element.className = className
+  element.textContent = text || ''
+  return element
+}
+
+const createMedia = (fact: SponsoredBloomFact) => {
+  const media = document.createElement('div')
+  media.className = `facts-widget-media${
+    fact.image || fact.video ? '' : ' is-hidden'
+  }`
+  media.dataset.factMedia = ''
+
+  if (fact.video) {
+    const video = document.createElement('video')
+    video.className = 'facts-widget-media-video'
+    video.dataset.factMediaVideo = ''
+    video.autoplay = true
+    video.loop = true
+    video.muted = true
+    video.defaultMuted = true
+    video.playsInline = true
+    video.preload = 'none'
+    video.src = fact.video
+    media.append(video)
+  } else if (fact.image) {
+    const image = document.createElement('img')
+    image.className = 'facts-widget-media-img'
+    image.dataset.factMediaImg = ''
+    image.src = fact.image
+    image.alt = fact.headline || ''
+    image.loading = 'lazy'
+    image.decoding = 'async'
+    media.append(image)
+  }
+
+  return media
+}
+
+export function initPortalSponsoredBloom(options: SponsoredBloomOptions): void {
+  const {
+    root,
+    payload,
+    portalAdvanceEvent,
+    portalIntroReadyEvent,
+    cleanupKey,
+    registerLifecycleCleanup,
+  } = options
+
+  const win = window as unknown as Record<string, unknown>
+  if (typeof win[cleanupKey] === 'function') {
+    ;(win[cleanupKey] as () => void)()
+  }
+
+  const stage = root.querySelector<HTMLElement>('[data-bloom-stage]')
+  const facts = Array.isArray(payload.sponsoredFacts)
+    ? payload.sponsoredFacts
+    : []
+
+  if (!stage || facts.length === 0) return
+
+  const abortController = new AbortController()
+  const { signal } = abortController
+  const prefersReducedMotion = window.matchMedia(
+    '(prefers-reduced-motion: reduce)',
+  )
+
+  let stopped = false
+  let started = false
+  let completed = false
+  let spawnTimeout = 0
+  let removalTimeout = 0
+  let nextFactIndex = 0
+  let pointerStart: { id: number; x: number; y: number } | null = null
+  let shuffledFacts: SponsoredBloomFact[] = []
+  let placementHistory: PlacementRecord[] = []
+  const randomValues =
+    typeof window.crypto?.getRandomValues === 'function'
+      ? new Uint32Array(1)
+      : null
+
+  const randomUnit = () => {
+    if (randomValues) {
+      window.crypto.getRandomValues(randomValues)
+      return randomValues[0] / 4294967296
+    }
+
+    return Math.random()
+  }
+
+  const randomBetween = (min: number, max: number) =>
+    min + randomUnit() * (max - min)
+
+  const shuffle = <T>(items: T[]): T[] => {
+    const shuffled = [...items]
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(randomUnit() * (index + 1))
+      ;[shuffled[index], shuffled[swapIndex]] = [
+        shuffled[swapIndex],
+        shuffled[index],
+      ]
+    }
+
+    return shuffled
+  }
+
+  const rememberPlacement = (placement: PlacementRecord) => {
+    placementHistory.push(placement)
+    if (placementHistory.length > 18) {
+      placementHistory.shift()
+    }
+  }
+
+  const rememberPrimaryPlacement = () => {
+    const rootFontSize =
+      Number.parseFloat(
+        window.getComputedStyle(document.documentElement).fontSize,
+      ) || 16
+    const viewportWidth = Math.max(window.innerWidth, 320)
+    const viewportHeight = Math.max(window.innerHeight, 420)
+    const compact = window.matchMedia('(max-width: 640px)').matches
+    const widthPx = compact
+      ? viewportWidth - rootFontSize * 1.1
+      : Math.min(14.25 * rootFontSize, viewportWidth - rootFontSize)
+    const heightPx = Math.min(
+      compact ? 8.2 * rootFontSize : 25 * rootFontSize,
+      viewportHeight * 0.58,
+    )
+    const right = compact
+      ? rootFontSize * 0.55
+      : clamp(viewportWidth * 0.03, rootFontSize * 0.9, rootFontSize * 2)
+    const bottom = rootFontSize * 0.9
+
+    rememberPlacement({
+      centerX: viewportWidth - right - widthPx / 2,
+      centerY: viewportHeight - bottom - heightPx / 2,
+      radius: Math.hypot(widthPx, heightPx) * 0.34,
+    })
+  }
+
+  const scorePlacementCandidate = (candidate: PlacementCandidate) => {
+    if (placementHistory.length === 0) return randomUnit()
+
+    const nearestClearance = Math.min(
+      ...placementHistory.map(placement => {
+        const distance = Math.hypot(
+          candidate.centerX - placement.centerX,
+          candidate.centerY - placement.centerY,
+        )
+        return distance / Math.max(1, candidate.radius + placement.radius)
+      }),
+    )
+    const centerBias =
+      Math.abs(candidate.centerX / candidate.viewportWidth - 0.5) +
+      Math.abs(candidate.centerY / candidate.viewportHeight - 0.5)
+    const bottomRightPenalty =
+      !candidate.compact &&
+      candidate.centerX > candidate.viewportWidth * 0.68 &&
+      candidate.centerY > candidate.viewportHeight * 0.55
+        ? 0.55
+        : 0
+    const edgeBias = candidate.compact
+      ? Math.abs(candidate.centerX / candidate.viewportWidth - 0.5) * 0.28
+      : centerBias * 0.18
+    return (
+      nearestClearance + edgeBias + randomUnit() * 0.42 - bottomRightPenalty
+    )
+  }
+
+  const createPlacementCandidate = (
+    order: number,
+    metrics: PlacementMetrics,
+  ): PlacementCandidate => {
+    const cycle = Math.floor(order / 8)
+    const widthMin = metrics.compact ? 8.25 : 11.5
+    const widthMax = metrics.compact ? 10.25 : 22.5
+    const widthRem = Math.min(
+      metrics.maxWidthRem,
+      randomBetween(widthMin, widthMax) * Math.max(0.82, 1 - cycle * 0.035),
+    )
+    const widthPx = widthRem * metrics.rootFontSize
+    const estimatedHeightPx =
+      widthPx *
+      (metrics.compact ? randomBetween(1.15, 1.65) : randomBetween(0.62, 0.78))
+    const maxLeftPx = Math.max(
+      metrics.margin,
+      metrics.viewportWidth - widthPx - metrics.margin,
+    )
+    let leftPx: number
+    let topPx: number
+
+    if (metrics.compact) {
+      const headerBottomPx = metrics.rootFontSize * 4.4
+      const privacyTopPx = metrics.viewportHeight - metrics.rootFontSize * 9.2
+      const logoCenterX = metrics.viewportWidth * 0.5
+      const logoCenterY = metrics.viewportHeight * 0.46
+      const minCenterX = metrics.margin + widthPx / 2
+      const maxCenterX = metrics.viewportWidth - metrics.margin - widthPx / 2
+      const minCenterY = headerBottomPx + estimatedHeightPx / 2
+      const maxCenterY = Math.max(
+        minCenterY,
+        privacyTopPx - estimatedHeightPx / 2,
+      )
+      const horizontalRadius = Math.max(
+        0,
+        Math.min(logoCenterX - minCenterX, maxCenterX - logoCenterX),
+      )
+      const verticalRadius = Math.max(
+        0,
+        Math.min(
+          metrics.viewportHeight * 0.31,
+          logoCenterY - minCenterY,
+          maxCenterY - logoCenterY,
+        ),
+      )
+      const angle = randomBetween(-Math.PI, Math.PI)
+      const radialScale = randomBetween(0.92, 1.08)
+      const centerX = clamp(
+        logoCenterX + Math.cos(angle) * horizontalRadius * radialScale,
+        minCenterX,
+        maxCenterX,
+      )
+      const centerY = clamp(
+        logoCenterY + Math.sin(angle) * verticalRadius * radialScale,
+        minCenterY,
+        maxCenterY,
+      )
+
+      leftPx = centerX - widthPx / 2
+      topPx = centerY - estimatedHeightPx / 2
+    } else {
+      const maxTopPx = Math.max(
+        metrics.margin,
+        metrics.viewportHeight - estimatedHeightPx - metrics.margin,
+      )
+      leftPx = randomBetween(metrics.margin, maxLeftPx)
+      topPx = randomBetween(metrics.margin, maxTopPx)
+    }
+
+    return {
+      leftPx,
+      topPx,
+      widthRem,
+      widthPx,
+      estimatedHeightPx,
+      centerX: leftPx + widthPx / 2,
+      centerY: topPx + estimatedHeightPx / 2,
+      radius: Math.hypot(widthPx, estimatedHeightPx) * 0.34,
+      compact: metrics.compact,
+      viewportWidth: metrics.viewportWidth,
+      viewportHeight: metrics.viewportHeight,
+    }
+  }
+
+  const createPlacement = (order: number) => {
+    const compact = window.matchMedia('(max-width: 640px)').matches
+    const rootFontSize =
+      Number.parseFloat(
+        window.getComputedStyle(document.documentElement).fontSize,
+      ) || 16
+    const viewportWidth = Math.max(window.innerWidth, 320)
+    const viewportHeight = Math.max(window.innerHeight, 420)
+    const margin = rootFontSize * 0.55
+    const maxWidthRem = Math.max(
+      8.5,
+      (viewportWidth - margin * 2) / rootFontSize,
+    )
+    const metrics: PlacementMetrics = {
+      compact,
+      rootFontSize,
+      viewportWidth,
+      viewportHeight,
+      margin,
+      maxWidthRem,
+    }
+    const candidateCount = compact ? 12 : 22
+    const candidates = Array.from({ length: candidateCount }, () =>
+      createPlacementCandidate(order, metrics),
+    )
+    const placement = candidates
+      .map(candidate => ({
+        candidate,
+        score: scorePlacementCandidate(candidate),
+      }))
+      .reduce((best, entry) =>
+        entry.score > best.score ? entry : best,
+      ).candidate
+
+    rememberPlacement(placement)
+
+    return {
+      left: (placement.leftPx / viewportWidth) * 100,
+      top: (placement.topPx / viewportHeight) * 100,
+      widthRem: placement.widthRem,
+      rotate: randomBetween(-4.8, 4.8),
+    }
+  }
+
+  const createCard = (
+    fact: SponsoredBloomFact,
+    cardOptions: { primary?: boolean; order?: number } = {},
+  ) => {
+    const card = document.createElement('article')
+    const hasMedia = Boolean(fact.image || fact.video)
+    card.className =
+      'portal-sponsored-bloom__card facts-widget-container facts-widget-portal'
+    card.dataset.factTheme = fact.theme || 'default'
+    card.dataset.factRole = fact.cookieActions?.length
+      ? 'privacy-notice'
+      : 'standard'
+    card.dataset.expanded = 'true'
+    card.dataset.bloomDensity =
+      cardOptions.primary || hasMedia || randomUnit() > 0.34
+        ? 'standard'
+        : 'compact'
+    card.dataset.hasMedia = hasMedia ? 'true' : 'false'
+
+    if (cardOptions.primary) {
+      card.classList.add('portal-sponsored-bloom__card--primary')
+    } else {
+      const placement = createPlacement(cardOptions.order ?? 0)
+      card.style.setProperty('--bloom-left', `${placement.left}%`)
+      card.style.setProperty('--bloom-top', `${placement.top}%`)
+      card.style.setProperty('--bloom-width', `${placement.widthRem}rem`)
+      card.style.setProperty('--bloom-rotate', `${placement.rotate}deg`)
+      card.style.setProperty('--bloom-order', String(cardOptions.order ?? 0))
+    }
+
+    const shell = document.createElement('div')
+    shell.className = 'facts-widget-shell'
+
+    const frame = document.createElement('div')
+    frame.className =
+      'facts-widget-frame megameal-surface megameal-surface--interactive'
+
+    const header = document.createElement('div')
+    header.className = 'facts-widget-header'
+
+    const headerCopy = document.createElement('div')
+    headerCopy.className = 'facts-widget-header-copy'
+    headerCopy.append(createText('div', 'facts-widget-kicker', 'Live Ad Feed'))
+    header.append(headerCopy)
+
+    const body = document.createElement('div')
+    body.className = 'facts-widget-body'
+
+    const labelRow = document.createElement('div')
+    labelRow.className = 'facts-widget-label-row'
+    labelRow.append(
+      createText(
+        'span',
+        'facts-widget-label',
+        fact.eyebrow || 'Sponsored Placement',
+      ),
+      createText(
+        'span',
+        'facts-widget-sponsor',
+        fact.sponsor || 'Consumer Satisfaction Bureau',
+      ),
+    )
+
+    const actionRow = document.createElement('div')
+    actionRow.className = 'facts-widget-actions'
+
+    const link = document.createElement('a')
+    link.className = 'facts-widget-cta'
+    link.href = fact.href || '/posts/explainer/'
+    link.textContent = fact.ctaText || 'Comply'
+    link.tabIndex = -1
+    link.dataset.sfxClick = 'sweep'
+    link.dataset.sfxHover = 'hover-soft'
+    actionRow.append(link)
+
+    if (fact.cookieActions?.length) {
+      link.hidden = true
+      const cookieActions = document.createElement('div')
+      cookieActions.className = 'facts-widget-cookie-actions'
+      fact.cookieActions.forEach((label, index) => {
+        const button = document.createElement('button')
+        button.type = 'button'
+        button.className = 'facts-widget-cookie-choice'
+        button.textContent = label
+        button.tabIndex = -1
+        button.dataset.factCookieChoice = String(index)
+        button.dataset.sfxClick = 'sweep'
+        cookieActions.append(button)
+      })
+      actionRow.append(cookieActions)
+    }
+
+    const finePrint = createText('p', 'facts-widget-fineprint', fact.finePrint)
+    if (!fact.finePrint) finePrint.classList.add('is-hidden')
+
+    body.append(
+      labelRow,
+      createText(
+        'h3',
+        'facts-widget-headline',
+        fact.headline || 'Sponsored Message',
+      ),
+      createMedia(fact),
+      createText('p', 'facts-widget-text', fact.text),
+      actionRow,
+      finePrint,
+    )
+
+    frame.append(
+      header,
+      body,
+      createText(
+        'p',
+        'facts-widget-footer',
+        'Paid propaganda. Unpaid consequences.',
+      ),
+    )
+    shell.append(frame)
+    card.append(shell)
+
+    return card
+  }
+
+  const clearSpawnTimer = () => {
+    if (!spawnTimeout) return
+    window.clearTimeout(spawnTimeout)
+    spawnTimeout = 0
+  }
+
+  const clearRemovalTimer = () => {
+    if (!removalTimeout) return
+    window.clearTimeout(removalTimeout)
+    removalTimeout = 0
+  }
+
+  const removeBloomRoot = () => {
+    clearRemovalTimer()
+    root.dataset.state = 'stopped'
+    root.remove()
+  }
+
+  const finishBloom = () => {
+    completed = true
+    root.dataset.complete = 'true'
+    clearSpawnTimer()
+  }
+
+  const scheduleNextSpawn = (
+    delay = randomBetween(MIN_SPAWN_DELAY_MS, MAX_SPAWN_DELAY_MS),
+  ) => {
+    clearSpawnTimer()
+    if (stopped || completed) return
+    if (nextFactIndex >= shuffledFacts.length) {
+      finishBloom()
+      return
+    }
+
+    spawnTimeout = window.setTimeout(() => {
+      spawnTimeout = 0
+      if (stopped) return
+
+      const fact = shuffledFacts[nextFactIndex]
+      nextFactIndex += 1
+      const card = createCard(fact, {
+        order: nextFactIndex,
+      })
+      stage.append(card)
+      scheduleNextSpawn(
+        prefersReducedMotion.matches
+          ? MAX_SPAWN_DELAY_MS
+          : randomBetween(MIN_SPAWN_DELAY_MS, MAX_SPAWN_DELAY_MS),
+      )
+    }, delay)
+  }
+
+  const startBloom = () => {
+    if (started || stopped) return
+    if (
+      window.scrollY > 24 ||
+      document.documentElement.classList.contains(
+        'megameal-home-standard-banner-phase',
+      )
+    ) {
+      stopBloom()
+      return
+    }
+
+    shuffledFacts = shuffle(facts)
+    placementHistory = []
+    const firstFact = payload.privacyNoticeFact
+
+    started = true
+    nextFactIndex = 0
+    root.dataset.state = 'active'
+    spawnTimeout = window.setTimeout(() => {
+      spawnTimeout = 0
+      if (stopped) return
+
+      stage.append(
+        createCard(firstFact, {
+          primary: true,
+          order: 0,
+        }),
+      )
+      rememberPrimaryPlacement()
+      scheduleNextSpawn(
+        prefersReducedMotion.matches
+          ? MAX_SPAWN_DELAY_MS
+          : randomBetween(MIN_SPAWN_DELAY_MS, MAX_SPAWN_DELAY_MS),
+      )
+    }, INITIAL_SPAWN_DELAY_MS)
+  }
+
+  function stopBloom() {
+    if (stopped) return
+
+    stopped = true
+    clearSpawnTimer()
+    abortController.abort()
+    root.dataset.state = 'stopping'
+    removalTimeout = window.setTimeout(removeBloomRoot, 520)
+    if (win[cleanupKey] === stopBloom) {
+      win[cleanupKey] = null
+    }
+  }
+
+  const handleCookieChoice = (event: MouseEvent) => {
+    if (!(event.target instanceof Element)) return
+    if (!event.target.closest('[data-fact-cookie-choice]')) return
+
+    event.preventDefault()
+    stopBloom()
+  }
+
+  const handleMovement = () => {
+    stopBloom()
+  }
+
+  const handleWindowScroll = () => {
+    if (window.scrollY > 16) {
+      handleMovement()
+    }
+  }
+
+  const handleKeydown = (event: KeyboardEvent) => {
+    if (movementKeys.has(event.key)) {
+      handleMovement()
+    }
+  }
+
+  const handlePointerDown = (event: PointerEvent) => {
+    if (event.button !== 0) return
+    if (
+      event.target instanceof Element &&
+      event.target.closest('[data-portal-sponsored-bloom]')
+    ) {
+      return
+    }
+
+    pointerStart = {
+      id: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+    }
+  }
+
+  const handlePointerMove = (event: PointerEvent) => {
+    if (!pointerStart || pointerStart.id !== event.pointerId) return
+
+    const distance = Math.hypot(
+      event.clientX - pointerStart.x,
+      event.clientY - pointerStart.y,
+    )
+    if (distance > 12) {
+      handleMovement()
+    }
+  }
+
+  const clearPointerStart = (event: PointerEvent) => {
+    if (!pointerStart || pointerStart.id === event.pointerId) {
+      pointerStart = null
+    }
+  }
+
+  win[cleanupKey] = stopBloom
+  root.addEventListener('click', handleCookieChoice, { signal })
+  window.addEventListener('wheel', handleMovement, {
+    capture: true,
+    passive: true,
+    signal,
+  })
+  window.addEventListener('touchmove', handleMovement, {
+    capture: true,
+    passive: true,
+    signal,
+  })
+  window.addEventListener('scroll', handleWindowScroll, {
+    capture: true,
+    passive: true,
+    signal,
+  })
+  window.addEventListener(portalAdvanceEvent, handleMovement, {
+    signal,
+  })
+  window.addEventListener('keydown', handleKeydown, {
+    capture: true,
+    signal,
+  })
+  window.addEventListener('pointerdown', handlePointerDown, {
+    capture: true,
+    passive: true,
+    signal,
+  })
+  window.addEventListener('pointermove', handlePointerMove, {
+    capture: true,
+    passive: true,
+    signal,
+  })
+  window.addEventListener('pointerup', clearPointerStart, {
+    capture: true,
+    passive: true,
+    signal,
+  })
+  window.addEventListener('pointercancel', clearPointerStart, {
+    capture: true,
+    passive: true,
+    signal,
+  })
+  window.addEventListener(portalIntroReadyEvent, startBloom, {
+    signal,
+  })
+  registerLifecycleCleanup(stopBloom, signal)
+
+  if (document.documentElement.dataset.megamealPortalIntroReady === 'true') {
+    window.setTimeout(startBloom, 0)
+  }
+}

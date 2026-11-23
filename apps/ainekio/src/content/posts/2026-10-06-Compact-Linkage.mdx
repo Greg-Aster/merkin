@@ -1,0 +1,152 @@
+---
+title: "Compact 35 mm Linkage, Lighter Rebuild, and Continuous Steering"
+published: 2026-10-06
+updated: 2026-10-06
+description: "Why the first printed V2 chassis could not stand on MG90 servos, how the 35/20/28 mm linkage and lighter chassis solve it, and new continuous walk steering and IMU estimation."
+image: "/posts/2026-10-06-progress/motion-library-point.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V2, Blender, Gait, Linkage, Chassis, Firmware, Wireless]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: legs
+  generation: v2
+  kind: journal
+  next: 2026-10-08-standing-walking
+  related: ["gait-development", "ainekio-v2", "protocol-and-safety"]
+---
+
+> **October 8 milestone:** [The lighter robot stands, walks, and responds to commands.](/posts/2026-10-08-standing-walking/)
+
+With the first V2 chassis printed (even before fitting the LCD and outer carapace
+panels), the robot **could not stand up on its MG90 servos** while carrying the
+heavy 10,000 mAh USB power bank.
+
+After evaluating larger servo alternatives, we kept the MG90s and redesigned the
+robot around their torque envelope across three fronts:
+
+1. **Shorter 35 / 20 / 28 mm leg linkage** for ~20% greater lifting leverage and
+   faster joint response, with all 23 motions retargeted in Blender.
+2. **Lighter chassis and discrete power** (~20% structural weight reduction),
+   replacing the heavy integrated power bank with a 2S battery and onboard
+   buck/charging boards, and prioritizing the **Wireless (offboard Q6A)** build.
+3. **Continuous steering, IMU attitude estimation, and dual camera profiles** in the
+   ESP32-P4 firmware and Body Control gateway.
+
+<figure>
+  <img src="/posts/2026-10-06-progress/motion-library-point.webp" alt="Blender render of the compact-linkage robot performing the Point gesture." width="1280" height="800" loading="eager" />
+  <figcaption>October 6 Point gesture preview on the compact 35/20/28 mm linkage.</figcaption>
+</figure>
+
+## Reworking the linkage: 35 mm carrier, 20 mm crank, 28 mm pickup
+
+To increase mechanical advantage without losing the robot's expressive repertoire,
+the compact `35 / 20 / 28 / 38 / 55 mm` geometry shortens the upper carrier and input
+crank while lengthening the lower-leg pickup lever:
+
+| Dimension | Previous model | October 5–6 compact linkage | Change |
+| --- | ---: | ---: | ---: |
+| Upper carrier | 40 mm | **35 mm** | −5 mm (−12.5%) |
+| Knee input crank | 24 mm | **20 mm** | −4 mm |
+| Lower-leg pickup radius | 24 mm | **28 mm** | +4 mm |
+| Connecting rod | 38 mm | **38 mm** | Unchanged |
+| Distal lower leg | 55 mm | **55 mm** | Unchanged |
+
+Download the [dimension comparison CSV](/posts/2026-10-06-progress/linkage-comparison.csv)
+or see the [gait development log](/posts/gait-development/) for the full kinematic history.
+
+### Retargeting all 23 named motions
+
+Thirteen clips preserve their original body trajectory, horizontal foot positions,
+and full-sole height without modification: *Celebrate, Curious, Cute, Dance, Freaky,
+Lay Down, Sad, Shake, Shrug, Stretch, Surprised, Swim,* and *Worm*. *Crouch* uses the
+native inverse-kinematics planner with its −35 mm terminal body translation.
+
+The remaining motions were refitted to match the shorter carrier:
+
+| Motion | Retained behavior | Adjustment in the 35/20/28 mm library |
+| --- | --- | --- |
+| Sit | Body trajectory, timing, contact sequence, and sole orientation | Rear landings move 5.584 mm forward |
+| Wave | Seated three-wave sequence and return to standing | Uses the revised Sit entry |
+| Upright | Sit entry, two front steps, and full −90° body rise | Refitted body path; forelimb reach changes from 90.339 to 76.585 mm |
+| Rest | Step timing, boot orientations, and chassis lowering | Landings move 5.018 mm forward |
+| Bow / Nod | Foot paths and original timing | Body translation adjusted by up to 5.0 mm |
+| Pushup | Five repetitions and timing | Body translation refitted by up to 4.767 mm |
+| Play Dead | Sequence and timing | Front slide endpoint moves 7.158 mm rearward |
+| Point | Carrier angle, boot orientation, and extension timing | Pointing toe displaced by 5.0 mm due to shorter carrier |
+
+<div className="grid gap-5 sm:grid-cols-2">
+  <figure>
+    <img src="/posts/2026-10-06-progress/sit-study.webp" alt="Blender view of the compact-linkage Sit study with the rear legs folded." width="768" height="480" loading="lazy" />
+    <figcaption>October 5 seated-support study with rear foot placement shifted 5.58 mm forward.</figcaption>
+  </figure>
+  <figure>
+    <img src="/posts/2026-10-06-progress/upright-study.webp" alt="Blender preview of the experimental Upright pose on the compact linkage." width="768" height="480" loading="lazy" />
+    <figcaption>Experimental Upright pose on the 35/20/28 mm linkage (76.59 mm forelimb reach).</figcaption>
+  </figure>
+</div>
+
+The completed offline library spans **31,031 source/preview samples** and **62,517
+native sampler timestamps** across all twelve joints, with 46 nonsequential Blender
+poses matching the C forward-kinematics solver to within **0.000027 mm**. Across
+Upright and Bow, the front cranks span **243.87°** of combined travel against the
+225° reference window (400–2,900 µs).
+
+For continuous locomotion, the controller now uses a **96 mm full Walk sweep**,
+**8.85 mm Walk lift**, and **−8 mm body offset**, while continuous Crawl uses a
+**−22 mm body offset**, **18 mm sweep**, and **4 mm lift**.
+
+## Lighter chassis rebuild and serviceable electronics bridge
+
+Alongside the linkage changes, we stripped unnecessary mass and consolidated split
+printed parts across the frame:
+
+- **Front bearing panel (Oct 1):** Reduced mesh volume from **5,421 to 4,347 mm³
+  (−19.81%)** using a 2.5 mm main web and four oval cutouts while keeping the 78.5 mm
+  width and 12.5 × 4.5 mm bearing pockets.
+- **One-piece side supports and rear tray:** Merged the separate side supports, trays,
+  and inside connectors into single printable solids per side, fastening directly
+  through bottom-slot tabs and removable flat-printed panel braces.
+- **Serviceable electronics bridge (Oct 3):** Uses seven M2×6 retainers (three P4 edge
+  clips, two IMU clips, and two PCA9685 spacer retainers) so the boards can be
+  mounted on the bridge before sliding it under the crossbars.
+
+<div className="grid gap-5 sm:grid-cols-2">
+  <figure>
+    <img src="/posts/2026-10-06-progress/electronics-bridge.webp" alt="Exploded Blender view of the electronics shelf and its end supports." width="1400" height="900" loading="lazy" />
+    <figcaption>Exploded Blender view of the removable electronics bridge and end supports.</figcaption>
+  </figure>
+  <figure>
+    <img src="/posts/2026-10-06-progress/multipart-face.webp" alt="Blender preview of Ainekio's angular red multipart face around a rectangular display and camera opening." width="1200" height="950" loading="lazy" />
+    <figcaption>23-panel angular mask study tilted 18° around the rectangular display and forward camera.</figcaption>
+  </figure>
+</div>
+
+## Continuous walk steering, IMU estimator, and camera profiles
+
+While replacement chassis and linkage parts printed, the software stack gained
+several core capabilities:
+
+- **Continuous Walk steering:** The gateway can now update a running Walk action
+  in-place with signed `forward` and `turn` commands (−100 to +100, positive turn =
+  left yaw), transitioning smoothly through the gait cycle without resetting phase.
+  Independent controls govern gait speed, stride/rate, named-motion speed, and maximum
+  joint speed.
+- **Portable C IMU attitude estimator:** A new six-axis C estimator module applies
+  sensor-to-body alignment and gyro bias calibration to compute roll/pitch orientation
+  and sample freshness, ready to wire into the P4 hardware loop.
+- **Dual camera profiles & recognition worker:** The P4 camera driver supports
+  independent preview (QVGA/VGA at 0–15 fps) and still capture (QVGA/VGA/XGA)
+  profiles under a single sensor/encoder owner, feeding a gateway recognition worker
+  that processes the newest frame and reports summaries and detected objects to the
+  Environment Bridge.
+- **Q6A Wi-Fi hotspot & ROS 2 Jazzy:** The P4 associated with the Q6A hotspot and
+  completed authenticated settings readback (with connection drop recovery in
+  progress), while desktop ROS 2 Jazzy talker/listener, MCAP bag recording, and RViz
+  checks were verified.

@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"environment": {
+		"kind": "cubemap-skybox",
+		"assetId": "cubemap_classic_sky",
+		"backgroundIntensity": 1,
+		"backgroundBlurriness": 0,
+		"environmentIntensity": 0.9,
+		"requiredForReadiness": true
+	},
+	"assets": {
+		"shared": ["cubemap_classic_sky"],
+		"local": [],
+		"preload": ["cubemap_classic_sky"],
+		"preloadGroups": {
+			"portal_arena": ["cubemap_classic_sky"]
+		}
+	},
+	"planned": {
+		"starmap": {
+			"enabled": false,
+			"assetId": "",
+			"motion": "static"
+		},
+		"chunkedSky": {
+			"enabled": false,
+			"chunks": []
+		},
+		"motion": {
+			"enabled": false,
+			"angularVelocity": [0, 0, 0]
+		}
+	}
+}

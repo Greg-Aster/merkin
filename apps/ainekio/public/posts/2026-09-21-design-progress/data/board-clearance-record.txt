@@ -1,0 +1,26 @@
+# Part_003 shoulder motion and board clearance — 2026-09-17
+
+No modeled Part_003-to-board collision occurs over the existing animation angle ranges applied to the current narrow prototype. The fixed chassis sweep also found no intersection above 0.01 mm³ at the sampled poses. Extra inward rotation does collide with the boards.
+
+Live source: `Blender workspace/robot-motion-batch-20260916/Ainekio-Motion-Library.blend`, dirty scene at frame 1. The audit exported evaluated meshes and calculated motion offline. It did not change live geometry, placement, animation, selection, or view. All 12 tested live object meshes were rechecked against the export and matched within 0.0001 mm.
+
+| Housing position | Board | Tested shoulder range | Conservative continuous clearance | Extra inward contact detected |
+| --- | --- | --- | --- | --- |
+| Rear left (FL) | ESP32-P4 | 18.69° inward to 125.00° outward | ≥ 1.970 mm | ~33.0° inward |
+| Rear right (FR) | ESP32-P4 | 19.18° inward to 125.00° outward | ≥ 1.967 mm | ~33.0° inward |
+| Front left (RL) | PCA9685 | 13.01° inward to 140.00° outward | ≥ 0.788 mm | ~22.3° inward |
+| Front right (RR) | PCA9685 | 13.01° inward to 140.00° outward | ≥ 0.788 mm | ~22.3° inward |
+
+Clearance is measured conservatively against the entire axis-aligned bounding box enclosing each imported board and its modeled components. The minimum sampled/refined envelope separations are about 1.977 mm for ESP32-P4 and 0.796 mm for PCA9685, occurring at the outward range endpoints (125° and 140°). Actual component surfaces may leave more room. The positive continuous lower bounds in the table account for intermediate angles using the maximum rigid rotational displacement between queried poses.
+
+Angles are relative to the present neutral housing pose. Positive outward direction is mirrored between robot sides. The current CRAWL animation references use h002 local X. Pivot positions were recovered from child bind matrices and transferred to the current TESTS housing geometry; hidden animated world transforms were not used because they were stale. The original wide rig was not substituted for the current chassis.
+
+The fixed chassis check covers front/rear end panels, top/bottom covers, and both center mounts. A total of 308 shoulder poses were checked, at 2° increments plus range endpoints. Center mounts are longitudinally separated from the housing sweep. This is sampled evidence for the chassis, unlike the continuous board-envelope clearance bound.
+
+Additional inward contact was found using the detailed board meshes, with a 0.01 mm³ intersection threshold, a 2° probe, and local bisection at the first detected interval. Values are approximate geometric contact thresholds, not calibrated servo stops or recommended commands.
+
+This audit covers the four Part_003 housings against boards and fixed chassis only. It does not qualify combined motion of the remaining linkage/servo meshes, flexible wires, plugged-in connectors, mounting hardware not represented in CAD, deformation, print tolerances, or the evolving carapace. Hidden temporary carapace meshes were excluded. The animation extrema are not physical servo-limit calibration.
+
+Allow more room around the PCA9685 before finalizing board mounts and cable routing; submillimeter conservative clearance at an extreme pose leaves little allowance for unmodeled items.
+
+Evidence: `context.json`, `sweep-results.json`, `envelope-clearance.json`, and `live-snapshot-recheck.json`. Reproducible scripts: `sweep.py` and `envelope_clearance.py`. The earlier detailed-mesh distance script `continuous_clearance.py` was stopped for runtime cost and is not the source of the clearance results above.

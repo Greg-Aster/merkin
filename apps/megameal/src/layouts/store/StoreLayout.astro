@@ -1,0 +1,115 @@
+---
+import '@fontsource/creepster'
+import '@fontsource/metal-mania'
+import Footer from '@components/Footer.astro'
+import Navbar from '@components/Navbar.astro'
+import BackToTop from '@components/control/BackToTop.astro'
+import ImageWrapper from '../../components/misc/ImageWrapper.astro'
+import CartDrawer from '../../components/store/CartDrawer.svelte'
+import StoreCartRuntime from '../../components/store/StoreCartRuntime.svelte'
+import { siteConfig } from '../../config/config'
+import { routeStyleHref } from '../../styles/routeStyleBundles'
+import Layout from '../Layout.astro'
+
+type StoreAmbientAudioTrack = {
+  id?: string
+  src: string
+  label: string
+  loop?: boolean
+  volume?: number
+  html5?: boolean
+}
+
+export interface Props {
+  title: string
+  description: string
+  ambientAudio?: StoreAmbientAudioTrack | StoreAmbientAudioTrack[]
+  // Add other props if Layout.astro expects them (e.g., lang, banner for OG tags)
+}
+const { title, description, ambientAudio, ...rest } = Astro.props // Capture other potential props for Layout
+const pageAmbientTracks = ambientAudio
+  ? (Array.isArray(ambientAudio) ? ambientAudio : [ambientAudio]).map(
+      (track, index) => ({
+        id:
+          track.id ??
+          `page-ambient:${Astro.url.pathname.replace(/\/+$/, '') || '/'}:${index}`,
+        src: track.src,
+        label: track.label,
+        loop: track.loop,
+        volume: track.volume,
+        html5: track.html5,
+      }),
+    )
+  : []
+const pageAmbientTrackJson = pageAmbientTracks.length
+  ? JSON.stringify(pageAmbientTracks).replace(/</g, '\\u003c')
+  : null
+---
+<Layout title={title} description={description} {...rest}>
+  <Fragment slot="head">
+    <link rel="stylesheet" href={routeStyleHref('store')} data-route-style="store" />
+    {pageAmbientTrackJson && (
+      <script
+        is:inline
+        id="megameal-page-ambient-track"
+        type="application/json"
+        set:html={pageAmbientTrackJson}
+      />
+    )}
+    <slot name="head" />
+  </Fragment>
+
+  <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-2 md:px-4 mx-auto">
+    <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all duration-300">
+      <Navbar />
+    </div>
+  </div>
+
+  <div id="banner-container" class="relative">
+    {/* Parallax Background */}
+    {siteConfig.banner.enable && (
+      <div id="parallax-banner" class="fixed top-0 left-0 w-full h-screen z-[-1] overflow-hidden">
+        <ImageWrapper
+          id="parallax-image"
+          alt="Site background image"
+          class="parallax-bg object-cover w-full h-[120vh]"
+          src={siteConfig.banner.src}
+          position={siteConfig.banner.position || 'center'}
+        />
+        {siteConfig.banner.credit?.enable && (
+          <div class="absolute bottom-4 right-4 text-white/50 text-xs bg-black/30 px-2 py-1 rounded">
+            {siteConfig.banner.credit.text && (
+              <a href={siteConfig.banner.credit.url || '#'} class="hover:text-white/80 transition">
+                {siteConfig.banner.credit.text}
+              </a>
+            )}
+          </div>
+        )}
+        {/* Optional overlay for better text readability */}
+        <div class="absolute inset-0 bg-gradient-to-b from-black/20 to-black/50 pointer-events-none"></div>
+      </div>
+    )}
+  </div>
+  <div id="page-content-surface">
+    {/* Cart Drawer — mounted once at layout level, controlled via custom events */}
+    <CartDrawer client:load />
+    <StoreCartRuntime client:load />
+
+    <div id="main-grid" class="relative z-10">
+      <main id="store-content" class="relative z-10 py-8 mt-6">
+        <slot />
+      </main>
+      <Footer />
+      <BackToTop />
+    </div>
+    <script>
+      import {
+        bindStoreLayoutChromePageLoad,
+        initStoreLayoutChrome,
+      } from './storeLayoutChrome'
+
+      initStoreLayoutChrome();
+      bindStoreLayoutChromePageLoad();
+    </script>
+  </div>
+</Layout>

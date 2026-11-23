@@ -1,0 +1,565 @@
+---
+import '@fontsource/roboto/400.css'
+import '@fontsource/roboto/500.css'
+import '@fontsource/roboto/700.css'
+import '@fontsource/sriracha/400.css'
+import '@fontsource-variable/jetbrains-mono'
+
+import { profileConfig, siteConfig } from '@/config/config'
+import ConfigCarrier from '@components/ConfigCarrier.astro'
+import PageNavigation from '../components/client/PageNavigation.svelte'
+import {
+  AUTO_MODE,
+  DARK_MODE,
+  LIGHT_MODE,
+  PAGE_WIDTH,
+} from '@/constants/constants'
+import { defaultFavicons } from '@/constants/icon'
+import type { SocialImageMetadata } from '../types'
+import type { Favicon } from '@/types/config'
+import { url, pathsEqual } from '@/utils/url-utils'
+import katexStylesheetHref from 'katex/dist/katex.css?url'
+import overlayScrollbarsStylesheetHref from 'overlayscrollbars/overlayscrollbars.css?url'
+import photoSwipeStylesheetHref from 'photoswipe/style.css?url'
+
+interface Props {
+  title?: string
+  banner?: string
+  description?: string
+  lang?: string
+  setOGTypeArticle?: boolean
+  post?: any
+  socialImage?: SocialImageMetadata
+}
+
+let { title, banner, description, lang, setOGTypeArticle, post, socialImage: suppliedSocialImage } = Astro.props
+
+// Check if we're on the home or post page for class assignments
+const isHomePage = pathsEqual(Astro.url.pathname, url('/'))
+const isPostPage = post?.data || Astro.url.pathname.includes('/posts/')
+
+// Build page title
+let pageTitle: string
+if (title) {
+  pageTitle = `${title} - ${siteConfig.title}`
+} else {
+  pageTitle = `${siteConfig.title} - ${siteConfig.subtitle}`
+}
+
+// Get favicons configuration
+const favicons: Favicon[] =
+  siteConfig.favicon.length > 0 ? siteConfig.favicon : defaultFavicons
+
+// Set language
+if (!lang) {
+  lang = `${siteConfig.lang}`
+}
+const siteLang = lang.replace('_', '-')
+const canonicalUrl = Astro.url.href
+
+function getBaseAwareAssetUrl(assetPath?: string): string | null {
+  if (!assetPath) return null
+  if (
+    assetPath.startsWith('http://') ||
+    assetPath.startsWith('https://') ||
+    assetPath.startsWith('//') ||
+    assetPath.startsWith('data:')
+  ) {
+    return assetPath
+  }
+  if (assetPath.startsWith('/')) {
+    return url(assetPath, import.meta.env.BASE_URL)
+  }
+  return assetPath
+}
+
+const socialImage =
+  getBaseAwareAssetUrl(suppliedSocialImage?.src) ||
+  getBaseAwareAssetUrl(post?.data?.image) ||
+  getBaseAwareAssetUrl(banner) ||
+  getBaseAwareAssetUrl(siteConfig.banner?.src) ||
+  getBaseAwareAssetUrl('/thumb/favicon-light-192.png')
+
+// Theme color configuration
+const configHue = siteConfig.themeColor.hue
+---
+
+<!DOCTYPE html>
+<html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]">
+  <head>
+    <title>{pageTitle}</title>
+
+    <meta charset="UTF-8" />
+    <meta name="description" content={description || pageTitle}>
+    <meta name="author" content={profileConfig.name}>
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:site_name" content={siteConfig.title}>
+    <meta property="og:url" content={Astro.url}>
+    <meta property="og:title" content={pageTitle}>
+    <meta property="og:description" content={description || pageTitle}>
+    <meta property="og:image" content={
+        new URL(socialImage, Astro.site)
+    }>
+    {suppliedSocialImage && <>
+      <meta property="og:image:width" content={suppliedSocialImage.width}>
+      <meta property="og:image:height" content={suppliedSocialImage.height}>
+      {suppliedSocialImage.type && <meta property="og:image:type" content={suppliedSocialImage.type}>}
+      {suppliedSocialImage.alt && <meta property="og:image:alt" content={suppliedSocialImage.alt}>}
+    </>}
+    {setOGTypeArticle ? (
+        <meta property="og:type" content="article" />
+    ) : (
+        <meta property="og:type" content="website" />
+    )}
+    
+    <!-- Article metadata for blog posts -->
+    {setOGTypeArticle && post?.data?.published && (
+        <meta property="article:published_time" content={post.data.published.toISOString()}>
+        )}
+    
+    <!-- twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content={Astro.url}>
+    <meta name="twitter:title" content={pageTitle}>
+    <meta name="twitter:description" content={description || pageTitle}>
+    <meta name="twitter:image" content={
+      new URL(socialImage, Astro.site)
+    }>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta name="generator" content={Astro.generator} />
+    {favicons.map(favicon => (
+        <link rel="icon"
+            href={favicon.src.startsWith('/') ? url(favicon.src) : favicon.src}
+            sizes={favicon.sizes}
+            media={favicon.theme && `(prefers-color-scheme: ${favicon.theme})`}
+        />
+    ))}
+
+    <!-- Set the theme before the page is rendered to avoid a flash -->
+        <script is:inline define:vars={{LIGHT_MODE, DARK_MODE, AUTO_MODE, PAGE_WIDTH, configHue, defaultTheme: siteConfig.defaultTheme, themeLock: siteConfig.themeLock ?? null}}>
+        // Honor a site-level theme lock before consulting local storage.
+        const theme = themeLock || localStorage.getItem('theme') || defaultTheme;
+        if (themeLock) {
+            localStorage.setItem('theme', themeLock);
+        }
+        switch (theme) {
+            case LIGHT_MODE:
+                document.documentElement.classList.remove('dark');
+                break
+            case DARK_MODE:
+                document.documentElement.classList.add('dark');
+                break
+            case AUTO_MODE:
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+        }
+
+        // Load the hue from local storage
+        const hue = localStorage.getItem('hue') || configHue;
+        document.documentElement.style.setProperty('--hue', hue);
+    </script>
+    <style define:vars={{
+        configHue,
+        'page-width': `${PAGE_WIDTH}rem`,
+    }}></style>
+
+    <slot name="head"></slot>
+
+    <link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={new URL(url('/rss.xml'), Astro.site).href}/>
+  </head>
+  <body class="min-h-screen transition"
+      class:list={[{
+          "is-home": isHomePage,
+          "lg:is-home": isHomePage,
+		}]}
+      data-katex-stylesheet={katexStylesheetHref}
+      data-overlayscrollbars-stylesheet={overlayScrollbarsStylesheetHref}
+      data-photoswipe-stylesheet={photoSwipeStylesheetHref}
+  >
+    {/* Accessibility: Skip to main content link */}
+    <a href="#main-content-wrapper" class="sr-only focus:not-sr-only fixed top-4 left-4 z-[9999] bg-[var(--primary)] text-white px-4 py-2 rounded font-bold">
+      Skip to main content
+    </a>
+
+    <ConfigCarrier></ConfigCarrier>
+    <PageNavigation client:load />
+
+    <slot />
+
+    <!-- increase the page height during page transition to prevent the scrolling animation from jumping -->
+    <div id="page-height-extend" class="hidden h-[300vh]"></div>
+  </body>
+</html>
+
+<style is:global>
+@tailwind components;
+@layer components {
+  #top-row {
+    @apply h-[0rem] transition-all duration-300;
+  }
+  
+  .navbar-hidden {
+    @apply opacity-0 -translate-y-16;
+  }
+  
+  /* Add animation styles for general page transitions */
+  .onload-animation {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  
+  .onload-animation.loaded {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
+
+<script>
+import {getHue, getStoredTheme, setHue, setTheme} from '@/utils/setting-utils';
+import {pathsEqual, url} from '@/utils/url-utils';
+
+function setClickOutsideToClose(panel: string, ignores: string[]) {
+    document.addEventListener("click", event => {
+        let panelDom = document.getElementById(panel);
+        if (!panelDom) return;
+        let tDom = event.target;
+        if (!(tDom instanceof Node)) return;
+        for (let ig of ignores) {
+            let ie = document.getElementById(ig)
+            if (ie == tDom || (ie?.contains(tDom))) {
+                return;
+            }
+        }
+        panelDom.classList.add("float-panel-closed");
+    });
+}
+setClickOutsideToClose("display-setting", ["display-setting", "display-settings-switch"])
+setClickOutsideToClose("nav-menu-panel", ["nav-menu-panel", "nav-menu-switch"])
+setClickOutsideToClose("search-panel", ["search-panel", "search-bar", "search-switch"])
+
+function loadTheme() {
+    const theme = getStoredTheme()
+    setTheme(theme)
+}
+
+function loadHue() {
+    setHue(getHue())
+}
+
+type ScrollbarInstance = { destroy: () => void };
+
+let scrollbarInstances: ScrollbarInstance[] = [];
+let scrollbarSchedule = 0;
+let scrollbarGeneration = 0;
+
+function loadFeatureStylesheet(href: string, feature: string): Promise<HTMLLinkElement> {
+    const existing = document.querySelector<HTMLLinkElement>(
+        `link[data-blog-core-feature-style="${feature}"]`,
+    );
+    if (existing) {
+        if (existing.sheet) return Promise.resolve(existing);
+        return new Promise((resolve, reject) => {
+            existing.addEventListener('load', () => resolve(existing), { once: true });
+            existing.addEventListener('error', () => reject(new Error(`Unable to load ${feature} styles.`)), { once: true });
+        });
+    }
+
+    const stylesheet = document.createElement('link');
+    stylesheet.rel = 'stylesheet';
+    stylesheet.href = href;
+    stylesheet.dataset.blogCoreFeatureStyle = feature;
+
+    const loaded = new Promise<HTMLLinkElement>((resolve, reject) => {
+        stylesheet.addEventListener('load', () => resolve(stylesheet), { once: true });
+        stylesheet.addEventListener('error', () => reject(new Error(`Unable to load ${feature} styles.`)), { once: true });
+    });
+    document.head.append(stylesheet);
+    return loaded;
+}
+
+function setupMathStyles() {
+    if (!document.querySelector('.katex')) return;
+
+    const stylesheetHref = document.body.dataset.katexStylesheet;
+    if (!stylesheetHref) {
+        console.error('Unable to style mathematical notation; the KaTeX stylesheet URL is unavailable.');
+        return;
+    }
+
+    void loadFeatureStylesheet(stylesheetHref, 'katex').catch(error => {
+        console.error('Unable to style mathematical notation.', error);
+    });
+}
+
+function destroyCustomScrollbars() {
+    scrollbarGeneration += 1;
+    scrollbarInstances.forEach(instance => instance.destroy());
+    scrollbarInstances = [];
+    window.clearTimeout(scrollbarSchedule);
+    scrollbarSchedule = 0;
+}
+
+async function initCustomScrollbar() {
+    const generation = ++scrollbarGeneration;
+    scrollbarInstances.forEach(instance => instance.destroy());
+    scrollbarInstances = [];
+
+    if (!window.matchMedia('(min-width: 768px) and (pointer: fine)').matches) {
+        return;
+    }
+
+    const codeBlocks = Array.from(document.querySelectorAll<HTMLElement>('pre'));
+    const mathBlocks = Array.from(document.querySelectorAll<HTMLElement>('.katex-display'));
+    if (codeBlocks.length === 0 && mathBlocks.length === 0) return;
+
+    try {
+        const stylesheetHref = document.body.dataset.overlayscrollbarsStylesheet;
+        if (!stylesheetHref) throw new Error('OverlayScrollbars stylesheet URL is unavailable.');
+
+        const [{ OverlayScrollbars }] = await Promise.all([
+            import('overlayscrollbars'),
+            loadFeatureStylesheet(stylesheetHref, 'overlayscrollbars'),
+        ]);
+
+        if (generation !== scrollbarGeneration) return;
+
+        codeBlocks.forEach((element) => {
+            scrollbarInstances.push(OverlayScrollbars(element, {
+                scrollbars: {
+                    theme: 'scrollbar-base scrollbar-dark px-2',
+                    autoHide: 'leave',
+                    autoHideDelay: 500,
+                    autoHideSuspend: false,
+                },
+            }));
+        });
+
+        mathBlocks.forEach((element) => {
+            scrollbarInstances.push(OverlayScrollbars(element, {
+                scrollbars: {
+                    theme: 'scrollbar-base scrollbar-auto py-1',
+                },
+            }));
+        });
+    } catch (error) {
+        console.error('Unable to enhance scrollbars; native scrolling remains available.', error);
+    }
+}
+
+function scheduleCustomScrollbar() {
+    destroyCustomScrollbars();
+    scrollbarSchedule = window.setTimeout(() => {
+        scrollbarSchedule = 0;
+        void initCustomScrollbar();
+    }, 1200);
+}
+
+function init() {
+    loadTheme();
+    loadHue();
+    setupMathStyles();
+    scheduleCustomScrollbar();
+}
+
+/* Load settings when entering the site */
+init();
+
+function broadcastAuthorContext() {
+    const contextElement = document.getElementById('author-context') as HTMLElement | null;
+    const fallbackDetail = {
+        slug: '',
+        customAvatar: '',
+        customName: '',
+        customBio: '',
+        customLink: '',
+        isHomePage: pathsEqual(window.location.pathname, url('/')),
+    };
+
+    if (!contextElement) {
+        window.dispatchEvent(new CustomEvent('merkin:author-context', { detail: fallbackDetail }));
+        return;
+    }
+
+    const detail = {
+        slug: contextElement.dataset.slug || '',
+        customAvatar: contextElement.dataset.customAvatar || '',
+        customName: contextElement.dataset.customName || '',
+        customBio: contextElement.dataset.customBio || '',
+        customLink: contextElement.dataset.customLink || '',
+        isHomePage: contextElement.dataset.isHomePage === 'true',
+    };
+
+    window.dispatchEvent(new CustomEvent('merkin:author-context', { detail }));
+}
+
+// Initial sync for direct page loads.
+broadcastAuthorContext();
+// Sync again on Astro view-transition style navigations.
+document.addEventListener('astro:page-load', broadcastAuthorContext);
+
+// Handle back-to-top button visibility
+let backToTopBtn = document.getElementById('back-to-top-btn');
+let toc = document.getElementById('toc-wrapper');
+let navbar = document.getElementById('navbar-wrapper');
+
+function syncScrollTargets() {
+    backToTopBtn = document.getElementById('back-to-top-btn');
+    toc = document.getElementById('toc-wrapper');
+    navbar = document.getElementById('navbar-wrapper');
+}
+
+document.addEventListener('astro:page-load', syncScrollTargets);
+document.addEventListener('astro:page-load', setupMathStyles);
+document.addEventListener('astro:page-load', scheduleCustomScrollbar);
+window.addEventListener('pagehide', destroyCustomScrollbars);
+
+let lastScrollTop = 0;
+
+function scrollFunction() {
+    const scrollTop = Math.max(document.body.scrollTop, document.documentElement.scrollTop);
+    const delta = scrollTop - lastScrollTop;
+
+    // Back-to-top button visibility
+    if (backToTopBtn) {
+        if (scrollTop > 300) {
+            backToTopBtn.classList.remove('hide');
+        } else {
+            backToTopBtn.classList.add('hide');
+        }
+    }
+
+    // TOC visibility
+    if (toc) {
+        toc.classList.remove('toc-hide');
+    }
+
+    // Smart navbar visibility: hide on sustained downward scroll past 300px, reveal immediately when scrolling up
+    if (navbar) {
+        if (scrollTop <= 120 || delta < -6) {
+            navbar.classList.remove('navbar-hidden');
+        } else if (scrollTop > 300 && delta > 4) {
+            navbar.classList.add('navbar-hidden');
+        }
+    }
+
+    lastScrollTop = Math.max(0, scrollTop);
+}
+
+window.onscroll = scrollFunction;
+let lightboxes: Array<{ destroy: () => void }> = [];
+let photoSwipeGeneration = 0;
+let photoSwipeSchedule = 0;
+
+const MARKDOWN_PHOTOSWIPE_SELECTOR = ".custom-md img, #post-cover img";
+const GALLERY_PHOTOSWIPE_SELECTOR = ".robot-gallery a.image-link";
+
+async function createPhotoSwipe(generation: number) {
+    const stylesheetHref = document.body.dataset.photoswipeStylesheet;
+    if (!stylesheetHref) throw new Error('PhotoSwipe stylesheet URL is unavailable.');
+
+    const [{ default: PhotoSwipeLightbox }] = await Promise.all([
+        import("photoswipe/lightbox"),
+        loadFeatureStylesheet(stylesheetHref, 'photoswipe'),
+    ]);
+
+    if (generation !== photoSwipeGeneration) return;
+
+    const sharedOptions = {
+        // Keep this lazy to avoid holding a stale rejected promise after Vite dep re-optimization.
+        pswpModule: () => import("photoswipe"),
+        closeSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>',
+        zoomSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M340-540h-40q-17 0-28.5-11.5T260-580q0-17 11.5-28.5T300-620h40v-40q0-17 11.5-28.5T380-700q17 0 28.5 11.5T420-660v40h40q17 0 28.5 11.5T500-580q0 17-11.5 28.5T460-540h-40v40q0 17-11.5 28.5T380-460q-17 0-28.5-11.5T340-500v-40Zm40 220q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0-127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>',
+        padding: { top: 20, bottom: 20, left: 20, right: 20 },
+        wheelToZoom: true,
+        imageClickAction: 'close' as const,
+        tapAction: 'close' as const,
+        doubleTapAction: 'zoom' as const,
+    };
+
+    if (document.querySelector(MARKDOWN_PHOTOSWIPE_SELECTOR)) {
+        const mdLightbox = new PhotoSwipeLightbox({
+            ...sharedOptions,
+            gallery: MARKDOWN_PHOTOSWIPE_SELECTOR,
+            arrowPrev: false,
+            arrowNext: false,
+        });
+        mdLightbox.addFilter("domItemData", (itemData, element) => {
+            if (element instanceof HTMLImageElement) {
+                itemData.src = element.src;
+                itemData.w = Number(element.naturalWidth || window.innerWidth);
+                itemData.h = Number(element.naturalHeight || window.innerHeight);
+                itemData.msrc = element.src;
+            }
+            return itemData;
+        });
+        mdLightbox.init();
+        lightboxes.push(mdLightbox);
+    }
+
+    if (document.querySelector(GALLERY_PHOTOSWIPE_SELECTOR)) {
+        const galleryLightbox = new PhotoSwipeLightbox({
+            ...sharedOptions,
+            gallery: '.robot-gallery',
+            children: 'a.image-link',
+            arrowPrev: true,
+            arrowNext: true,
+        });
+        galleryLightbox.addFilter("domItemData", (itemData, _element, linkEl) => {
+            const anchor = linkEl instanceof HTMLAnchorElement ? linkEl : null;
+            if (anchor) {
+                const thumb = anchor.querySelector('img');
+                itemData.src = anchor.href;
+                itemData.w = Number(anchor.dataset.pswpWidth || thumb?.naturalWidth || 1600);
+                itemData.h = Number(anchor.dataset.pswpHeight || thumb?.naturalHeight || 1000);
+                if (thumb?.currentSrc || thumb?.src) {
+                    itemData.msrc = thumb.currentSrc || thumb.src;
+                }
+                if (thumb?.alt) {
+                    itemData.alt = thumb.alt;
+                }
+            }
+            return itemData;
+        });
+        galleryLightbox.init();
+        lightboxes.push(galleryLightbox);
+    }
+}
+
+const destroyPhotoSwipe = () => {
+    lightboxes.forEach(instance => instance.destroy());
+    lightboxes = [];
+};
+
+const setupPhotoSwipe = () => {
+    photoSwipeGeneration += 1;
+    const generation = photoSwipeGeneration;
+    destroyPhotoSwipe();
+    window.clearTimeout(photoSwipeSchedule);
+
+    const hasGallery = Boolean(document.querySelector(GALLERY_PHOTOSWIPE_SELECTOR));
+    const hasMarkdown = Boolean(document.querySelector(MARKDOWN_PHOTOSWIPE_SELECTOR));
+    if (!hasGallery && !hasMarkdown) return;
+
+    photoSwipeSchedule = window.setTimeout(() => {
+        void createPhotoSwipe(generation).catch(error => {
+            console.error('Unable to initialize the image viewer.', error);
+        });
+    }, hasGallery ? 50 : 800);
+};
+
+setupPhotoSwipe();
+document.addEventListener('astro:page-load', setupPhotoSwipe);
+window.addEventListener('pagehide', () => {
+    photoSwipeGeneration += 1;
+    window.clearTimeout(photoSwipeSchedule);
+    destroyPhotoSwipe();
+});
+</script>

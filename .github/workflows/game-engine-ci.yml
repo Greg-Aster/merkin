@@ -1,0 +1,92 @@
+name: Game Engine CI
+
+on:
+  pull_request:
+    paths:
+      - "apps/game.megameal/**"
+      - "apps/megameal/public/audio/**"
+      - "packages/shared-audio/**"
+      - "packages/shared-data/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "scripts/audit-legacy-game-references.mjs"
+      - ".github/workflows/game-engine-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "9.14.4"
+
+jobs:
+  engine-contract-gate:
+    name: Engine Contract Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Legacy game reference audit
+        run: pnpm audit:legacy-game-references
+
+      - name: Engine boundary audit
+        run: pnpm --dir apps/game.megameal audit:engine-boundaries
+
+      - name: Type check
+        run: pnpm --dir apps/game.megameal type-check
+
+      - name: Lint
+        run: pnpm --dir apps/game.megameal lint
+
+      - name: Input contract
+        run: pnpm --dir apps/game.megameal test:input-contract
+
+      - name: Charged action contract
+        run: pnpm --dir apps/game.megameal test:charged-action-contract
+
+      - name: Story note contract
+        run: pnpm --dir apps/game.megameal test:story-note-contract
+
+      - name: Scene environment contract
+        run: pnpm --dir apps/game.megameal test:scene-environment-contract
+
+      - name: Runtime scene contract
+        run: pnpm --dir apps/game.megameal test:runtime-scene-contract
+
+      - name: Audio contract
+        run: pnpm --dir apps/game.megameal test:audio-contract
+
+      - name: Level authoring contract
+        run: pnpm --dir apps/game.megameal test:level-authoring-contract
+
+      - name: Generated GLB import contract
+        run: pnpm --dir apps/game.megameal test:generated-glb-import-contract
+
+      - name: Kinematic character contract
+        run: pnpm --dir apps/game.megameal test:kinematic-character-contract
+
+      - name: Collision cook contract
+        run: pnpm --dir apps/game.megameal test:level-editor-collision-cook-contract
+
+      - name: Observatory collision drift check
+        run: pnpm --dir apps/game.megameal ci:observatory-collision-drift
+
+      - name: Build
+        run: pnpm --dir apps/game.megameal build

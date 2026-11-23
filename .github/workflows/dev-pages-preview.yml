@@ -1,0 +1,169 @@
+name: Dev Preview (GitHub Pages)
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch, tag, or SHA to preview"
+        required: true
+        default: "dev"
+        type: string
+      prune_mode:
+        description: "Large-asset pruning mode"
+        required: true
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - always
+          - never
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages-dev-preview
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9.14.4"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test preview paths and document reliability
+        run: |
+          node apps/ainekio/scripts/test-base-path.mjs
+          node apps/megameal/scripts/test-google-doc-preview.mjs
+
+      - name: Build all sites into subfolders
+        env:
+          MERKIN_DEV_PREVIEW: "true"
+          PRUNE_INPUT: ${{ inputs.prune_mode || 'auto' }}
+        run: |
+          set -euo pipefail
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          PREVIEW_SITE_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io"
+          BASE="/${REPO_NAME}"
+
+          rm -rf preview-dist
+          mkdir -p preview-dist
+          touch preview-dist/.nojekyll
+
+          # Pages replaces the whole artifact on each deployment. Always build
+          # every site so a changed-only run cannot erase working previews.
+          links_file="$(mktemp)"
+          built_count=0
+          prune_note=""
+
+          build_site() {
+            local key="$1"
+            local label="$2"
+            local dist_dir="$3"
+            local build_script="$4"
+
+            echo "Building ${label}"
+            SITE_URL="${PREVIEW_SITE_URL}" SITE_BASE="${BASE}/${key}/" pnpm "${build_script}"
+            cp -a "${dist_dir}" "preview-dist/${key}"
+            printf '<li><a href="%s/">%s</a> <em>(built in this run)</em></li>\n' "${key}" "${label}" >> "${links_file}"
+            built_count=$((built_count + 1))
+          }
+
+          build_site "ainekio" "Ainekio" "apps/ainekio/dist" "build:ainekio"
+          SITE_BASE="${BASE}/ainekio/" node apps/ainekio/scripts/check-project-guide.mjs
+          build_site "megameal" "MEGA MEAL SAGA" "apps/megameal/dist" "build:megameal"
+          build_site "dndiy" "DNDIY" "DNDIY.github.io/dist" "build:dndiy"
+          build_site "temporal" "Temporal Flow" "Temporal-Flow/dist" "build:temporal"
+
+          prune_mode="${PRUNE_INPUT}"
+          if [[ -z "${prune_mode}" ]]; then
+            prune_mode="auto"
+          fi
+
+          total_before="$(du -sb preview-dist | cut -f1)"
+          should_prune=false
+          if [[ "${prune_mode}" == "always" ]]; then
+            should_prune=true
+          elif [[ "${prune_mode}" == "auto" && "${total_before}" -gt 950000000 ]]; then
+            should_prune=true
+          fi
+
+          if [[ "${should_prune}" == "true" ]]; then
+            mapfile -t pruned_files < <(find preview-dist -type f -size +25M -print)
+            if [[ "${#pruned_files[@]}" -gt 0 ]]; then
+              printf '%s\n' "${pruned_files[@]}" > preview-dist/pruned-large-assets.txt
+              find preview-dist -type f -size +25M -delete
+              prune_note="Large assets over 25MB were pruned for preview stability. See pruned-large-assets.txt."
+              echo "${prune_note}"
+            fi
+          fi
+
+          total_after="$(du -sb preview-dist | cut -f1)"
+          echo "Preview artifact size before pruning: ${total_before} bytes"
+          echo "Preview artifact size after pruning:  ${total_after} bytes"
+
+          cat > preview-dist/index.html <<HTMLEOF
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="utf-8"><title>Merkin Dev Preview</title>
+          <style>body{font-family:sans-serif;max-width:600px;margin:4rem auto;padding:0 1rem}a{display:block;margin:1rem 0;font-size:1.2rem}</style>
+          </head>
+          <body>
+          <h1>Merkin Dev Preview</h1>
+          <p>Built ${built_count} site(s) for this preview.</p>
+          <p>Source commit: <a href="https://github.com/${GITHUB_REPOSITORY}/commit/$(git rev-parse HEAD)">$(git rev-parse --short HEAD)</a></p>
+          <ul>
+          $(cat "${links_file}")
+          </ul>
+          $(if [[ -n "${prune_note}" ]]; then echo "<p><strong>${prune_note}</strong></p>"; fi)
+          </body>
+          </html>
+          HTMLEOF
+
+          rm -f "${links_file}"
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: preview-dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

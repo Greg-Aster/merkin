@@ -1,0 +1,12 @@
+---
+import SharedPagination from '@merkin/blog-core/components/control/Pagination.astro'
+import type { Page } from 'astro'
+
+interface Props {
+  page: Page
+  class?: string
+  style?: string
+}
+---
+
+<SharedPagination {...Astro.props} />

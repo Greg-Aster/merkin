@@ -1,0 +1,2133 @@
+{
+	"id": "miranda_deck",
+	"runtimeScene": {
+		"schemaVersion": 1,
+		"id": "miranda_deck_runtime",
+		"generatedAt": "2026-06-05T00:00:00.000Z",
+		"source": {
+			"kind": "authored",
+			"id": "miranda.scene#deck"
+		},
+		"readiness": {
+			"playerStableId": "player",
+			"requiredAssetIds": [
+				"mesh_box",
+				"mesh_cylinder",
+				"mesh_miranda_engine_core",
+				"mesh_portal_gate",
+				"material_miranda_floor_main",
+				"material_miranda_floor_upper",
+				"material_miranda_cockpit_panel",
+				"material_miranda_cockpit_panel_center",
+				"material_miranda_crew_bunk",
+				"material_miranda_locker_bank",
+				"material_miranda_captains_desk",
+				"material_miranda_captains_chair",
+				"material_miranda_recipe_safe",
+				"material_miranda_engine_column",
+				"material_miranda_engine_core",
+				"material_miranda_med_pod",
+				"material_miranda_mess_table",
+				"material_miranda_mess_counter",
+				"material_miranda_chapel_altar",
+				"material_miranda_brig_cell",
+				"material_miranda_brig_desk",
+				"material_miranda_cargo_stack_a",
+				"material_miranda_cargo_stack",
+				"material_miranda_server_bank",
+				"material_miranda_server_bank_wide",
+				"material_miranda_story_marker_cyan",
+				"material_miranda_story_marker_amber",
+				"material_miranda_story_marker_red",
+				"material_miranda_story_marker_magenta",
+				"audio_portal_activate",
+				"audio_ambient_wicked_shadows_whisper",
+				"audio_ambient_dark_shadows_of_delight",
+				"audio_ambient_shadow_waltz"
+			],
+			"requiredCollisionPrefabIds": [
+				"miranda_floor_main",
+				"miranda_floor_upper",
+				"miranda_floor_cargo_hold",
+				"miranda_cockpit_panel_side",
+				"miranda_cockpit_panel_center",
+				"miranda_crew_bunk",
+				"miranda_locker_bank",
+				"miranda_captains_desk",
+				"miranda_captains_chair",
+				"miranda_recipe_safe",
+				"miranda_engine_column",
+				"miranda_engine_core",
+				"miranda_med_pod",
+				"miranda_mess_table_large",
+				"miranda_mess_table_small",
+				"miranda_mess_counter",
+				"miranda_chapel_altar",
+				"miranda_brig_cell",
+				"miranda_brig_desk",
+				"miranda_cargo_stack_a",
+				"miranda_cargo_stack_b",
+				"miranda_cargo_stack_c",
+				"miranda_cargo_stack_d",
+				"miranda_server_bank_tall",
+				"miranda_server_bank_wide",
+				"miranda_story_marker_cyan",
+				"miranda_story_marker_amber",
+				"miranda_story_marker_red",
+				"miranda_story_marker_magenta",
+				"portal_gate"
+			],
+			"requiredCollisionStableIds": [
+				"miranda:floor:main",
+				"miranda:floor:upper",
+				"miranda:floor:cargo-hold",
+				"miranda:cockpit:panel:left",
+				"miranda:cockpit:panel:center",
+				"miranda:cockpit:panel:right",
+				"miranda:crew:bunk:port:a",
+				"miranda:crew:bunk:port:b",
+				"miranda:crew:bunk:starboard:a",
+				"miranda:crew:bunk:starboard:b",
+				"miranda:crew:locker-bank",
+				"miranda:captain:desk",
+				"miranda:captain:chair",
+				"miranda:captain:recipe-safe",
+				"miranda:engine:core",
+				"miranda:engine:column:a",
+				"miranda:engine:column:b",
+				"miranda:engine:column:c",
+				"miranda:engine:column:d",
+				"miranda:airlock:return-portal",
+				"miranda:medbay:pod:a",
+				"miranda:medbay:pod:b",
+				"miranda:medbay:pod:c",
+				"miranda:medbay:pod:d",
+				"miranda:mess:table:a",
+				"miranda:mess:table:b",
+				"miranda:mess:counter",
+				"miranda:chapel:altar",
+				"miranda:brig:cell:a",
+				"miranda:brig:cell:b",
+				"miranda:brig:cell:c",
+				"miranda:brig:cell:d",
+				"miranda:brig:desk",
+				"miranda:cargo:stack:a",
+				"miranda:cargo:stack:b",
+				"miranda:cargo:stack:c",
+				"miranda:cargo:stack:d",
+				"miranda:archive:server-bank:a",
+				"miranda:archive:server-bank:b",
+				"miranda:archive:server-bank:c",
+				"miranda:archive:server-bank:d",
+				"miranda:archive:server-bank:e",
+				"miranda:cockpit:story-note:captain-log",
+				"miranda:crew:story-note:medical-watch",
+				"miranda:captain:story-note:first-officer",
+				"miranda:captain:story-note:vault-fragment",
+				"miranda:engine:story-note:engineering-memo",
+				"miranda:medbay:story-note:quarantine",
+				"miranda:mess:story-note:ledger",
+				"miranda:brig:story-note:confession",
+				"miranda:archive:story-note:index"
+			],
+			"requiredWalkableStableIds": [
+				"miranda:floor:main",
+				"miranda:floor:upper",
+				"miranda:floor:cargo-hold"
+			],
+			"requiredLightStableIds": [
+				"miranda:command-gallery:beacon-light",
+				"miranda:observation-gallery:light",
+				"miranda:archive-gallery:light"
+			]
+		}
+	},
+	"level": {
+		"id": "miranda_deck",
+		"sceneId": "miranda_deck_game",
+		"preloadGroups": ["miranda_deck"],
+		"resources": {
+			"game:collectedCount": 0,
+			"game:totalCollectibles": 0,
+			"game:characterBounds": {
+				"minX": -20,
+				"maxX": 20,
+				"minZ": -50,
+				"maxZ": 48
+			}
+		},
+		"preload": [
+			"mesh_box",
+			"mesh_cylinder",
+			"mesh_miranda_engine_core",
+			"mesh_portal_gate",
+			"material_miranda_floor_main",
+			"material_miranda_floor_upper",
+			"material_miranda_cockpit_panel",
+			"material_miranda_cockpit_panel_center",
+			"material_miranda_crew_bunk",
+			"material_miranda_locker_bank",
+			"material_miranda_captains_desk",
+			"material_miranda_captains_chair",
+			"material_miranda_recipe_safe",
+			"material_miranda_engine_column",
+			"material_miranda_engine_core",
+			"material_miranda_med_pod",
+			"material_miranda_mess_table",
+			"material_miranda_mess_counter",
+			"material_miranda_chapel_altar",
+			"material_miranda_brig_cell",
+			"material_miranda_brig_desk",
+			"material_miranda_cargo_stack_a",
+			"material_miranda_cargo_stack",
+			"material_miranda_server_bank",
+			"material_miranda_server_bank_wide",
+			"material_miranda_story_marker_cyan",
+			"material_miranda_story_marker_amber",
+			"material_miranda_story_marker_red",
+			"material_miranda_story_marker_magenta",
+			"audio_portal_activate",
+			"audio_ambient_wicked_shadows_whisper",
+			"audio_ambient_dark_shadows_of_delight",
+			"audio_ambient_shadow_waltz"
+		],
+		"instances": [
+			{
+				"id": "miranda-floor-main",
+				"prefabId": "miranda_floor_main",
+				"stableId": "miranda:floor:main",
+				"transform": {
+					"position": [0, 3.35, -4]
+				}
+			},
+			{
+				"id": "miranda-floor-upper",
+				"prefabId": "miranda_floor_upper",
+				"stableId": "miranda:floor:upper",
+				"transform": {
+					"position": [0, 4.7, -27.5]
+				}
+			},
+			{
+				"id": "miranda-floor-cargo-hold",
+				"prefabId": "miranda_floor_cargo_hold",
+				"stableId": "miranda:floor:cargo-hold",
+				"transform": {
+					"position": [0, 3.35, 45]
+				}
+			},
+			{
+				"id": "miranda-command-gallery-beacon-light",
+				"prefabId": "miranda_command_gallery_beacon_light",
+				"stableId": "miranda:command-gallery:beacon-light",
+				"transform": {
+					"position": [0, 7.7, -24.1]
+				}
+			},
+			{
+				"id": "miranda-cockpit-panel-left",
+				"prefabId": "miranda_cockpit_panel_side",
+				"stableId": "miranda:cockpit:panel:left",
+				"transform": {
+					"position": [-2.6, 2.25, -20.2],
+					"rotation": [
+						0.08842644374541003, 0.1783049929434211, 0.01609091832305187,
+						0.9798618146889424
+					]
+				}
+			},
+			{
+				"id": "miranda-cockpit-panel-center",
+				"prefabId": "miranda_cockpit_panel_center",
+				"stableId": "miranda:cockpit:panel:center",
+				"transform": {
+					"position": [0, 2.25, -20.2],
+					"rotation": [0.08987854919801104, 0, 0, 0.9959527330119943]
+				}
+			},
+			{
+				"id": "miranda-cockpit-panel-right",
+				"prefabId": "miranda_cockpit_panel_side",
+				"stableId": "miranda:cockpit:panel:right",
+				"transform": {
+					"position": [2.6, 2.25, -20.2],
+					"rotation": [
+						0.08842644374541003, -0.1783049929434211, -0.01609091832305187,
+						0.9798618146889424
+					]
+				}
+			},
+			{
+				"id": "miranda-captain-log",
+				"prefabId": "miranda_story_marker_cyan",
+				"stableId": "miranda:cockpit:story-note:captain-log",
+				"transform": {
+					"position": [-1.35, 2.1, -18.4]
+				},
+				"components": {
+					"StoryNote": {
+						"id": "miranda.note.captain_log",
+						"title": "Captain's Log 45.7.21",
+						"author": "Captain Helena Zhao",
+						"location": "Cockpit Nav Station",
+						"excerpt": "There is nothing to salvage. Only debris, salt, and the taste of a vanished system.",
+						"body": "This is Captain Helena Zhao of the salvage vessel Second Breakfast.\n\nMiranda's primary sun went supernova without warning. Inner planets vaporized. Outer planetoids were thrown into cold darkness. We entered the debris field expecting a graveyard and found something worse: a silence that feels arranged.\n\nSome say you can still taste celery salt in the dust. I laughed when I first heard it. I am not laughing now.",
+						"markerColor": "#9fdcff",
+						"markerSize": 0.62
+					}
+				}
+			},
+			{
+				"id": "miranda-bunk-port-a",
+				"prefabId": "miranda_crew_bunk",
+				"stableId": "miranda:crew:bunk:port:a",
+				"transform": {
+					"position": [-7.55, 0.76, -4.2]
+				}
+			},
+			{
+				"id": "miranda-bunk-port-b",
+				"prefabId": "miranda_crew_bunk",
+				"stableId": "miranda:crew:bunk:port:b",
+				"transform": {
+					"position": [-7.55, 2.1, -4.2]
+				}
+			},
+			{
+				"id": "miranda-bunk-starboard-a",
+				"prefabId": "miranda_crew_bunk",
+				"stableId": "miranda:crew:bunk:starboard:a",
+				"transform": {
+					"position": [-7.55, 0.76, 0.9]
+				}
+			},
+			{
+				"id": "miranda-bunk-starboard-b",
+				"prefabId": "miranda_crew_bunk",
+				"stableId": "miranda:crew:bunk:starboard:b",
+				"transform": {
+					"position": [-7.55, 2.1, 0.9]
+				}
+			},
+			{
+				"id": "miranda-locker-bank",
+				"prefabId": "miranda_locker_bank",
+				"stableId": "miranda:crew:locker-bank",
+				"transform": {
+					"position": [-4.7, 1.32, -1.65]
+				}
+			},
+			{
+				"id": "miranda-crew-note",
+				"prefabId": "miranda_story_marker_red",
+				"stableId": "miranda:crew:story-note:medical-watch",
+				"transform": {
+					"position": [-7.2, 1.08, -0.1]
+				},
+				"components": {
+					"StoryNote": {
+						"id": "miranda.note.crew_medical_watch",
+						"title": "Crew Medical Watch",
+						"author": "Dr. Imani Vale",
+						"location": "Crew Quarters Locker",
+						"excerpt": "Headaches, nausea, deja vu. Nobody wants to say the symptoms out loud twice.",
+						"body": "Three crew reported headaches after handling drone returns from the debris field. Two described dreams of a bar they have never visited. One woke up repeating a drink order in a voice he claims was not his own.\n\nNo abnormalities on scans. No fever. No infection. The fear is the only thing progressing.\n\nRecommendation: limit direct exposure to recovered signal caches, especially any reference to a Bloody Mary and any insistence on pickle prohibition.",
+						"markerColor": "#ff9d9d",
+						"markerSize": 0.6
+					}
+				}
+			},
+			{
+				"id": "miranda-captains-desk",
+				"prefabId": "miranda_captains_desk",
+				"stableId": "miranda:captain:desk",
+				"transform": {
+					"position": [6.55, 0.9, -4.6],
+					"rotation": [0, 0.03998933418663416, 0, 0.9992001066609779]
+				}
+			},
+			{
+				"id": "miranda-captains-chair",
+				"prefabId": "miranda_captains_chair",
+				"stableId": "miranda:captain:chair",
+				"transform": {
+					"position": [5.12, 1.22, -4.85],
+					"rotation": [0, -0.12467473338522769, 0, 0.992197667229329]
+				}
+			},
+			{
+				"id": "miranda-safe",
+				"prefabId": "miranda_recipe_safe",
+				"stableId": "miranda:captain:recipe-safe",
+				"transform": {
+					"position": [7.35, 1.42, -6.55]
+				}
+			},
+			{
+				"id": "miranda-first-officer-note",
+				"prefabId": "miranda_story_marker_amber",
+				"stableId": "miranda:captain:story-note:first-officer",
+				"transform": {
+					"position": [6.8, 1.06, -4.1]
+				},
+				"components": {
+					"StoryNote": {
+						"id": "miranda.note.private_memorandum",
+						"title": "Private Memorandum",
+						"author": "First Officer Soren Pike",
+						"location": "Captain's Office Desk",
+						"excerpt": "The captain looks composed until someone mentions drinks, dreams, or card players.",
+						"body": "The captain has not slept properly in eleven cycles. She denies it, but the evidence is in the way she freezes whenever recovered transcripts mention the saloon.\n\nTwice now she has asked whether anyone else has seen three old men through the bridge glass. There was nobody there. On the second occasion she also asked whether the ship kept a safe for paper records.\n\nIt does now.",
+						"markerColor": "#e7c89d",
+						"markerSize": 0.58
+					}
+				}
+			},
+			{
+				"id": "miranda-vault-fragment",
+				"prefabId": "miranda_story_marker_red",
+				"stableId": "miranda:captain:story-note:vault-fragment",
+				"transform": {
+					"position": [8, 1.18, -6.55]
+				},
+				"components": {
+					"StoryNote": {
+						"id": "miranda.note.vault_fragment",
+						"title": "Vault Fragment: Recipe Lockbox",
+						"author": "Recovered hardcopy, access restricted",
+						"location": "Captain's Safe",
+						"excerpt": "The page keeps moving. The phrase keeps returning. The paper smells faintly of tomato, iron, and smoke.",
+						"body": "Cross-reference from the mechanical observer and the old man's account suggests a causality nexus formed around a drink completed at the instant of Miranda's destruction.\n\nHardcopy fragment secured in captain's vault after digital copies exhibited instability. Crew instructed not to vocalize the activation phrase aloud.\n\nFragment note: \"Bloody Mary, no pickles, make it a double.\"\n\nIf this page is found outside the safe again, burn it and do not discuss the ash.",
+						"markerColor": "#ff6d8e",
+						"markerSize": 0.58
+					}
+				}
+			},
+			{
+				"id": "miranda-engine-core",
+				"prefabId": "miranda_engine_core",
+				"stableId": "miranda:engine:core",
+				"transform": {
+					"position": [0, 1.75, 16.5]
+				}
+			},
+			{
+				"id": "miranda-engine-column-a",
+				"prefabId": "miranda_engine_column",
+				"stableId": "miranda:engine:column:a",
+				"transform": {
+					"position": [-3.6, 1.5, 15.6]
+				}
+			},
+			{
+				"id": "miranda-engine-column-b",
+				"prefabId": "miranda_engine_column",
+				"stableId": "miranda:engine:column:b",
+				"transform": {
+					"position": [-1.2, 1.5, 15.6]
+				}
+			},
+			{
+				"id": "miranda-engine-column-c",
+				"prefabId": "miranda_engine_column",
+				"stableId": "miranda:engine:column:c",
+				"transform": {
+					"position": [1.2, 1.5, 15.6]
+				}
+			},
+			{
+				"id": "miranda-engine-column-d",
+				"prefabId": "miranda_engine_column",
+				"stableId": "miranda:engine:column:d",
+				"transform": {
+					"position": [3.6, 1.5, 15.6]
+				}
+			},
+			{
+				"id": "miranda-engine-note",
+				"prefabId": "miranda_story_marker_amber",
+				"stableId": "miranda:engine:story-note:engineering-memo",
+				"transform": {
+					"position": [2.55, 1.2, 15.7]
+				},
+				"components": {
+					"StoryNote": {
+						"id": "miranda.note.engineering_memo",
+						"title": "Engineering Memo 8.15",
+						"author": "Chief Engineer Mara Quill",
+						"location": "Engine Room Control Deck",
+						"excerpt": "The ship is humming in sympathy with transmissions that should no longer exist.",
+						"body": "Reactor output remains nominal, but the harmonic drift is wrong. Every time we pass through a dense pocket of Miranda ash, the engine room resonates with carrier bands matching the dead system's final RF burst.\n\nIt sounds like traffic stacked above an atmosphere that is no longer there. Queue chatter. Clearance loops. Repeated holds.\n\nI have shut down three relays and the sound still comes through the deck.",
+						"markerColor": "#ffb36d",
+						"markerSize": 0.62
+					}
+				}
+			},
+			{
+				"id": "miranda-return-portal",
+				"prefabId": "portal_gate",
+				"stableId": "miranda:airlock:return-portal",
+				"transform": {
+					"position": [0, 1, 6.6],
+					"scale": [0.95, 0.95, 0.95]
+				},
+				"components": {
+					"Portal": {
+						"id": "miranda.return.observatory",
+						"label": "Return to Observatory",
+						"prompt": "Click to return to Observatory",
+						"targetRuntimeSceneId": "observatory_runtime",
+						"activationRadius": 2.35
+					}
+				}
+			},
+			{
+				"id": "miranda-med-pod-a",
+				"prefabId": "miranda_med_pod",
+				"stableId": "miranda:medbay:pod:a",
+				"transform": {
+					"position": [-12.8, 2.02, 9.6]
+				}
+			},
+			{
+				"id": "miranda-med-pod-b",
+				"prefabId": "miranda_med_pod",
+				"stableId": "miranda:medbay:pod:b",
+				"transform": {
+					"position": [-9.8, 2.02, 9.6]
+				}
+			},
+			{
+				"id": "miranda-med-pod-c",
+				"prefabId": "miranda_med_pod",
+				"stableId": "miranda:medbay:pod:c",
+				"transform": {
+					"position": [-12.8, 2.02, 16.6]
+				}
+			},
+			{
+				"id": "miranda-med-pod-d",
+				"prefabId": "miranda_med_pod",
+				"stableId": "miranda:medbay:pod:d",
+				"transform": {
+					"position": [-9.8, 2.02, 16.6]
+				}
+			},
+			{
+				"id": "miranda-medbay-note",
+				"prefabId": "miranda_story_marker_cyan",
+				"stableId": "miranda:medbay:story-note:quarantine",
+				"transform": {
+					"position": [-12.9, 1.08, 12.2]
+				},
+				"components": {
+					"StoryNote": {
+						"id": "miranda.note.quarantine_bay",
+						"title": "Quarantine Bay Slip",
+						"author": "Dr. Imani Vale",
+						"location": "Medbay Cryo Pod",
+						"excerpt": "The sleepers are not dead. The ship still refuses to classify them as living.",
+						"body": "We sealed three crew inside the aft medbay after the Miranda ash dreams escalated into waking fugues. They answer to their names, but only after a delay, as if translating from somewhere farther away.\n\nTheir body temperatures fall whenever the Bloody Mary phrase is spoken near the pods. The glass frosts from the inside first.\n\nI have ordered the quarantine lamps to stay red until somebody can explain why the EEG spikes match the ship's own telemetry.",
+						"markerColor": "#8de0ff",
+						"markerSize": 0.6
+					}
+				}
+			},
+			{
+				"id": "miranda-mess-table-a",
+				"prefabId": "miranda_mess_table_large",
+				"stableId": "miranda:mess:table:a",
+				"transform": {
+					"position": [-11.4, 0.72, 27.6],
+					"rotation": [0, 0.04997916927067833, 0, 0.9987502603949663]
+				}
+			},
+			{
+				"id": "miranda-mess-table-b",
+				"prefabId": "miranda_mess_table_small",
+				"stableId": "miranda:mess:table:b",
+				"transform": {
+					"position": [-9.2, 0.72, 33.2],
+					"rotation": [0, -0.09983341664682815, 0, 0.9950041652780257]
+				}
+			},
+			{
+				"id": "miranda-mess-counter",
+				"prefabId": "miranda_mess_counter",
+				"stableId": "miranda:mess:counter",
+				"transform": {
+					"position": [-13.6, 1.02, 29.8]
+				}
+			},
+			{
+				"id": "miranda-mess-note",
+				"prefabId": "miranda_story_marker_amber",
+				"stableId": "miranda:mess:story-note:ledger",
+				"transform": {
+					"position": [-11.4, 1.02, 29.2]
+				},
+				"components": {
+					"StoryNote": {
+						"id": "miranda.note.mess_ledger",
+						"title": "Mess Ledger Addendum",
+						"author": "Steward Callum Reef",
+						"location": "Galley Service Counter",
+						"excerpt": "We ran out of clean water before we ran out of stories about the bar.",
+						"body": "Nobody eats in the mess unless the speakers are playing static. If the channels are quiet, people start hearing the card table again.\n\nThe bowls rattle whenever we cross a dense ash current. Plates slide toward the aft corridor as if the ship itself leans toward Miranda.\n\nI locked the pantry and still found celery salt on the floor this morning.",
+						"markerColor": "#ffc584",
+						"markerSize": 0.6
+					}
+				}
+			},
+			{
+				"id": "miranda-chapel-altar",
+				"prefabId": "miranda_chapel_altar",
+				"stableId": "miranda:chapel:altar",
+				"transform": {
+					"position": [10.8, 0.92, 18.4]
+				}
+			},
+			{
+				"id": "miranda-brig-cell-a",
+				"prefabId": "miranda_brig_cell",
+				"stableId": "miranda:brig:cell:a",
+				"transform": {
+					"position": [9.4, 1.4, 30]
+				}
+			},
+			{
+				"id": "miranda-brig-cell-b",
+				"prefabId": "miranda_brig_cell",
+				"stableId": "miranda:brig:cell:b",
+				"transform": {
+					"position": [13, 1.4, 30]
+				}
+			},
+			{
+				"id": "miranda-brig-cell-c",
+				"prefabId": "miranda_brig_cell",
+				"stableId": "miranda:brig:cell:c",
+				"transform": {
+					"position": [9.4, 1.4, 37.6]
+				}
+			},
+			{
+				"id": "miranda-brig-cell-d",
+				"prefabId": "miranda_brig_cell",
+				"stableId": "miranda:brig:cell:d",
+				"transform": {
+					"position": [13, 1.4, 37.6]
+				}
+			},
+			{
+				"id": "miranda-brig-desk",
+				"prefabId": "miranda_brig_desk",
+				"stableId": "miranda:brig:desk",
+				"transform": {
+					"position": [11.1, 0.72, 42],
+					"rotation": [0, 0.03998933418663416, 0, 0.9992001066609779]
+				}
+			},
+			{
+				"id": "miranda-brig-note",
+				"prefabId": "miranda_story_marker_red",
+				"stableId": "miranda:brig:story-note:confession",
+				"transform": {
+					"position": [12.8, 1.08, 31.6]
+				},
+				"components": {
+					"StoryNote": {
+						"id": "miranda.note.brig_confession",
+						"title": "Brig Confession",
+						"author": "Unnamed detainee",
+						"location": "Detention Cell 02",
+						"excerpt": "I was not trying to open the safe. I was trying to put the page back.",
+						"body": "They locked me in the brig because I kept leaving the corridor at night and waking up near the captain's office with soot under my nails.\n\nThe truth is smaller and worse: every time I close my eyes, I can hear a voice asking me to return a recipe card to its proper era.\n\nThe bars hum when the engines drift. The hum knows my name.",
+						"markerColor": "#ff8ea6",
+						"markerSize": 0.6
+					}
+				}
+			},
+			{
+				"id": "miranda-cargo-stack-a",
+				"prefabId": "miranda_cargo_stack_a",
+				"stableId": "miranda:cargo:stack:a",
+				"transform": {
+					"position": [-2.8, 0.95, 33.6],
+					"rotation": [0, 0.04997916927067833, 0, 0.9987502603949663]
+				}
+			},
+			{
+				"id": "miranda-cargo-stack-b",
+				"prefabId": "miranda_cargo_stack_b",
+				"stableId": "miranda:cargo:stack:b",
+				"transform": {
+					"position": [3.8, 1.35, 38.1],
+					"rotation": [0, -0.07492970727274234, 0, 0.9971888181122075]
+				}
+			},
+			{
+				"id": "miranda-cargo-stack-c",
+				"prefabId": "miranda_cargo_stack_c",
+				"stableId": "miranda:cargo:stack:c",
+				"transform": {
+					"position": [0.2, 0.7, 44.2]
+				}
+			},
+			{
+				"id": "miranda-cargo-stack-d",
+				"prefabId": "miranda_cargo_stack_d",
+				"stableId": "miranda:cargo:stack:d",
+				"transform": {
+					"position": [-4.6, 0.78, 28.4],
+					"rotation": [0, 0.09983341664682815, 0, 0.9950041652780257]
+				}
+			},
+			{
+				"id": "miranda-observation-light",
+				"prefabId": "miranda_observation_light",
+				"stableId": "miranda:observation-gallery:light",
+				"transform": {
+					"position": [-10.8, 7.2, 8.4]
+				}
+			},
+			{
+				"id": "miranda-server-bank-a",
+				"prefabId": "miranda_server_bank_tall",
+				"stableId": "miranda:archive:server-bank:a",
+				"transform": {
+					"position": [9.4, 5.1, 1.6]
+				}
+			},
+			{
+				"id": "miranda-server-bank-b",
+				"prefabId": "miranda_server_bank_tall",
+				"stableId": "miranda:archive:server-bank:b",
+				"transform": {
+					"position": [13.2, 5.1, 1.6]
+				}
+			},
+			{
+				"id": "miranda-server-bank-c",
+				"prefabId": "miranda_server_bank_tall",
+				"stableId": "miranda:archive:server-bank:c",
+				"transform": {
+					"position": [9.4, 5.1, 13.8]
+				}
+			},
+			{
+				"id": "miranda-server-bank-d",
+				"prefabId": "miranda_server_bank_tall",
+				"stableId": "miranda:archive:server-bank:d",
+				"transform": {
+					"position": [13.2, 5.1, 13.8]
+				}
+			},
+			{
+				"id": "miranda-server-bank-e",
+				"prefabId": "miranda_server_bank_wide",
+				"stableId": "miranda:archive:server-bank:e",
+				"transform": {
+					"position": [11.3, 5.1, 24]
+				}
+			},
+			{
+				"id": "miranda-archive-light",
+				"prefabId": "miranda_archive_light",
+				"stableId": "miranda:archive-gallery:light",
+				"transform": {
+					"position": [10.8, 7, 10.8]
+				}
+			},
+			{
+				"id": "miranda-archive-note",
+				"prefabId": "miranda_story_marker_magenta",
+				"stableId": "miranda:archive:story-note:index",
+				"transform": {
+					"position": [12.6, 5.02, 9.4]
+				},
+				"components": {
+					"StoryNote": {
+						"id": "miranda.note.archive_index",
+						"title": "Archive Index: Recovered Echoes",
+						"author": "Signal Archivist Nila Serrin",
+						"location": "Upper Data Gallery",
+						"excerpt": "Each copied transcript diverges the second time it is opened.",
+						"body": "The upper archive is no longer storing files. It is growing variants.\n\nOpen one Miranda transcript and you receive an account. Open it again and the witness order changes. Open it a third time and there is a fourth witness seated at the table.\n\nI moved the worst logs to the upper stacks and disconnected them from the main grid. The lights in this gallery still blink in answers.",
+						"markerColor": "#cba7ff",
+						"markerSize": 0.6
+					}
+				}
+			}
+		]
+	},
+	"assets": {
+		"shared": [
+			"mesh_portal_gate",
+			"audio_portal_activate",
+			"audio_ambient_dark_shadows_of_delight",
+			"audio_ambient_shadow_waltz"
+		],
+		"local": [
+			{
+				"id": "mesh_box",
+				"kind": "mesh",
+				"url": "builtin://box"
+			},
+			{
+				"id": "mesh_cylinder",
+				"kind": "mesh",
+				"url": "builtin://cylinder"
+			},
+			{
+				"id": "mesh_miranda_engine_core",
+				"kind": "mesh",
+				"url": "builtin://cylinder?radiusTop=1.1&radiusBottom=1.4&height=3.6&radialSegments=18"
+			},
+			{
+				"id": "material_miranda_floor_main",
+				"kind": "material",
+				"url": "builtin://miranda-floor-main",
+				"material": {
+					"color": "#252d37",
+					"emissive": "#10161d",
+					"emissiveIntensity": 0.05,
+					"metalness": 0.72,
+					"roughness": 0.4
+				}
+			},
+			{
+				"id": "material_miranda_floor_upper",
+				"kind": "material",
+				"url": "builtin://miranda-floor-upper",
+				"material": {
+					"color": "#2e3844",
+					"emissive": "#141b23",
+					"emissiveIntensity": 0.04,
+					"metalness": 0.76,
+					"roughness": 0.36
+				}
+			},
+			{
+				"id": "material_miranda_cockpit_panel",
+				"kind": "material",
+				"url": "builtin://miranda-cockpit-panel",
+				"material": {
+					"color": "#1e2e3f",
+					"emissive": "#92dfff",
+					"emissiveIntensity": 0.9,
+					"metalness": 0.88,
+					"roughness": 0.18
+				}
+			},
+			{
+				"id": "material_miranda_cockpit_panel_center",
+				"kind": "material",
+				"url": "builtin://miranda-cockpit-panel-center",
+				"material": {
+					"color": "#1e2e3f",
+					"emissive": "#92dfff",
+					"emissiveIntensity": 1,
+					"metalness": 0.9,
+					"roughness": 0.16
+				}
+			},
+			{
+				"id": "material_miranda_crew_bunk",
+				"kind": "material",
+				"url": "builtin://miranda-crew-bunk",
+				"material": {
+					"color": "#2b3341",
+					"emissive": "#122030",
+					"emissiveIntensity": 0.08,
+					"metalness": 0.58,
+					"roughness": 0.46
+				}
+			},
+			{
+				"id": "material_miranda_locker_bank",
+				"kind": "material",
+				"url": "builtin://miranda-locker-bank",
+				"material": {
+					"color": "#29323d",
+					"emissive": "#0f1823",
+					"emissiveIntensity": 0.06,
+					"metalness": 0.72,
+					"roughness": 0.34
+				}
+			},
+			{
+				"id": "material_miranda_captains_desk",
+				"kind": "material",
+				"url": "builtin://miranda-captains-desk",
+				"material": {
+					"color": "#5a3c2b",
+					"emissive": "#24160f",
+					"emissiveIntensity": 0.04,
+					"metalness": 0.18,
+					"roughness": 0.78
+				}
+			},
+			{
+				"id": "material_miranda_captains_chair",
+				"kind": "material",
+				"url": "builtin://miranda-captains-chair",
+				"material": {
+					"color": "#3b2f36",
+					"emissive": "#181116",
+					"emissiveIntensity": 0.06,
+					"metalness": 0.26,
+					"roughness": 0.74
+				}
+			},
+			{
+				"id": "material_miranda_recipe_safe",
+				"kind": "material",
+				"url": "builtin://miranda-recipe-safe",
+				"material": {
+					"color": "#2b3138",
+					"emissive": "#12181d",
+					"emissiveIntensity": 0.05,
+					"metalness": 0.82,
+					"roughness": 0.28
+				}
+			},
+			{
+				"id": "material_miranda_engine_column",
+				"kind": "material",
+				"url": "builtin://miranda-engine-column",
+				"material": {
+					"color": "#46313a",
+					"emissive": "#181116",
+					"emissiveIntensity": 0.04,
+					"metalness": 0.82,
+					"roughness": 0.28
+				}
+			},
+			{
+				"id": "material_miranda_engine_core",
+				"kind": "material",
+				"url": "builtin://miranda-engine-core",
+				"material": {
+					"color": "#5a2d24",
+					"emissive": "#ffb56b",
+					"emissiveIntensity": 0.95,
+					"metalness": 0.86,
+					"roughness": 0.24
+				}
+			},
+			{
+				"id": "material_miranda_med_pod",
+				"kind": "material",
+				"url": "builtin://miranda-med-pod",
+				"material": {
+					"color": "#6da8bf",
+					"emissive": "#8de0ff",
+					"emissiveIntensity": 0.4,
+					"metalness": 0.28,
+					"roughness": 0.16,
+					"opacity": 0.72,
+					"transparent": true
+				}
+			},
+			{
+				"id": "material_miranda_mess_table",
+				"kind": "material",
+				"url": "builtin://miranda-mess-table",
+				"material": {
+					"color": "#5d4638",
+					"emissive": "#241912",
+					"emissiveIntensity": 0.04,
+					"metalness": 0.18,
+					"roughness": 0.82
+				}
+			},
+			{
+				"id": "material_miranda_mess_counter",
+				"kind": "material",
+				"url": "builtin://miranda-mess-counter",
+				"material": {
+					"color": "#3f2d29",
+					"emissive": "#160e0d",
+					"emissiveIntensity": 0.06,
+					"metalness": 0.46,
+					"roughness": 0.54
+				}
+			},
+			{
+				"id": "material_miranda_chapel_altar",
+				"kind": "material",
+				"url": "builtin://miranda-chapel-altar",
+				"material": {
+					"color": "#332934",
+					"emissive": "#b991ff",
+					"emissiveIntensity": 0.22,
+					"metalness": 0.36,
+					"roughness": 0.58
+				}
+			},
+			{
+				"id": "material_miranda_brig_cell",
+				"kind": "material",
+				"url": "builtin://miranda-brig-cell",
+				"material": {
+					"color": "#3f3034",
+					"emissive": "#150f12",
+					"emissiveIntensity": 0.05,
+					"metalness": 0.6,
+					"roughness": 0.42
+				}
+			},
+			{
+				"id": "material_miranda_brig_desk",
+				"kind": "material",
+				"url": "builtin://miranda-brig-desk",
+				"material": {
+					"color": "#4a3732",
+					"emissive": "#1b1310",
+					"emissiveIntensity": 0.04,
+					"metalness": 0.22,
+					"roughness": 0.8
+				}
+			},
+			{
+				"id": "material_miranda_cargo_stack_a",
+				"kind": "material",
+				"url": "builtin://miranda-cargo-stack-a",
+				"material": {
+					"color": "#564136",
+					"emissive": "#241a13",
+					"emissiveIntensity": 0.04,
+					"metalness": 0.16,
+					"roughness": 0.86
+				}
+			},
+			{
+				"id": "material_miranda_cargo_stack",
+				"kind": "material",
+				"url": "builtin://miranda-cargo-stack",
+				"material": {
+					"color": "#5a4334",
+					"emissive": "#241a13",
+					"emissiveIntensity": 0.04,
+					"metalness": 0.16,
+					"roughness": 0.86
+				}
+			},
+			{
+				"id": "material_miranda_server_bank",
+				"kind": "material",
+				"url": "builtin://miranda-server-bank",
+				"material": {
+					"color": "#202634",
+					"emissive": "#7dc8ff",
+					"emissiveIntensity": 0.28,
+					"metalness": 0.86,
+					"roughness": 0.22
+				}
+			},
+			{
+				"id": "material_miranda_server_bank_wide",
+				"kind": "material",
+				"url": "builtin://miranda-server-bank-wide",
+				"material": {
+					"color": "#202634",
+					"emissive": "#7dc8ff",
+					"emissiveIntensity": 0.32,
+					"metalness": 0.86,
+					"roughness": 0.22
+				}
+			},
+			{
+				"id": "material_miranda_story_marker_cyan",
+				"kind": "material",
+				"url": "builtin://miranda-story-marker-cyan"
+			},
+			{
+				"id": "material_miranda_story_marker_amber",
+				"kind": "material",
+				"url": "builtin://miranda-story-marker-amber"
+			},
+			{
+				"id": "material_miranda_story_marker_red",
+				"kind": "material",
+				"url": "builtin://miranda-story-marker-red"
+			},
+			{
+				"id": "material_miranda_story_marker_magenta",
+				"kind": "material",
+				"url": "builtin://miranda-story-marker-magenta"
+			},
+			{
+				"id": "audio_ambient_wicked_shadows_whisper",
+				"kind": "audio",
+				"url": "/audio/ambient/Wicked%20Shadows%20Whisper.mp3",
+				"tags": ["music", "ambient", "miranda"]
+			}
+		],
+		"preloadGroups": {
+			"miranda_deck": [
+				"mesh_box",
+				"mesh_cylinder",
+				"mesh_miranda_engine_core",
+				"mesh_portal_gate",
+				"material_miranda_floor_main",
+				"material_miranda_floor_upper",
+				"material_miranda_cockpit_panel",
+				"material_miranda_cockpit_panel_center",
+				"material_miranda_crew_bunk",
+				"material_miranda_locker_bank",
+				"material_miranda_captains_desk",
+				"material_miranda_captains_chair",
+				"material_miranda_recipe_safe",
+				"material_miranda_engine_column",
+				"material_miranda_engine_core",
+				"material_miranda_med_pod",
+				"material_miranda_mess_table",
+				"material_miranda_mess_counter",
+				"material_miranda_chapel_altar",
+				"material_miranda_brig_cell",
+				"material_miranda_brig_desk",
+				"material_miranda_cargo_stack_a",
+				"material_miranda_cargo_stack",
+				"material_miranda_server_bank",
+				"material_miranda_server_bank_wide",
+				"material_miranda_story_marker_cyan",
+				"material_miranda_story_marker_amber",
+				"material_miranda_story_marker_red",
+				"material_miranda_story_marker_magenta",
+				"audio_portal_activate",
+				"audio_ambient_wicked_shadows_whisper",
+				"audio_ambient_dark_shadows_of_delight",
+				"audio_ambient_shadow_waltz"
+			]
+		}
+	},
+	"prefabs": {
+		"shared": ["portal_gate"],
+		"local": [
+			{
+				"id": "miranda_floor_main",
+				"assetIds": ["mesh_box", "material_miranda_floor_main"],
+				"tags": ["world", "collision", "miranda"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [40, 1.2, 92]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_floor_main",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "walkable",
+						"channel": "worldStatic",
+						"shape": {
+							"type": "box",
+							"halfExtents": [20, 0.6, 46]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_floor_upper",
+				"assetIds": ["mesh_box", "material_miranda_floor_upper"],
+				"tags": ["world", "collision", "miranda"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [18, 0.9, 18]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_floor_upper",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "walkable",
+						"channel": "worldStatic",
+						"shape": {
+							"type": "box",
+							"halfExtents": [9, 0.45, 9]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_floor_cargo_hold",
+				"assetIds": ["mesh_box", "material_miranda_floor_main"],
+				"tags": ["world", "collision", "miranda", "cargo-hold"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [40, 1.2, 6]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_floor_main",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "walkable",
+						"channel": "worldStatic",
+						"shape": {
+							"type": "box",
+							"halfExtents": [20, 0.6, 3]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_cockpit_panel_side",
+				"assetIds": ["mesh_box", "material_miranda_cockpit_panel"],
+				"tags": ["world", "collision", "miranda", "cockpit"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [2.1, 0.2, 1.1]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_cockpit_panel",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [1.05, 0.1, 0.55]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_cockpit_panel_center",
+				"assetIds": ["mesh_box", "material_miranda_cockpit_panel_center"],
+				"tags": ["world", "collision", "miranda", "cockpit"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [2.4, 0.2, 1.1]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_cockpit_panel_center",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [1.2, 0.1, 0.55]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_crew_bunk",
+				"assetIds": ["mesh_box", "material_miranda_crew_bunk"],
+				"tags": ["world", "collision", "miranda", "crew-quarters"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [2.3, 0.28, 1]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_crew_bunk",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [1.15, 0.14, 0.5]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_locker_bank",
+				"assetIds": ["mesh_box", "material_miranda_locker_bank"],
+				"tags": ["world", "collision", "miranda", "crew-quarters"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1.1, 2.4, 6.5]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_locker_bank",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [0.55, 1.2, 3.25]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_captains_desk",
+				"assetIds": ["mesh_box", "material_miranda_captains_desk"],
+				"tags": ["world", "collision", "miranda", "captain-office"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [2.1, 0.18, 1.12]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_captains_desk",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [1.05, 0.09, 0.56]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_captains_chair",
+				"assetIds": ["mesh_cylinder", "material_miranda_captains_chair"],
+				"tags": ["world", "collision", "miranda", "captain-office"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1.16, 0.82, 1.16]
+					},
+					"Renderable": {
+						"meshId": "mesh_cylinder",
+						"materialId": "material_miranda_captains_chair",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "cylinder",
+							"halfHeight": 0.41,
+							"radius": 0.58
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_recipe_safe",
+				"assetIds": ["mesh_box", "material_miranda_recipe_safe"],
+				"tags": ["world", "collision", "miranda", "captain-office"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1.05, 1.32, 0.96]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_recipe_safe",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [0.525, 0.66, 0.48]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_engine_column",
+				"assetIds": ["mesh_cylinder", "material_miranda_engine_column"],
+				"tags": ["world", "collision", "miranda", "engine-room"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [0.96, 3, 0.96]
+					},
+					"Renderable": {
+						"meshId": "mesh_cylinder",
+						"materialId": "material_miranda_engine_column",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "cylinder",
+							"halfHeight": 1.5,
+							"radius": 0.48
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_engine_core",
+				"assetIds": [
+					"mesh_miranda_engine_core",
+					"material_miranda_engine_core"
+				],
+				"tags": ["world", "collision", "miranda", "engine-room"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1, 1, 1]
+					},
+					"Renderable": {
+						"meshId": "mesh_miranda_engine_core",
+						"materialId": "material_miranda_engine_core",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "mesh",
+							"vertices": [
+								[1.1, 1.8, 0],
+								[1.0336618828644994, 1.8, 0.37622215765823563],
+								[0.8426488874308758, 1.8, 0.7070663706551933],
+								[0.5500000000000002, 1.8, 0.9526279441628825],
+								[0.19101299543362346, 1.8, 1.0832885283134288],
+								[-0.19101299543362335, 1.8, 1.0832885283134288],
+								[-0.5499999999999998, 1.8, 0.9526279441628827],
+								[-0.8426488874308757, 1.8, 0.7070663706551935],
+								[-1.0336618828644992, 1.8, 0.3762221576582358],
+								[-1.1, 1.8, 1.3471114790620887e-16],
+								[-1.0336618828644994, 1.8, -0.3762221576582356],
+								[-0.842648887430876, 1.8, -0.7070663706551933],
+								[-0.5500000000000005, 1.8, -0.9526279441628824],
+								[-0.19101299543362338, 1.8, -1.0832885283134288],
+								[0.191012995433623, 1.8, -1.083288528313429],
+								[0.5500000000000002, 1.8, -0.9526279441628825],
+								[0.8426488874308756, 1.8, -0.7070663706551936],
+								[1.033661882864499, 1.8, -0.3762221576582364],
+								[1.4, -1.8, 0],
+								[1.3155696691002716, -1.8, 0.4788282006559362],
+								[1.0724622203665692, -1.8, 0.8999026535611548],
+								[0.7000000000000001, -1.8, 1.212435565298214],
+								[0.24310744873370257, -1.8, 1.378730854217091],
+								[-0.2431074487337024, -1.8, 1.378730854217091],
+								[-0.6999999999999996, -1.8, 1.2124355652982142],
+								[-1.072462220366569, -1.8, 0.8999026535611552],
+								[-1.3155696691002716, -1.8, 0.4788282006559364],
+								[-1.4, -1.8, 1.7145055188062944e-16],
+								[-1.3155696691002716, -1.8, -0.47882820065593606],
+								[-1.0724622203665692, -1.8, -0.8999026535611548],
+								[-0.7000000000000006, -1.8, -1.2124355652982137],
+								[-0.24310744873370244, -1.8, -1.378730854217091],
+								[0.24310744873370194, -1.8, -1.3787308542170913],
+								[0.7000000000000001, -1.8, -1.212435565298214],
+								[1.0724622203665688, -1.8, -0.8999026535611554],
+								[1.3155696691002712, -1.8, -0.4788282006559372],
+								[0, 1.8, 0],
+								[0, -1.8, 0]
+							],
+							"indices": [
+								0, 18, 19, 0, 19, 1, 36, 1, 0, 37, 18, 19, 1, 19, 20, 1, 20, 2,
+								36, 2, 1, 37, 19, 20, 2, 20, 21, 2, 21, 3, 36, 3, 2, 37, 20, 21,
+								3, 21, 22, 3, 22, 4, 36, 4, 3, 37, 21, 22, 4, 22, 23, 4, 23, 5,
+								36, 5, 4, 37, 22, 23, 5, 23, 24, 5, 24, 6, 36, 6, 5, 37, 23, 24,
+								6, 24, 25, 6, 25, 7, 36, 7, 6, 37, 24, 25, 7, 25, 26, 7, 26, 8,
+								36, 8, 7, 37, 25, 26, 8, 26, 27, 8, 27, 9, 36, 9, 8, 37, 26, 27,
+								9, 27, 28, 9, 28, 10, 36, 10, 9, 37, 27, 28, 10, 28, 29, 10, 29,
+								11, 36, 11, 10, 37, 28, 29, 11, 29, 30, 11, 30, 12, 36, 12, 11,
+								37, 29, 30, 12, 30, 31, 12, 31, 13, 36, 13, 12, 37, 30, 31, 13,
+								31, 32, 13, 32, 14, 36, 14, 13, 37, 31, 32, 14, 32, 33, 14, 33,
+								15, 36, 15, 14, 37, 32, 33, 15, 33, 34, 15, 34, 16, 36, 16, 15,
+								37, 33, 34, 16, 34, 35, 16, 35, 17, 36, 17, 16, 37, 34, 35, 17,
+								35, 18, 17, 18, 0, 36, 0, 17, 37, 35, 18
+							]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_med_pod",
+				"assetIds": ["mesh_box", "material_miranda_med_pod"],
+				"tags": ["world", "collision", "miranda", "medbay"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1.2, 1.4, 3.6]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_med_pod",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [0.6, 0.7, 1.8]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_mess_table_large",
+				"assetIds": ["mesh_box", "material_miranda_mess_table"],
+				"tags": ["world", "collision", "miranda", "mess-hall"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [2.8, 0.18, 1.2]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_mess_table",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [1.4, 0.09, 0.6]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_mess_table_small",
+				"assetIds": ["mesh_box", "material_miranda_mess_table"],
+				"tags": ["world", "collision", "miranda", "mess-hall"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [2.4, 0.18, 1.2]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_mess_table",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [1.2, 0.09, 0.6]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_mess_counter",
+				"assetIds": ["mesh_box", "material_miranda_mess_counter"],
+				"tags": ["world", "collision", "miranda", "mess-hall"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1.2, 2.04, 5.8]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_mess_counter",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [0.6, 1.02, 2.9]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_chapel_altar",
+				"assetIds": ["mesh_box", "material_miranda_chapel_altar"],
+				"tags": ["world", "collision", "miranda", "chapel"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [3.4, 1.84, 1.3]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_chapel_altar",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [1.7, 0.92, 0.65]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_brig_cell",
+				"assetIds": ["mesh_box", "material_miranda_brig_cell"],
+				"tags": ["world", "collision", "miranda", "brig"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1.1, 2.8, 4.2]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_brig_cell",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [0.55, 1.4, 2.1]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_brig_desk",
+				"assetIds": ["mesh_box", "material_miranda_brig_desk"],
+				"tags": ["world", "collision", "miranda", "brig"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [2.4, 1.44, 1.2]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_brig_desk",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [1.2, 0.72, 0.6]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_cargo_stack_a",
+				"assetIds": ["mesh_box", "material_miranda_cargo_stack_a"],
+				"tags": ["world", "collision", "miranda", "cargo-hold"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [3.2, 1.9, 3.4]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_cargo_stack_a",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [1.6, 0.95, 1.7]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_cargo_stack_b",
+				"assetIds": ["mesh_box", "material_miranda_cargo_stack"],
+				"tags": ["world", "collision", "miranda", "cargo-hold"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [2.6, 2.7, 2.8]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_cargo_stack",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [1.3, 1.35, 1.4]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_cargo_stack_c",
+				"assetIds": ["mesh_box", "material_miranda_cargo_stack"],
+				"tags": ["world", "collision", "miranda", "cargo-hold"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [4.6, 1.4, 2.6]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_cargo_stack",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [2.3, 0.7, 1.3]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_cargo_stack_d",
+				"assetIds": ["mesh_box", "material_miranda_cargo_stack"],
+				"tags": ["world", "collision", "miranda", "cargo-hold"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [2.2, 1.56, 2.2]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_cargo_stack",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [1.1, 0.78, 1.1]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_server_bank_tall",
+				"assetIds": ["mesh_box", "material_miranda_server_bank"],
+				"tags": ["world", "collision", "miranda", "archive-gallery"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1.4, 2.6, 3.2]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_server_bank",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [0.7, 1.3, 1.6]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_server_bank_wide",
+				"assetIds": ["mesh_box", "material_miranda_server_bank_wide"],
+				"tags": ["world", "collision", "miranda", "archive-gallery"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [4.8, 2.6, 1.6]
+					},
+					"Renderable": {
+						"meshId": "mesh_box",
+						"materialId": "material_miranda_server_bank_wide",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [2.4, 1.3, 0.8]
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_story_marker_cyan",
+				"assetIds": ["mesh_cylinder", "material_miranda_story_marker_cyan"],
+				"tags": ["world", "interaction", "miranda", "story-marker"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [0.58, 0.9, 0.58]
+					},
+					"Renderable": {
+						"meshId": "mesh_cylinder",
+						"materialId": "material_miranda_story_marker_cyan",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "trigger",
+						"channel": "trigger",
+						"sensor": true,
+						"shape": {
+							"type": "cylinder",
+							"halfHeight": 0.45,
+							"radius": 0.29
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_story_marker_amber",
+				"assetIds": ["mesh_cylinder", "material_miranda_story_marker_amber"],
+				"tags": ["world", "interaction", "miranda", "story-marker"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [0.58, 0.9, 0.58]
+					},
+					"Renderable": {
+						"meshId": "mesh_cylinder",
+						"materialId": "material_miranda_story_marker_amber",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "trigger",
+						"channel": "trigger",
+						"sensor": true,
+						"shape": {
+							"type": "cylinder",
+							"halfHeight": 0.45,
+							"radius": 0.29
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_story_marker_red",
+				"assetIds": ["mesh_cylinder", "material_miranda_story_marker_red"],
+				"tags": ["world", "interaction", "miranda", "story-marker"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [0.58, 0.9, 0.58]
+					},
+					"Renderable": {
+						"meshId": "mesh_cylinder",
+						"materialId": "material_miranda_story_marker_red",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "trigger",
+						"channel": "trigger",
+						"sensor": true,
+						"shape": {
+							"type": "cylinder",
+							"halfHeight": 0.45,
+							"radius": 0.29
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_story_marker_magenta",
+				"assetIds": ["mesh_cylinder", "material_miranda_story_marker_magenta"],
+				"tags": ["world", "interaction", "miranda", "story-marker"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [0.58, 0.9, 0.58]
+					},
+					"Renderable": {
+						"meshId": "mesh_cylinder",
+						"materialId": "material_miranda_story_marker_magenta",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "trigger",
+						"channel": "trigger",
+						"sensor": true,
+						"shape": {
+							"type": "cylinder",
+							"halfHeight": 0.45,
+							"radius": 0.29
+						}
+					}
+				}
+			},
+			{
+				"id": "miranda_command_gallery_beacon_light",
+				"tags": ["world", "light", "miranda", "command-gallery"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1, 1, 1]
+					},
+					"Light": {
+						"kind": "point",
+						"color": "#e76949",
+						"intensity": 8,
+						"distance": 20,
+						"decay": 2,
+						"visible": true
+					}
+				}
+			},
+			{
+				"id": "miranda_observation_light",
+				"tags": ["world", "light", "miranda", "observation-gallery"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1, 1, 1]
+					},
+					"Light": {
+						"kind": "point",
+						"color": "#8adff5",
+						"intensity": 4.6,
+						"distance": 15,
+						"decay": 2,
+						"visible": true
+					}
+				}
+			},
+			{
+				"id": "miranda_archive_light",
+				"tags": ["world", "light", "miranda", "archive-gallery"],
+				"components": {
+					"Transform": {
+						"position": [0, 0, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [1, 1, 1]
+					},
+					"Light": {
+						"kind": "point",
+						"color": "#7dc8ff",
+						"intensity": 5,
+						"distance": 16,
+						"decay": 2,
+						"visible": true
+					}
+				}
+			}
+		]
+	},
+	"audio": {
+		"sceneMusic": {
+			"trackIds": [
+				"audio_ambient_wicked_shadows_whisper",
+				"audio_ambient_dark_shadows_of_delight",
+				"audio_ambient_shadow_waltz"
+			],
+			"volume": 0.16,
+			"autoplay": true
+		},
+		"eventMappings": [
+			{
+				"id": "miranda.portal.activate",
+				"eventType": "PortalActivated",
+				"soundId": "audio_portal_activate",
+				"volume": 0.32,
+				"sceneId": "miranda_deck_game"
+			}
+		]
+	},
+	"renderProfile": {
+		"id": "miranda_deck_minimal",
+		"renderer": {
+			"clearColor": "#080b12",
+			"clearAlpha": 1,
+			"antialias": true,
+			"maxPixelRatio": 2,
+			"fallbackMaterialColor": "#9eb6d6"
+		},
+		"lighting": {
+			"lights": [
+				{
+					"kind": "ambient",
+					"color": "#9eb6d6",
+					"intensity": 0.38
+				},
+				{
+					"kind": "directional",
+					"color": "#f4f7ff",
+					"intensity": 1.15,
+					"position": [11, 18, -9]
+				},
+				{
+					"kind": "directional",
+					"color": "#6f8fb8",
+					"intensity": 0.42,
+					"position": [-16, 8, 14]
+				}
+			]
+		}
+	},
+	"player": {
+		"transform": {
+			"position": [0, 4.25, -13.8]
+		},
+		"groundY": 4.25
+	}
+}

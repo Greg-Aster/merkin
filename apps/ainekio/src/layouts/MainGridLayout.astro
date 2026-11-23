@@ -1,0 +1,26 @@
+---
+import SharedMainGridLayout from '@merkin/blog-core/layouts/MainGridLayout.astro'
+import { getPageSocialImage } from '../lib/social-images'
+import { url } from '../utils/url-utils'
+const socialImage = await getPageSocialImage(Astro.props)
+const { post, setOGTypeArticle } = Astro.props
+const llmsHref = new URL(url('/llms.txt'), Astro.site ?? 'https://ainek.io').href
+import '@merkin/blog-core/styles/variables.styl'
+import '../styles/main.css'
+import '../styles/markdown.css'
+import '@merkin/blog-core/styles/markdown-extend.styl'
+import '@merkin/blog-core/styles/scrollbar.css'
+import '../styles/transition.css'
+---
+
+<SharedMainGridLayout {...Astro.props} disableSidebar={true} socialImage={socialImage}>
+  <Fragment slot="head">
+    <link rel="alternate" type="text/plain" title="Ainekio LLM Documentation" href={llmsHref} />
+    {socialImage?.alt && <meta name="twitter:image:alt" content={socialImage.alt} />}
+    {setOGTypeArticle && post?.data?.updated && (
+      <meta property="article:modified_time" content={post.data.updated.toISOString()} />
+    )}
+    <slot name="head" />
+  </Fragment>
+  <slot />
+</SharedMainGridLayout>

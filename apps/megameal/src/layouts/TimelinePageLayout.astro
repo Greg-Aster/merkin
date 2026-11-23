@@ -1,0 +1,52 @@
+---
+import { defaultEraConfig } from '@/config/timelineconfig'
+import { isPublishedManifestRecord } from '@/contracts/manifests'
+import TimelinePortalCarousel from '@components/timeline/TimelinePortalCarousel.svelte'
+import timelineManifest from '../../../../packages/shared-data/generated/timeline.json'
+import { routeStyleHref } from '../styles/routeStyleBundles'
+import MainGridLayout from './MainGridLayout.astro'
+
+interface Props {
+  title: string
+  description: string
+  slug: string
+}
+
+const { title, description, slug } = Astro.props
+const timelineEvents = timelineManifest.items.filter(isPublishedManifestRecord)
+const syntheticPost = {
+  slug,
+  data: {
+    title: `MEGAMEAL ${title}`,
+    description,
+    bannerType: 'timeline',
+    bannerData: {
+      category: 'MEGA MEAL',
+      compact: false,
+    },
+  },
+}
+---
+
+<MainGridLayout
+  {title}
+  {description}
+  post={syntheticPost}
+  backgroundImage="none"
+  contentMode="banner-only"
+>
+  <Fragment slot="head">
+    <link rel="stylesheet" href={routeStyleHref('timeline')} data-route-style="timeline" />
+  </Fragment>
+  <Fragment slot="timeline-banner-content">
+    <h1 class="sr-only">{title}</h1>
+    <div id="megameal-timeline-route-marker" hidden></div>
+    <TimelinePortalCarousel
+      events={timelineEvents}
+      eraConfig={defaultEraConfig}
+      initialViewMode="travel"
+      presentation="full"
+      client:only="svelte"
+    />
+  </Fragment>
+</MainGridLayout>

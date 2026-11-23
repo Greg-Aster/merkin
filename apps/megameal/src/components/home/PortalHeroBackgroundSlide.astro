@@ -1,0 +1,49 @@
+---
+const portalIntroBackgroundVideo = '/assets/banner/tunnel.webm'
+const portalIntroBackgroundPlaybackRate = 1.0
+---
+
+<div class="megameal-portal-background-slide" aria-hidden="true">
+  <video
+    class="megameal-portal-background-slide__video"
+    src={portalIntroBackgroundVideo}
+    autoplay
+    loop
+    muted
+    playsinline
+    preload="auto"
+    data-playback-rate={portalIntroBackgroundPlaybackRate}
+  ></video>
+</div>
+
+<script>
+  const slide = document.querySelector<HTMLElement>(
+    '.megameal-portal-background-slide',
+  )
+  const video = slide?.querySelector<HTMLVideoElement>(
+    '.megameal-portal-background-slide__video',
+  )
+
+  if (video) {
+    const configuredRate = Number(video.dataset.playbackRate)
+    const playbackRate =
+      Number.isFinite(configuredRate) && configuredRate > 0 ? configuredRate : 1
+    let visible = false
+
+    video.playbackRate = playbackRate
+    video.addEventListener('play', () => {
+      video.playbackRate = playbackRate
+    })
+
+    const revealVideo = () => {
+      if (visible || video.readyState < 2) return
+      visible = true
+      slide?.classList.add('is-video-visible')
+    }
+
+    video.addEventListener('loadeddata', revealVideo)
+    video.addEventListener('canplay', revealVideo)
+    video.addEventListener('playing', revealVideo)
+    window.requestAnimationFrame(revealVideo)
+  }
+</script>

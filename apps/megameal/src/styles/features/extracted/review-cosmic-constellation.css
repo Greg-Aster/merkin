@@ -1,0 +1,144 @@
+/* ============================================================
+ * Cosmic review montage constellation
+ * ============================================================ */
+
+.review-cosmic__constellation {
+  display: grid;
+  grid-template-areas:
+    "copy images"
+    "fragments images";
+  grid-template-columns: minmax(0, 0.9fr) minmax(20rem, 1.1fr);
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid oklch(0.74 0.14 218 / 0.28);
+  border-radius: 0.5rem;
+  background:
+    linear-gradient(90deg, oklch(0.05 0.03 260 / 0.92), oklch(0.11 0.04 296 / 0.72)),
+    repeating-linear-gradient(115deg, transparent 0 18px, oklch(0.8 0.05 250 / 0.04) 18px 19px);
+}
+
+.review-cosmic__constellation-copy {
+  grid-area: copy;
+}
+
+.review-cosmic__constellation-images {
+  grid-area: images;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(8rem, auto);
+  gap: 0.62rem;
+}
+
+.review-cosmic__constellation-images .review-cosmic__image {
+  height: 100%;
+}
+
+.review-cosmic__fragments {
+  position: relative;
+  grid-area: fragments;
+  min-height: 10rem;
+}
+
+.review-cosmic__fragments span {
+  position: absolute;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid oklch(0.84 0.15 75 / 0.48);
+  border-radius: 0.3rem;
+  background: oklch(0.04 0.02 260 / 0.92);
+  color: oklch(0.88 0.08 78);
+  font-size: 0.75rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.review-cosmic__fragments span:nth-child(1) {
+  top: 0.4rem;
+  left: 0.7rem;
+  transform: rotate(-5deg);
+}
+
+.review-cosmic__fragments span:nth-child(2) {
+  top: 2.8rem;
+  left: 8.5rem;
+  color: oklch(0.82 0.14 146);
+  transform: rotate(4deg);
+}
+
+.review-cosmic__fragments span:nth-child(3) {
+  top: 5.5rem;
+  left: 1.5rem;
+  color: var(--cosmic-red);
+  transform: rotate(2deg);
+}
+
+.review-cosmic__fragments span:nth-child(4) {
+  top: 1.3rem;
+  right: 1.4rem;
+  color: var(--cosmic-violet);
+  transform: rotate(6deg);
+}
+
+.review-cosmic__fragments span:nth-child(5) {
+  top: 7.4rem;
+  right: 0.7rem;
+  color: var(--cosmic-cold);
+  transform: rotate(-6deg);
+}
+
+.review-cosmic__fragments span:nth-child(6) {
+  top: 5rem;
+  left: 12.4rem;
+  color: oklch(0.8 0.15 300);
+  transform: rotate(-3deg);
+}
+
+@media (max-width: 900px) {
+  .review-cosmic__constellation {
+    grid-template-areas:
+      "copy"
+      "fragments"
+      "images";
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .review-cosmic__constellation-images {
+    grid-template-columns: 1fr;
+  }
+
+  .review-cosmic__fragments {
+    min-height: 13rem;
+  }
+
+  .review-cosmic__fragments span:nth-child(n) {
+    right: auto;
+    left: 0.2rem;
+  }
+
+  .review-cosmic__fragments span:nth-child(2) {
+    top: 2.3rem;
+    left: 5rem;
+  }
+
+  .review-cosmic__fragments span:nth-child(3) {
+    top: 4.7rem;
+    left: 1rem;
+  }
+
+  .review-cosmic__fragments span:nth-child(4) {
+    top: 7rem;
+    left: 5.6rem;
+  }
+
+  .review-cosmic__fragments span:nth-child(5) {
+    top: 9.4rem;
+    left: 0.5rem;
+  }
+
+  .review-cosmic__fragments span:nth-child(6) {
+    top: 11.2rem;
+    left: 6rem;
+  }
+}

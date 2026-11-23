@@ -1,0 +1,6 @@
+  @supports (content-visibility: auto) {
+    .dispatches-stream {
+      content-visibility: auto;
+      contain-intrinsic-size: 1px 720px;
+    }
+  }

@@ -1,0 +1,14 @@
+name: Legacy GitHub Game Deploy (Archived)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  archived:
+    name: Legacy deploy disabled
+    runs-on: ubuntu-latest
+    steps:
+      - name: Legacy deployment notice
+        run: |
+          echo "Legacy GitHub Pages deployment is archived."
+          echo "Active game deploys now go through the current game host and edge routing."

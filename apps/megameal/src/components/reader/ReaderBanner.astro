@@ -1,0 +1,123 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import { Icon } from 'astro-icon/components'
+import {
+  FIRST_CONTACT_MANUAL_DESCRIPTION,
+  FIRST_CONTACT_MANUAL_TITLE,
+  firstContactManualHref,
+} from '../../utils/reader'
+
+interface Props {
+  entries: CollectionEntry<'reader'>[]
+  activeSlug?: string
+}
+
+const { entries, activeSlug = '' } = Astro.props
+const activeEntry =
+  entries.find(entry => entry.slug === activeSlug) ?? entries[0] ?? null
+---
+
+<section
+  class="relative h-full w-full overflow-hidden bg-black text-white"
+  aria-label="Reader library"
+>
+  <img
+    src="/assets/banner/manual-bg.webp"
+    alt=""
+    loading="eager"
+    decoding="async"
+    class="absolute inset-0 h-full w-full object-cover opacity-45"
+  />
+  <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-slate-950/55 to-black/90"></div>
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(34,211,238,0.18),transparent_32%),radial-gradient(circle_at_78%_38%,rgba(248,113,113,0.16),transparent_28%)]"></div>
+
+  <div class="relative z-10 mx-auto grid h-full w-full min-w-0 max-w-[var(--page-width)] content-center px-4 py-4 md:px-8 md:py-10">
+    <div class="grid min-h-0 min-w-0 items-center gap-6 md:grid-cols-[minmax(16rem,0.8fr)_minmax(0,1.4fr)]">
+      <div class="hidden md:block">
+        <div class="max-w-sm rounded-lg border border-white/20 bg-black/40 p-4 shadow-2xl backdrop-blur">
+          <div class="mb-3 flex items-center justify-between gap-3 border-b border-white/15 pb-3">
+            <div>
+              <div class="text-xs font-bold uppercase tracking-[0.16em] text-cyan-200">
+                Contents
+              </div>
+              <div class="mt-1 text-lg font-black leading-tight text-white">
+                Reader Index
+              </div>
+            </div>
+            <Icon name="material-symbols:chrome-reader-mode-outline-rounded" class="text-2xl text-white/55" />
+          </div>
+          <nav class="max-h-[min(48vh,25rem)] space-y-1 overflow-y-auto pr-1" aria-label="Reader table of contents">
+            {entries.map((entry, index) => {
+              const href = firstContactManualHref(entry)
+              const isActive = entry.slug === activeSlug
+              return (
+                <a
+                  href={href}
+                  class:list={[
+                    'grid grid-cols-[2.25rem_minmax(0,1fr)] gap-2 rounded-md border px-2 py-1.5 transition',
+                    isActive
+                      ? 'border-cyan-300 bg-white/15'
+                      : 'border-white/10 bg-white/5 hover:border-white/25 hover:bg-white/10 active:scale-[0.98]',
+                  ]}
+                  aria-current={isActive ? 'page' : undefined}
+                  data-sfx-hover="hover-soft"
+                  data-sfx-click="soft"
+                >
+                  <span class="inline-flex h-7 w-7 place-self-start items-center justify-center rounded-md bg-white/10 text-[0.68rem] font-bold text-white/75">
+                    {index + 1}
+                  </span>
+                  <span class="min-w-0">
+                    <span class="line-clamp-2 block text-sm font-bold leading-tight text-white">
+                      {entry.data.title}
+                    </span>
+                  </span>
+                </a>
+              )
+            })}
+          </nav>
+        </div>
+      </div>
+
+      <div class="min-w-0 max-w-4xl">
+        <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-white/80 backdrop-blur">
+          <Icon name="material-symbols:chrome-reader-mode-outline-rounded" class="text-base text-cyan-200" />
+          Universal Reader
+        </div>
+        <p class="max-w-4xl text-4xl font-black leading-none text-white md:text-6xl">
+          {FIRST_CONTACT_MANUAL_TITLE}
+        </p>
+        <p class="mt-4 max-w-2xl text-base leading-relaxed text-white/75 md:text-lg">
+          {FIRST_CONTACT_MANUAL_DESCRIPTION}
+        </p>
+
+        {activeEntry && (
+          <a
+            href={firstContactManualHref(activeEntry)}
+            class="mt-6 inline-grid max-w-xl grid-cols-[5.5rem_minmax(0,1fr)] gap-3 rounded-lg border border-white/20 bg-black/40 p-3 text-left transition hover:border-cyan-300 hover:bg-black/55 active:scale-[0.99]"
+            data-sfx-hover="hover-soft"
+            data-sfx-click="soft"
+          >
+            <img
+              src={activeEntry.data.image || '/posts/timeline/dont.png'}
+              alt={activeEntry.data.title}
+              loading="eager"
+              decoding="async"
+              class="aspect-square w-full rounded-md object-cover"
+            />
+            <span class="min-w-0 self-center">
+              <span class="block text-xs font-bold uppercase tracking-[0.14em] text-cyan-200">
+                Current Reading
+              </span>
+              <span class="mt-1 block text-lg font-black leading-tight text-white">
+                {activeEntry.data.title}
+              </span>
+              <span class="mt-1 line-clamp-2 block text-sm leading-snug text-white/65">
+                {activeEntry.data.description}
+              </span>
+            </span>
+          </a>
+        )}
+      </div>
+    </div>
+  </div>
+</section>

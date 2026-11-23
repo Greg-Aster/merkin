@@ -1,0 +1,93 @@
+---
+import {
+  getAnimationDuration,
+  getSizeFactor,
+  getStarColor,
+  getStarType,
+} from '@merkin/blog-core/utils/starUtils'
+
+export interface Props {
+  era?: string
+  isKeyEvent?: boolean
+  isSelected?: boolean
+  isHovered?: boolean
+  size?: number
+  identifier?: string
+  useEraColors?: boolean
+  triggerHighlightAnimation?: boolean
+}
+
+const {
+  era,
+  isKeyEvent = false,
+  isSelected = false,
+  isHovered = false,
+  size = 8,
+  identifier = Math.random().toString(36).slice(2, 10),
+  useEraColors = false,
+  triggerHighlightAnimation = false,
+} = Astro.props
+
+const uniqueId = `star-${identifier}-${isKeyEvent ? 'key' : 'normal'}`
+const starType = getStarType(uniqueId, isKeyEvent)
+const sizeFactor = getSizeFactor(isKeyEvent, uniqueId)
+const finalSize = size * sizeFactor
+const mainColor = getStarColor(uniqueId, era, useEraColors)
+const animationDuration = getAnimationDuration(uniqueId)
+---
+
+<div
+  class:list={[
+    'star-wrapper',
+    { 'is-selected': isSelected },
+    { 'is-hovered': isHovered },
+    { 'is-key-event': isKeyEvent },
+  ]}
+  data-trigger-highlight={triggerHighlightAnimation ? 'true' : 'false'}
+  style={`
+    --star-size: ${finalSize}px;
+    --star-color: ${mainColor};
+    --star-duration: ${animationDuration}s;
+  `}
+>
+  <span class="star-backing-plate" aria-hidden="true"></span>
+  <span class="star-glow" aria-hidden="true"></span>
+  <span class="star-rays" aria-hidden="true"></span>
+  <svg
+    class="star-shape"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={finalSize * 2}
+    height={finalSize * 2}
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r={isKeyEvent ? '2.2' : '1.7'} fill={mainColor} />
+    <circle cx="12" cy="12" r={isKeyEvent ? '4.2' : '3.2'} fill={mainColor} opacity="0.18" />
+    {starType === 'sparkle' && (
+      <>
+        <path d="M12 4v16M4 12h16" stroke={mainColor} stroke-width="0.95" stroke-linecap="round" opacity="0.72" />
+        <path d="M7.5 7.5l9 9M16.5 7.5l-9 9" stroke={mainColor} stroke-width="0.55" stroke-linecap="round" opacity="0.3" />
+      </>
+    )}
+    {starType === 'refraction' && (
+      <>
+        <path d="M12 5v14M5 12h14" stroke={mainColor} stroke-width="0.72" stroke-linecap="round" opacity="0.62" />
+        <path d="M8 8h8v8H8z" fill="none" stroke={mainColor} stroke-width="0.48" opacity="0.28" transform="rotate(45 12 12)" />
+      </>
+    )}
+    {starType === 'halo' && (
+      <circle cx="12" cy="12" r="5.7" fill="none" stroke={mainColor} stroke-width="0.72" opacity="0.34" />
+    )}
+    {starType === 'classic' && (
+      <path d="M12 5.4l1.7 4 4.2.6-3.1 3 .8 4.2-3.6-1.9-3.6 1.9.8-4.2-3.1-3 4.2-.6z" fill={mainColor} opacity="0.22" />
+    )}
+    {starType === 'subtle' && (
+      <path d="M10 9.5l4 5M9 12h6" stroke={mainColor} stroke-width="0.45" opacity="0.45" />
+    )}
+    <path d="M12 6.5v11M6.5 12h11" stroke="#fff" stroke-width="0.72" stroke-linecap="round" opacity="0.58" />
+  </svg>
+  <span class="star-orbit star-orbit--base" aria-hidden="true"></span>
+  <span class="star-orbit star-orbit--pulse" aria-hidden="true"></span>
+  <span class="star-highlight-pulse" aria-hidden="true"></span>
+</div>
+

@@ -1,0 +1,97 @@
+---
+title: "4th-Wire Servo Feedback, Rebuilt Chassis, and Qwen 2B Specialists"
+published: 2026-10-18
+updated: 2026-10-18
+description: "Adding potentiometer feedback wires to all 12 servos through a CD74HC4067 multiplexer, repackaging the V2 chassis, and upgrading MetaHuman OS to Qwen3.5 2B Intent and Task specialists."
+image: "/gallery/20261017_213601-1600.webp"
+authorName: "Ainekio Project"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V2, Servo Feedback, Hardware, Body Control, MetaHuman OS, Training]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: body
+  generation: v2
+  kind: journal
+  next: 2026-10-21-body-face-and-standing
+  related: ["ainekio-v2", "gait-development", "metahuman-integration"]
+---
+
+Floor walking trials on October 16 highlighted a fundamental limitation of open-loop
+hobby servos: sending a PWM command from the PCA9685 never tells the controller
+whether a loaded leg actually reached its target or stalled halfway. To give the
+ESP32-P4 true joint-position visibility, we modified all twelve MG90S servos with a
+**fourth analog feedback wire** routed through a **CD74HC4067 16-channel multiplexer**,
+rebuilt the surrounding chassis tray, and upgraded MetaHuman OS from 0.8B to
+**Qwen3.5 2B** Intent and Task specialists.
+
+## 12-servo potentiometer feedback via CD74HC4067
+
+Each servo now has an added wire soldered directly to its internal potentiometer
+wiper. While the **PCA9685** continues driving the 50 Hz PWM command pulses, the
+twelve analog wiper leads connect to multiplexer channels **C4 through C15**
+(mapping servo socket `N` to mux channel `C(N+4)`).
+
+<figure>
+  <img src="/posts/2026-10-18-progress/multiplexer-wiring.png" alt="V2 feedback wiring diagram showing twelve servo wiper wires on CD74HC4067 channels C4 through C15, selector lines to the P4, and the separate PCA9685 PWM command path." width="2400" height="1740" loading="lazy" />
+  <figcaption>October 17 V2 feedback wiring diagram: 12 servo potentiometer wipers feed CD74HC4067 channels C4–C15 into the ESP32-P4 ADC alongside the PCA9685 PWM output bus.</figcaption>
+</figure>
+
+The P4 scans the multiplexer channels through its ADC, tagging each reading with
+sample age and spread so Body Control can display live measured-versus-commanded
+joint positions and advance multi-stage movements (such as `Stand`) as soon as fresh
+feedback confirms arrival.
+
+### Three-point calibration across all 12 servos
+
+With the LCD and ADC multiplexer running together on the ESP32-P4, I calibrated all
+twelve servos across a three-point sweep at **500, 1650, and 2800 µs** and checked
+linearity across **48 intermediate positions (480 settled readings)**:
+
+| Calibration check | Measured result |
+| --- | --- |
+| Calibrated channels | All 12 joints (`socket N → mux C(N+4)`) |
+| Largest median tracking difference | **15.31 µs** pulse-equivalent |
+| Largest single-sample difference | **23.34 µs** |
+| Configured arrival tolerance | **30 µs** |
+
+## Chassis repackaging around the feedback harness
+
+Routing twelve extra feedback wires and the multiplexer board accompanied a new set of
+prototype chassis prints: a revised battery cradle, lower electronics slot, extended
+front tray, updated front servo housings, forward gyro carrier, board retainers,
+battery-mounted keeper bridge, and four LCD-carrier spacers.
+
+<figure>
+  <img src="/gallery/20261017_200604-960.webp" alt="Open Ainekio chassis on the October 17 workbench, showing the display, circuit boards and wiring during the rebuild." width="960" height="720" loading="lazy" />
+  <figcaption>October 17 workbench view during the 4th-wire feedback and chassis rebuild. <a href="/gallery/">See more photos in the gallery.</a></figcaption>
+</figure>
+
+## MetaHuman OS: upgrading to Qwen3.5 2B Intent and Task specialists
+
+On the cognitive side, trained **Qwen3.5 2B** LoRA specialists replaced the earlier
+0.8B production adapters for both **Intent** and **Task Decisions**, running on a
+shared **Q8_0 2B base with F16 LoRA adapters** (reducing GPU memory allocation from
+`5,684 MiB` in BF16 down to **`3,982 MiB`** with identical parsed programs across
+38/40 precision checks):
+
+| Frozen benchmark suite | Previous 0.8B specialist | Deployed Qwen3.5 2B specialist |
+| --- | ---: | ---: |
+| **Intent** reference agreement | 219 / 297 (73.7%) | **266 / 297 (89.6%)** |
+| **Task** reference agreement | 578 / 1,293 (44.7%) | **1,194 / 1,293 (92.3%)** |
+
+An experimental **9B Autonomy adapter** was also assigned to the dedicated `Autonomy`
+category for Active Operator and Boredom Reflection/Movement planning, cutting median
+call time from `37.7 s` to `3.1 s` via much more concise output generation.
+
+### Runtime responsiveness and memory recall cleanup
+
+Profiling the companion UI also caught why status polling occasionally stuttered: the
+monitor panel was re-parsing the full daily log file on the main thread every refresh.
+Dropping historical log reads from live polling brought status snapshots down to
+**~3 ms**. One-off body commands that get rejected by safety bounds now fail cleanly
+instead of looping back into goal review, and the vector memory index now embeds both
+sides of each conversation so past replies recall as reliably as user prompts.

@@ -1,0 +1,447 @@
+/* Hybrid-impossibility doctrine layout for First Contact Manual chapter 1. */
+
+.fcmi-hybrid-spread {
+  display: grid;
+  gap: clamp(1rem, 3vw, 1.45rem);
+  margin: clamp(1.2rem, 4vw, 2rem) 0;
+  padding: clamp(0.9rem, 3vw, 1.35rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.28);
+  border-radius: var(--fcmi-radius-lg);
+  background:
+    radial-gradient(circle at 12% 0%, rgb(var(--fcmi-accent-rgb) / 0.14), transparent 28rem),
+    linear-gradient(135deg, rgb(var(--fcmi-surface-rgb) / 0.96), rgb(var(--fcmi-surface-2-rgb) / 0.82)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.1), transparent 42%, rgb(255 92 92 / 0.08));
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.03),
+    0 22px 58px rgb(0 0 0 / 0.32);
+}
+
+.fcmi-hybrid-cover {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: clamp(0.75rem, 2vw, 1rem);
+  align-items: center;
+  padding: clamp(0.85rem, 2.4vw, 1.1rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.24);
+  border-radius: var(--fcmi-radius-md);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.16), transparent 58%),
+    rgb(var(--fcmi-surface-rgb) / 0.64);
+}
+
+.fcmi-hybrid-cover-mark {
+  display: grid;
+  width: 3.2rem;
+  height: 3.2rem;
+  place-items: center;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.28);
+  border-radius: 50%;
+  background: rgb(var(--fcmi-accent-rgb) / 0.12);
+  box-shadow: 0 0 22px rgb(var(--fcmi-glow-rgb) / 0.18);
+  font-size: 1.45rem;
+}
+
+.fcmi-hybrid-cover-copy {
+  min-width: 0;
+}
+
+.fcmi-hybrid-cover-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.8rem;
+  align-items: baseline;
+}
+
+.fcmi-hybrid-cover h3,
+.fcmi-hybrid-section-heading h4,
+.fcmi-hybrid-collision-card h4,
+.fcmi-hybrid-density-cell h4,
+.fcmi-hybrid-case-row h4,
+.fcmi-hybrid-protocol-list h4,
+.fcmi-hybrid-multiply-panel h4 {
+  margin: 0;
+  color: rgb(var(--fcmi-text-rgb));
+  font-family: var(--fcmi-mono);
+  font-weight: 900;
+  line-height: 1.16;
+  text-transform: uppercase;
+}
+
+.fcmi-hybrid-cover h3 {
+  font-size: 1.35rem;
+}
+
+.fcmi-hybrid-cover-title-row span,
+.fcmi-hybrid-cover-label {
+  color: rgb(var(--fcmi-accent-rgb));
+  font-family: var(--fcmi-mono);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.fcmi-hybrid-cover p,
+.fcmi-hybrid-section-heading p {
+  margin: 0.25rem 0 0;
+  color: rgb(var(--fcmi-muted-rgb));
+  line-height: 1.55;
+}
+
+.fcmi-hybrid-opening {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.65fr);
+  gap: clamp(0.85rem, 2.6vw, 1.15rem);
+  align-items: start;
+}
+
+.fcmi-hybrid-opening-copy {
+  display: grid;
+  gap: 0.78rem;
+  padding: clamp(0.95rem, 2.5vw, 1.25rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.18);
+  border-left: 4px solid rgb(var(--fcmi-accent-rgb) / 0.62);
+  border-radius: var(--fcmi-radius-md);
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.72), rgb(var(--fcmi-surface-rgb) / 0.46)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.08), transparent 78%);
+}
+
+.fcmi-hybrid-opening-copy p,
+.fcmi-hybrid-smart-copy p,
+.fcmi-hybrid-field-rule p,
+.fcmi-hybrid-collision-card p,
+.fcmi-hybrid-density-cell p,
+.fcmi-hybrid-case-row p,
+.fcmi-hybrid-protocol-list p,
+.fcmi-hybrid-multiply-panel p,
+.fcmi-hybrid-summary {
+  margin: 0;
+  color: rgb(var(--fcmi-muted-rgb));
+  line-height: 1.62;
+}
+
+.fcmi-hybrid-opening-copy p:first-child {
+  color: rgb(var(--fcmi-text-rgb));
+  font-size: 1.02rem;
+}
+
+.fcmi-hybrid-field-rule {
+  display: grid;
+  gap: 0.55rem;
+  padding: clamp(0.85rem, 2vw, 1rem);
+  border: 1px solid rgb(255 92 92 / 0.28);
+  border-radius: var(--fcmi-radius-md);
+  background:
+    linear-gradient(135deg, rgb(255 92 92 / 0.15), transparent 60%),
+    rgb(var(--fcmi-surface-rgb) / 0.58);
+  box-shadow: inset 0 0 0 1px rgb(var(--fcmi-text-rgb) / 0.03);
+}
+
+.fcmi-hybrid-field-rule > span,
+.fcmi-hybrid-phase-panel strong,
+.fcmi-hybrid-field-rule strong,
+.fcmi-hybrid-summary strong {
+  color: rgb(var(--fcmi-text-rgb));
+  font-family: var(--fcmi-mono);
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.fcmi-hybrid-field-rule > span {
+  color: rgb(255 92 92);
+  font-size: 0.75rem;
+}
+
+.fcmi-hybrid-collision-map,
+.fcmi-hybrid-smart-matter,
+.fcmi-hybrid-recognition,
+.fcmi-hybrid-multiplication {
+  display: grid;
+  gap: clamp(0.78rem, 2vw, 1rem);
+  padding: clamp(0.85rem, 2.4vw, 1.1rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.16);
+  border-radius: var(--fcmi-radius-md);
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.58), rgb(var(--fcmi-surface-rgb) / 0.34)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.06), transparent 76%);
+}
+
+.fcmi-hybrid-section-heading {
+  display: grid;
+  gap: 0.25rem;
+  max-width: 56rem;
+}
+
+.fcmi-hybrid-section-heading h4 {
+  font-size: 1.05rem;
+}
+
+.fcmi-hybrid-collision-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.fcmi-hybrid-collision-card {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.55rem 0.7rem;
+  align-items: start;
+  padding: 0.78rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.18);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.12), transparent 52%),
+    rgb(var(--fcmi-surface-rgb) / 0.42);
+}
+
+.fcmi-hybrid-collision-card > span {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.36);
+  border-radius: 50%;
+  color: rgb(var(--fcmi-accent-rgb));
+  font-family: var(--fcmi-mono);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.fcmi-hybrid-collision-card > h4 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.fcmi-hybrid-collision-card > p {
+  grid-column: 1 / -1;
+}
+
+.fcmi-hybrid-collision-card h4,
+.fcmi-hybrid-density-cell h4,
+.fcmi-hybrid-case-row h4,
+.fcmi-hybrid-protocol-list h4,
+.fcmi-hybrid-multiply-panel h4 {
+  font-size: 0.86rem;
+}
+
+.fcmi-hybrid-smart-matter {
+  grid-template-columns: minmax(0, 1fr);
+  border-color: rgb(var(--fcmi-accent-rgb) / 0.22);
+  background:
+    radial-gradient(circle at 100% 0%, rgb(var(--fcmi-accent-rgb) / 0.16), transparent 24rem),
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.66), rgb(var(--fcmi-surface-rgb) / 0.38));
+}
+
+.fcmi-hybrid-smart-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.42fr);
+  gap: clamp(0.75rem, 2vw, 1rem);
+}
+
+.fcmi-hybrid-smart-copy {
+  display: grid;
+  gap: 0.78rem;
+  padding: clamp(0.82rem, 2vw, 1rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.16);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.7), rgb(var(--fcmi-surface-rgb) / 0.44)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.08), transparent 76%);
+}
+
+.fcmi-hybrid-smart-copy p:first-child {
+  color: rgb(var(--fcmi-text-rgb));
+}
+
+.fcmi-hybrid-phase-panel {
+  display: grid;
+  gap: 0.6rem;
+  align-content: start;
+  padding: clamp(0.78rem, 2vw, 1rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.18);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.68), rgb(var(--fcmi-surface-rgb) / 0.38)),
+    linear-gradient(135deg, rgb(var(--fcmi-accent-rgb) / 0.12), transparent 58%);
+}
+
+.fcmi-hybrid-phase-strip {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.fcmi-hybrid-phase-strip span {
+  display: block;
+  padding: 0.48rem 0.58rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.24);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.16), transparent 80%),
+    rgb(var(--fcmi-surface-rgb) / 0.46);
+  color: rgb(var(--fcmi-text-rgb));
+  font-family: var(--fcmi-mono);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.fcmi-hybrid-density-board {
+  display: grid;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.16);
+  border-radius: var(--fcmi-radius-sm);
+  overflow: hidden;
+}
+
+.fcmi-hybrid-density-cell {
+  display: grid;
+  grid-template-columns: minmax(8.5rem, 0.32fr) minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: start;
+  padding: 0.82rem;
+  border-left: 4px solid rgb(var(--fcmi-accent-rgb) / 0.62);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.1), transparent 48%),
+    rgb(var(--fcmi-surface-rgb) / 0.44);
+}
+
+.fcmi-hybrid-density-cell + .fcmi-hybrid-density-cell {
+  border-top: 1px solid rgb(var(--fcmi-accent-rgb) / 0.13);
+}
+
+.fcmi-hybrid-recognition-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(17rem, 0.42fr);
+  gap: clamp(0.75rem, 2vw, 1rem);
+  align-items: start;
+}
+
+.fcmi-hybrid-case-ledger {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.fcmi-hybrid-case-row {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.17);
+  border-left: 4px solid rgb(var(--fcmi-accent-rgb) / 0.62);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.09), transparent 58%),
+    rgb(var(--fcmi-surface-rgb) / 0.42);
+}
+
+.fcmi-hybrid-protocol-list {
+  display: grid;
+  gap: 0.62rem;
+  padding: clamp(0.82rem, 2vw, 1rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.2);
+  border-radius: var(--fcmi-radius-md);
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.72), rgb(var(--fcmi-surface-rgb) / 0.44)),
+    linear-gradient(135deg, rgb(var(--fcmi-accent-rgb) / 0.12), transparent 58%);
+}
+
+.fcmi-hybrid-question-list,
+.fcmi-hybrid-threat-list {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  color: rgb(var(--fcmi-muted-rgb));
+  line-height: 1.45;
+}
+
+.fcmi-hybrid-multiplication {
+  border-color: rgb(255 92 92 / 0.22);
+  background:
+    linear-gradient(90deg, rgb(255 92 92 / 0.1), transparent 46%, rgb(var(--fcmi-accent-rgb) / 0.09)),
+    rgb(var(--fcmi-surface-rgb) / 0.52);
+}
+
+.fcmi-hybrid-equation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.48rem;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.78rem, 2vw, 1rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.2);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.1), transparent 48%, rgb(255 92 92 / 0.08)),
+    rgb(var(--fcmi-surface-rgb) / 0.58);
+  color: rgb(var(--fcmi-muted-rgb));
+  font-family: var(--fcmi-mono);
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.fcmi-hybrid-equation strong {
+  color: rgb(var(--fcmi-text-rgb));
+}
+
+.fcmi-hybrid-multiplication-panels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.65rem, 2vw, 0.9rem);
+}
+
+.fcmi-hybrid-multiply-panel {
+  display: grid;
+  gap: 0.65rem;
+  padding: clamp(0.82rem, 2vw, 1rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.18);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(180deg, rgb(var(--fcmi-surface-rgb) / 0.68), rgb(var(--fcmi-surface-rgb) / 0.42)),
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.09), transparent 76%);
+}
+
+.fcmi-hybrid-threat-list span {
+  color: rgb(var(--fcmi-text-rgb));
+  font-family: var(--fcmi-mono);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.fcmi-hybrid-summary {
+  padding: clamp(0.78rem, 2vw, 1rem);
+  border: 1px solid rgb(var(--fcmi-accent-rgb) / 0.18);
+  border-radius: var(--fcmi-radius-sm);
+  background:
+    linear-gradient(90deg, rgb(var(--fcmi-accent-rgb) / 0.12), transparent 78%),
+    rgb(var(--fcmi-surface-rgb) / 0.48);
+}
+
+@media (max-width: 980px) {
+  .fcmi-hybrid-cover,
+  .fcmi-hybrid-opening,
+  .fcmi-hybrid-smart-layout,
+  .fcmi-hybrid-recognition-layout,
+  .fcmi-hybrid-multiplication-panels {
+    grid-template-columns: 1fr;
+  }
+
+  .fcmi-hybrid-cover-label {
+    justify-self: start;
+  }
+
+  .fcmi-hybrid-collision-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .fcmi-hybrid-collision-card,
+  .fcmi-hybrid-density-cell {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,181 @@
+import { LIGHT_MODE, DARK_MODE, AUTO_MODE } from '../constants'
+
+export * from './quiz'
+
+export type LIGHT_DARK_MODE =
+  | typeof LIGHT_MODE
+  | typeof DARK_MODE
+  | typeof AUTO_MODE
+
+export type SiteConfig = {
+  title: string
+  subtitle: string
+  description?: string
+  url?: string
+  enablePostFooterNav?: boolean
+  lang: string
+  themeColor: {
+    hue: number
+    fixed: boolean
+  }
+  transparency?: number
+  defaultTheme: LIGHT_DARK_MODE
+  themeLock?: typeof LIGHT_MODE | typeof DARK_MODE
+  enableAdmin?: boolean
+  enableSpecialPageFeatures?: boolean
+  sidebar?: {
+    enable?: boolean
+  }
+  banner: {
+    enable: boolean
+    src: string
+    video?: string
+    playbackRate?: number
+    position?: 'top' | 'center' | 'bottom'
+    credit: {
+      enable: boolean
+      text: string
+      url?: string
+    }
+  }
+  toc: {
+    enable: boolean
+    depth: 1 | 2 | 3
+    minHeadings?: number
+  }
+  rightRail?: {
+    enable: boolean
+    showOnHome?: boolean
+    showOnPostsWithoutToc?: boolean
+    stickyTop?: string
+    mobilePortraitHero?: {
+      enabled?: boolean
+      style?: 'banner-overlay'
+    }
+    widget?: {
+      type: 'updates'
+      collection?: string
+      slug?: string
+      excerptLength?: number
+      pageUrl?: string
+      pageLinkLabel?: string
+    }
+  }
+  favicon: Favicon[]
+}
+
+export type Favicon = {
+  src: string
+  theme?: 'light' | 'dark'
+  sizes?: string
+}
+
+export enum LinkPreset {
+  Home = 0,
+  Archive = 1,
+  About = 2,
+  Community = 3,
+  Projects = 4,
+  Configs = 5,
+  Friends = 6,
+  NewPost = 7,
+}
+
+export type PasswordConfig = {
+  username: string
+  passwordHash: string
+  needsSetup: boolean
+  createdAt?: string
+}
+
+export type NavBarLink = {
+  name: string
+  url: string
+  external?: boolean
+  dropdown?: {
+    name: string
+    url: string
+    external?: boolean
+  }[]
+}
+
+export type NavBarConfig = {
+  links: (NavBarLink | LinkPreset)[]
+}
+
+export type ProfileConfig = {
+  avatar?: string
+  avatarFilename?: string
+  name: string
+  bio?: string
+  links: {
+    name: string
+    url: string
+    icon: string
+  }[]
+}
+
+export type LicenseConfig = {
+  enable: boolean
+  name: string
+  url: string
+}
+
+export type BlogPostData = {
+  body: string
+  title: string
+  published: Date
+  updated?: Date
+  description: string
+  tags: string[]
+  draft?: boolean
+  archive?: boolean
+  yIndex: number
+  image?: string
+  downloadable?: boolean
+  category?: string
+  showToc?: boolean
+  prevTitle?: string
+  prevSlug?: string
+  nextTitle?: string
+  nextSlug?: string
+  bannerLink?: string
+  backgroundImage?: string
+  timelineYear?: number
+  timelineEra?: string
+  isKeyEvent?: boolean
+  timelineLocation?: string
+  bannerType?: 'image' | 'video' | 'timeline'
+  bannerData?: {
+    videoId?: string
+    imageUrl?: string
+    category?: string
+    startYear?: number
+    endYear?: number
+    background?: string
+    title?: string
+    height?: string
+    compact?: boolean
+  }
+  series?: string
+  seriesPart?: number
+  seriesTitle?: string
+  contentFormat?:
+    | 'chronicle'
+    | 'recipe'
+    | 'review'
+    | 'report'
+    | 'commercial'
+    | 'manual'
+    | 'update'
+    | 'classified'
+}
+
+/** Explicit dimensions describe the actual image supplied by the application. */
+export interface SocialImageMetadata {
+  src: string
+  width: number
+  height: number
+  type?: string
+  alt?: string
+}

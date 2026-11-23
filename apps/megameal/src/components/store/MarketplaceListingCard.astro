@@ -1,0 +1,216 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import { Icon } from 'astro-icon/components'
+import {
+  getProductHref,
+  getProductListingVisual,
+} from '../../contracts/products'
+
+export interface Props {
+  product: CollectionEntry<'products'>
+}
+
+const { product } = Astro.props
+
+const productHref = getProductHref(product)
+
+const mediaItems =
+  Array.isArray(product.data.media) && product.data.media.length > 0
+    ? product.data.media
+    : [
+        ...(product.data.image
+          ? [
+              {
+                type: 'image' as const,
+                src: product.data.image,
+                alt: product.data.name,
+              },
+            ]
+          : []),
+      ]
+
+const thumbnail = getProductListingVisual(product)
+
+const mediaKinds = Array.from(
+  new Set(
+    mediaItems.map(item => {
+      if (item.type === 'youtube') return 'broadcast'
+      if (item.type === 'model3d') return 'scan'
+      return item.type
+    }),
+  ),
+).slice(0, 3)
+
+const reviewCount = product.data.preWrittenReviews?.length ?? 0
+const questionCount = product.data.qanda?.length ?? 0
+const brand = product.data.brand ?? 'MegaMeal Merchant Services'
+const shippingNote = product.data.shippingNote
+const sku = product.data.sku
+const rating = product.data.rating
+const fullStars =
+  typeof rating === 'number' ? Math.min(5, Math.max(0, Math.round(rating))) : 0
+const stars = Array.from({ length: 5 }, (_, index) => index < fullStars)
+
+const availabilityDisplay: Record<
+  string,
+  { label: string; badgeClass: string; note: string }
+> = {
+  available: {
+    label: 'Available Now',
+    badgeClass: 'bg-emerald-400/90 text-slate-950 border-emerald-300/60',
+    note: 'Cleared for this region.',
+  },
+  coming_soon: {
+    label: 'Coming Soon',
+    badgeClass: 'bg-cyan-300/85 text-slate-950 border-cyan-200/60',
+    note: 'Launch window still stabilizing.',
+  },
+  out_of_stock: {
+    label: 'Out of Stock',
+    badgeClass: 'bg-slate-400/80 text-slate-950 border-slate-200/40',
+    note: 'Demand exceeded containment.',
+  },
+  not_in_your_area: {
+    label: 'Not In Your Area',
+    badgeClass: 'bg-amber-300/90 text-slate-950 border-amber-200/60',
+    note: 'Regional clearance remains pending.',
+  },
+  not_in_your_timeline: {
+    label: 'Not In Your Timeline',
+    badgeClass: 'bg-fuchsia-300/90 text-slate-950 border-fuchsia-200/60',
+    note: 'Viewable here, purchasable elsewhere.',
+  },
+  artifact_only: {
+    label: 'Artifact Record',
+    badgeClass: 'bg-rose-300/85 text-slate-950 border-rose-200/60',
+    note: 'Archival listing only.',
+  },
+}
+
+const availabilityTone =
+  availabilityDisplay[product.data.availability ?? 'coming_soon'] ??
+  availabilityDisplay.coming_soon
+---
+
+<article class="marketplace-card-shell h-full rounded-[1.6rem] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.98))] shadow-[0_20px_60px_rgba(2,6,23,0.32)] overflow-hidden">
+	<a href={productHref} class="marketplace-card block h-full">
+		<div class="marketplace-card__media">
+			<div class="marketplace-card__badges">
+				<span class={`marketplace-card__availability ${availabilityTone.badgeClass}`}>
+					{availabilityTone.label}
+				</span>
+				{product.data.featured && (
+					<span class="marketplace-card__flag">Featured</span>
+				)}
+			</div>
+			{thumbnail ? (
+				<Fragment>
+					<img
+						alt={product.data.name}
+						data-src={thumbnail.src}
+						data-srcset={thumbnail.srcset}
+						data-sizes="(max-width: 720px) 10rem, (max-width: 1279px) 40vw, 19rem"
+						data-state="pending"
+						data-store-product-image
+						decoding="async"
+					/>
+					<div
+						class="storefront-product-image-placeholder"
+						data-store-product-placeholder
+					>
+						<Icon name="mdi:image-outline" class="h-10 w-10 opacity-40" />
+						<span>Loading asset</span>
+					</div>
+					<noscript>
+						<img
+							src={thumbnail.src}
+							srcset={thumbnail.srcset}
+							sizes="(max-width: 720px) 10rem, (max-width: 1279px) 40vw, 19rem"
+							alt={product.data.name}
+							loading="lazy"
+						/>
+					</noscript>
+				</Fragment>
+			) : (
+				<div class="marketplace-card__placeholder">
+					<Icon name="mdi:image-off-outline" class="h-10 w-10 opacity-40" />
+					<span>Asset pending</span>
+				</div>
+			)}
+			<div class="marketplace-card__media-meta">
+				{mediaKinds.map((kind) => (
+					<span>{kind}</span>
+				))}
+			</div>
+		</div>
+
+		<div class="marketplace-card__body">
+			<div class="marketplace-card__sellerline">
+				<div>
+					<span>Seller</span>
+					<strong>{brand}</strong>
+				</div>
+			</div>
+
+			<div class="marketplace-card__heading">
+				<div>
+					<p class="marketplace-card__category">
+						{product.data.category ?? "catalog entry"}
+					</p>
+					<h2>{product.data.name}</h2>
+				</div>
+				{typeof product.data.price === "number" ? (
+					<strong class="marketplace-card__price">
+						${product.data.price.toFixed(2)}
+					</strong>
+				) : (
+					<strong class="marketplace-card__price marketplace-card__price--muted">
+						Inquire
+					</strong>
+				)}
+			</div>
+
+			{product.data.tagline && (
+				<p class="marketplace-card__tagline">"{product.data.tagline}"</p>
+			)}
+
+			<div class="marketplace-card__offer-row">
+				<span>{availabilityTone.note}</span>
+				{sku && <strong>SKU {sku}</strong>}
+			</div>
+
+			<div class="marketplace-card__subgrid">
+				<div class="marketplace-card__rating">
+					<div class="marketplace-card__stars" aria-hidden="true">
+						{stars.map((filled) => (
+							<span class:list={[filled ? "filled" : ""]}>★</span>
+						))}
+					</div>
+					<span>
+						{typeof rating === "number" ? rating.toFixed(1) : "unrated"} rating
+					</span>
+				</div>
+				<div class="marketplace-card__meta-copy">
+					<span>{reviewCount} reviews</span>
+					<span>{questionCount} Q&A entries</span>
+				</div>
+			</div>
+
+			{shippingNote && (
+				<div class="marketplace-card__shipping">
+					<Icon name="mdi:truck-fast-outline" class="h-4 w-4" />
+					<p>{shippingNote}</p>
+				</div>
+			)}
+
+			<div class="marketplace-card__footer">
+				<div class="marketplace-card__footer-actions">
+					<span class="marketplace-card__cta">
+						Inspect listing <Icon name="mdi:arrow-right" class="h-4 w-4" />
+					</span>
+				</div>
+				<p>Policy, media, and review trail available inside listing.</p>
+			</div>
+		</div>
+	</a>
+</article>

@@ -1,0 +1,132 @@
+---
+title: "Companion Systems: Single-Voice Persona, Locomotion Goals, and Gait Refinements"
+published: 2026-10-15
+updated: 2026-10-15
+description: "Consolidating outward speech under Persona, adding Desire review and Active Operator in MetaHuman OS, introducing goal-bearing locomotion with signed lateral control, and refining Walk, Run, Crawl, Crab, and seated Wave."
+image: "/posts/2026-10-15-progress/companion-systems.svg"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: false
+showToc: true
+tags: [Ainekio, V2, MetaHuman OS, Agency, Memory, Gait, Locomotion, IMU, LoRA]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: metahuman
+  generation: both
+  kind: journal
+  next: 2026-10-18-servo-feedback-and-chassis
+  related: ["ainekio-companion", "metahuman-integration", "gait-development"]
+---
+
+On October 15 I cleaned up two things that kept rubbing against each other during live
+voice and floor tests: making sure only one model voice ever speaks for the robot, and
+tying physical walking commands to real camera and IMU progress instead of blind timers.
+
+<figure>
+  <img src="/posts/2026-10-15-progress/companion-systems.svg" alt="Requests, body events and autonomous intentions enter Environment Mode. Selected context informs routing and planning; body actions return evidence for review; Persona supplies the outward reply. Attributed experience can inform later Desire review." width="1000" height="660" loading="lazy" />
+  <figcaption>Companion loop: Orchestrator routes incoming speech and body events, Task chooses physical or camera actions, Goal Review checks what actually happened, and Persona owns the spoken reply.</figcaption>
+</figure>
+
+## Ten model roles and one owner for outward speech
+
+Workflows and model settings now route across ten clear specialist roles:
+
+| Category | Responsibility |
+| --- | --- |
+| **Orchestrator** | Interpret requests and events; select routes, tools, and context |
+| **Task Decisions** | Select executable body/sensing actions and task controls |
+| **Planner** | Develop and revise multi-step plans |
+| **Persona** | Express identity, personality, conversation, and self-directed intentions |
+| **Psychotherapist** | Independently assess attributed experience and update long-term persona |
+| **Vision** | Interpret camera images and support visually grounded planning |
+| **Curator** | Review and prepare attributed memory and training records |
+| **Coder** | Work on code and technical tasks |
+| **Summarizer** | Condense history while preserving meaning and attribution |
+| **Embedder** | Represent records for vector retrieval and similarity search |
+
+### Stripping speech out of the Task planner
+
+Following yesterday's [speech/action confusion on the 0.8B planner](/posts/2026-10-14-startup-and-leveling/),
+I removed spoken lines from the Task model completely. Task now picks only physical
+postures, gaits, or camera actions; Goal Review checks the resulting sensor telemetry;
+and **Persona** is the only path that writes conversation history or speaks out loud
+through the wake-word voice loop. Retraining the specialist dataset (6,358 training,
+1,518 evaluation, and 187 regression examples) around that strict action-only schema
+stopped spoken figures of speech from accidentally triggering leg movements.
+
+### Grounding desires and memory in physical outcomes
+
+Autonomous reflection also needed a reality check against the physical body. Desire
+review now sees live robot status and actual execution outcomes—so if the robot tried
+to walk toward something and couldn't, it recognizes the mismatch rather than assuming
+the action succeeded. Every stored memory keeps strict attribution (who spoke, when,
+and whether an episode happened in the physical room or during an internal reflection
+pass), while bursty sensor events coalesce cleanly instead of piling up duplicate
+workflow resumes.
+
+Quick diagnostic LoRA runs on a **Qwen3.5 9B** base also confirmed that tiny 4–5 sample
+seed sets aren't enough to replace explicit persona context without muddling memory
+attribution, so larger curated transcripts will come first before promoting 9B adapters.
+
+## Goal-bearing locomotion and lateral drift correction
+
+Instead of firing open-ended Walk or Turn commands and guessing when to stop, walking
+tasks now pair each movement with a concrete sensor check across the camera and IMU:
+
+| Locomotion goal | Progress & completion evidence |
+| --- | --- |
+| **Distance** | Measured linear displacement in an identified reference frame |
+| **Relative turn** | Signed yaw change relative to the starting orientation |
+| **Approach** | Reaching a specified relationship to a tracked visual target |
+| **Follow** | Maintaining an ongoing target relationship until an ending condition |
+| **Visual endpoint** | Camera observations evaluated against completion criteria |
+
+If the needed camera or IMU signal isn't available at the start, the task declines to
+move; if tracking drops mid-walk, it brings the gait to a clean standing finish rather
+than marching blindly on a timer. On the ESP32-P4, the gait controller also gained
+signed sideways trim so the robot can nudge back onto centerline during visual
+approaches.
+
+## Livelier gaits and a faster seated Wave
+
+Over Wi-Fi OTA, I bumped foot clearance and planted sweep across all four continuous
+gaits on the `35 / 20 / 28 / 38 / 55 mm` linkage and staggered the PCA9685 PWM channel
+phases so all twelve servos don't draw their current spikes on the exact same
+microsecond:
+
+<figure>
+  <img src="/gallery/20261015_172412-1600.webp" alt="Close-up workbench photograph of a printed 3-DOF leg module showing the 35 mm carrier, 20 mm crank, 28 mm pickup, 38 mm rod, and 55 mm lower leg." width="1595" height="1196" loading="lazy" />
+  <figcaption>October 15 printed 3-DOF leg module on the bench: <code>35 mm</code> upper carrier, <code>20 mm</code> crank, <code>28 mm</code> pickup radius, <code>38 mm</code> connecting rod, and <code>55 mm</code> distal lower leg.</figcaption>
+</figure>
+
+| Gait parameter | Previous | Revised | Notes |
+| --- | ---: | ---: | --- |
+| **Walk** planted sweep | 32 mm | **37 mm** | +18.6% planned travel (`44.44 → 52.71 mm/s` at Speed 100, `0.9 s` cycle) |
+| **Walk** lift (low / full) & stance | 4 / 8 mm (80%) | **6 / 10 mm (78%)** | Broader swing arch clears floor earlier; lateral shift reduced `9 → 7 mm` |
+| **Run** planted stroke & lift | 40 mm / 2–8 mm | **44 mm / 5–12 mm** | Front/rear paired bound |
+| **Crawl** planted stroke & lift | 18 mm / 2–4 mm | **32 mm / 5–8 mm** | +59.5% planned cycle travel on bare-leg contact |
+| **Crab** fore/aft & sideways stroke | 36 mm / 24 mm | **40 mm / 32 mm** | Stance width narrowed `190 → 160 mm`; lift `8–14 mm` (+25% sideways travel) |
+
+### Snappier seated Wave (`16.0 s → 6.2 s`)
+
+Watching the robot wave in person made it obvious how sluggish the original 16-second
+clip felt. Retiming seated **Wave** down to **6.2 seconds** and more than doubling the
+front shoulder sweep made the gesture read immediately across the desk:
+
+| Wave phase (at 1× speed) | Previous | Revised |
+| --- | ---: | ---: |
+| Seated entry complete | 3.0 s | **1.2 s** |
+| Front arm lift complete | 4.2 s | **1.6 s** |
+| Shoulder wave amplitude (3× waves) | ±18° | **±42°** |
+| Standing recovery & total duration | 15.2 s / 16.0 s | **6.0 s / 6.2 s** |
+
+### Live IMU leveling readouts and stationary gyro zeroing
+
+Body Control now shows live roll/pitch angles, target error, and per-leg extension
+deltas even while self-leveling is toggled off, with one-click buttons on the bench to
+capture the current stance as level reference or average 256 stationary samples into
+saved gyro bias without rebooting.

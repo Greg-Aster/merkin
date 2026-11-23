@@ -1,0 +1,104 @@
+.review-essay__evidence {
+  max-width: 72rem;
+  margin: 1.25rem auto;
+  padding: 1rem 0;
+  border-top: 1px solid oklch(0.5 0.05 255 / 0.24);
+}
+
+.review-essay__evidence-heading {
+  max-width: 52rem;
+  margin-bottom: 1rem;
+}
+
+.review-essay__evidence-heading p:not(.review-essay__section-label) {
+  margin: 0 0 0.85rem;
+  font-size: 1rem;
+  line-height: 1.62;
+}
+
+.review-essay__evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.review-essay__evidence-card {
+  display: grid;
+  min-width: 0;
+  gap: 0.5rem;
+  align-content: start;
+  padding: 0.75rem;
+  border: 1px solid oklch(0.5 0.05 255 / 0.24);
+  border-radius: 0.45rem;
+  background: oklch(0.98 0.01 90 / 0.54);
+  color: inherit;
+  text-decoration: none;
+}
+
+.review-essay__evidence-card,
+.review-essay__evidence-card:hover,
+.review-essay__evidence-card * {
+  text-decoration: none !important;
+}
+
+.dark .review-essay__evidence-card {
+  background: oklch(0.15 0.02 260 / 0.68);
+}
+
+.review-essay__evidence-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 0.35rem;
+  background: oklch(0.08 0.01 260);
+}
+
+.review-essay__evidence-image > img,
+.review-essay__evidence-image picture,
+.review-essay__evidence-image picture > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: cover;
+  object-position: center;
+}
+
+.review-essay__evidence-label {
+  color: oklch(0.42 0.12 255);
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.dark .review-essay__evidence-label {
+  color: oklch(0.78 0.16 255);
+}
+
+.review-essay__evidence-card strong {
+  font-size: 1.08rem;
+  line-height: 1.12;
+}
+
+.review-essay__evidence-card span:last-child {
+  color: oklch(0.38 0.03 260);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.dark .review-essay__evidence-card span:last-child {
+  color: oklch(0.75 0.02 260);
+}
+
+@media (max-width: 900px) {
+  .review-essay__evidence-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .review-essay__evidence-grid {
+    grid-template-columns: 1fr;
+  }
+}

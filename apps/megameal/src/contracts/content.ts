@@ -1,0 +1,54 @@
+export type DraftableData = {
+  draft?: boolean
+}
+
+export type ArchivableData = DraftableData & {
+  archive?: boolean
+}
+
+export type DownloadableData = DraftableData & {
+  downloadable?: boolean
+}
+
+export type PublishedData = {
+  published: Date | string
+}
+
+export type ContentEntryWithData<TData> = {
+  data: TData
+}
+
+export function isPublicContentData(data: DraftableData) {
+  return import.meta.env.PROD ? data.draft !== true : true
+}
+
+export function isPromotedContentData(data: ArchivableData) {
+  return isPublicContentData(data) && data.archive !== true
+}
+
+export function publicCollectionFilter<TData extends DraftableData>({
+  data,
+}: ContentEntryWithData<TData>) {
+  return isPublicContentData(data)
+}
+
+export function promotedCollectionFilter<TData extends ArchivableData>({
+  data,
+}: ContentEntryWithData<TData>) {
+  return isPromotedContentData(data)
+}
+
+export function publicDownloadableCollectionFilter<
+  TData extends DownloadableData,
+>({ data }: ContentEntryWithData<TData>) {
+  return isPublicContentData(data) && data.downloadable === true
+}
+
+export function comparePublishedDesc<
+  TEntry extends ContentEntryWithData<PublishedData>,
+>(left: TEntry, right: TEntry) {
+  return (
+    new Date(right.data.published).getTime() -
+    new Date(left.data.published).getTime()
+  )
+}

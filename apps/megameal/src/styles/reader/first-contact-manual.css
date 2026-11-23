@@ -1,0 +1,7 @@
+/* Canonical First Contact Manual stylesheet entrypoint.
+   Keep chapter imports stable while internal ownership stays responsibility-based. */
+@import './first-contact-manual-foundation.css';
+@import './first-contact-manual-primitives.css';
+@import './first-contact-manual-reference.css';
+@import './first-contact-manual-chapter.css';
+@import './first-contact-manual-legacy.css';

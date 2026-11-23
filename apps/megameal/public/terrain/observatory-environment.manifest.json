@@ -1,0 +1,785 @@
+{
+  "name": "Observatory-Environment",
+  "id": "observatory-environment",
+  "type": "terrain",
+  "version": "1.0.0",
+  "runtime": {
+    "mode": "glb-chunk-terrain",
+    "visualSource": "source-glb-chunks",
+    "fallbackSurfacePolicy": "disabled",
+    "terrainAuthority": "editor-baked-terrain"
+  },
+  "assets": {
+    "environment": "/models/levels/observatory-environment.glb",
+    "heightmap": "/terrain/heightmaps/observatory-environment_heightmap.png",
+    "chunksPath": "/terrain/levels/observatory-environment/",
+    "sourceGlb": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb"
+  },
+  "spawn": {
+    "position": [
+      -137.2,
+      20,
+      -49.5
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  "physics": {
+    "type": "baked-terrain-mesh",
+    "worldSize": 393.5526885986328,
+    "gridX": 4,
+    "gridY": 4,
+    "chunkSize": 98.3881721496582,
+    "minHeight": -1.8438290357589722,
+    "maxHeight": 56.307861328125,
+    "bounds": {
+      "min": [
+        -196.7517120361328,
+        -1.8438290357589722,
+        -194.6022491455078
+      ],
+      "max": [
+        196.8009765625,
+        56.307861328125,
+        194.5846710205078
+      ]
+    }
+  },
+  "lighting": {
+    "ambientIntensity": 0.3,
+    "directionalLights": [
+      {
+        "position": [
+          100,
+          200,
+          100
+        ],
+        "color": 16777215,
+        "intensity": 1
+      }
+    ]
+  },
+  "optimization": {
+    "terrainSegments": {
+      "ultra_low": {
+        "width": 16,
+        "height": 16
+      },
+      "low": {
+        "width": 24,
+        "height": 24
+      },
+      "medium": {
+        "width": 32,
+        "height": 32
+      },
+      "high": {
+        "width": 48,
+        "height": 48
+      },
+      "ultra": {
+        "width": 96,
+        "height": 96
+      }
+    }
+  },
+  "style": {
+    "preset": "ghibli",
+    "enabled": false,
+    "colorGrading": {
+      "saturation": 1.2,
+      "contrast": 1.1,
+      "brightness": 1,
+      "warmth": 1.05
+    },
+    "fog": {
+      "enabled": true,
+      "density": 0.002,
+      "color": "#87CEEB"
+    },
+    "bloom": {
+      "enabled": true,
+      "intensity": 0.3,
+      "threshold": 0.9
+    }
+  },
+  "features": {
+    "vegetation": true,
+    "fireflies": true,
+    "starMap": true,
+    "conversations": true,
+    "styles": true
+  },
+  "collision": {
+    "terrain": {
+      "type": "baked-terrain-mesh",
+      "sourceLinked": true,
+      "url": "/terrain/collision/observatory-environment.collider.bin",
+      "metadataUrl": "/terrain/collision/observatory-environment.collider.meta.json",
+      "triangleCount": 24642,
+      "vertexCount": 12544,
+      "byteSize": 446264,
+      "bakeMode": "editor-walkable-surface",
+      "preset": "desktop",
+      "targetTriangles": 25000,
+      "maxBytes": 6291456,
+      "bakeSettings": {
+        "preset": "desktop",
+        "targetTriangles": 25000,
+        "maxBytes": 6291456
+      },
+      "colliderResolution": 24642,
+      "sampleStep": 23,
+      "bounds": {
+        "min": [
+          -199.5517120361328,
+          -1.5331727266311646,
+          -195.1022491455078
+        ],
+        "max": [
+          194.0009765625,
+          56.307861328125,
+          194.0846710205078
+        ]
+      },
+      "center": [
+        -2.7753677368164062,
+        27.387344300746918,
+        -0.5087890625
+      ],
+      "sourceContract": {
+        "schemaVersion": 1,
+        "terrainSourceType": "glb-chunk-terrain",
+        "runtimeMode": "editor-baked-terrain",
+        "sourceAssetUrl": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
+        "sourceAssetUrls": [
+          "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb"
+        ],
+        "authoredSourceAssetUrls": [
+          "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb"
+        ],
+        "sourceAssetFingerprint": {
+          "algorithm": "sha256",
+          "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
+        },
+        "sourceAssetFingerprints": [
+          {
+            "url": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
+            "fingerprint": {
+              "algorithm": "sha256",
+              "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
+            }
+          }
+        ],
+        "sourceCoordinateSystem": "three-y-up-xz-ground",
+        "sourceBounds": {
+          "min": [
+            -199.5517120361328,
+            -1.8438290357589722,
+            -195.1022491455078
+          ],
+          "max": [
+            194.0009765625,
+            56.307861328125,
+            194.0846710205078
+          ]
+        },
+        "renderBakeMode": "source-glb-chunk-mesh",
+        "collisionBakeMode": "editor-walkable-surface",
+        "collisionMeshSource": {
+          "type": "editor-walkable-surface",
+          "url": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
+          "fingerprint": {
+            "algorithm": "sha256",
+            "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
+          },
+          "surface": {
+            "algorithm": "editor-walkable-grid",
+            "resolution": 112,
+            "sourceTriangleCount": 563976,
+            "outputTriangleCount": 24642
+          }
+        },
+        "collisionCoverageBounds": {
+          "min": [
+            -199.5517120361328,
+            -1.5331727266311646,
+            -195.1022491455078
+          ],
+          "max": [
+            194.0009765625,
+            56.307861328125,
+            194.0846710205078
+          ]
+        },
+        "role": "walkable",
+        "sourceVertexCount": 721624,
+        "sourceTriangleCount": 563976,
+        "vertexCount": 12544,
+        "triangleCount": 24642,
+        "byteSize": 446264,
+        "targetTriangles": 25000,
+        "maxBytes": 6291456
+      }
+    }
+  },
+  "visualChunks": {
+    "generatedAt": "2026-05-20T04:23:01.399Z",
+    "generatedBy": "cook-terrain-glb-chunks",
+    "chunkCount": 16,
+    "sourceContract": {
+      "schemaVersion": 1,
+      "terrainSourceType": "glb-chunk-terrain",
+      "sourceAssetUrl": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
+      "sourceAssetUrls": [
+        "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb"
+      ],
+      "authoredSourceAssetUrls": [
+        "/models/levels/observatory-environment.glb"
+      ],
+      "sourceAssetFingerprint": {
+        "algorithm": "sha256",
+        "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
+      },
+      "sourceAssetFingerprints": [
+        {
+          "url": "/models/levels/observatory-environment.glb",
+          "fingerprint": {
+            "algorithm": "sha256",
+            "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
+          }
+        }
+      ],
+      "heightmapUrl": "/terrain/heightmaps/observatory-environment_heightmap.png",
+      "heightmapFingerprint": {
+        "algorithm": "sha256",
+        "value": "9940d42617657bb0ed767695abc55f424a688dee1b4e6005a84eaa8e63c89f6f"
+      },
+      "sourceCoordinateSystem": "three-y-up-xz-ground",
+      "sourceBounds": {
+        "min": [
+          -199.5517120361328,
+          -1.8438290357589722,
+          -195.1022491455078
+        ],
+        "max": [
+          194.0009765625,
+          56.307861328125,
+          194.0846710205078
+        ]
+      },
+      "renderBakeMode": "source-glb-chunk-mesh",
+      "collisionBakeMode": "editor-walkable-surface",
+      "collisionMeshSource": {
+        "type": "editor-walkable-surface",
+        "url": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
+        "fingerprint": {
+          "algorithm": "sha256",
+          "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
+        },
+        "surface": {
+          "algorithm": "editor-walkable-grid",
+          "resolution": 112,
+          "sourceTriangleCount": 563976,
+          "outputTriangleCount": 24642
+        }
+      },
+      "runtimeMode": "editor-baked-terrain"
+    },
+    "activation": {
+      "maxActiveChunksByTier": {
+        "ultra_low": 4,
+        "low": 6,
+        "medium": 8,
+        "high": 9,
+        "ultra": 12
+      }
+    },
+    "lods": [
+      {
+        "level": 0,
+        "distance": 787.1053771972656
+      }
+    ],
+    "runtimeMode": "glb-chunk-terrain",
+    "visualSource": "source-glb-chunks",
+    "source": "source-glb",
+    "preservesSourceUvs": true,
+    "preservesSourceMaterialSlots": true,
+    "preservesSourceNormals": true,
+    "preservesSourceTangents": false,
+    "preservesSourceMeshGroups": true,
+    "preservesTextureReferences": true,
+    "pbrRepair": {
+      "tool": "gltfGeneratedPbrRepair",
+      "repairedChunkCount": 0,
+      "addedNormalPrimitiveCount": 0,
+      "skippedNormalPrimitiveCount": 0,
+      "repairedImplicitMetallicMaterialCount": 0
+    },
+    "product": {
+      "type": "glb-chunk-terrain",
+      "visualSource": "source-glb-chunks",
+      "chunksPath": "/terrain/levels/observatory-environment/",
+      "chunkCount": 16,
+      "lods": [
+        0
+      ],
+      "generatedAt": "2026-05-20T04:23:01.399Z",
+      "generatedBy": "cook-terrain-glb-chunks",
+      "sourceAssetUrl": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
+      "sourceHash": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9",
+      "textureReferenceCount": 2,
+      "preservesSourceUvs": true,
+      "preservesSourceMaterialSlots": true,
+      "preservesSourceNormals": true,
+      "preservesSourceTangents": false,
+      "preservesSourceMeshGroups": true,
+      "textureReferencesPreserved": true,
+      "pbrRepair": {
+        "tool": "gltfGeneratedPbrRepair",
+        "repairedChunkCount": 0,
+        "addedNormalPrimitiveCount": 0,
+        "skippedNormalPrimitiveCount": 0,
+        "repairedImplicitMetallicMaterialCount": 0
+      }
+    },
+    "chunks": [
+      {
+        "x": 0,
+        "z": 0,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_0_0_LOD0.glb",
+        "bounds": {
+          "min": [
+            -196.7517120361328,
+            -1.8438290357589722,
+            -194.6022491455078
+          ],
+          "max": [
+            -97.66653442382812,
+            56.307861328125,
+            -96.81147766113281
+          ]
+        },
+        "byteSize": 1898288,
+        "triangleCount": 4083,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 0,
+        "z": 1,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_0_1_LOD0.glb",
+        "bounds": {
+          "min": [
+            -196.7517120361328,
+            -1.8438290357589722,
+            -97.93818664550781
+          ],
+          "max": [
+            -97.80085754394531,
+            56.307861328125,
+            0.713060736656189
+          ]
+        },
+        "byteSize": 3525248,
+        "triangleCount": 39100,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 0,
+        "z": 2,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_0_2_LOD0.glb",
+        "bounds": {
+          "min": [
+            -199.5517120361328,
+            -1.8438290357589722,
+            -0.6493792533874512
+          ],
+          "max": [
+            -97.932373046875,
+            56.307861328125,
+            97.8233642578125
+          ]
+        },
+        "byteSize": 4728388,
+        "triangleCount": 58706,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 0,
+        "z": 3,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_0_3_LOD0.glb",
+        "bounds": {
+          "min": [
+            -196.7517120361328,
+            -1.8438290357589722,
+            96.77996063232422
+          ],
+          "max": [
+            -96.22724151611328,
+            56.307861328125,
+            194.5846710205078
+          ]
+        },
+        "byteSize": 2554824,
+        "triangleCount": 15765,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 1,
+        "z": 0,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_1_0_LOD0.glb",
+        "bounds": {
+          "min": [
+            -99.30606842041016,
+            -1.8438290357589722,
+            -195.1022491455078
+          ],
+          "max": [
+            1.104590892791748,
+            56.307861328125,
+            -96.63421630859375
+          ]
+        },
+        "byteSize": 2893012,
+        "triangleCount": 23582,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 1,
+        "z": 1,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_1_1_LOD0.glb",
+        "bounds": {
+          "min": [
+            -98.87583923339844,
+            -1.8438290357589722,
+            -98.21732330322266
+          ],
+          "max": [
+            0.7406339645385742,
+            56.307861328125,
+            0.4920962452888489
+          ]
+        },
+        "byteSize": 5127172,
+        "triangleCount": 62943,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 1,
+        "z": 2,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_1_2_LOD0.glb",
+        "bounds": {
+          "min": [
+            -98.76800537109375,
+            -1.8438290357589722,
+            -0.5646146535873413
+          ],
+          "max": [
+            0.5604804754257202,
+            56.307861328125,
+            97.72954559326172
+          ]
+        },
+        "byteSize": 5522200,
+        "triangleCount": 69054,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 1,
+        "z": 3,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_1_3_LOD0.glb",
+        "bounds": {
+          "min": [
+            -100.30142211914062,
+            -1.8438290357589722,
+            96.88443756103516
+          ],
+          "max": [
+            0.6640927791595459,
+            56.307861328125,
+            194.5846710205078
+          ]
+        },
+        "byteSize": 4494860,
+        "triangleCount": 51125,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 2,
+        "z": 0,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_2_0_LOD0.glb",
+        "bounds": {
+          "min": [
+            -0.7327322959899902,
+            -1.8438290357589722,
+            -194.6022491455078
+          ],
+          "max": [
+            98.96601867675781,
+            56.307861328125,
+            -96.7713623046875
+          ]
+        },
+        "byteSize": 3288036,
+        "triangleCount": 32482,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 2,
+        "z": 1,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_2_1_LOD0.glb",
+        "bounds": {
+          "min": [
+            -0.9132544994354248,
+            -1.8438290357589722,
+            -97.83734130859375
+          ],
+          "max": [
+            99.21934509277344,
+            56.307861328125,
+            0.3801000416278839
+          ]
+        },
+        "byteSize": 5010252,
+        "triangleCount": 60666,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 2,
+        "z": 2,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_2_2_LOD0.glb",
+        "bounds": {
+          "min": [
+            -0.4950012266635895,
+            -1.8438290357589722,
+            -0.415820837020874
+          ],
+          "max": [
+            99.4327392578125,
+            56.307861328125,
+            97.70820617675781
+          ]
+        },
+        "byteSize": 4951164,
+        "triangleCount": 59348,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 2,
+        "z": 3,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_2_3_LOD0.glb",
+        "bounds": {
+          "min": [
+            -0.5625898838043213,
+            -1.8438290357589722,
+            96.73075866699219
+          ],
+          "max": [
+            98.81413269042969,
+            56.307861328125,
+            194.5846710205078
+          ]
+        },
+        "byteSize": 3052520,
+        "triangleCount": 24805,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 3,
+        "z": 0,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_3_0_LOD0.glb",
+        "bounds": {
+          "min": [
+            97.83760070800781,
+            -1.8438290357589722,
+            -194.6022491455078
+          ],
+          "max": [
+            196.8009765625,
+            56.307861328125,
+            -95.53377532958984
+          ]
+        },
+        "byteSize": 2361056,
+        "triangleCount": 14527,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 3,
+        "z": 1,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_3_1_LOD0.glb",
+        "bounds": {
+          "min": [
+            97.73393249511719,
+            -1.8438290357589722,
+            -99.63448333740234
+          ],
+          "max": [
+            196.8009765625,
+            56.307861328125,
+            0.2450827956199646
+          ]
+        },
+        "byteSize": 3628176,
+        "triangleCount": 37014,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 3,
+        "z": 2,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_3_2_LOD0.glb",
+        "bounds": {
+          "min": [
+            97.5925521850586,
+            -1.8438290357589722,
+            -0.3953210413455963
+          ],
+          "max": [
+            196.8009765625,
+            56.307861328125,
+            97.79862213134766
+          ]
+        },
+        "byteSize": 2194164,
+        "triangleCount": 9140,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      },
+      {
+        "x": 3,
+        "z": 3,
+        "lod": 0,
+        "url": "/terrain/levels/observatory-environment/chunk_3_3_LOD0.glb",
+        "bounds": {
+          "min": [
+            98.00083923339844,
+            -1.8438290357589722,
+            96.79331970214844
+          ],
+          "max": [
+            196.8009765625,
+            56.307861328125,
+            194.5846710205078
+          ]
+        },
+        "byteSize": 1781196,
+        "triangleCount": 1636,
+        "materialSlots": [
+          {
+            "index": 0,
+            "name": "Material_0.001"
+          }
+        ]
+      }
+    ],
+    "warnings": [
+      "LOD generation not configured; emitted LOD0 only."
+    ]
+  },
+  "source": {
+    "assetUrl": "/models/levels/observatory/observatory-environment-2026-05-20T03-59-49-020Z.glb",
+    "assetHash": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9",
+    "assetFingerprint": {
+      "algorithm": "sha256",
+      "value": "914306b3eab4dd07619d0f086fda03aef1a45b7faeb5161e1b3472990e3e16f9"
+    },
+    "assetByteSize": 31548740,
+    "provenance": {
+      "restoredFrom": ".linked-worktrees/fix-travel-date-v1/MEGAMEAL/public/models/levels/observatory-environment.glb",
+      "restoredAt": "2026-05-13T17:29:30.399Z"
+    }
+  }
+}

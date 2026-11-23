@@ -1,0 +1,36 @@
+---
+import ArchivePanel from '@components/ArchivePanel.astro'
+import MainGridLayout from '@layouts/MainGridLayout.astro'
+import {
+  formatArchiveTaxonomyLabel,
+  getArchiveTags,
+} from '@utils/archiveTaxonomy'
+
+export async function getStaticPaths() {
+  return getArchiveTags().map(tag => ({
+    params: {
+      tag,
+    },
+  }))
+}
+
+const tag = decodeURIComponent(Astro.params.tag as string).toLowerCase()
+const tagLabel = formatArchiveTaxonomyLabel(tag)
+const title = `Tag: ${tagLabel}`
+const description = `Archive entries tagged ${tagLabel} in the MEGA MEAL SAGA.`
+const archiveLayoutPost = {
+  data: {
+    bannerType: 'none',
+    showToc: false,
+  },
+}
+---
+
+<MainGridLayout
+  title={title}
+  description={description}
+  post={archiveLayoutPost}
+>
+    <h1 class="sr-only">{title}</h1>
+    <ArchivePanel tags={[tag]}></ArchivePanel>
+</MainGridLayout>

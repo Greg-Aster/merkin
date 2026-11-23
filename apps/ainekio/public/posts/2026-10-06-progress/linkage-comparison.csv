@@ -1,0 +1,6 @@
+dimension,unit,shared_model_13fc3e4,offline_candidate_20261005,delta,qualification
+carrier,mm,40,35,-5,Model dimensions; revised physical assembly not tested
+crank,mm,24,20,-4,Model dimensions; revised physical assembly not tested
+pickup_radius,mm,24,28,4,Model dimensions; revised physical assembly not tested
+connecting_rod,mm,38,38,0,Model dimensions; not a measurement of installed rods
+distal_leg,mm,55,55,0,Model dimensions; revised physical assembly not tested

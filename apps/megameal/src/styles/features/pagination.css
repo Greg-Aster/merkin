@@ -1,0 +1,6 @@
+.pagination-btn,
+.pagination-page,
+.pagination-current {
+  min-width: 44px;
+  text-align: center;
+}

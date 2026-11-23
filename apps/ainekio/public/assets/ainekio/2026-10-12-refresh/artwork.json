@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-12",
+  "tool": "Blender Cycles",
+  "blender": {
+    "scene": "Wireless",
+    "source": "ainekio-variable-gait-Recovery.blend",
+    "capture": "Evaluated meshes from Wireless, rendered in an isolated scene at neutral stance. Existing center shell included. Working model, pose and visibility preserved."
+  },
+  "captures": [
+    {
+      "file": "blender-front.webp",
+      "width": 1600,
+      "height": 1100,
+      "sha256": "a9af36c5fc50f2a4a951bcfed36de29b512c0bd6cc23989122d1b5b34743d821"
+    },
+    {
+      "file": "blender-rear.webp",
+      "width": 1600,
+      "height": 1100,
+      "sha256": "bd70f7efe0a12477e88187d6776ed3da16c8cbb14afbfa670cd9fe9eeafc836b"
+    },
+    {
+      "file": "blender-side.webp",
+      "width": 1600,
+      "height": 1100,
+      "sha256": "bd58d54532701fcc7db851ed0657a84b4df3e33782f9a1c9711952b1d225030e"
+    },
+    {
+      "file": "blender-top.webp",
+      "width": 1600,
+      "height": 1100,
+      "sha256": "0b5588443e75d7d9eaafbb8f67ea7a87f7628797a892512c90370070689049b7"
+    }
+  ],
+  "renders": [
+    {
+      "file": "render-front.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "e67532f7b7293d663c626144bc99dae26a434456e8b98c2cc2d540348ddb8394",
+      "view": "hero"
+    },
+    {
+      "file": "render-overview.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "ef2e5384d6065f7e4ee4f169c4e9360f3f698e06a4e72408b57f2b6ded629946",
+      "view": "overview"
+    },
+    {
+      "file": "render-rear.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "fde63915c96215d313a8bd52cabce799e2bcea6b91111c75947c7d0447dd0c23",
+      "view": "rear"
+    },
+    {
+      "file": "render-shell.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "80e88136dd680d73d484c540fc74781d1d1693d586db812482c542d3f08dee2e",
+      "view": "shell"
+    }
+  ]
+}

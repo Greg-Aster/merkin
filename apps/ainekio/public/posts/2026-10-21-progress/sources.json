@@ -1,0 +1,289 @@
+{
+  "observed": "2026-10-21",
+  "previousWebsiteCommit": "307f39a37518428488d1fcd79ebe4bfd4a250785",
+  "scope": "Local source and maintained dated qualification records, including unpublished working-tree changes. Installation and physical results are attributed to their dated records, not new tests by the website task.",
+  "repositoryHeads": {
+    "Ainekio": "f1e130f8ae22e07bcca82b461a7e20246b39b2d3",
+    "metahuman": "6133ec1d19f670ccb9f8f3c9310998b6ec85b5b0"
+  },
+  "sources": [
+    {
+      "repository": "Ainekio",
+      "path": "docs/v2-12servo/GAIT_RESEARCH_JOURNAL.md",
+      "sha256": "e49517853ca913f8477de469de7e11a091186845c15e42aaa2060703d3b720be",
+      "bytes": 587254,
+      "workingTreeStatus": "M docs/v2-12servo/GAIT_RESEARCH_JOURNAL.md"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "docs/v2-12servo/LCD_FACE.md",
+      "sha256": "b2375622e5cd5d348d87eec9c9ef41f533c39d577367f1bc21d1d8d7bca05247",
+      "bytes": 23367,
+      "workingTreeStatus": "M docs/v2-12servo/LCD_FACE.md"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/README.md",
+      "sha256": "3a1577a791677fe1042c18de69c361af0c82eae8147d3aeae8db8994f80cec86",
+      "bytes": 120661,
+      "workingTreeStatus": "M Master/gateway/README.md"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/gait_learning_service.py",
+      "sha256": "fa6eccbb3ac28551893966aed4ef0b4ad0e06c6ff5bb0f7157f9dd144af6eab4",
+      "bytes": 40921,
+      "workingTreeStatus": "?? Master/gateway/gait_learning_service.py"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/gait_optimizer.py",
+      "sha256": "bdd38cf06e71ee6673c44eedf566163de65f88720f49f551a2d17366ccb373ad",
+      "bytes": 15094,
+      "workingTreeStatus": "?? Master/gateway/gait_optimizer.py"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/depth_motion.py",
+      "sha256": "18a7f017cb4632e4af2c9ca973b2d14f18dd8a26912ce1be968e0bea4b7080d4",
+      "bytes": 3617,
+      "workingTreeStatus": "?? Master/gateway/depth_motion.py"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/body_events.py",
+      "sha256": "9b3d2cb28ac7297e84b5ef492c437edad627b39dd0765498529fb8d28e5fbd6c",
+      "bytes": 9166,
+      "workingTreeStatus": "M Master/gateway/body_events.py"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/main/body.c",
+      "sha256": "50d3ae1e3b481bc8da07ad6f0bea76d7e8462f95fe53ae236a160867d1bae421",
+      "bytes": 81457,
+      "workingTreeStatus": "M Slave/firmware/esp32p4-wifi6/main/body.c"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/main/controller.c",
+      "sha256": "2b0fe19e31516c0e03b74bd07a28bc0354b79e304f4c10ffd63f3be003508787",
+      "bytes": 79793,
+      "workingTreeStatus": "M Slave/firmware/esp32p4-wifi6/main/controller.c"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/main/servo_feedback.c",
+      "sha256": "e38490c606e187a08a0f90617003de71b018efc3b2e7be3e7330861233f48dcb",
+      "bytes": 20196,
+      "workingTreeStatus": "M Slave/firmware/esp32p4-wifi6/main/servo_feedback.c"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/CMakeLists.txt",
+      "sha256": "772518091045b7b26b53c3188b72f2613e3978bc3fb7db4f448a7eb8f8a69fe4",
+      "bytes": 2212,
+      "workingTreeStatus": "M Slave/firmware/esp32p4-wifi6/CMakeLists.txt"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/software/models/v2-12servo/motions/gestures/README.md",
+      "sha256": "397a1a592e8cdbc0d2886fedae2cc360c8ffc8a41623971dddce0d38c6a2a157",
+      "bytes": 7986,
+      "workingTreeStatus": "M Slave/software/models/v2-12servo/motions/gestures/README.md"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/software/faces/face.c",
+      "sha256": "bcae1cb554f3339c8fbdf430b5eb7e2b2bac5c827a755df08210247974655d38",
+      "bytes": 15030,
+      "workingTreeStatus": "M Slave/software/faces/face.c"
+    },
+    {
+      "repository": "metahuman",
+      "path": "docs/robot/ROBOT_BIBLE.md",
+      "sha256": "8645ed219ee470af42a8095ff19c5061a81a38d27887e58afe009bfeb9e55e07",
+      "bytes": 305202,
+      "workingTreeStatus": "M docs/robot/ROBOT_BIBLE.md"
+    },
+    {
+      "repository": "metahuman",
+      "path": "docs/investigations/robot-status-workflow-scratchpad.md",
+      "sha256": "37c9d977d11cbb5af779c0c63c77639aeb20ba0382eb6e192c9d222c6d825916",
+      "bytes": 126979,
+      "workingTreeStatus": "M docs/investigations/robot-status-workflow-scratchpad.md"
+    },
+    {
+      "repository": "metahuman",
+      "path": "etc/cognitive-graphs/fast-body-event-mode.json",
+      "sha256": "cedbb15c18474f3d614c18012d9c4b58a8407fc94ef5c38bef951c759405baad",
+      "bytes": 10098,
+      "workingTreeStatus": "?? etc/cognitive-graphs/fast-body-event-mode.json"
+    },
+    {
+      "repository": "metahuman",
+      "path": "packages/core/src/environment-interface/body-events.ts",
+      "sha256": "e4aad86ef8fea4aacf8287f6771d483ed556adf3239969a8335f57986da37f10",
+      "bytes": 515,
+      "workingTreeStatus": "?? packages/core/src/environment-interface/body-events.ts"
+    },
+    {
+      "repository": "metahuman",
+      "path": "brain/agents/active-operator/index.ts",
+      "sha256": "5c47a59b94dda4636683dcd696776f660bc90bc010c8f9675eb1ffedd15cf476",
+      "bytes": 6820,
+      "workingTreeStatus": "M brain/agents/active-operator/index.ts"
+    },
+    {
+      "repository": "metahuman",
+      "path": "brain/agents/environment-bridge/core.ts",
+      "sha256": "723493b68a95aa8abe0133bc604e84d9f9292ab69b27aeda1d35df68b86f930f",
+      "bytes": 47374,
+      "workingTreeStatus": "M brain/agents/environment-bridge/core.ts"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/software/models/v2-12servo/clip.c",
+      "sha256": "1ff5649b20918ca31027e09430984c6cafe765344c458a400353b4469128d09a",
+      "bytes": 12178,
+      "workingTreeStatus": "M Slave/software/models/v2-12servo/clip.c"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "docs/v2-12servo/face-preview/default.webp",
+      "sha256": "119735fa88475ef602bbb347f8fd5727724f0a8f82830e53b382dc2f2e3a9c18",
+      "bytes": 186524,
+      "workingTreeStatus": "M docs/v2-12servo/face-preview/default.webp"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "docs/v2-12servo/face-preview/thinking.webp",
+      "sha256": "70069c5ccd4f6129b530c5d57ce2a869fff3996b3d43c10c5a4c25460b670cf8",
+      "bytes": 435320,
+      "workingTreeStatus": "M docs/v2-12servo/face-preview/thinking.webp"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "docs/v2-12servo/face-preview/surprised.webp",
+      "sha256": "c3ca5813b71721906340d276a4e0b170f7d70e5d2398438cca3cbe3b87edb3f9",
+      "bytes": 114462,
+      "workingTreeStatus": "M docs/v2-12servo/face-preview/surprised.webp"
+    }
+  ],
+  "prototypeExports": [
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/bezel/Ainekio-Motion-Working-MASK  Recessed LCD bezel.stl",
+      "sha256": "0d71ad5d20b42a1e7d850637b9a0e88c321ed78e84732437964e980534af8e1e",
+      "bytes": 597784
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/carapace rear /Ainekio-Motion-Working-CARAPACE  Compact arch - Left.stl",
+      "sha256": "f1d6b182bc0d925ed551468df2690460fedfaeb8f66cc617d987a4da32c9e05d",
+      "bytes": 73384
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/carapace rear /Ainekio-Motion-Working-CARAPACE  Compact arch - Right.stl",
+      "sha256": "6da5304d49867b31e183e901bc3674fab1f94301cbf3c770fabc7b22952cde58",
+      "bytes": 88584
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/cheek fang/Ainekio-Motion-Working-Cheek.Fang.L.001.stl",
+      "sha256": "487ef95554673e6540079f6d84b90a9f9c185a9afcfcb3017c42dcda39456b93",
+      "bytes": 77884
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/cheek fang/Ainekio-Motion-Working-Cheek.Fang.R.001.stl",
+      "sha256": "80a9133cae35252352846ffe4c1f0ddcfce932cb9d4d48f4335923b902451109",
+      "bytes": 71384
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/chin/Ainekio-Motion-Working-Chin.L - separate spacer.stl",
+      "sha256": "a0ee66063afe192d002eb2cae37ff8b18e0aa069db3e3c402b6a43719df267c4",
+      "bytes": 38484
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/chin/Ainekio-Motion-Working-Chin.L.001.stl",
+      "sha256": "a1a9b30a27658eeee43df69af97f2d1929bf325fd9ebb8b17e99d500ebbb8cc0",
+      "bytes": 86784
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/chin/Ainekio-Motion-Working-Chin.R - separate spacer.stl",
+      "sha256": "19c7cf25fae26f8bff11c8e06e1a57217f853094f3f9f9ff1b2f83e6f12b04b5",
+      "bytes": 38484
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/chin/Ainekio-Motion-Working-Chin.R.001.stl",
+      "sha256": "181d8fdec30b22d50e9e6b577d96cde9984981ee30bfb043944d6a65d907dd52",
+      "bytes": 84284
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/chin2/Ainekio-Motion-Working-Chin.L.001.stl",
+      "sha256": "898e0243f91c301130a2995d4ac67ba9b6486ae8f5c1bc6d5fdc6a1d13f4811d",
+      "bytes": 123384
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/chin2/Ainekio-Motion-Working-Chin.R.001.stl",
+      "sha256": "3350c34b0eb5133eb59abd38f6a051c42d39583e91538346804f61e5650ee211",
+      "bytes": 128084
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/helmet pices/Ainekio-Motion-Working-CARAPACE  Rear helmet - Center.stl",
+      "sha256": "a27fe3067c05096a558f386542f89b59f8ad87cddfa6b6e1203adafa0ef49525",
+      "bytes": 199284
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/helmet pices/Ainekio-Motion-Working-CARAPACE  Rear helmet - Left.stl",
+      "sha256": "37a4077f52b96f2e6699f4a8daa294f4cd7d06a31fbf2e81711815517eef2e59",
+      "bytes": 227684
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/helmet pices/Ainekio-Motion-Working-CARAPACE  Rear helmet - Right.stl",
+      "sha256": "2bcbc94e177f245be543f28a9ceba3c4b2f55dc00a49b9640e91548dbc73cc5f",
+      "bytes": 205584
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/helmet pices/Ainekio-Motion-Working-MASK  Upper visor - joined brow and crown.stl",
+      "sha256": "a89eaf1c02e0bffc93820151755eaf572e45cf6f4bd790a871b38fe5a02229c9",
+      "bytes": 515384
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/side guard/Ainekio-Motion-Working-Side.Guard.L.001.stl",
+      "sha256": "e949502f109943026261f34bf4887056a75b1aef73541e7806c4eb639aa8fba9",
+      "bytes": 687884
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/side guard/Ainekio-Motion-Working-Side.Guard.R.002.stl",
+      "sha256": "1197cb6dca6d78409b329612dba160609db19c5aa97199fce70e870997a7f922",
+      "bytes": 429584
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/side protector/Ainekio-Motion-Working-Carapace - Left Side Protector.001.stl",
+      "sha256": "d881813afd00734cb7083ff514822c995a3e0aaadd20c1d591695e50193378cf",
+      "bytes": 87284
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/side protector/Ainekio-Motion-Working-Carapace - Left Side Protector.stl",
+      "sha256": "3a6a8436e2818dfbfd10c6855680fcbdf7aecea3e962299c6b2f9cc95cd5963d",
+      "bytes": 87284
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/side protector/Ainekio-Motion-Working-Carapace - Right Side Protector.001.stl",
+      "sha256": "f7e8f5a30ab18fb9e053334343193fb27526469644c80f4db570857861f14e8e",
+      "bytes": 87284
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/side protector/Ainekio-Motion-Working-Carapace - Right Side Protector.stl",
+      "sha256": "2ad2e1ea07fecf96179c3b66b40db217df7551465fd4185196fc8b05902e8c37",
+      "bytes": 87284
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/temple/Ainekio-Motion-Working-Temple.L.001.stl",
+      "sha256": "e6797e5388a94c274d16fbc35873f63e9b68aef1604878a514d695d95ab04b39",
+      "bytes": 17884
+    },
+    {
+      "path": "Slave/hardware/v2-12servo/STL/Red/temple/Ainekio-Motion-Working-Temple.R.001.stl",
+      "sha256": "5eeded69d2c7b5c618d5b09e1b360de3ade9b22f638d4db6df193f73bf422d0e",
+      "bytes": 17784
+    }
+  ]
+}

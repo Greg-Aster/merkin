@@ -1,0 +1,10 @@
+#cookbook-reader[data-recipe-mode='original'] [data-recipe-mode='terrestrial'],
+#cookbook-reader[data-recipe-mode='terrestrial'] [data-recipe-mode='original'] {
+  display: none;
+}
+
+[data-recipe-download-mode][aria-current='true'] .card-base {
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, var(--primary) 58%, transparent),
+    inset 0 0 10px color-mix(in srgb, var(--primary) 28%, transparent);
+}

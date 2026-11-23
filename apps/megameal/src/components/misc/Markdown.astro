@@ -1,0 +1,13 @@
+---
+import SharedMarkdown from '@merkin/blog-core/components/misc/Markdown.astro'
+
+interface Props {
+  class?: string
+}
+
+const className = Astro.props.class ?? ''
+---
+
+<SharedMarkdown class={className}>
+  <slot />
+</SharedMarkdown>

@@ -1,0 +1,41 @@
+name: Mirror to GitLab
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "*"
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    name: Push refs to GitLab
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate mirror token
+        run: |
+          if [ -z "${{ secrets.GITLAB_TOKEN }}" ]; then
+            echo "Missing required secret: GITLAB_TOKEN"
+            exit 1
+          fi
+
+      - name: Mirror branches and tags to GitLab
+        run: |
+          TARGET_PATH="${{ vars.GITLAB_MIRROR_PROJECT_PATH || 'Greg.Aster/merkin' }}"
+          git remote add gitlab-mirror "https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/${TARGET_PATH}.git"
+
+          # Fetch all GitHub branches so --prune doesn't delete GitLab-side branches
+          # that simply weren't checked out locally.
+          git fetch --all
+
+          # Keep GitLab as a mirror of GitHub refs.
+          git push --force gitlab-mirror "refs/heads/*:refs/heads/*"
+          git push --force gitlab-mirror "refs/tags/*:refs/tags/*"

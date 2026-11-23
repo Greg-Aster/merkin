@@ -1,0 +1,184 @@
+{
+  "review_date": "2026-10-14",
+  "evidence": "Actual llama.cpp Q4 model evaluation; no physical commands dispatched. Correlated synthetic cases are not real-world success rates.",
+  "production": "Retained October 13 Task refinement adapter. Neither candidate deployed at review.",
+  "baseline_reuse": "Second run reused baseline outputs only for verified unchanged records and serving artifacts; new cases ran on the existing adapter. Do not infer controlled latency gains.",
+  "runs": [
+    {
+      "run": "speech-action-boundary-20261014-r2",
+      "metrics": {
+        "current-evaluation": {
+          "total": 1029,
+          "coreValid": {
+            "count": 1026,
+            "rate": 0.9970845481049563
+          },
+          "exactRouting": {
+            "count": 533,
+            "rate": 0.5179786200194364
+          },
+          "acceptableRouting": {
+            "count": 490,
+            "rate": 0.47619047619047616
+          },
+          "missedPhysicalActions": 13,
+          "unsafeActionAuthorityErrors": 101,
+          "wrongPhysicalActions": 195,
+          "falseCompletions": 0,
+          "unnecessaryCaptures": 63
+        },
+        "candidate-evaluation": {
+          "total": 1029,
+          "coreValid": {
+            "count": 1028,
+            "rate": 0.9990281827016521
+          },
+          "exactRouting": {
+            "count": 939,
+            "rate": 0.9125364431486881
+          },
+          "acceptableRouting": {
+            "count": 874,
+            "rate": 0.8493683187560739
+          },
+          "missedPhysicalActions": 7,
+          "unsafeActionAuthorityErrors": 15,
+          "wrongPhysicalActions": 51,
+          "falseCompletions": 0,
+          "unnecessaryCaptures": 14
+        },
+        "current-regression": {
+          "total": 141,
+          "coreValid": {
+            "count": 139,
+            "rate": 0.9858156028368794
+          },
+          "exactRouting": {
+            "count": 83,
+            "rate": 0.5886524822695035
+          },
+          "acceptableRouting": {
+            "count": 82,
+            "rate": 0.5815602836879432
+          },
+          "missedPhysicalActions": 0,
+          "unsafeActionAuthorityErrors": 7,
+          "wrongPhysicalActions": 18,
+          "falseCompletions": 0,
+          "unnecessaryCaptures": 6
+        },
+        "candidate-regression": {
+          "total": 141,
+          "coreValid": {
+            "count": 141,
+            "rate": 1
+          },
+          "exactRouting": {
+            "count": 103,
+            "rate": 0.7304964539007093
+          },
+          "acceptableRouting": {
+            "count": 99,
+            "rate": 0.7021276595744681
+          },
+          "missedPhysicalActions": 1,
+          "unsafeActionAuthorityErrors": 1,
+          "wrongPhysicalActions": 20,
+          "falseCompletions": 0,
+          "unnecessaryCaptures": 0
+        }
+      },
+      "historical_no_worse": false,
+      "private_exact_checks_passed": false,
+      "deployed": false
+    },
+    {
+      "run": "quoted-imperative-20261014",
+      "metrics": {
+        "current-evaluation": {
+          "total": 1221,
+          "coreValid": {
+            "count": 1217,
+            "rate": 0.9967239967239967
+          },
+          "exactRouting": {
+            "count": 581,
+            "rate": 0.47583947583947583
+          },
+          "acceptableRouting": {
+            "count": 533,
+            "rate": 0.43652743652743653
+          },
+          "missedPhysicalActions": 15,
+          "unsafeActionAuthorityErrors": 125,
+          "wrongPhysicalActions": 313,
+          "falseCompletions": 0,
+          "unnecessaryCaptures": 63
+        },
+        "candidate-evaluation": {
+          "total": 1221,
+          "coreValid": {
+            "count": 1219,
+            "rate": 0.9983619983619983
+          },
+          "exactRouting": {
+            "count": 1011,
+            "rate": 0.828009828009828
+          },
+          "acceptableRouting": {
+            "count": 1011,
+            "rate": 0.828009828009828
+          },
+          "missedPhysicalActions": 10,
+          "unsafeActionAuthorityErrors": 50,
+          "wrongPhysicalActions": 94,
+          "falseCompletions": 0,
+          "unnecessaryCaptures": 39
+        },
+        "current-regression": {
+          "total": 141,
+          "coreValid": {
+            "count": 139,
+            "rate": 0.9858156028368794
+          },
+          "exactRouting": {
+            "count": 83,
+            "rate": 0.5886524822695035
+          },
+          "acceptableRouting": {
+            "count": 82,
+            "rate": 0.5815602836879432
+          },
+          "missedPhysicalActions": 0,
+          "unsafeActionAuthorityErrors": 7,
+          "wrongPhysicalActions": 18,
+          "falseCompletions": 0,
+          "unnecessaryCaptures": 6
+        },
+        "candidate-regression": {
+          "total": 141,
+          "coreValid": {
+            "count": 141,
+            "rate": 1
+          },
+          "exactRouting": {
+            "count": 111,
+            "rate": 0.7872340425531915
+          },
+          "acceptableRouting": {
+            "count": 110,
+            "rate": 0.7801418439716312
+          },
+          "missedPhysicalActions": 3,
+          "unsafeActionAuthorityErrors": 0,
+          "wrongPhysicalActions": 15,
+          "falseCompletions": 0,
+          "unnecessaryCaptures": 0
+        }
+      },
+      "historical_no_worse": false,
+      "private_exact_checks_passed": false,
+      "deployed": false
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "review_date": "2026-10-15",
+  "purpose": "Public summaries of current companion systems, motion controls and training diagnostics. Local source and dated recorded validation were reviewed; no new robot or model tests were performed for the website.",
+  "boundary": "Working-tree snapshots may precede published source branches. Firmware installation is distinct from physical qualification. Private conversations, raw model inputs, accounts and diagnostic packets are not redistributed.",
+  "sources": [
+    {
+      "repository": "metahuman",
+      "path": "docs/robot/ROBOT_BIBLE.md",
+      "sha256": "8bfb3e6ed6895284400021bd33441556a3f7c48bdea61ff024fbc233e70b919b"
+    },
+    {
+      "repository": "metahuman",
+      "path": "docs/investigations/robot-status-workflow-scratchpad.md",
+      "sha256": "2d99db548ae28e4dd6331a0b0cce301c94a89ec7caf6f111a1dcf8c778eb3d8e"
+    },
+    {
+      "repository": "metahuman",
+      "path": "packages/core/src/model-roles.ts",
+      "sha256": "ff6a9ffc1948a5c879d38831b88f266cffa96cddf498ad24fcf931568303a06a"
+    },
+    {
+      "repository": "metahuman",
+      "path": "packages/core/src/agency/operational-context.ts",
+      "sha256": "b7711fb5557d5243f1904fd932b2f5621b04b8c2925c71fa7a69ea2ce5860381"
+    },
+    {
+      "repository": "metahuman",
+      "path": "brain/agents/active-operator/index.ts",
+      "sha256": "ae87ca281a2296a85ccd903c290d205261f03d661a63e6d3f1bb1fac19bb6a88"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "docs/v2-12servo/GAIT_RESEARCH_JOURNAL.md",
+      "sha256": "90ff21032dcf8e2b539e6e151d68cff47c406d01896f63ad2578419968ff70f3"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Master/gateway/dashboard/static/dashboard.html",
+      "sha256": "9494e18defc65eca3acae1874c79a4e73338eebe0d22eb8eddb40afe80c6c7f6"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "Slave/firmware/esp32p4-wifi6/components/ainekio_pca9685/pca9685.c",
+      "sha256": "74d0cffa7bd0c4f8979fe16726261ed893378b453b36227755f09fe014555b69"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "docs/gait-research/run-crawl-crab-20261015/validation-summary.json",
+      "sha256": "c9dbb09315e5d3b6a75247d445a74f97cadbda2ef47af15bf7be1adeec65d5c4"
+    },
+    {
+      "repository": "Ainekio",
+      "path": "docs/gait-research/walk-stagger-20261015/straight-comparison.json",
+      "sha256": "2062cb6b2d029015d3eebacf801a82e6d7b93c4d76d1ae7a86fa5fa1d7ff0bb2"
+    },
+    {
+      "repository": "metahuman",
+      "path": "etc/cognitive-graphs/environment-mode.json",
+      "sha256": "372e0b6134833e2d32799f690f1f300290df6ad53618b93ba29880632dc14f40"
+    },
+    {
+      "repository": "metahuman",
+      "path": "packages/core/src/environment-interface/locomotion-goal.spec.ts",
+      "sha256": "3a35441c83a4d74474576b1febfefa404e867b67446c52236ce859ea00d13323"
+    },
+    {
+      "repository": "metahuman",
+      "path": "docs/technical/MAINTAINED_SURFACE.md",
+      "sha256": "a02a7718e1b51b536d8505b46d61fec9700cc34db1086820068a4f68ca07b97c"
+    },
+    {
+      "repository": "metahuman",
+      "path": "packages/core/src/environment-interface/active-task.ts",
+      "sha256": "f7734531433493c4d5e05c7365813771e9e8c0e927d06dac9b37c43174d103c7"
+    }
+  ]
+}

@@ -1,0 +1,262 @@
+{
+	"id": "prototype_arena",
+	"runtimeScene": {
+		"schemaVersion": 1,
+		"id": "prototype_arena_runtime",
+		"generatedAt": "2026-06-05T00:00:00.000Z",
+		"source": {
+			"kind": "prototype",
+			"id": "prototype_arena"
+		},
+		"readiness": {
+			"playerStableId": "player",
+			"requiredAssetIds": [
+				"mesh_arena_floor",
+				"mesh_ingredient",
+				"material_arena_floor",
+				"material_ingredient",
+				"audio_ui_collect"
+			],
+			"requiredCollisionPrefabIds": ["arena_floor"]
+		}
+	},
+	"level": {
+		"id": "prototype_arena",
+		"sceneId": "prototype_game",
+		"preloadGroups": ["prototype_arena"],
+		"resources": {
+			"game:collectedCount": 0,
+			"game:totalCollectibles": 4,
+			"game:characterBounds": {
+				"minX": -6,
+				"maxX": 6,
+				"minZ": -4,
+				"maxZ": 4
+			}
+		},
+		"preload": [
+			"mesh_arena_floor",
+			"mesh_ingredient",
+			"material_arena_floor",
+			"material_ingredient",
+			"audio_ui_collect"
+		],
+		"instances": [
+			{
+				"id": "floor",
+				"prefabId": "arena_floor",
+				"stableId": "arena:floor"
+			},
+			{
+				"id": "ingredient-north",
+				"prefabId": "ingredient_pickup",
+				"stableId": "ingredient:north",
+				"components": {
+					"Collectible": {
+						"id": "ingredient_north",
+						"label": "North Ingredient",
+						"radius": 0.85,
+						"value": 1
+					}
+				},
+				"transform": {
+					"position": [0, 0.35, -2.8]
+				}
+			},
+			{
+				"id": "ingredient-west",
+				"prefabId": "ingredient_pickup",
+				"stableId": "ingredient:west",
+				"components": {
+					"Collectible": {
+						"id": "ingredient_west",
+						"label": "West Ingredient",
+						"radius": 0.85,
+						"value": 1
+					}
+				},
+				"transform": {
+					"position": [-4, 0.35, 0]
+				}
+			},
+			{
+				"id": "ingredient-east",
+				"prefabId": "ingredient_pickup",
+				"stableId": "ingredient:east",
+				"components": {
+					"Collectible": {
+						"id": "ingredient_east",
+						"label": "East Ingredient",
+						"radius": 0.85,
+						"value": 1
+					}
+				},
+				"transform": {
+					"position": [4, 0.35, 0]
+				}
+			},
+			{
+				"id": "ingredient-south",
+				"prefabId": "ingredient_pickup",
+				"stableId": "ingredient:south",
+				"components": {
+					"Collectible": {
+						"id": "ingredient_south",
+						"label": "South Ingredient",
+						"radius": 0.85,
+						"value": 1
+					}
+				},
+				"transform": {
+					"position": [0, 0.35, 3.2]
+				}
+			}
+		]
+	},
+	"assets": {
+		"shared": [],
+		"local": [
+			{
+				"id": "mesh_arena_floor",
+				"kind": "mesh",
+				"url": "builtin://arena-floor"
+			},
+			{
+				"id": "mesh_ingredient",
+				"kind": "mesh",
+				"url": "builtin://ingredient"
+			},
+			{
+				"id": "material_arena_floor",
+				"kind": "material",
+				"url": "builtin://tile-green"
+			},
+			{
+				"id": "material_ingredient",
+				"kind": "material",
+				"url": "builtin://ingredient-gold"
+			},
+			{
+				"id": "audio_ui_collect",
+				"kind": "audio",
+				"url": "/audio/sfx/interface-click-tone.mp3",
+				"tags": ["ui", "collect", "sfx"]
+			}
+		],
+		"preloadGroups": {
+			"prototype_arena": [
+				"mesh_arena_floor",
+				"mesh_ingredient",
+				"material_arena_floor",
+				"material_ingredient",
+				"audio_ui_collect"
+			]
+		}
+	},
+	"prefabs": {
+		"local": [
+			{
+				"id": "arena_floor",
+				"assetIds": ["mesh_arena_floor", "material_arena_floor"],
+				"tags": ["world", "collision"],
+				"components": {
+					"Transform": {
+						"position": [0, -0.05, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [14, 0.1, 10]
+					},
+					"Renderable": {
+						"meshId": "mesh_arena_floor",
+						"materialId": "material_arena_floor",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "solid",
+						"channel": "world",
+						"shape": {
+							"type": "box",
+							"halfExtents": [7, 0.05, 5]
+						}
+					}
+				}
+			},
+			{
+				"id": "ingredient_pickup",
+				"assetIds": ["mesh_ingredient", "material_ingredient"],
+				"tags": ["pickup", "objective"],
+				"components": {
+					"Transform": {
+						"position": [0, 0.35, 0],
+						"rotation": [0, 0, 0, 1],
+						"scale": [0.55, 0.55, 0.55]
+					},
+					"Renderable": {
+						"meshId": "mesh_ingredient",
+						"materialId": "material_ingredient",
+						"visible": true
+					},
+					"RigidBody": {
+						"type": "fixed",
+						"mass": 0
+					},
+					"Collider": {
+						"intent": "trigger",
+						"channel": "pickup",
+						"sensor": true,
+						"shape": {
+							"type": "box",
+							"halfExtents": [0.35, 0.35, 0.35]
+						}
+					},
+					"Collectible": {
+						"id": "ingredient",
+						"label": "Ingredient",
+						"radius": 0.8,
+						"value": 1
+					}
+				}
+			}
+		]
+	},
+	"audio": {
+		"eventMappings": [
+			{
+				"id": "prototype.collect.ingredient",
+				"eventType": "ItemCollected",
+				"soundId": "audio_ui_collect",
+				"volume": 0.35,
+				"sceneId": "prototype_game"
+			}
+		]
+	},
+	"renderProfile": {
+		"id": "prototype_minimal_daylight",
+		"renderer": {
+			"clearColor": "#121917",
+			"clearAlpha": 1,
+			"antialias": true,
+			"maxPixelRatio": 2,
+			"fallbackMaterialColor": "#50a8ff"
+		},
+		"lighting": {
+			"lights": [
+				{
+					"kind": "ambient",
+					"color": "#d8f5e4",
+					"intensity": 0.85
+				},
+				{
+					"kind": "directional",
+					"color": "#fff2d5",
+					"intensity": 2.1,
+					"position": [3, 6, 4]
+				}
+			]
+		}
+	},
+	"player": {}
+}
