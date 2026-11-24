@@ -7,18 +7,18 @@ interface Props {
 }
 
 const {
-  heading = 'Try Ainekio V2 Live in Your Browser',
-  description = 'Runs 500 Hz MuJoCo WASM, compiled ESP32-P4 C firmware, MicroDuck neural walking, and NeuralPose emotes client-side across 6 playable 3D worlds — including Yggdrasil, Observatory, and the V2 Robotics Lab. Zero install required.',
+  heading = 'Drive V1, V2 & V3 Live in Your Browser',
+  description = 'Runs 500 Hz MuJoCo WASM, compiled ESP32-P4 C firmware, MicroDuck neural walking, and NeuralPose emotes across all three robots (V1, V2 & V3) in 6 playable 3D worlds — including the 19 m Robotics Lab, Yggdrasil, and PeerJS multiplayer rooms. Zero install required.',
   buttonLabel = 'Try the Simulator Now',
   href = 'https://simulator.ainek.io/',
 } = Astro.props
 ---
 
-<aside class="sim-cta not-prose" aria-label="Launch Ainekio V2 Web Simulator">
+<aside class="sim-cta not-prose" aria-label="Launch Ainekio 3D Web Simulator">
   <div class="sim-cta-body">
     <p class="sim-cta-eyebrow">
       <span class="sim-cta-dot" aria-hidden="true"></span>
-      Live Browser Alpha · simulator.ainek.io
+      Live 3D Browser Simulator · simulator.ainek.io
     </p>
     <p class="sim-cta-heading">{heading}</p>
     <p class="sim-cta-desc">{description}</p>
@@ -31,7 +31,7 @@ const {
         <path d="M8 7h9v9" />
       </svg>
     </a>
-    <span class="sim-cta-meta">Desktop WebGL · Standalone or Body Control WS</span>
+    <span class="sim-cta-meta">Desktop &amp; Mobile WebGL · V1/V2/V3 · PeerJS Multiplayer · Body Control WS</span>
   </div>
 </aside>
 

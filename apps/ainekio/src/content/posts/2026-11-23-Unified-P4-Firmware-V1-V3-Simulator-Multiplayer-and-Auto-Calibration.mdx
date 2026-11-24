@@ -1,0 +1,99 @@
+---
+title: "Unified ESP32-P4 Firmware (V1·V2·V3), All Three Robots & PeerJS Multiplayer in simulator.ainek.io, Automated Servo Calibration & V3 Panoramic Cyclops"
+published: 2026-11-23T12:30:00-08:00
+updated: 2026-11-23
+description: "November 21–23 milestone: unifying all three robots (V1, V2 & V3) inside a single ESP32-P4 firmware codebase and live 500 Hz MuJoCo WASM simulator at simulator.ainek.io; adding V3's DS3225 PRO self-leveling double-parallelogram crawler feet, panoramic ILI9341 Cyclops optic, and trained v3-microduck-p4 / neural_pose_v3 policies; launching PeerJS multiplayer rooms, a 19 m multi-zone Robotics Lab obstacle course, and standalone @ainekio/engine v0.1.0; and shipping Body Control automated 4th-wire + IMU servo calibration, the Virtual Simulation Manager, and zero-pinning Ainekio OS auto-following."
+image: "/posts/2026-11-23-progress/simulator-v3-cyclops-yggdrasil.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Ainekio Project"
+authorBio: "Robot familiar field notes"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V1, V2, V3, ESP32-P4, Simulator, MuJoCo, WebGL, Multiplayer, Cyclops, Calibration, MicroDuck, NeuralPose]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: overview
+  generation: both
+  kind: journal
+  next: project-overview
+  related: ["gateway-and-simulator", "ainekio-v3-preview", "ainekio-v1", "ainekio-cockpit", "ainekio-os", "2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim"]
+---
+import SimulatorCta from '../../components/SimulatorCta.astro'
+
+<SimulatorCta />
+
+Over November 21–23, development converged across the entire stack—turning the standalone browser simulator at **[`simulator.ainek.io`](https://simulator.ainek.io/)** from a single-robot proof-of-concept into a **full three-generation multiplayer testbed**, unifying **V1, V2, and V3** into a **single `ESP32-P4` firmware codebase**, and overhauling **Body Control** and **Ainekio OS** with automated servo calibration, a dedicated Virtual Simulation Manager, and unified room chat:
+
+1. **All Three Robots (`V1`, `V2`, `V3`) Live in [`simulator.ainek.io`](https://simulator.ainek.io/) + PeerJS Multiplayer & 19 m Robotics Lab:** Visitors can hot-switch live between **Ainekio V1** (8-servo clock-spring, `v1-microduck-p4`, `neural_pose_v1`), **Ainekio V2** (12-servo four-bar, `microduck-v19-snag-p4`, `neural-pose-v7-hysteresis`, compiled `ainekio-v2-firmware.wasm`), and **Ainekio V3** (12-servo `DS3225 PRO` Option A-1 + self-leveling crawler feet, panoramic Cyclops optic, `v3-microduck-p4`, `neural_pose_v3`), host or join **PeerJS WebRTC multiplayer rooms**, and drive across six worlds anchored by a **19 m multi-zone Robotics Lab obstacle course**.
+2. **Unified Multi-Model `ESP32-P4` Firmware (`v1-8servo` · `v2-12servo` · `v3-12servo`) & Panoramic V3 Cyclops Optic:** One `ESP32-P4` firmware tree now compiles verified binaries for all three robots (`sdkconfig.v1-8servo`, default `v2-12servo`, `sdkconfig.v3-12servo`), introducing **direct 8-channel P4 ADC feedback (no analog mux)** on V1 and the **`face_cyclops.c` panoramic single-eye optic** (`2.8"` `ILI9341` SPI TFT + simulator WASM) on V3.
+3. **V3 Mechanical Evolution (`DS3225 PRO` HV, Double-Parallelogram Self-Leveling Ankles & Trained RL):** Reconciled V3 (`v3-p4-ds3225pro-optA1-ankle-20261122`, `406.4 × 236.5 × 385.6 mm`, `2.97 kg` est.) around `35 kg·cm` `DS3225 PRO` HV coreless servos, PETG spiral knee springs (`0.167 N·m/rad`), `22 N` preloaded servo-saver rods, and **1:1 self-leveling double-parallelogram pivoting crawler feet** (`<= 0.27°` level error across `8/8` MuJoCo evaluation scenarios at `0.31 m/s` forward trot).
+4. **Body Control Automated Servo Calibration, Virtual Simulation Manager & Zero-Pinning Ainekio OS Bridge:** Shipped closed-loop **Auto-Calibration (`auto_calibration.py`)** (`floor` and `legs_free` modes with `25°` tilt abort), replaced legacy daemon scripts with the **Virtual Simulation Manager (`simulation.py`, `:8792`, `ainekio-pair:`, 24/7 headless runner)**, removed `robotId` pinning in Ainekio OS so it auto-follows whichever physical or virtual robot Body Control selects, and bridged **Cockpit text input + `AIKSPK01` spoken text echo** into simulator room chat.
+5. **Standalone `@ainekio/engine@v0.1.0` Extracted:** Extracted the shared ECS, Three.js, Rapier, WebRTC multiplayer, and robot-audio core into its own repository ([`Greg-Aster/ainekio-engine`](https://github.com/Greg-Aster/ainekio-engine)), cutting duplicated engine code out of `game.megameal`.
+
+---
+
+## 1. All Three Generations (`V1 · V2 · V3`), 19 m Robotics Lab & PeerJS Multiplayer in `simulator.ainek.io`
+
+Two days ago [`simulator.ainek.io`](https://simulator.ainek.io/) launched running Ainekio V2 on a basic cable-strip pad. Today all three Ainekio generations run side-by-side at **`500 Hz` MuJoCo WASM** (`50 Hz` control) directly in a browser Web Worker with zero installation required:
+
+| Model in `simulator.ainek.io` | Actuators & Mechanics | Neural Gait (50 Hz) | Neural Pose (Lazy-Loaded) | Face & Camera |
+| --- | --- | --- | --- | --- |
+| **[Ainekio V1](/posts/ainekio-v1/)** (`#model=v1`) | 8-servo spider (`R1/R2/L1/L2` hip yaw + `R4/R3/L3/L4` vertical knees), `1.25 MB` Meshopt GLB | `v1-microduck-p4` (`201 KB` float32 / `53.7 KB` int8 C; `3.0 Hz` CPG, `8/8` scenarios) | `neural_pose_v1` (`1.01 MB`, 8 motions: `stand, sit, lay_down, crouch, bow, stretch, wave_fr, wave_fl`) | `128×64` OLED (`V1_FaceDisplay`) + Arducam B0066 |
+| **[Ainekio V2](/posts/ainekio-v2/)** (`#model=v2`, default) | 12-servo `35/20/28/38 mm` closed-chain four-bar, `4.27 MB` GLB | `microduck-v19-snag-p4` (`418 KB` float32 / `107.8 KB` int8 C; full compiled `ainekio-v2-firmware.wasm`) | `neural-pose-v7-hysteresis` (`3.32 MB` + `PoseManifoldRuntime`, 14 curated motions) | `1.9"` `ST7789` `320×170` LCD (14 interactive expressions) + chin `OV5647` |
+| **[Ainekio V3](/posts/ainekio-v3-preview/)** (`#model=v3`) | 12-servo `DS3225 PRO` Option A-1 (`54/22/46/56/135 mm`) + double-parallelogram self-leveling ankles, `2.60 MB` multi-material PBR GLB | `v3-microduck-p4` (`251 KB` float32 / `66.9 KB` int8 C; `0.31 m/s` trot, `<= 0.27°` ankle level error) | `neural_pose_v3` (`1.51 MB`, 8 motions, `0.28°–1.11°` MAE, `0.0` L↔R reflection error) | **`2.8"` `ILI9341` Panoramic Cyclops** (`face_cyclops.c` in WASM) + Arducam B0066 |
+
+<div className="grid grid-cols-1 gap-4 my-6 md:grid-cols-2">
+  <figure className="m-0">
+    <img src="/posts/2026-11-23-progress/simulator-v1-p4-lab.webp" alt="Live capture from simulator.ainek.io showing the 8-servo Ainekio V1 quadruped with cobalt sculpted spiked legs standing on the glowing home pad of the 19 m Robotics Lab Obstacle Course, running v1-microduck-p4 at 1.40 ms/step with 8 live servo gauges." width="1600" height="1000" loading="lazy" className="w-full rounded-xl" />
+    <figcaption><strong>Ainekio V1 live in the 19 m Robotics Lab:</strong> <code>v1-microduck-p4</code> neural gait, <code>128×64</code> OLED mirror, 8 interactive servo gauges, and AprilTag/cone agility course behind the home pad.</figcaption>
+  </figure>
+  <figure className="m-0">
+    <img src="/posts/2026-11-23-progress/simulator-v2-obstacle-lab.webp" alt="Live capture from simulator.ainek.io showing the red 12-servo Ainekio V2 quadruped on the home calibration pad of the upgraded 19 m Robotics Lab Obstacle Course with orange slalom cones, yellow cable strips, AprilTags, red vision target sphere, and glowing diagnostic telemetry screens." width="1600" height="1000" loading="lazy" className="w-full rounded-xl" />
+    <figcaption><strong>Upgraded 19 m Multi-Zone Robotics Lab:</strong> 7 proving zones, 128 MuJoCo colliders, dynamic AprilTags (<code>TAG-00</code>–<code>TAG-09</code>), Macbeth ColorChecker, SLAM checkerboard, and live lab screens.</figcaption>
+  </figure>
+</div>
+
+### PeerJS Multiplayer Rooms, Mobile Data Optimization & World Upgrades
+- **WebRTC P2P Multiplayer (`src/multiplayer/*`, `remotePeerManager.ts`):** Click **Multiplayer** in the top bar to host or join a room, share a `?room=<name>` link, jump straight to another peer's world, and chat in real time. Remote robots sync at `10 Hz` (world pose, `robotModel`, `jointsDeg`, `levelId`, `faceName`) and render as full articulated V1, V2, or V3 GLBs with `60 FPS` interpolation—while remaining wire-compatible with `game.megameal` and the newly extracted **[`@ainekio/engine@v0.1.0`](https://github.com/Greg-Aster/ainekio-engine)**.
+- **Six Upgraded Worlds & Mobile Optimization:** Added **19 m Robotics Lab (Obstacle Course)** (`376` primitives, `128` colliders, `7` zones), **Solitude (Stonehenge Plain)** (`solitude.hfield.bin` + rolling vertex-colored grass + animated firefly), **Miranda Wreck** (zero-G debris, rotating dying star, bridge stairs, crew quarters), **Sci Fi Room (Astral House)** (Chronos-Orrery, Escher stairs, crystal garden), **Yggdrasil (Tree of Life)** (3 radial spatial-audio wells), and distance-streamed **Observatory** chunks—plus a dedicated mobile HUD (`<= 900 px`), halved ambient MP3 payloads, lazy neural-pose loading, and immutable Cloudflare Pages CDN caching (`public/_headers`).
+
+<figure className="my-6">
+  <img src="/posts/2026-11-23-progress/simulator-solitude-multiplayer.webp" alt="Live capture from simulator.ainek.io showing Ainekio V3 standing inside Solitude (Stonehenge Plain) with glowing ancient stone arches, rolling green terrain, the floating golden firefly, the panoramic Cyclops optic HUD, and the PeerJS Multiplayer Rooms panel open." width="1600" height="1000" loading="lazy" className="w-full rounded-xl" />
+  <figcaption><strong>Solitude (Stonehenge Plain) + PeerJS Multiplayer Rooms:</strong> Ainekio V3 with its panoramic Cyclops HUD and the WebRTC P2P room creator open beside the glowing Stonehenge archway and floating firefly.</figcaption>
+</figure>
+
+---
+
+## 2. Unified Multi-Model `ESP32-P4` Firmware & V3 Panoramic Cyclops Optic
+
+Rather than maintaining separate firmware forks for V1, V2, and V3, `Slave/firmware/esp32p4-wifi6/` now builds **all three robot models from one unified `ESP32-P4` codebase** using `Kconfig.projbuild` (`AINEKIO_ROBOT_MODEL`, `AINEKIO_DISPLAY_BACKEND`, `AINEKIO_FEEDBACK_BACKEND`) and model overlays:
+
+- **`sdkconfig.v1-8servo` (`body_v1.c`, `1,062` lines, `2.1 MB` compiled binary verified):** Drives 8× `MG90S` servos on `PCA9685` channels `0..7`, renders the `0.96"` `128×64` I2C OLED (`display_ssd1306.c`, `SCL=GPIO26`, `SDA=GPIO27`), and reads all 8 fourth-wire servo potentiometers on **8 direct `ESP32-P4` ADC pins with zero analog multiplexer** (`ADC1 CH4..7` on `GPIO20..23` for `J0..J3`, `ADC2 CH0..3` on `GPIO49..52` for `J4..J7`).
+- **Default `v2-12servo` (`body.c`, `display.c`, `3.5 MB` verified):** Continues driving the active `650 g` 12-servo floor robot with `CD74HC4067` 12-channel mux feedback, `1.9"` `ST7789` LCD, and on-chip `50 Hz` `MicroDuck`.
+- **`sdkconfig.v3-12servo` (`body_v3.c`, `1,012` lines, `2.1 MB` verified):** Drives 12× **`DS3225 PRO` HV coreless** servos (`35 kg·cm / 3.43 N·m`, `800 deg/s` on direct `2S` `7.4 V`), **`display_ili9341.c`** (`348` lines, `2.8"` `MSP2807` `320×240` 40 MHz SPI TFT centering the `320×170` canvas), and the brand-new **`face_cyclops.c`** (`964` lines) panoramic Cyclops optic—featuring a luminous outer iris ring with 24 mechanical aperture ticks, radial iris fibers, glossy dark pupil with dual specular glints, mechanical eyelid/brow shutters, twin flanking radar arcs, and a 16-second ambient saccadic glance/autofocus cycle compiled into both P4 firmware and simulator WASM.
+
+### V3 Self-Leveling Crawler Feet & Trained RL Results
+Reconciled under geometry `v3-p4-ds3225pro-optA1-ankle-20261122` (`406.4 × 236.5 × 385.6 mm`, `180.93 mm` shoulder height, `125.03 mm` belly clearance, `2.97 kg` estimated mass; physical print pending), each V3 leg pairs the Option A-1 four-bar (`54 / 22 / 46 / 56 / 135 mm`) with a **PETG flat spiral knee spring** (`~0.167 N·m/rad`), a **`~22 N` preloaded PETG servo-saver rod** (`±1.3 mm`), and a **2-stage double-parallelogram self-leveling pivoting crawler foot** (`1:1` flat sole, `±27.5°` range + outboard compliant damper).
+
+In CPU MuJoCo qualification (`v3-microduck-p4` pass 6b, `66,940 B` int8 C policy; pass 7 training in progress), V3 survived **8/8 scenarios** with **`max_ankle_level_err_deg <= 0.27°`** across every run (`0.310 m/s` forward trot with `97.2 mm` stride and `40.3 mm` foot lift, `±1.33 rad/s` turns, `±0.15 m/s` crab). `neural_pose_v3` (`1.52 MB`, `0.0` L↔R reflection error) cleared **8/8 postures** at **`0.28°–1.11°` MAE**. V1's corresponding `v1-microduck-p4` (`53,696 B` int8 C, `17.2M` steps) and `neural_pose_v1` (`1.02 MB`, `0.0` reflection error) also cleared **8/8 gait and 8/8 posture suites**.
+
+---
+
+## 3. Body Control Auto-Calibration, Virtual Simulation Manager & Unified Comms
+
+Three major host-side upgrades landed across `Ainekio-bot` (`Master/gateway/`) and `ainekio-os` (`ce743e7e` + Nov 23):
+
+1. **Automated 4th-Wire + IMU Servo Calibration (`Master/gateway/auto_calibration.py`, `/api/calibration/auto`):**
+   - Replaces tedious manual per-joint offset tweaking with a guided automated workflow inside Body Control (`#auto-calibration-card`).
+   - Supports **`floor`** mode (low-friction surface: full 4th-wire range sweep + IMU/shaft-load 4-leg height & shoulder leveling) and **`legs_free`** mode (unloaded 4th-wire range sweep), executing exact `0.00°` closure-error closed-chain sweep poses behind a **`25.0°` tilt abort guard**, with one-click `Apply` and `Restore`.
+2. **Virtual Simulation Manager (`Master/gateway/simulation.py`, `/api/simulation`):**
+   - Retires the old `simulator_bridge.py` / `start-virtual-robot.sh` daemon scripts.
+   - Serves `simulator.ainek.io` locally on dedicated port **`:8792`**, mints scoped virtual robot tokens (`ainekio-v1-sim`, `ainekio-v2-sim`, `ainekio-v3-sim`), generates zero-log `#hash` launch URLs and **`ainekio-pair:` Quick Pair codes** (supporting both local `ws://127.0.0.1:8790/robot` and the `wss://robot-gateway.ainek.io/robot` Cloudflare relay), and supervises a **24/7 headless Chromium runner** on the Brain host so autonomous virtual robots remain online even when operator browsers close.
+3. **Zero-Pinning Ainekio OS Auto-Follow & Unified Room Chat / Spoken Echo:**
+   - Commit `ce743e7e` in `ainekio-os` removed `robotId` pinning: Body Control now solely owns active robot selection, and Ainekio OS automatically follows whichever physical (`V1`/`V2`) or virtual (`ainekio-v*-sim`) body is attached on the same bridge stream without restarting (with `1,000 ms` base / `2,500 ms` local-unconnected reconnect backoff and dead `correction_failed` stall fields retired).
+   - Added a direct text-input bar (`#cockpit-stream-form`) in Cockpit HUD, unified **Comms Feed** + top-bar **Tap to Talk** in `simulator.ainek.io`, and **`AIKSPK01` `speechText` (`<= 2,000` chars)** metadata on downward robot TTS packets so spoken replies echo cleanly into Cockpit and multiplayer room chat.
+
+Explore the updated **[Gateway & 3D Simulator Guide](/posts/gateway-and-simulator/)**, **[Ainekio V3 Armored Preview](/posts/ainekio-v3-preview/)**, **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)**, and **[Ainekio Cockpit HUD](/posts/ainekio-cockpit/)**—or launch **[`simulator.ainek.io`](https://simulator.ainek.io/)** directly to drive all three robots now.

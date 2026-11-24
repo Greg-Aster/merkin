@@ -135,7 +135,7 @@ const ROBOTS: Record<RobotId, RobotMeta> = {
     clipCount: 38,
     envelope: '174.8 × 155.5 × 84.1 mm',
     actuators: '8× 4th-Wire MG90S · Under-Arm Clock-Springs',
-    compute: 'ESP32-P4 + PCA9685 · 0.96" OLED (59 faces)',
+    compute: 'Unified ESP32-P4 (body_v1.c · v1-microduck-p4) · 0.96" OLED',
     guideHref: '/posts/ainekio-v1/',
     guideLabel: 'V1 Systems Guide',
     lineupX: -0.305,
@@ -158,13 +158,13 @@ const ROBOTS: Record<RobotId, RobotMeta> = {
   v3: {
     id: 'v3',
     shortLabel: 'V3 (Armored CAD)',
-    title: 'Ainekio V3 · Heavy-Equipment DS3235 CAD',
-    badge: 'In Development · Option A-1 5-Link · 12 DOF',
+    title: 'Ainekio V3 · Armored DS3225 PRO & Self-Leveling Ankles',
+    badge: 'Live in Simulator · Physical Print Pending · 12 DOF',
     glbPath: '/models/ainekio-v3.glb',
     clipCount: 0,
-    envelope: '402.0 × 236.5 × 343.1 mm (w/ whip)',
-    actuators: '12× Waterproof DS3235 · Option A-1 5-Link',
-    compute: 'Radxa Dragon Q6A + ESP32-P4 · 2.8" Vault TFT',
+    envelope: '406.4 × 236.5 × 385.6 mm',
+    actuators: '12× DS3225 PRO HV · Option A-1 + Self-Leveling Ankles',
+    compute: 'Radxa Dragon Q6A + ESP32-P4 · 2.8" Panoramic Cyclops TFT',
     guideHref: '/posts/ainekio-v3-preview/',
     guideLabel: 'V3 Armored CAD Guide',
     lineupX: 0.278,
@@ -1423,7 +1423,7 @@ onDestroy(() => {
           <div class="rv-lineup-legend" aria-hidden="true">
             <span><strong>Left:</strong> V1 (175 mm · Clock-Spring)</span>
             <span><strong>Center:</strong> V2 (245 mm · 650 g)</span>
-            <span><strong>Right:</strong> V3 (402 mm · Opt A-1 DS3235)</span>
+            <span><strong>Right:</strong> V3 (406 mm · Opt A-1 DS3225 PRO)</span>
           </div>
         {/if}
 
@@ -1535,12 +1535,12 @@ onDestroy(() => {
               {:else if activeMode === 'lineup'}
                 1:1 Lineup Motion Bench
               {:else}
-                V3 · DS3235 CAD Status
+                V3 · 12-DOF Option A-1 + Ankles
               {/if}
             </span>
             <h4 class="rv-md-title">
               {#if activeMode === 'v3'}
-                Motion Library Pending
+                Live in 3D Simulator
               {:else}
                 Gaits, Poses &amp; Emotes
               {/if}
@@ -1561,16 +1561,23 @@ onDestroy(() => {
 
         {#if activeMode === 'v3'}
           <div class="rv-md-v3-notice">
-            <span class="rv-md-v3-badge">Under Active Development</span>
+            <span class="rv-md-v3-badge">Trained &amp; Playable in MuJoCo</span>
             <p>
-              <strong>Ainekio V3</strong> is currently in mechanical CAD &amp; print-fit development.
-              Its 12× DS3235 heavy-servo gait policy and expressive motion library have not been trained yet.
+              <strong>Ainekio V3</strong> now runs trained <code>v3-microduck-p4</code> neural walking (0.31&nbsp;m/s trot, &le;&nbsp;0.27&deg; ankle level error), 8 <code>neural_pose_v3</code> postures, and its panoramic Cyclops optic live in <strong>simulator.ainek.io</strong> (physical print pending).
             </p>
-            {#if allowModelSwitch}
-              <div class="rv-md-v3-actions">
+            <div class="rv-md-v3-actions">
+              <a
+                class="rv-md-cta"
+                href="https://simulator.ainek.io/#model=v3"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Drive V3 Live in Simulator →
+              </a>
+              {#if allowModelSwitch}
                 <button
                   type="button"
-                  class="rv-md-cta"
+                  class="rv-md-cta is-secondary"
                   on:click={() => void switchFromV3AndPreview('v2')}
                 >
                   Walk &amp; Emote on V2 (47 clips) →
@@ -1582,8 +1589,8 @@ onDestroy(() => {
                 >
                   Walk &amp; Emote on V1 (38 clips) →
                 </button>
-              </div>
-            {/if}
+              {/if}
+            </div>
           </div>
         {:else}
           {#if activeMode === 'lineup'}
@@ -2302,11 +2309,14 @@ onDestroy(() => {
   }
 
   .rv-md-cta {
+    display: block;
+    box-sizing: border-box;
     padding: 0.52rem 0.75rem;
     border-radius: 0.45rem;
     font-size: 0.76rem;
     font-weight: 750;
     text-align: left;
+    text-decoration: none;
     color: #061015;
     background: #38bdf8;
     border: 0;

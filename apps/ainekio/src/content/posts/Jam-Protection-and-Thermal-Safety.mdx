@@ -1,8 +1,8 @@
 ---
 title: "7-Layer Phantom-Jam Resolution & Per-Joint I²t Servo Winding Thermal Fuse"
 published: 2026-11-16T10:00:00-08:00
-updated: 2026-11-20
-description: "How Ainekio V2 prevents micro-servo burnout while eliminating false carpet-swing jams and competing recovery loops: the 7-layer phantom-jam fix across ESP32-P4 C firmware and NeuralPose v8, 1.8 s walking reverse unsnag, [1..4094] ADC stall sensing, and an 8–10 s per-joint I²t thermal fuse."
+updated: 2026-11-23
+description: "How Ainekio V2 prevents micro-servo burnout while eliminating false carpet-swing jams and competing recovery loops: the 7-layer phantom-jam fix across ESP32-P4 C firmware and NeuralPose v8, Automated Servo Calibration (auto_calibration.py) tilt abort guard, 1.8 s walking reverse unsnag, [1..4094] ADC stall sensing, and an 8–10 s per-joint I²t thermal fuse."
 image: "/posts/2026-11-16-progress/jam-protection-and-thermal-fuse.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -99,12 +99,13 @@ When `thermal_load[j]` reaches `1.0`:
 
 ---
 
-## 4. Hardware-in-the-loop C + Python & `game.megameal` virtual jam verification
+## 4. Hardware-in-the-loop C + Python, Automated Servo Calibration guard & `simulator.ainek.io` virtual jam verification
 
-Two complementary harnesses verify stall sensing and `I²t` cutoff end-to-end without risking physical `MG90S` windings:
+Two complementary harnesses verify stall sensing and `I²t` cutoff end-to-end without risking physical `MG90S` windings—paired with closed-loop safety guards during automated calibration ([Milestone #21](/posts/2026-11-23-unified-p4-firmware-v1-v3-simulator-multiplayer-and-auto-calibration/)):
 
 - **Native C + Python HIL suite (`tests/test_p4_jam_and_thermal.py`):** Compiles production `body.c`, `pca9685.c`, and `servo_feedback_*.c` into a shared library wired to a simulated `I2C` `PCA9685` register bank and 12-bit `CD74HC4067` ADC.
-- **Full-parity `game.megameal` 3D simulator (`VirtualRobotPanel.svelte`, [see simulator guide](/posts/gateway-and-simulator/#game-megameal-simulator)):** Runs the same compiled `ESP32-P4` C firmware (`libgait_native.so`, `full_parity=True`) atop a `500 Hz` MuJoCo plant with interactive **per-servo `J0–J11` pin/jam toggles**, letting operators pin individual joints mid-walk or mid-pose in the browser and watch `thermal_load[j]` trip `LEDn_OFF_H = 0x10` in `8–10 s` while the other 11 joints keep the robot standing.
+- **Live [`simulator.ainek.io`](https://simulator.ainek.io/) 3D browser simulator ([simulator guide](/posts/gateway-and-simulator/)):** Runs the same compiled `ESP32-P4` C firmware atop `500 Hz` MuJoCo WASM across **V1**, **V2**, and **V3** with interactive **per-servo `J0–J7` (V1) and `J0–J11` (V2/V3) pin/jam fault injection**, letting operators pin individual joints mid-walk or mid-pose in the browser and watch `thermal_load[j]` trip `LEDn_OFF_H = 0x10` in `8–10 s` while the healthy joints keep the robot standing.
+- **Automated Servo Calibration (`auto_calibration.py`) `25.0°` tilt abort guard & schema cleanup:** During automated 3-point potentiometer characterization on the bench, `auto_calibration.py` continuously monitors `LSM6DS3` attitude and immediately aborts the sweep if body tilt exceeds **`25.0°`**, preventing runaway sweeps if the robot slips off its calibration stand; alongside the phantom-jam cleanup, the legacy `correction_failed` telemetry field was retired in favor of the single authoritative `outputs_released: true` thermal cutoff contract.
 
 | Test Suite | Simulated Condition | Verified Hardware & Register Outcome |
 | :--- | :--- | :--- |

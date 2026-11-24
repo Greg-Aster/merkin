@@ -24,7 +24,7 @@ reading:
 
 > **Original eight-servo era document.** Copied from the [original Google Doc](https://docs.google.com/document/d/1w1k1ZmoCP_l_8z639lCzDJ3wRVZI1T3BijteEptouvg/edit) on October 12, 2026. The text below retains its own historical status and later additions; “current” refers to the document’s observation period, not today. [Ainekio V1 Systems Guide](/posts/ainekio-v1/) · [All original posts](/posts/v1-original-posts/) · [Current project status](/posts/project-overview/#project-status).
 
-> **Later project updates:** MetaHuman OS is now published openly as **[Ainekio OS](/posts/ainekio-os/)** (`Greg-Aster/ainekio-os`), and the early browser simulator mentioned below was retired once physical V1 hardware came online. For how the active eight-servo V1 robot operates today, see the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)**.
+> **Later project updates:** MetaHuman OS is now published openly as **[Ainekio OS](/posts/ainekio-os/)** (`Greg-Aster/ainekio-os`), and the early July browser simulator mentioned below was retired once physical V1 hardware came online. Real `500 Hz` MuJoCo WASM browser simulation has since returned live for V1, V2, and V3 at **[`simulator.ainek.io`](https://simulator.ainek.io/)**. For how the active eight-servo V1 robot operates today, see the **[Ainekio V1 Systems Guide](/posts/ainekio-v1/)**.
 
 ---
 

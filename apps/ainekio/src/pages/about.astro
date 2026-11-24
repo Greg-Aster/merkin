@@ -14,6 +14,7 @@ const quickFacts = [
   { label: 'Actuators', value: '12 × 4th-wire feedback MG90S' },
   { label: 'Onboard MCU', value: 'Waveshare ESP32-P4-WIFI6' },
   { label: 'Locomotion', value: '50 Hz L2-cached int8 neural policy' },
+  { label: '3D Web Simulator', value: 'simulator.ainek.io · V1/V2/V3 + Multiplayer' },
   { label: 'Face & camera', value: '1.9" ST7789 (59 faces) · OV5647' },
   { label: 'Companion OS', value: 'Ainekio OS · Local memory & voice' },
 ]
@@ -37,6 +38,7 @@ const quickFacts = [
         codeRepository: [
           'https://github.com/Greg-Aster/Ainekio-bot',
           'https://github.com/Greg-Aster/ainekio-os',
+          'https://github.com/Greg-Aster/ainekio-engine',
         ],
       },
     })}
@@ -44,13 +46,13 @@ const quickFacts = [
   <div class="about-shell">
     <section class="card-base about-hero">
       <div class="about-hero-copy">
-        <p class="about-eyebrow">Quadruped Hardware &amp; Local AI Architecture</p>
+        <p class="about-eyebrow">Quadruped Hardware, Web Simulation &amp; Local AI</p>
         <h1>About Ainekio</h1>
         <p class="about-lead">
-          Ainekio is a 3D-printed four-legged robot designed in Blender and paired with <strong>Ainekio OS</strong>—a local-first AI runtime for persistent episodic memory, room-audio conversation, facial expression, and bounded autonomy.
+          Ainekio is a family of 3D-printed four-legged robots designed in Blender—playable live in the <strong><a href="https://simulator.ainek.io/" target="_blank" rel="noopener noreferrer">3D Web Simulator (simulator.ainek.io)</a></strong>—and paired with <strong>Ainekio OS</strong>, a local-first AI runtime for persistent episodic memory, room-audio conversation, facial expression, and bounded autonomy.
         </p>
         <p class="about-note">
-          The system spans two repositories: <strong>Ainekio-bot</strong> for the physical hardware, embedded C firmware, Body Control gateway, and MuJoCo reinforcement-learning locomotion stack, and <strong>ainekio-os</strong> for the cognitive runtime.
+          The stack spans three repositories: <strong>Ainekio-bot</strong> for physical hardware, unified ESP32-P4 firmware, Body Control gateway, and MuJoCo RL locomotion; <strong>ainekio-os</strong> for the cognitive runtime; and standalone <strong>@ainekio/engine</strong> powering the live V1/V2/V3 browser simulator and PeerJS multiplayer rooms at <strong>simulator.ainek.io</strong>.
         </p>
       </div>
       <figure class="about-hero-media">
@@ -66,7 +68,15 @@ const quickFacts = [
       </figure>
     </section>
 
-    <section class="about-links" aria-label="Repositories and contact">
+    <section class="about-links" aria-label="Simulator, repositories and contact">
+      <a href="https://simulator.ainek.io/" target="_blank" rel="noopener noreferrer" class="card-base about-link-card group">
+        <span class="about-icon about-icon-emerald"><Icon name="material-symbols:open-in-new-rounded" class="text-2xl" /></span>
+        <span class="min-w-0">
+          <span class="about-link-label">Live V1/V2/V3 3D Web Simulator</span>
+          <span class="about-link-title group-hover:text-emerald-300">simulator.ainek.io</span>
+        </span>
+        <Icon name="material-symbols:open-in-new-rounded" class="ml-auto text-xl text-slate-400 dark:text-slate-500" />
+      </a>
       <a href="https://github.com/Greg-Aster/Ainekio-bot" target="_blank" rel="noreferrer" class="card-base about-link-card group">
         <span class="about-icon about-icon-cyan"><Icon name="fa6-brands:github" class="text-2xl" /></span>
         <span class="min-w-0">
@@ -80,6 +90,14 @@ const quickFacts = [
         <span class="min-w-0">
           <span class="about-link-label">Ainekio OS (The Mind)</span>
           <span class="about-link-title group-hover:text-amber-300">Greg-Aster/ainekio-os</span>
+        </span>
+        <Icon name="material-symbols:open-in-new-rounded" class="ml-auto text-xl text-slate-400 dark:text-slate-500" />
+      </a>
+      <a href="https://github.com/Greg-Aster/ainekio-engine" target="_blank" rel="noreferrer" class="card-base about-link-card group">
+        <span class="about-icon about-icon-cyan"><Icon name="fa6-brands:github" class="text-2xl" /></span>
+        <span class="min-w-0">
+          <span class="about-link-label">Standalone @ainekio/engine</span>
+          <span class="about-link-title group-hover:text-cyan-300">Greg-Aster/ainekio-engine</span>
         </span>
         <Icon name="material-symbols:open-in-new-rounded" class="ml-auto text-xl text-slate-400 dark:text-slate-500" />
       </a>
@@ -111,6 +129,8 @@ const quickFacts = [
             ))}
           </dl>
           <nav class="rail-links" aria-label="Start reading">
+            <a href="https://simulator.ainek.io/" target="_blank" rel="noopener noreferrer">Try Live 3D Simulator →</a>
+            <a href={url('/posts/gateway-and-simulator/')}>Gateway &amp; Simulator Guide →</a>
             <a href={url('/posts/project-overview/')}>System Overview →</a>
             <a href={url('/posts/ainekio-os/')}>Ainekio OS Architecture →</a>
             <a href={url('/posts/how-does-ainekio-stack-up/')}>Robot Comparison →</a>
@@ -133,7 +153,7 @@ const quickFacts = [
   .about-hero-media img { width: 100%; height: auto; aspect-ratio: 4/3; object-fit: cover; border-radius: 0.65rem; border: 1px solid rgb(255 255 255 / 0.09); }
   .about-hero-media figcaption { margin-top: 0.5rem; font-size: 0.78rem; color: var(--text-color-muted); }
 
-  .about-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.9rem; }
+  .about-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0.9rem; }
   .about-link-card { display: flex; align-items: center; gap: 0.85rem; padding: 0.95rem 1.1rem; text-decoration: none; }
   .about-icon { display: inline-flex; padding: 0.65rem; border-radius: 0.65rem; flex-shrink: 0; }
   .about-icon-cyan { background: rgb(6 182 212 / 0.12); color: #67e8f9; }

@@ -89,7 +89,7 @@ Three floor verification clips from the living-room carpet test series exercise 
     <source src="/gallery/v2-jam-protection-test.mp4" type="video/mp4" />
     <a href="/gallery/v2-jam-protection-test.mp4">Download V2 boot, stretch, and 4th-wire jam detection video (MP4)</a>
   </video>
-  <figcaption><strong>Capability check 2 — Closed-loop 4th-wire jam detection:</strong> During its post-boot stretch and room greeting, a leg hits mechanical resistance; onboard <code>CD74HC4067</code> (`GPIO27–30` → `GPIO49`) potentiometer feedback flags the shaft tracking error, backs off before winding heat builds up, and prompts Ainekio to report the fault aloud.</figcaption>
+  <figcaption><strong>Capability check 2 — Closed-loop 4th-wire jam detection:</strong> During its post-boot stretch and room greeting, a leg hits mechanical resistance; onboard <code>CD74HC4067</code> (<code>GPIO27–30</code> → <code>GPIO49</code>) potentiometer feedback flags the shaft tracking error, backs off before winding heat builds up, and prompts Ainekio to report the fault aloud.</figcaption>
 </figure>
 
 <figure>
@@ -142,7 +142,7 @@ To make mechanical packaging, linkage geometry, and scale differences directly i
   client:visible
   initialModel="lineup"
   compact={true}
-  caption="Interactive 1:1 millimeter-scale lineup of Ainekio V1 (left, 196.7 mm), Ainekio V2 (center, 244.9 mm · 650 g), and Ainekio V3 (right, 436.3 mm armored DS3235 CAD). Open Motions & Gaits to play gaits, poses, and emotes on V1 and V2, or toggle X-Ray and Bare Core to inspect internal boards, batteries, and four-bar linkages."
+  caption="Interactive 1:1 millimeter-scale lineup of Ainekio V1, Ainekio V2, and Ainekio V3. Note: this live 3D viewer renders the latest updated CAD exports alongside the November 18 milestone notes above (where the initial studio launch measured 196.7 mm for V1, 244.9 mm / 650 g for V2, and 436.3 mm for V3). Open Motions & Gaits to play gaits, poses, and emotes on V1 and V2, or toggle X-Ray and Bare Core to inspect internal boards, batteries, and linkages."
 />
 
 Each `.glb` separates `ExteriorShell` armor and carapace meshes from `InteriorCore` frames, electronics (`ESP32-P4`, `PCA9685`, `Radxa Dragon Q6A`, `ST7789` / `MSP2807` / `SSD1306` displays), battery packs, and servo linkages—allowing instant switching between **Full Shell**, translucent **X-Ray**, and **Bare Core** views on the [homepage](/), [Ainekio V1](/posts/ainekio-v1/), [Ainekio V2](/posts/ainekio-v2/), and [Ainekio V3](/posts/ainekio-v3-preview/) guides.

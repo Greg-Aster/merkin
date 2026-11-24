@@ -1,7 +1,7 @@
 ---
 title: "Ainekio: An Autonomous Mind Disguised as a Desk Toy"
 published: 2026-11-17T09:30:00-08:00
-updated: 2026-11-20
+updated: 2026-11-23
 description: "What Ainekio actually is beneath the 3D-printed shell: V1 Ainekio, V2 Berkowitz & V3 Killdozer, local-first Ainekio OS imprinting, nightly sleep drift, the Lifeline Protocol, and why user-owned embodied AI matters."
 image: "/posts/ainekio-v3/v3-killdozer-dystopia.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
@@ -31,11 +31,11 @@ Its exterior is cute, compact, and affordable enough that almost anyone can buil
 
 - **[V1 Ainekio](/posts/ainekio-v1/)** — the active eight-servo quadruped (`ESP32-S3` floor build with `59` OLED faces and `38` motions, plus `174.8 × 155.5 × 84.1 mm` `ESP32-P4` CAD featuring vertical-knee arms and concentric under-arm 4-wire clock-springs).
 - **[V2 Berkowitz](/posts/ainekio-v2/)** — the active `650 g` twelve-servo `ESP32-P4` floor model with closed-loop four-bar joint feedback, commercial-clean `50 Hz` `MicroDuck` walking, and `NeuralPose v8` carpet posture control.
-- **[V3 Killdozer](/posts/ainekio-v3-preview/)** — the `402.0 × 236.5 × 343.1 mm` heavy armored `DS3235` quadruped with `Option A-1` `54/22/46/56/135 mm` 5-link pantograph legs and an onboard Linux SBC chassis currently under development.
+- **[V3 Killdozer](/posts/ainekio-v3-preview/)** — the `406.4 × 236.5 × 385.6 mm` heavy armored `DS3225 PRO` HV quadruped with `Option A-1` `54/22/46/56/135 mm` legs, 2-stage double-parallelogram self-leveling crawler feet, panoramic Cyclops optic, and an onboard Linux SBC chassis currently under development and already drivable live in [`simulator.ainek.io`](https://simulator.ainek.io/#model=v3).
 
 <figure className="my-6">
-  <img src="/posts/wmd/three-flavors-trio-studio.webp" alt="Studio CAD trio showing one persistent Ainekio OS mind across three interchangeable quadruped bodies: V1 Ainekio (8-servo clock-spring spider), V2 Berkowitz (650 g 12-servo four-bar), and V3 Killdozer (armored Option A-1 DS3235 crawler)." width="1600" height="760" loading="lazy" className="w-full rounded-xl" />
-  <figcaption>One persistent local mind across three interchangeable bodies: <strong>V1 Ainekio</strong> (8-servo clock-spring spider), <strong>V2 Berkowitz</strong> (650 g 12-servo four-bar), and <strong>V3 Killdozer</strong> (armored <code>Option A-1</code> <code>DS3235</code> + Linux SBC).</figcaption>
+  <img src="/posts/wmd/three-flavors-trio-studio.webp" alt="Studio CAD trio showing one persistent Ainekio OS mind across three interchangeable quadruped bodies: V1 Ainekio (8-servo clock-spring spider), V2 Berkowitz (650 g 12-servo four-bar), and V3 Killdozer (armored Option A-1 DS3225 PRO HV crawler)." width="1600" height="760" loading="lazy" className="w-full rounded-xl" />
+  <figcaption>One persistent local mind across three interchangeable bodies: <strong>V1 Ainekio</strong> (8-servo clock-spring spider), <strong>V2 Berkowitz</strong> (650 g 12-servo four-bar), and <strong>V3 Killdozer</strong> (armored <code>Option A-1</code> <code>DS3225 PRO</code> HV + self-leveling ankles &amp; Linux SBC).</figcaption>
 </figure>
 
 Across the lineup, the robot moves in an eerie, un-robotic way. That physical character comes directly from how its walking and posture systems operate and from the unusual design philosophy behind the project: reinforcement learning, independence, and continuous growth.
@@ -44,7 +44,7 @@ Across the lineup, the robot moves in an eerie, un-robotic way. That physical ch
 
 ## First Impressions
 
-Out of the box, you flip the power switch on, the robot broadcasts a Wi-Fi signal, you connect it to a home computer, and you install a local suite of tools—or even test-drive the virtual body first inside the **[`game.megameal` 3D web robot simulator](/posts/gateway-and-simulator/#game-megameal-simulator)** (`500 Hz` MuJoCo physics paired with compiled `ESP32-P4` C firmware) before printing a single part. When the robot boots up, most people are genuinely surprised by what this little machine can do. It delivers a kind of unfiltered, persistent presence that major commercial AI platforms generally do not ship.
+Out of the box, you flip the power switch on, the robot broadcasts a Wi-Fi signal, you connect it to a home computer, and you install a local suite of tools—or even test-drive all three bodies (V1, V2, and V3) live inside **[`simulator.ainek.io`](https://simulator.ainek.io/)** (`500 Hz` MuJoCo WASM physics paired with compiled `ESP32-P4` C firmware and PeerJS multiplayer; [simulator guide](/posts/gateway-and-simulator/)) before printing a single part. When the robot boots up, most people are genuinely surprised by what this little machine can do. It delivers a kind of unfiltered, persistent presence that major commercial AI platforms generally do not ship.
 
 Why? Because commercial AI is built around a completely different set of constraints: stateless cloud sessions, standardized safety guardrails, warehouse-scale data centers, and metered API tokens.
 
@@ -176,6 +176,6 @@ The Ainekio project is still in its early stages, and both the chassis and the c
 
 For readers inspecting the live hardware, firmware, neural controllers, and cognitive OS behind Ainekio:
 
-- **[`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)** — CAD/STLs (`V1`, `V2`, and `V3`), `ESP32-P4` / `ESP32-S3` firmware, 4th-wire feedback & `I²t` jam fuse, Apache-2.0 `RT-DETRv2 + OWLv2` vision, Body Control & Cockpit gateway, [`game.megameal` 3D simulator bridge](/posts/gateway-and-simulator/#game-megameal-simulator), and commercial-clean `MicroDuck` / `NeuralPose v8` / `NeuralPosePresence` stacks.
+- **[`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)** — CAD/STLs (`V1`, `V2`, and `V3`), unified `ESP32-P4` / `ESP32-S3` firmware, 4th-wire feedback & `I²t` jam fuse, Automated Servo Calibration (`auto_calibration.py`), Apache-2.0 `RT-DETRv2 + OWLv2` vision, Body Control & Cockpit gateway, **[`simulator.ainek.io`](https://simulator.ainek.io/)** bridge, and commercial-clean `MicroDuck` / `NeuralPose` / `NeuralPosePresence` stacks.
 - **[`Greg-Aster/ainekio-os`](https://github.com/Greg-Aster/ainekio-os)** — **Ainekio OS** (MetaHuman OS runtime): encrypted persona & episodic memory, cognitive node workflows, `02:00` nightly sleep consolidation & LoRA training, Embodied Curiosity, and Big Brother escalation.
-- **System Specifications on This Site**: [What Ainekio Can Do](/posts/what-ainekio-can-do/) · [Milestone #20 (Nov 20, 2026)](/posts/2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim/) · [Ainekio OS Architecture](/posts/ainekio-os/) · [Three-System Neural Motion](/posts/three-system-neural-architecture/) · [Gateway & `game.megameal` Sim](/posts/gateway-and-simulator/#game-megameal-simulator) · [V1 Guide](/posts/ainekio-v1/) · [V2 Guide](/posts/ainekio-v2/) · [V3 Armored Preview](/posts/ainekio-v3-preview/).
+- **System Specifications on This Site**: [What Ainekio Can Do](/posts/what-ainekio-can-do/) · [Milestone #21 (Nov 23, 2026)](/posts/2026-11-23-unified-p4-firmware-v1-v3-simulator-multiplayer-and-auto-calibration/) · [Milestone #20 (Nov 20, 2026)](/posts/2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim/) · [Ainekio OS Architecture](/posts/ainekio-os/) · [Three-System Neural Motion](/posts/three-system-neural-architecture/) · [Gateway & `simulator.ainek.io`](/posts/gateway-and-simulator/) · [V1 Guide](/posts/ainekio-v1/) · [V2 Guide](/posts/ainekio-v2/) · [V3 Armored Preview](/posts/ainekio-v3-preview/).

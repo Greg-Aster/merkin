@@ -8,7 +8,7 @@ import type {
 
 export const siteConfig: SiteConfig = {
   title: 'Ainekio',
-  subtitle: '12-Servo ESP32-P4 Quadruped Robot Companion & Ainekio OS',
+  subtitle: '3D-Printed Quadruped Robot Companion, Web Simulator & Ainekio OS',
   enablePostFooterNav: true,
   lang: 'en',
   themeColor: {
@@ -60,6 +60,7 @@ export const navBarConfig: NavBarConfig = {
         { name: 'V1 vs. V2', url: '/posts/v1-v2-comparison/' },
       ],
     },
+    { name: 'Simulator', url: 'https://simulator.ainek.io/', external: true },
     {
       name: 'Docs',
       url: '/archive/?kind=reference',
@@ -67,6 +68,7 @@ export const navBarConfig: NavBarConfig = {
         { name: 'System Overview', url: '/posts/project-overview/' },
         { name: 'Ainekio OS', url: '/posts/ainekio-os/' },
         { name: 'Ainekio Cockpit', url: '/posts/ainekio-cockpit/' },
+        { name: 'Gateway & Simulator', url: '/posts/gateway-and-simulator/' },
         { name: '3-System Neural', url: '/posts/three-system-neural-architecture/' },
         { name: 'Jam & Thermal Fuse', url: '/posts/jam-protection-and-thermal-safety/' },
         { name: 'All Reference Guides', url: '/archive/?kind=reference' },

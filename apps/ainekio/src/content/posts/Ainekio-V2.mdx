@@ -1,8 +1,8 @@
 ---
 title: "Ainekio V2 Hardware: 3D-Printed 12-Servo ESP32-P4 Quadruped, 4th-Wire MG90S Feedback & Pinout"
 published: 2026-09-07T12:00:00-07:00
-updated: 2026-11-18
-description: "Complete V2 hardware reference: interactive 3D CAD model, 650 g 12-servo closed-loop chassis, 35/20/28/38/55 mm leg linkages, on-chip 107.8 KB L2-cached ESP32-P4 neural gait, per-joint I²t thermal fuse, PCA9685 and CD74HC4067 (C4–C15 → GPIO49) wiring diagrams, and STL archives."
+updated: 2026-11-23
+description: "Complete V2 hardware reference: interactive 3D CAD model, 650 g 12-servo closed-loop chassis, 35/20/28/38/55 mm leg linkages, on-chip 107.8 KB L2-cached ESP32-P4 neural gait, per-joint I²t thermal fuse, automated servo calibration (auto_calibration.py), live simulator.ainek.io V2 twin, PCA9685 and CD74HC4067 (C4–C15 → GPIO49) wiring diagrams, and STL archives."
 image: "/assets/ainekio/2026-10-12-refresh/blender-front.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Greg the Mechanic"
@@ -23,7 +23,12 @@ reading:
 ---
 import RobotModelViewer from '../../components/RobotModelViewer.svelte'
 
-Ainekio V2 ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) is a `650 g`, twelve-servo, closed-loop quadruped body built around the **Waveshare ESP32-P4-WIFI6**. Where the eight-servo V1 prototype moved each leg in a single plane with two open-loop motors, V2 adds a third actuator per leg for lateral hip roll (`±h`), a compact four-bar linkage for upper-carrier (`alpha`) and knee (`theta`) actuation with curved rocking soles, 4th-wire potentiometer feedback on all twelve joints, a `208 Hz` inertial measurement unit, on-chip `50 Hz` Core 1 neural gait execution inside the `ESP32-P4`'s `128 KB` L2 cache, and a modular **Wireless Keeper Bridge** `2S` power carrier.
+Ainekio V2 ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) is a `650 g`, twelve-servo, closed-loop quadruped body built around the **Waveshare ESP32-P4-WIFI6**. Where the active eight-servo V1 quadruped moves each leg with two planar motors, V2 adds a third actuator per leg for lateral hip roll (`±h`), a compact four-bar linkage for upper-carrier (`alpha`) and knee (`theta`) actuation with curved rocking soles, 4th-wire potentiometer feedback on all twelve joints, a `208 Hz` inertial measurement unit, on-chip `50 Hz` Core 1 neural gait execution inside the `ESP32-P4`'s `128 KB` L2 cache, **Automated Servo Calibration (`auto_calibration.py`)**, a live **[`simulator.ainek.io`](https://simulator.ainek.io/) `500 Hz` MuJoCo WASM V2 twin**, and a modular **Wireless Keeper Bridge** `2S` power carrier.
+
+<figure className="my-6">
+  <img src="/posts/2026-11-23-progress/ainekio-v2-closeup-hero.webp" alt="Close-up studio hero view of the 650 g crimson-and-black Ainekio V2 quadruped showing its faceted head visor, 1.9-inch ST7789 face display, chin-mounted OV5647 camera, crimson carapace, and 35/20/28/38/55 mm four-bar legs." width="787" height="612" loading="lazy" className="mx-auto rounded-xl" />
+  <figcaption>Close-up hardware profile of <strong>Ainekio V2</strong>: faceted crimson carapace and head mask, recessed <code>1.9"</code> <code>ST7789</code> IPS face display, chin-mounted <code>OV5647</code> MIPI-CSI camera, and <code>35/20/28/38/55 mm</code> closed-chain four-bar linkages.</figcaption>
+</figure>
 
 <RobotModelViewer
   client:visible
@@ -40,7 +45,7 @@ Ainekio V2 ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot
 | Parameter | V2 Specification |
 | --- | --- |
 | **Assembled mass** | `650 g` (complete body with 12 feedback servos, shell, LCD, chin camera, and `2S` battery carrier) |
-| **Overall envelope** | `245.85 × 182.79 × 109.06 mm` (`L × W × H`, Blender assembly reference) |
+| **Overall envelope** | `244.9 × 141.5 × 103.4 mm` neutral CAD (`245.9 × 182.8 × 109.1 mm` splayed physical stance, `L × W × H`) |
 | **Degrees of freedom** | 12 actuated joints (3 per leg: shoulder roll, upper-carrier pitch, knee linkage crank) |
 | **Compact linkage geometry** | `35 mm` upper carrier, `20 mm` input crank, `28 mm` lower-leg pickup radius, `38 mm` connecting rod, `55 mm` distal lower leg with curved rocking sole |
 | **Actuators** | 12× Miuzei `MG90S` metal-gear micro servos modified with a 4th analog wiper feedback wire (housed in shimmed upper servo brackets) |
@@ -49,7 +54,7 @@ Ainekio V2 ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot
 | **Main controller & on-chip RL** | `Waveshare ESP32-P4-WIFI6` (dual-core `360 MHz` RISC-V, `128 KB` L2 cache running a `107.8 KB` `int8` MicroDuck neural actor at `50 Hz` on Core 1, `32 MB` PSRAM, `32 MB` flash) + `ESP32-C6` Wi-Fi 6 |
 | **Inertial sensor** | `LSM6DS3` 6-axis accelerometer/gyroscope (`208 Hz` sampling, yaw-zeroed attitude filter, dedicated gyro carrier) |
 | **Face display & camera** | `1.9"` `ST7789` IPS LCD (`320 × 170`, **59** animated expressions, recessed bezel + 4 wireless spacers) + chin-mounted `OV5647` MIPI-CSI camera below the LCD (`180°` inverted mount) |
-| **Audio subsystem** | Onboard `ES8311` codec + `NS4150B` Class-D amplifier, microphone, `20 × 30 mm` `8 Ω 2 W` speaker, and open **`microWakeWord` (`int8` TFLite Micro) + WebRTC VAD** (alongside `WakeNet9s` support) |
+| **Audio subsystem** | Onboard `ES8311` codec + `NS4150B` Class-D amplifier, microphone, `20 × 30 mm` `8 Ω 2 W` speaker, and open **`microWakeWord` (`int8` TFLite Micro) + WebRTC VAD** |
 | **Power & Keeper Bridge** | Battery-mounted **Wireless Keeper Bridge**: `2S` (`8.4 V` max) Li-ion pack (`73.6 × 46 × 22 mm`), `Mini560` `5 V / 5 A` buck converter, `HiLetgo` `2S` USB-C boost charger, and snap-in `ESP32-P4`/`PCA9685`/`HiLetgo` PCB clips |
 
 ## Compact leg linkage geometry
@@ -85,7 +90,7 @@ Motor power branches directly from the `Mini560` `5 V / 5 A` regulator into the 
 
 ### CD74HC4067 4th-wire feedback multiplexer & per-joint `I²t` jam safety
 
-Every `MG90S` servo is opened on the bench to solder a 4th wire onto its internal potentiometer wiper. Those twelve analog lines route into channels **`C4–C15`** of a `CD74HC4067` multiplexer—addressed via select lines `S0–S3` on **`GPIO27–30`** and sampled at `50 Hz` into `ESP32-P4` **`GPIO49` (`ADC2_CH0`)**—allowing the controller to measure real shaft positions, verify target arrival (`Stand` within `2 mm` and closed-loop `Walk` synchronization), and run an **[`8–10 s` per-joint `I²t` winding thermal fuse](/posts/jam-protection-and-thermal-safety/)** with selective `PCA9685` channel cutoff so a snagged or jammed joint relaxes before overheating without collapsing healthy supporting legs:
+Every `MG90S` servo is opened on the bench to solder a 4th wire onto its internal potentiometer wiper. Those twelve analog lines route into channels **`C4–C15`** of a `CD74HC4067` multiplexer—addressed via select lines `S0–S3` on **`GPIO27–30`** and sampled at `50 Hz` into `ESP32-P4` **`GPIO49` (`ADC2_CH0`)**—allowing the controller to measure real shaft positions, verify target arrival (`Stand` within `2 mm` and closed-loop `Walk` synchronization), run **Automated Servo Calibration (`auto_calibration.py`)** with a `25.0°` IMU tilt abort guard to characterize all 12 joints without manual slider stepping, and enforce an **[`8–10 s` per-joint `I²t` winding thermal fuse](/posts/jam-protection-and-thermal-safety/)** with selective `PCA9685` channel cutoff so a snagged or jammed joint relaxes before overheating without collapsing healthy supporting legs. The exact same compiled `ESP32-P4` C firmware and 4th-wire feedback stack also powers V2's live **`500 Hz` MuJoCo WASM twin at [`simulator.ainek.io`](https://simulator.ainek.io/)**, where operators can test walking, poses, and interactive `J0–J11` pin/jam fault injection directly in a browser:
 
 ![Multiplexer Wiring](/gallery/diagram-multiplexer-wiring-960.webp)
 
@@ -112,10 +117,10 @@ All V2 structural parts—including the recessed `1.9"` LCD bezel and wireless s
 
 | Subsystem | V1 (Active 8-Servo & `Scene 'v1'` Upgrade) | V2 (Active 12-Servo P4) |
 | --- | --- | --- |
-| **Legs** | 2 joints per leg; 8× `MG90S` (`8× 683ZZ` counter-bearings in Nov 18 `Scene 'v1'`) | 3 joints per leg; 12× feedback-modified `MG90S` |
+| **Legs** | 2 joints per leg; 8× `MG90S` (`4× 683ZZ` hip counter-bearings, squared vertical-knee `R2V10` arms & concentric under-arm 4-wire clock-springs in `Scene 'v1'`) | 3 joints per leg; 12× feedback-modified `MG90S` |
 | **Foot placement** | Fore/aft and vertical only | Full 3D foot workspace including lateral hip roll and curved rocking soles |
-| **Chassis** | `Frame7`/`Frame8` spider-stance frame (seated `196.7 × 186.5 × 78.1 mm` cap in `Scene 'v1'`) | Custom enclosed shell (`245.85 × 182.79 × 109.06 mm`) with modular front face and Wireless Keeper Bridge |
-| **Controller** | Summer 2026 `ESP32-S3 N16R8` (direct MCPWM) · Nov 18 `Scene 'v1'` `ESP32-P4-WIFI6` + `PCA9685` + 8× 4th-wire | `Waveshare ESP32-P4-WIFI6` (`50 Hz` Core 1 `107.8 KB` L2 neural gait) + `PCA9685` PWM + `CD74HC4067` (`C4–C15` → `GPIO49`, `S0–S3` on `GPIO27–30`) ADC mux |
+| **Chassis** | `Frame7`/`Frame8` spider-stance frame (`174.8 × 155.5 × 84.1 mm` neutral CAD envelope; lowered `Frame8` cap `121.7 × 79.7 × 22.0 mm`) | Custom enclosed shell (`244.9 × 141.5 × 103.4 mm` neutral CAD; `245.9 × 182.8 × 109.1 mm` splayed physical stance) with modular front face and Wireless Keeper Bridge |
+| **Controller** | Summer 2026 `ESP32-S3 N16R8` (direct MCPWM) · Unified `ESP32-P4` firmware (`sdkconfig.v1-8servo`, `body_v1.c`, direct 8-ch ADC with no analog mux, `display_ssd1306.c`) | `Waveshare ESP32-P4-WIFI6` (`50 Hz` Core 1 `107.8 KB` L2 neural gait) + `PCA9685` PWM + `CD74HC4067` (`C4–C15` → `GPIO49`, `S0–S3` on `GPIO27–30`) ADC mux |
 | **Host compute** | Desktop over Wi-Fi | Desktop or `Radxa Dragon Q6A` over Wi-Fi running **[Ainekio OS](/posts/ainekio-os/)** |
 | **Power** | `2S 1000 mAh` Li-ion + dual `Mini560` | `2S` pack + `Mini560` `5 V / 5 A` + `HiLetgo` `2S` USB-C charger in Wireless Keeper Bridge |
 
@@ -123,7 +128,10 @@ All V2 structural parts—including the recessed `1.9"` LCD bezel and wireless s
 
 For photographs, CAD diffs, and bench measurements from each stage of the V2 mechanical build, follow the dated journal milestones:
 
-- **[Nov 16, 2026 — Per-joint I²t jam fuse, 3-system neural motion, 17 refined V2 STLs, and V3 armored CAD](/posts/2026-11-16-cockpit-stream-jam-fuse-and-v3-armor/)**: Selective `PCA9685` winding thermal cutoff, `MicroDuck v18/v19-snag-p4` + RISC-V PIE fixes, 17 updated V2 STLs, and the `440.8 mm` armored V3 CAD assembly.
+- **[Nov 23, 2026 — Unified ESP32-P4 firmware across V1/V2/V3, live browser simulator multiplayer, and Automated Servo Calibration (`auto_calibration.py`)](/posts/2026-11-23-unified-p4-firmware-v1-v3-simulator-multiplayer-and-auto-calibration/)**: Unified `ESP32-P4` firmware targets (`v1-8servo`, `v2-12servo`, `v3-12servo`), closed-loop `auto_calibration.py` with `25.0°` tilt abort guard, and live V1/V2/V3 twins with PeerJS multiplayer on `simulator.ainek.io`.
+- **[Nov 20, 2026 — V1 clock-spring arms, 7-layer phantom-jam fix, NeuralPose v8, and V3 Option A-1 pantograph](/posts/2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim/)**: 7-layer phantom-jam resolution across firmware and `NeuralPose v8`, `CARRIER_HOME_MARGIN_DEG = 3.0`, clean `939`-row Freestyle library, and `50 Hz` `NeuralPosePresence`.
+- **[Nov 18, 2026 — V1 P4 CAD revisit, NeuralPose v5-adaptive, physical floor capability videos, and interactive 3D CAD studio](/posts/2026-11-18-v1-p4-revisit-neuralpose-v5-and-3d-cad/)**: `34` print-ready `Red/` V2 STLs, `!actively_leveling` firmware guard, physical carpet capability videos, and 1:1 millimeter Three.js CAD studio.
+- **[Nov 16, 2026 — Per-joint I²t jam fuse, 3-system neural motion, 17 refined V2 STLs, and V3 armored CAD](/posts/2026-11-16-cockpit-stream-jam-fuse-and-v3-armor/)**: Selective `PCA9685` winding thermal cutoff, `MicroDuck v18/v19-snag-p4` + RISC-V PIE fixes, 17 updated V2 STLs, and the armored V3 CAD assembly.
 - **[Nov 11, 2026 — On-chip 107.8 KB P4 neural gait, Wireless Keeper Bridge, and 30 Red shell/bezel STLs](/posts/2026-11-11-on-chip-neural-gait-and-ainekio-os/)**: Core 1 `50 Hz` L2-cached MicroDuck inference, physical hardwood & seam bouts, and 30 updated Red STLs.
 - **[Nov 6, 2026 — Carpet trials, Pupper V3 / MJX simulation, and hardware diagrams](/posts/2026-11-06-carpet-trials-rl-and-big-brother/)**: Physical carpet walking trials, full-CAD Blender-to-MuJoCo MJCF export, and finalized wiring diagrams.
 - **[Nov 1, 2026 — Completed body prototype and neural walking](/posts/2026-11-01-neural-walking/)**: Finalized face panels, LCD carrier, servo covers, and 12-part STL package.

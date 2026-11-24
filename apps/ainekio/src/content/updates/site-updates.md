@@ -10,24 +10,30 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "Live browser 3D simulator alpha (simulator.ainek.io), V1 clock-spring arms, NeuralPose v8 phantom-jam fix & V3 Option A-1 CAD"
-  location: "Active V1 & 650 g V2 floor robots · V3 Option A-1 CAD · simulator.ainek.io live alpha · Ainekio OS"
-  updated: 2026-11-21
-  mileage: "simulator.ainek.io live alpha (6 worlds) · V1 under-arm clock-springs · NeuralPose v8 (0 phantom stalls) · V3 Option A-1 (+120% lift)"
-  section: "Standalone zero-install browser 3D simulator live at simulator.ainek.io (500 Hz MuJoCo WASM + compiled ESP32-P4 firmware + 6 worlds including Yggdrasil), V1 vertical-knee clock-spring arms, 7-layer phantom leg-jam elimination + NeuralPose v8, and V3 Option A-1 5-link CAD"
-  nextStop: "Test-print V1's under-arm clock-spring rotor/stator cups and V3's Option A-1 single-corner leg assembly while expanding robot-builder tooling and multi-robot worlds on simulator.ainek.io and game.megameal."
-  note: "On November 21, the 3D web robot simulator graduated from a local game.megameal daemon PoC to a live, zero-install browser alpha at https://simulator.ainek.io/—running 500 Hz MuJoCo WASM, compiled ESP32-P4 C firmware (ainekio-v2-firmware.wasm), MicroDuck neural walking, and NeuralPose emotes client-side across six playable 3D worlds (including Yggdrasil, Observatory, Miranda Wreck, Solitude, Sci Fi Room, and V2 Robotics Lab) with optional Body Control WebSocket attachment. Alongside the simulator launch, November 19–20 workbench work resolved seven stacked phantom leg-jam root causes across ESP32-P4 firmware and NeuralPose v5→v8-calibrated (2.46M GPU MuJoCo steps, Schmitt-trigger 6.5°→3.0° carpet stepping, 50 Hz NeuralPosePresence, above_calibration_mask = 0, stalled_joints = 0) while preserving the hardware 8–10 s per-channel I²t thermal fuse; upgraded V1 CAD to squared 36.2 mm vertical-knee R2V10 arms with concentric under-arm 4-wire clock-springs; and rescaled V3 onto the Option A-1 5-link pantograph (+120% lift, 0.93:1 dual-servo balance)."
+  status: "All 3 robots (V1·V2·V3) + multiplayer live on simulator.ainek.io, unified ESP32-P4 firmware, V3 Cyclops optic & Body Control auto-calibration"
+  location: "Active V1 & 650 g V2 floor robots · V3 DS3225 PRO (live in sim, print pending) · simulator.ainek.io · Ainekio OS"
+  updated: 2026-11-23
+  mileage: "V1/V2/V3 live on simulator.ainek.io · PeerJS multiplayer · Unified P4 firmware · Auto-calibration · V3 Cyclops optic"
+  section: "Unified multi-model ESP32-P4 firmware (V1/V2/V3), all three robots + PeerJS multiplayer & 19 m Robotics Lab live on simulator.ainek.io, V3 DS3225 PRO self-leveling crawler feet & panoramic ILI9341 Cyclops face, Body Control automated 4th-wire + IMU servo calibration & Virtual Simulation Manager, and zero-pinning Ainekio OS auto-following"
+  nextStop: "Print and assemble V1's under-arm clock-spring ESP32-P4 deck and V3's DS3225 PRO Option A-1 self-leveling crawler leg while completing V3 MicroDuck pass 7 training."
+  note: "Over November 21–23, all three Ainekio generations converged onto a single unified ESP32-P4 firmware codebase (sdkconfig.v1-8servo with direct 8-channel ADC + SSD1306 OLED, default v2-12servo with ST7789 + CD74HC4067 mux, and sdkconfig.v3-12servo with 2.8-inch ILI9341 panoramic Cyclops optic) and went live together in the browser at https://simulator.ainek.io/—complete with trained MicroDuck & NeuralPose policies for V1, V2, and V3, PeerJS WebRTC multiplayer rooms, a 19 m multi-zone Robotics Lab obstacle course, and standalone @ainekio/engine v0.1.0. In parallel, Body Control shipped automated 4th-wire + IMU servo calibration (floor & legs_free modes with 25° tilt abort), a dedicated Virtual Simulation Manager (:8792, Quick Pair, 24/7 headless runner), and direct Cockpit text chat synced with Ainekio OS zero-pinning robot auto-following and AIKSPK01 spoken room-chat echo."
   areas:
-    - label: "V1 clock-springs, V2 & V3 Option A-1"
-      status: "V1 vertical-knee clock-spring CAD, 650 g V2 & V3 Option A-1"
-      detail: "V1 (174.8 × 155.5 × 84.1 mm) pairs 36.2 mm vertical-knee R2V10 arms with concentric under-arm 4-wire clock-springs (rotor cup + snout stator + spiral harness), Frame8 bays, and 21,216-vert spiked legs. V2 runs 34 Red STLs + I²t fuse; V3 (402.0 × 236.5 × 343.1 mm, 537 active meshes) adopts Option A-1 5-link legs (+120% lift, -48.6 mm tail), a 3,860-vert belly tub, Clip 26 latches, and AINEKIO V-003 fender brows."
-    - label: "Phantom-jam fix & NeuralPose v8"
-      status: "7-layer jam fix, NeuralPose v8-calibrated & 50 Hz Presence"
-      detail: "Eliminated false stalls across P4 streaming reversals, balance-trim guards, -27.87° calibrated carrier floors, and retired duplicate Python/LLM recovery loops while keeping the hardware I²t thermal fuse intact. NeuralPose v8 (2.46M steps, Schmitt-trigger 6.5°→3.0° carpet stepping, 12/12 scenarios, 0 falls) and 50 Hz NeuralPosePresence run with 0.0° shoulder scrub."
-    - label: "simulator.ainek.io 3D web sim & OS"
-      status: "Live browser alpha (MuJoCo WASM + P4 firmware) & commercial-clean OS"
-      detail: "Live standalone browser alpha at https://simulator.ainek.io/ compiles 500 Hz MuJoCo WASM and real ESP32-P4 C firmware into a Web Worker with MicroDuck neural gait, NeuralPose emotes, 6 playable 3D worlds (including Yggdrasil, Observatory, Miranda Wreck, Solitude, Sci Fi Room & V2 Robotics Lab), live ST7789 faces, virtual OV5647 POV driving, wrench perturbations, J0–J11 pin/jam testing, and optional Body Control WebSocket attachment."
+    - label: "Unified P4 Firmware & V1·V2·V3"
+      status: "One ESP32-P4 codebase across V1, V2 & V3 + V3 Cyclops optic"
+      detail: "V1 compiles on P4 with 8 direct ADC channels (no mux), SSD1306 OLED, and v1-microduck-p4 (53.7 KB). V2 runs the 650 g floor build + NeuralPose v8 + I²t fuse. V3 (406.4 × 236.5 × 385.6 mm, 2.97 kg est.) runs DS3225 PRO HV servos, self-leveling double-parallelogram crawler feet (<= 0.27° error), panoramic ILI9341 Cyclops face, and v3-microduck-p4 (66.9 KB) + neural_pose_v3 live in MuJoCo."
+    - label: "simulator.ainek.io & @ainekio/engine"
+      status: "V1·V2·V3 live in browser + PeerJS multiplayer + 19 m Lab"
+      detail: "Zero-install 500 Hz MuJoCo WASM + compiled P4 firmware at https://simulator.ainek.io/ with live V1/V2/V3 hot-switching, PeerJS WebRTC multiplayer rooms, 6 worlds (19 m Robotics Lab, Yggdrasil, Observatory, Miranda Wreck, Solitude, Sci Fi Room), unified Comms Feed, and extracted @ainekio/engine v0.1.0."
+    - label: "Body Control & Ainekio OS"
+      status: "Auto-calibration, Virtual Simulation Manager & zero-pinning bridge"
+      detail: "Body Control adds automated floor/legs_free servo calibration (0.00° closure error, 25° tilt guard), Virtual Simulation Manager (:8792, ainekio-pair:, 24/7 headless runner), and Cockpit text input—paired with Ainekio OS zero-pinning auto-following (1,000/2,500 ms reconnect) and AIKSPK01 spoken text echo."
 entries:
+  - title: "Unified ESP32-P4 firmware (V1·V2·V3), all three robots & PeerJS multiplayer on simulator.ainek.io, V3 Cyclops optic & auto-calibration"
+    date: 2026-11-23
+    location: "Unified ESP32-P4 firmware, simulator.ainek.io (V1/V2/V3 + multiplayer), Body Control, Ainekio OS & @ainekio/engine"
+    mileage: "V1/V2/V3 in simulator · PeerJS multiplayer · 19 m Robotics Lab · V3 Cyclops & self-leveling ankles · Auto-calibration"
+    summary: "Unifying V1, V2, and V3 inside a single ESP32-P4 firmware tree and live 500 Hz MuJoCo WASM simulator at simulator.ainek.io; training V1 and V3 MicroDuck + NeuralPose policies; adding V3's DS3225 PRO self-leveling double-parallelogram crawler feet and panoramic ILI9341 Cyclops face; launching PeerJS multiplayer, the 19 m Robotics Lab obstacle course, and @ainekio/engine v0.1.0; and shipping Body Control automated servo calibration, the Virtual Simulation Manager, and zero-pinning Ainekio OS auto-following."
+    url: "/posts/2026-11-23-unified-p4-firmware-v1-v3-simulator-multiplayer-and-auto-calibration/"
   - title: "V1 clock-spring arms, hunting phantom leg jams (NeuralPose v8), V3 Option A-1 legs, and the live simulator.ainek.io 3D web simulator"
     date: 2026-11-20
     location: "V1 & V3 CAD (v3-2.blend), V2 firmware/NeuralPose v8, and live simulator.ainek.io alpha"
@@ -164,6 +170,6 @@ entries:
 
 # About the build journal
 
-These dated workbench entries cover ongoing development across the active eight-servo **Ainekio V1** quadruped (`ESP32-S3` floor build & `Scene 'v1'` `ESP32-P4`/`683ZZ`/4th-wire upgrades), the active `650 g` twelve-servo **Ainekio V2** floor robot, the `608`-mesh armored `DS3235` **Ainekio V3** CAD, and [Ainekio OS](https://github.com/Greg-Aster/ainekio-os) (formerly MetaHuman OS).
+These dated workbench entries cover ongoing development across the active eight-servo **Ainekio V1** quadruped (`ESP32-S3` floor build & unified `ESP32-P4` clock-spring / direct 8-ch ADC upgrade), the active `650 g` twelve-servo **Ainekio V2** floor robot, the armored `DS3225 PRO` **Ainekio V3** (Option A-1 self-leveling ankles, panoramic Cyclops optic & trained RL live in [`simulator.ainek.io`](https://simulator.ainek.io/), physical print pending), and [Ainekio OS](https://github.com/Greg-Aster/ainekio-os).
 
 If you want a high-level picture before reading individual bench logs, start with the [System Overview](/posts/project-overview/), [What Ainekio Can Do](/posts/what-ainekio-can-do/), [How Does Ainekio Stack Up?](/posts/how-does-ainekio-stack-up/), [Ainekio V1 Guide](/posts/ainekio-v1/), or [Ainekio OS Guide](/posts/ainekio-os/). Pre-hardware planning drafts from July 2026 remain preserved in [July 2026 Early Planning Notes](/posts/v1-original-posts/).

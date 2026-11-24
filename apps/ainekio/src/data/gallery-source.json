@@ -10,10 +10,10 @@
   {
     "id": "megameal-v2-lab-simulator",
     "kind": "design",
-    "source": "media-originals/screenshots/megameal_v2_lab_simulator.png",
-    "title": "game.megameal 3D virtual robot lab: Ainekio V2 in the 1:1 browser simulator (alpha PoC)",
-    "caption": "Live browser WebGL capture from game.megameal (?scene=v2_lab_runtime) showing the 12-servo Ainekio V2 quadruped in the 1:1 cable-and-obstacle arena alongside the interactive MuJoCo-parity HUD (virtual OV5647 chin-camera feed, ST7789 face mirror, Free/Follow/POV cameras, force-wrench perturbations, and J0–J11 servo pin/jam controls).",
-    "date": "2026-11-20"
+    "source": "media-originals/screenshots/simulator_v3_cyclops_yggdrasil.png",
+    "title": "simulator.ainek.io 3D web simulator: Ainekio V3 (panoramic Cyclops optic) in Yggdrasil",
+    "caption": "Live browser WebGL capture from simulator.ainek.io showing Ainekio V3 with its panoramic 2.8-inch ILI9341 Cyclops optic and self-leveling crawler feet on the Bifrost bridge in Yggdrasil (Tree of Life), running 500 Hz MuJoCo WASM, v3-microduck-p4 neural walking, PeerJS multiplayer rooms, and 12 live servo pin/jam controls alongside V1 and V2.",
+    "date": "2026-11-23"
   },
   {
     "id": "v1-clockspring-open-deck",

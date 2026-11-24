@@ -26,9 +26,9 @@ const galleryJsonLd = {
 const groups = [
   { id: 'photos', shortLabel: 'Workbench photos', title: 'From the workbench', intro: 'Photographs of the physical robots: the 650 g 12-servo V2 feedback build, single-leg linkage prototypes, and the active 8-servo V1 quadruped.', kinds: ['photo'] },
   { id: 'videos', shortLabel: 'Floor videos', title: 'The physical robot on video', intro: 'Live V2 capability checks (wake-up, greet, 4th-wire jam detection, and IMU shake reflexes), onboard OV5647 camera footage from carpet walking trials, and floor/bench runs.', kinds: ['physical-video'] },
-  { id: 'animation', shortLabel: 'Sim & RL studies', title: 'Simulation, neural gait & motion studies', intro: 'Cross-morphology V3 motion-transfer rollouts showing why each robot body must learn its own motions, MuJoCo quadruped RL rollouts (MicroDuck v18/v19-snag-p4 & NeuralPose v5), and C-gait imitation policy comparisons.', kinds: ['animation'] },
-  { id: 'diagrams', shortLabel: 'Wiring & Studies', title: 'Hardware wiring, kinematic plots & 59-face libraries', intro: 'ESP32-P4 pinouts, PCA9685 PWM and CD74HC4067 4th-wire feedback wiring diagrams, V3 5-link workspace & DS3235 torque-optimization plots, MicroDuck System-ID benchmarks, and full 59-expression face sheets across V2 (ST7789 LCD) and V1 (128×64 SSD1306 OLED).', kinds: ['diagram'] },
-  { id: 'design', shortLabel: 'CAD & Web Sim', title: 'CAD, 3D Web Simulator & MuJoCo MJCF models', intro: 'Blender CAD assemblies and live simulator captures—Ainekio V3 with Option A-1 5-link crawler legs, Clip 26 clamshell latches & AINEKIO V-003 hull; Ainekio V1 vertical-knee arms & concentric under-arm 4-wire clock-springs; the game.megameal 3D virtual robot lab alpha; and the 650 g Ainekio V2 Keeper Bridge & MuJoCo MJCF models.', kinds: ['design'] },
+  { id: 'animation', shortLabel: 'Sim & RL studies', title: 'Simulation, neural gait & motion studies', intro: 'Cross-morphology V3 motion-transfer rollouts showing why each robot body must learn its own motions, MuJoCo quadruped RL rollouts (V2 MicroDuck v18/v19-snag-p4 & NeuralPose v8 alongside V1 v1-microduck-p4 and V3 v3-microduck-p4 neural gaits), and C-gait imitation policy comparisons.', kinds: ['animation'] },
+  { id: 'diagrams', shortLabel: 'Wiring & Studies', title: 'Hardware wiring, kinematic plots & 59-face libraries', intro: 'ESP32-P4 pinouts, PCA9685 PWM and CD74HC4067 4th-wire feedback wiring diagrams, V3 5-link workspace & DS3225 PRO torque-optimization plots, MicroDuck System-ID benchmarks, and full 59-expression face sheets across V2 (ST7789 LCD) and V1 (128×64 SSD1306 OLED).', kinds: ['diagram'] },
+  { id: 'design', shortLabel: 'CAD & Web Sim', title: 'CAD, 3D Web Simulator & MuJoCo MJCF models', intro: 'Blender CAD assemblies and live captures from simulator.ainek.io (V1, V2 & V3 across Yggdrasil & the 19 m Robotics Lab)—Ainekio V3 with Option A-1 4-bar legs, self-leveling ankles, Clip 26 clamshell latches & AINEKIO V-003 hull; Ainekio V1 vertical-knee arms & concentric under-arm 4-wire clock-springs; and the 650 g Ainekio V2 Keeper Bridge & MuJoCo MJCF models.', kinds: ['design'] },
 ].map(group => ({
   ...group,
   items: gallery.filter(item => group.kinds.includes(item.kind)),
@@ -61,7 +61,7 @@ const labelForKind = (kind: string) =>
       <div class="gallery-meta-row">
         <p class="gallery-milestone">
           <strong>Latest milestone:</strong>
-          <a href={url('/posts/2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim/')}>Nov 20 V1 clock-spring arms, NeuralPose v8 phantom-jam fix, V3 Option A-1 legs &amp; game.megameal 3D web sim →</a>
+          <a href={url('/posts/2026-11-23-unified-p4-firmware-v1-v3-simulator-multiplayer-and-auto-calibration/')}>Nov 23: Unified P4 firmware, V1/V2/V3 simulator, multiplayer &amp; auto-calibration →</a>
         </p>
         <ShareBar title={galleryTitle} description={galleryDescription} url={Astro.url.href} />
       </div>

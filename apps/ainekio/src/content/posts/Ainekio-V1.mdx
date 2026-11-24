@@ -1,8 +1,8 @@
 ---
 title: "Ainekio V1: Active Eight-Servo Quadruped Systems Guide"
 published: 2026-08-31
-updated: 2026-11-20
-description: "Complete technical systems guide to the active eight-servo Ainekio V1 quadruped: functioning ESP32-S3 floor build, Scene 'v1' vertical-knee R2V10 arms, coaxial under-arm 4-wire clock-springs, sculpted spiked lower legs, ESP32-P4 / 683ZZ / 4th-wire upgrades, embodied voice, vision, 59 OLED expressions (303 frames), 38 motions, and protocol-v1 Ainekio OS loop."
+updated: 2026-11-23
+description: "Complete technical systems guide to the active eight-servo Ainekio V1 quadruped: functioning ESP32-S3 floor build, Scene 'v1' vertical-knee R2V10 arms, coaxial under-arm 4-wire clock-springs, unified ESP32-P4 firmware (sdkconfig.v1-8servo, direct 8-ch ADC, display_ssd1306.c), v1-microduck-p4 & neural_pose_v1 RL policies live in simulator.ainek.io, 59 OLED expressions (303 frames), and 38 motions."
 image: "/posts/ainekio-v1/ainekio-v1-physical.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Greg the Mechanic"
@@ -22,12 +22,20 @@ reading:
   related: ["body-design-and-hardware", "controller-firmware", "v1-original-posts", "v1-v2-comparison", "ainekio-v2"]
 ---
 import RobotModelViewer from '../../components/RobotModelViewer.svelte'
+import SimulatorCta from '../../components/SimulatorCta.astro'
 
-> **Active 8-servo platform:** **Ainekio V1** is not an archived prototype—it is a **functioning, actively developed eight-servo quadruped** running alongside **[Ainekio V2](/posts/ainekio-v2/)** (`12` servos) and the in-development **[Ainekio V3](/posts/ainekio-v3-preview/)** (`DS3235` + onboard Linux SBC). On the floor today, the `ESP32-S3` V1 robot walks, emotes across **38 `.amot` motions**, speaks, listens, snaps `OV3660` vision stills, and renders all **`59` procedural V2-derived facial expressions (`303` frames)** on its `0.96"` `SSD1306` OLED over `protocol-v1` with **[Ainekio OS](/posts/ainekio-os/)**. Simultaneously, V1 is advancing on the workbench through **`Scene 'v1'` (`174` active meshes, `174.8 × 155.5 × 84.1 mm` neutral CAD envelope, inspectable and animatable in the 3D viewer below)**: a lowered `Frame8` top enclosure cap (`121.7 × 79.7 × 22.0 mm`) with corner clock-spring clearance bays, squared vertical-knee `R2V10` upper arms (`36.17 × 36.17 × 37.50 mm`), unified cobalt-blue sculpted spiked lower legs (`39.30 × 5.30 × 79.17 mm`), concentric 3-part coaxial under-arm 4-wire clock-spring harnesses, `683ZZ` hip counter-bearings, and an upgraded `Waveshare ESP32-P4-WIFI6` + `PCA9685` + 8× 4th-wire feedback + `GY-LSM6DS3` IMU + `Arducam B0066` deck ([Milestone #20](/posts/2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim/)).
+> **Active 8-servo platform:** **Ainekio V1** is not an archived prototype—it is a **functioning, actively developed eight-servo quadruped** running alongside **[Ainekio V2](/posts/ainekio-v2/)** (`12` servos) and the in-development **[Ainekio V3](/posts/ainekio-v3-preview/)** (`DS3225 PRO` HV + onboard Linux SBC). On the floor today, the `ESP32-S3` V1 robot walks, emotes across **38 `.amot` motions**, speaks, listens, snaps `OV3660` vision stills, and renders all **`59` procedural V2-derived facial expressions (`303` frames)** on its `0.96"` `SSD1306` OLED over `protocol-v1` with **[Ainekio OS](/posts/ainekio-os/)**. Simultaneously, V1 is advancing through **`Scene 'v1'` (`174` active meshes, `174.8 × 155.5 × 84.1 mm` neutral CAD envelope, inspectable and animatable in the 3D viewer below)** and our **unified `ESP32-P4` firmware (`sdkconfig.v1-8servo`, `body_v1.c`, direct 8-ch ADC with no analog mux, `display_ssd1306.c`)**, with trained **`v1-microduck-p4`** walking and **`neural_pose_v1`** posture policies now live in **[`simulator.ainek.io`](https://simulator.ainek.io/#model=v1)** ([Milestone #21](/posts/2026-11-23-unified-p4-firmware-v1-v3-simulator-multiplayer-and-auto-calibration/)).
 
 **Ainekio V1** demonstrates how much embodied capability fits inside a compact, 3D-printed sub-$100 eight-servo spider-stance quadruped—combining onboard vision, full-duplex room audio, expressive OLED eyes, and deterministic safety firmware into a live physical body for a persistent local AI mind.
 
-While early pre-hardware planning drafts from July 2026 are preserved separately as [July 2026 Early Planning Notes](/posts/v1-original-posts/), this guide documents **the active Ainekio V1 robot across both its functioning `ESP32-S3` floor configuration and its ongoing `Scene 'v1'` vertical-knee, clock-spring, and `ESP32-P4` / 4th-wire upgrades**.
+While early pre-hardware planning drafts from July 2026 are preserved separately as [July 2026 Early Planning Notes](/posts/v1-original-posts/), this guide documents **the active Ainekio V1 robot across both its functioning `ESP32-S3` floor configuration and its unified `ESP32-P4` / `Scene 'v1'` vertical-knee, clock-spring, and 4th-wire direct-ADC architecture**.
+
+<SimulatorCta
+  heading="Drive Ainekio V1 Live in the 3D Simulator"
+  description="Test Ainekio V1's vertical-knee R2V10 chassis, 0.96-inch SSD1306 OLED face, compiled ESP32-P4 body_v1.c firmware, v1-microduck-p4 neural walking, and neural_pose_v1 postures in 500 Hz MuJoCo WASM right in your browser."
+  buttonLabel="Drive V1 in Simulator"
+  href="https://simulator.ainek.io/#model=v1"
+/>
 
 ---
 
@@ -37,7 +45,7 @@ Ainekio V1 splits responsibility cleanly across three layers so servo pulse gene
 
 | Layer | V1 Hardware / Runtime | Core Responsibilities |
 | --- | --- | --- |
-| **1. Onboard Body (`Slave/firmware/esp32s3` & `Scene 'v1'` CAD)** | **Summer 2026 physical build:** Freenove `ESP32-S3-WROOM CAM` (`FNK0085`, `N16R8`: dual-core `160 MHz` Xtensa LX7, `16 MiB` flash, `8 MiB` octal PSRAM) running **ESP-IDF v5.5.4** + portable C11 `ainekio_core` · **Nov 20 `Scene 'v1'` CAD (`174` active meshes):** `Waveshare ESP32-P4-WIFI6` + `PCA9685` + 8× 4th-wire feedback (coaxial under-arm clock-springs) + `GY-LSM6DS3` IMU + `Arducam B0066` | Drives 8× `MG90S` servos (`50 Hz`), renders **59 expressions (`303` frames)** on the `0.96"` `SSD1306` OLED (generated deterministically via `derive_v1_oled.py` `2.5×` isotropic crop from V2's procedural C `face_preview` into `faces-v1.json`), captures correlated `OV3660` `XGA` (`1024×768`) stills (or `B0066` CSI frames in `Scene 'v1'`), runs `16 kHz` audio + VAD + speaker playback, monitors `2S` battery ADC, and enforces local leases/watchdogs |
+| **1. Onboard Body (`Slave/firmware/esp32s3` & unified `esp32p4-wifi6` `sdkconfig.v1-8servo`)** | **Summer 2026 physical build:** Freenove `ESP32-S3-WROOM CAM` (`FNK0085`, `N16R8`: dual-core `160 MHz` Xtensa LX7, `16 MiB` flash, `8 MiB` octal PSRAM) running **ESP-IDF v5.5.4** + portable C11 `ainekio_core` · **Unified `ESP32-P4` build (`sdkconfig.v1-8servo` + `Scene 'v1'` `174`-mesh CAD):** `Waveshare ESP32-P4-WIFI6` running `body_v1.c` + `display_ssd1306.c` + `PCA9685` + **8 direct ADC channels (no analog mux)** (`ADC1 CH4..7` / `GPIO20..23` + `ADC2 CH0..3` / `GPIO49..52`) + `GY-LSM6DS3` IMU + `Arducam B0066` | Drives 8× `MG90S` servos (`50 Hz`), renders **59 expressions (`303` frames)** on the `0.96"` `SSD1306` OLED (generated deterministically via `derive_v1_oled.py` `2.5×` isotropic crop from V2's procedural C `face_preview` into `faces-v1.json`), runs trained **`v1-microduck-p4`** walking and **`neural_pose_v1`** postures on the P4 stack, captures correlated `OV3660` / `B0066` stills, runs `16 kHz` audio + VAD + speaker playback, and enforces local leases/watchdogs |
 | **2. Host Gateway (`Master/gateway`)** | Node.js `protocol-v1` control-plane server on LAN PC | Authenticates the `v1-8servo` body over a single multiplexed WebSocket (`JSON` text + binary `0x01` PCM audio + `0x02`/`0x03` JPEG frames), assigns connection epochs and command sequence IDs, tracks acks/completions, and serves operator telemetry |
 | **3. Companion Mind ([Ainekio OS](/posts/ainekio-os/))** | `Greg-Aster/ainekio-os` (originally MetaHuman OS during V1 bring-up) | Transcribes room speech (Whisper), grounds camera frames, maintains persistent episodic memory and Standing Persona identity across days, and emits bounded semantic intents (`walk`, `wave`, `face`, `say`, or `motion_plan_v1` keyframe sequences) |
 
@@ -94,7 +102,7 @@ Each corner leg carries two `MG90S` micro servos without lateral hip-roll abduct
   </figure>
   <figure>
     <img src="/gallery/20260827_093200-960.webp" alt="Top-down workbench photo of the physical August 2026 Ainekio V1 eight-servo chassis showing the Freenove ESP32-S3 board and direct servo wiring." width="960" height="720" loading="lazy" />
-    <figcaption>Workbench harness detail on the August 2026 prototype (`direct MCPWM` wiring on the `ESP32-S3` prior to the `Frame8` enclosure and `ESP32-P4` + `PCA9685` deck).</figcaption>
+    <figcaption>Workbench harness detail on the August 2026 prototype (<code>direct MCPWM</code> wiring on the <code>ESP32-S3</code> prior to the <code>Frame8</code> enclosure and <code>ESP32-P4</code> + <code>PCA9685</code> deck).</figcaption>
   </figure>
 </div>
 
@@ -153,6 +161,16 @@ Because the delivered `N16R8` module uses **octal PSRAM at `80 MHz`**, **`GPIO33
   <figcaption>Complete <code>59</code>-expression (<code>303</code>-frame) <code>128 × 64</code> 1-bit <code>SSD1306</code> OLED contact sheet (<code>faces-v1.json</code>) derived deterministically via <code>derive_v1_oled.py</code> (<code>2.5×</code> isotropic crop from V2's procedural C <code>face_preview</code>).</figcaption>
 </figure>
 
+### Unified `ESP32-P4` firmware (`sdkconfig.v1-8servo`), direct 8-ch ADC & trained V1 RL policies
+
+In November 2026 ([Milestone #21](/posts/2026-11-23-unified-p4-firmware-v1-v3-simulator-multiplayer-and-auto-calibration/)), V1 graduated into the unified multi-model `Slave/firmware/esp32p4-wifi6` codebase alongside V2 and V3—removing the need for an external analog multiplexer while bringing native neural locomotion and posture control to the 8-servo chassis:
+
+- **Unified `ESP32-P4` target (`sdkconfig.v1-8servo`):** Compiles **`body_v1.c`** (`1,062` lines) and **`display_ssd1306.c`** (`0.96"` `128×64` I2C OLED moved to `SCL = GPIO26`, `SDA = GPIO27` to free `GPIO20–23` for direct analog capture), verified as a standalone firmware binary (`build-v1/ainekio_p4_body.bin`).
+- **8 direct `ESP32-P4` ADC channels (no `CD74HC4067` mux required):** Because V1 only has 8 joints (`J0–J7`), all 8 fourth-wire potentiometer wipers land straight on native `ESP32-P4` ADC pins—**`ADC1 CH4..7` (`GPIO20..23`, `J0..J3`)** and **`ADC2 CH0..3` (`GPIO49..52`, `J4..J7`)**—simplifying harness wiring inside `Frame7`/`Frame8`.
+- **Trained V1 RL policies live in [`simulator.ainek.io`](https://simulator.ainek.io/#model=v1):**
+  - **`v1-microduck-p4` (`53,696 B` `int8` C policy):** Trained across **`17.2M` MuJoCo steps**, passing **`8/8`** evaluation scenarios with **`0.144 m/s`** fast forward walk and **`±1.21 rad/s`** yaw turning.
+  - **`neural_pose_v1` (`1.02 MB`):** Passing **`8/8`** whole-body posture scenarios with **`1.07°–3.97°` MAE** and **`0.0` reflection equivariance error**.
+
 ---
 
 ## 5. Single-socket `protocol-v1` loop & how V1 shaped V2 and V3
@@ -168,12 +186,13 @@ When V1 powers on (after initial WPA2 provisioning via its `Ainekio-Setup` `192.
 V1 proved the entire **body ↔ gateway ↔ Ainekio OS** architecture in real rooms, while both inspiring V1's own November 20 `Scene 'v1'` vertical-knee + clock-spring + closed-loop CAD upgrade and defining the next two quadruped generations:
 
 - **Why [Ainekio V2](/posts/ainekio-v2/) was built (Active 12-Servo Closed-Loop Body):** Two-DOF open-loop legs could not step sideways, balance dynamically in roll, or tell when a foot caught on thick carpet (`45°/90°/180°` turns varied with floor friction). V2 added lateral hip roll (`12` servos), compact `35/20/28/38/55 mm` four-bar linkages, **4th-wire potentiometer feedback** (`CD74HC4067` `C4–C15` → `GPIO49` with select lines `S0–S3` on `GPIO27–30`), a `208 Hz` `LSM6DS3` IMU, a `1.9"` color LCD (**59 expressions**), open `microWakeWord` (`int8` TFLite Micro) + WebRTC VAD audio, an `8–10 s` `I²t` winding thermal fuse, and an **on-chip `50 Hz` `107.8 KB` L2-cached neural gait** in a `650 g` shell ([V1 vs. V2 Comparison](/posts/v1-v2-comparison/)).
-- **Why [Ainekio V3](/posts/ainekio-v3-preview/) is now in CAD (Industrial Armored `DS3235` + Onboard Linux SBC):** Scaling up into a `537`-mesh industrial armored assembly (`402.0 × 236.5 × 343.1 mm` w/ whip; `~260.6 mm` to ROPS/cargo roofline) with waterproof **`DS3235`** standard servos, compact **`Option A-1` (`54 / 22 / 46 / 56 / 135 mm`, `-35°` bellcrank)** high-torque 5-link pantograph legs (`+120%` vertical lift, `+116%` running thrust), a continuous `3,860`-vert armored belly chassis tub housing a low-CG `4× 21700` (`2S2P`) pack, and `AINEKIO` / `V-003` armored sponsons lets V3 carry **both** an `ESP32-P4-WIFI6` motor controller and an **onboard `Radxa Dragon Q6A` Linux SBC** inside a weather-resistant hull—pairing a **recessed `2.8"` `MSP2807` (`ILI9341`) vault TFT behind a swept ROPS bull-bar** with rear-accessible Linux I/O, a `Clip 26` leaf-spring clamshell latch, and a `72 mm` `Ø2.0 mm`-pin service piano hinge.
+- **Why [Ainekio V3](/posts/ainekio-v3-preview/) is now in CAD & live simulation (Industrial Armored `DS3225 PRO` HV + Onboard Linux SBC):** Scaling up into an industrial armored assembly (`406.4 × 236.5 × 385.6 mm` neutral envelope, `~2.97 kg` est.) with 12× **`DS3225 PRO` HV coreless** servos (`270°` travel on direct `2S`, `35 kg·cm`), compact **`Option A-1` (`54 / 22 / 46 / 56 / 135 mm`)** 5-link pantograph legs with **2-stage double-parallelogram self-leveling crawler feet** (`<= 0.27°` level error) and compliant knee/servo-saver linkages, a continuous armored belly chassis tub housing a low-CG `4× 21700` (`2S2P`) pack, and `AINEKIO` / `V-003` sponsons lets V3 carry **both** an `ESP32-P4-WIFI6` motor controller (`sdkconfig.v3-12servo`, `body_v3.c`, panoramic `face_cyclops.c`) and an **onboard `Radxa Dragon Q6A` Linux SBC** inside a weather-resistant hull—with `v3-microduck-p4` and `neural_pose_v3` already live in [`simulator.ainek.io`](https://simulator.ainek.io/#model=v3) ahead of physical printing.
 
 ### Deeper V1 engineering references
 
+- **[Milestone #21: Unified ESP32-P4 Firmware, V1/V3 Live Simulator, Multiplayer & Auto-Calibration](/posts/2026-11-23-unified-p4-firmware-v1-v3-simulator-multiplayer-and-auto-calibration/)** — Nov 21–23 build report covering `sdkconfig.v1-8servo` (`body_v1.c`), direct 8-ch ADC, and trained `v1-microduck-p4` / `neural_pose_v1` in `simulator.ainek.io`.
 - **[V1 Eight-Servo Body & Hardware Reference](/posts/body-design-and-hardware/)** — Detailed bill of materials, `Frame8` / vertical-knee `R2V10` / concentric clock-spring CAD notes, and dual-buck power wiring.
-- **[V1 ESP32-S3 Controller Firmware](/posts/controller-firmware/)** — Portable C11 `ainekio_core` lifecycle, `MCPWM` timing, `derive_v1_oled.py` 59-face pipeline, OTA rollback, SoftAP provisioning, and the `ESP32-P4` closed-loop upgrade path.
+- **[V1 Controller Firmware Reference](/posts/controller-firmware/)** — Portable C11 `ainekio_core` lifecycle, `MCPWM` timing, `derive_v1_oled.py` 59-face pipeline, OTA rollback, SoftAP provisioning, and the unified `ESP32-P4` `sdkconfig.v1-8servo` target.
 - **[V1 vs. V2 Side-by-Side Comparison](/posts/v1-v2-comparison/)** — Joint excursion tables, compute comparison, and downloadable `.amot` range CSVs across both active robots.
 - **[Milestone #20: V1 Clock-Spring Arms, V2 Phantom Jams & V3 Option A-1](/posts/2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim/)** — Detailed November 20 build report covering V1's vertical-knee + clock-spring redesign, sculpted spiked lower leg, and V3's `Option A-1` 5-link optimization.
 - **[July 2026 Early Planning Notes (Pre-Hardware Drafts)](/posts/v1-original-posts/)** — The preserved July 2026 Google Docs design discussions from before the first physical parts arrived.

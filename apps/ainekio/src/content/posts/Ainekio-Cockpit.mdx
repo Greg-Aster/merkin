@@ -1,8 +1,8 @@
 ---
 title: "Ainekio Cockpit: Full-Screen Camera HUD, Tap-to-Talk & Live Ainekio OS Stream"
 published: 2026-11-16T09:00:00-08:00
-updated: 2026-11-16
-description: "Technical reference for Ainekio Cockpit (#cockpit-section) in Body Control: full-viewport OV5647 HUD, 8×8 MoGe-2 / ground-plane corridor range, one-tap wake-word bypass, translucent live Ainekio OS message stream, 10 instant subsystem toggles, and 2D vector joystick."
+updated: 2026-11-23
+description: "Technical reference for Ainekio Cockpit (#cockpit-section) and Body Control workspaces: full-viewport OV5647 HUD, 8×8 MoGe-2 / ground-plane corridor range, microWakeWord + Tap-to-Talk, live Ainekio OS stream with direct text input & AIKSPK01 echo, 10 instant subsystem toggles, 2D joystick, Automated Servo Calibration, and the Virtual Simulation Manager."
 image: "/posts/2026-11-16-progress/cockpit-hud-architecture.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -33,7 +33,7 @@ While the multi-panel **Body Control** dashboard (`Master/gateway/dashboard/`) e
 Across the top edge of the camera feed (`cockpit-hud-top`), Cockpit surfaces real-time link health and immediate voice/safety controls:
 
 - **Live posture & attitude pills:** Connection state, active controller state (`STAND`, `WALK`, `FREESTYLE`, `PASSIVE`), `208 Hz` `LSM6DS3` roll and pitch readout (`#cockpit-attitude-readout`), and status toast notifications.
-- **`Tap to Talk` (`#cockpit-talk-button`) + live mic meter (`#cockpit-mic-level`):** Normally, the `ESP32-P4` listens behind onboard wake-word gating (`WakeNet9s` / `microWakeWord`). Tapping `Tap to Talk` saves the current microphone gate (`wake` or `vad`), sends `{ on: true, gate: "open" }` to the robot, and displays a floating status banner (`"Listening — speak now, then tap Done to send..."`) alongside a live `16 kHz` PCM level meter. Tapping `Done · Send` restores the prior `wake` or `vad` gate, causing the `ESP32-P4` to seal and flush the recorded PCM utterance immediately through `Master/gateway` to Whisper (`:9883`) and Ainekio OS.
+- **`Tap to Talk` (`#cockpit-talk-button`) + live mic meter (`#cockpit-mic-level`):** Normally, the `ESP32-P4` listens behind onboard **`microWakeWord` + WebRTC VAD** gating (proprietary `WakeNet9s` is disabled). Tapping `Tap to Talk` saves the current microphone gate (`wake` or `vad`), sends `{ on: true, gate: "open" }` to the robot, and displays a floating status banner (`"Listening — speak now, then tap Done to send..."`) alongside a live `16 kHz` PCM level meter. Tapping `Done · Send` restores the prior `wake` or `vad` gate, causing the `ESP32-P4` to seal and flush the recorded PCM utterance immediately through `Master/gateway` to Whisper (`:9883`) and Ainekio OS.
 - **Camera, `Stream`, `Settings`, and direct `STOP`:** One-click `Cam` stream switch, `Snap` still capture, `Stream` overlay toggle (`localStorage["ainekio-cockpit-stream-open"]`), `⚙ Settings` drawer, and high-priority `STOP` (`stop` preempting active motion and coordinator leases).
 
 ---
@@ -46,8 +46,8 @@ Previously, driving Ainekio from Body Control while conversing with or debugging
 | :--- | :--- | :--- |
 | **`Body Control Text Out` node** | `ainekio-os` `packages/core/src/nodes/environment/send-text.node.ts` (alias `body_control_text_out`) | `any-input` output node wired into **7 cognitive graphs** (`environment-conversation-mode`, `agent-mode`, `dual-mode`, `emulation-mode`, `big-brother-response-mode`, `big-brother-tool-mode`, and `robot-wake-up-mode`). Emits durable `environment_text_stream` outbox effects **without claiming a `bodyLease`** or queuing physical robot commands. |
 | **Coordinator outbox & SSE relay** | `coordinator-outbox.ts`, `ExecutionStore` (`completeProjection`), `environment-interface/store.ts` | Buffers up to `64` `pendingTextStream` items per session (deduplicated across `128` delivered IDs), streams `event: messages` batches over `/api/environment-bridge/stream`, and forwards `{ type: "environment.text_stream", version: 1 }` frames over the bridge WebSocket. |
-| **Gateway `EnvironmentAdapter._text_stream`** | `Ainekio-bot` `Master/gateway/environment_adapter/server.py` (`POST /api/metahuman-stream`) | Merges three live sources into an 80-message deduplicated ring (`160`-ID history): **(1)** transcribed user voice utterances (`id: "voice:<utteranceId>"`, `role: "user"`, `source: "voice"`), **(2)** cognitive workflow & Big Brother replies (`environment.text_stream`), and **(3)** direct bridge text actions (`id: "action:<action_id>"`). |
-| **Cockpit `#cockpit-stream-panel`** | `Master/gateway/dashboard/static/{dashboard.html,js,css}` | Displays glowing online bridge status, role/mode badges (`You · voice`, `Ainekio OS`, `Big Brother`), `HH:MM:SS` timestamps, sticky bottom auto-scroll (`≤ 28 px` threshold), and one-click `Clear` (`{"op": "clear"}`). |
+| **Gateway `EnvironmentAdapter._text_stream`** | `Ainekio-bot` `Master/gateway/environment_adapter/server.py` (`POST /api/metahuman-stream`) | Merges live sources into an 80-message deduplicated ring (`160`-ID history): **(1)** transcribed user voice utterances (`id: "voice:<utteranceId>"`, `role: "user"`, `source: "voice"`), **(2)** direct typed prompts from Cockpit HUD (`#cockpit-stream-form`), **(3)** cognitive workflow & Big Brother replies (`environment.text_stream`), **(4)** direct bridge text actions (`id: "action:<action_id>"`), and **(5)** `room_chat` plus **`AIKSPK01` spoken text echoes** (`<= 2,000` chars carried in chunk-1 `audio.speech`) from physical or [`simulator.ainek.io`](https://simulator.ainek.io/) sessions. |
+| **Cockpit `#cockpit-stream-panel` & `#cockpit-stream-form`** | `Master/gateway/dashboard/static/{dashboard.html,js,css}` | Displays glowing online bridge status, role/mode badges (`You · voice`, `Ainekio OS`, `Big Brother`, `room_chat`), `HH:MM:SS` timestamps, sticky bottom auto-scroll (`≤ 28 px` threshold), an inline **Cockpit HUD text input (`#cockpit-stream-form`)** for typing directly to Ainekio OS from the camera overlay, and one-click `Clear` (`{"op": "clear"}`). |
 
 ---
 
@@ -58,7 +58,7 @@ Opening `⚙ Settings` inside Cockpit exposes ten live hardware, neural, percept
 1. **Auto-leveling (`#cockpit-balance-toggle`):** Enables/pauses tapered `208 Hz` `LSM6DS3` roll/pitch self-leveling (`≤ 0.5°` bus-quiet deadband with linkage-Jacobian anti-windup).
 2. **Jam detection (`#cockpit-jam-toggle`):** Enables target-aware 4th-wire potentiometer stall monitoring across all 12 `CD74HC4067` channels (see [Jam Protection & Winding Thermal Fuse](/posts/jam-protection-and-thermal-safety/)).
 3. **Freestyle & walking unsnag recovery (`#cockpit-recovery-toggle`):** Coordinates `NeuralPose v8` Schmitt-trigger carpet stance alignment, `0.8 s` bounded arrival escape, and `1.8 s` walking reverse unsnag.
-4. **Living presence — System 3 (`#cockpit-presence-toggle`):** Toggles **`50 Hz` `NeuralPosePresence`** (`POST /api/presence`) for motor-silent `vad_open` listening, pure sagittal speech nods (`±2.5 mm` Z, `±4.5°` pitch, `0.0°` shoulder scrub), and person-aware inactivity rest (see [Three-System Neural Motion Architecture](/posts/three-system-neural-architecture/)).
+4. **NeuralPosePresence — System 3 (`#cockpit-presence-toggle`):** Toggles **`50 Hz` `NeuralPosePresence`** (`POST /api/presence`) for motor-silent `vad_open` listening, pure sagittal speech nods (`±2.5 mm` Z, `±4.5°` pitch, `0.0°` shoulder scrub), and person-aware inactivity rest (see [Three-System Neural Motion Architecture](/posts/three-system-neural-architecture/)).
 5. **Auto self-right & gyro reflex (`#cockpit-self-right-toggle`):** Feeds live IMU gyro/tilt state into System 3 (`imu_fed_to_policy`) and enables pickup passive safety (`calm_then_release`) and automatic self-righting.
 6. **Walking heading correction (`#cockpit-walking-feedback-toggle`):** Closes IMU yaw drift during straight-line walking bouts.
 7. **Host neural gait vs. On-chip MicroDuck (`#cockpit-walk-system-toggle`):** Switches live walking between **Core 1 on-chip `107.84 KiB` `int8` MicroDuck** (`source="native"`, zero Wi-Fi step jitter) and **host-streamed `50 Hz` MicroDuck policies** (`source="neural"`).
@@ -68,12 +68,12 @@ Opening `⚙ Settings` inside Cockpit exposes ten live hardware, neural, percept
 
 ---
 
-## 4. 2D vector joystick, 25-emote catalog & custom Freestyle prompt
+## 4. 2D vector joystick, 24-emote catalog & custom Freestyle prompt
 
 Along the bottom of the viewport, Cockpit pairs continuous locomotion steering with expressive pose synthesis:
 
 - **Pointer-captured 2D virtual joystick (`#cockpit-joystick`):** Features a `14%` center deadzone, `70 ms` / `8%` vector delta throttling (`driveHeldVector(forward, turn)`), a `Stride 0–100%` range slider (`#cockpit-speed`), and `Finish Walk` (`#cockpit-walk-finish`) for clean stance phase completion—working alongside `WASD`/arrow keys and USB/Bluetooth gamepads.
-- **Quick posture pad & 25-button emote drawer (`#cockpit-emotes-drawer`):** Four immediate stances (`Stand`, `Sit`, `Neutral`, `Rest`) plus 25 named gestures (`wave`, `stretch`, `dance`, `bow`, `celebrate`, `cute`, `curious`, `nod`, `shake`, `shrug`, `crouch`, `lay_down`, `dead`, `pushup`, `point`, `swim`, `surprised`, `sad`, `salsa`, `macarena`, `worm`, `freaky`, `number_one` `#1 · hydrant`, and `number_two` `#2 · squat`), switchable between compiled C splines (`Legacy`) and `50 Hz` `NeuralPose` (`Freestyle`).
+- **Quick posture pad & 24-button emote drawer (`#cockpit-emotes-drawer`):** Four immediate stances (`Stand`, `Sit`, `Neutral`, `Rest`) plus 24 named gestures (`wave`, `stretch`, `dance`, `bow`, `celebrate`, `cute`, `curious`, `nod`, `shake`, `shrug`, `crouch`, `lay_down`, `dead`, `pushup`, `point`, `swim`, `surprised`, `sad`, `salsa`, `macarena`, `worm`, `freaky`, `number_one` `#1 · hydrant`, and `number_two` `#2 · squat`), switchable between compiled C splines (`Legacy`) and `50 Hz` `NeuralPose` (`Freestyle`).
 - **Inline Freestyle prompt (`#cockpit-freestyle-form`):** Dispatches free-text natural-language choreography prompts (`POST /api/request-motion`) to the local `:8794` `Qwen3.5-0.8B` + `freestyle-curriculum-adapter.F16.gguf` generator (`939` clean choreography rows) and executes the resulting multi-frame trajectory through `50 Hz` `NeuralPose v8`.
 
 ---
@@ -85,3 +85,12 @@ Alongside human teleoperation in Cockpit, `Master/gateway/spatial_curiosity.py` 
 - Attributes Apache-2.0 `RT-DETRv2 + OWLv2` detections and `YuNet`/`SFace` person identities to compass-relative body yaw sectors, tracking `lastSeenSecAgo`, `freeFloorMeters` (from `GroundPlane` or `MoGe-2`), `secondsStationary`, `secondsSinceHumanActivity`, and `trackedObjects` with `inspected` flags (auto-marked when an object is framed near center at `area ≥ 0.08`).
 - Resets sector placement automatically when `tipped` or `rapid_movement` indicates the robot was picked up and relocated.
 - Feeds Ainekio OS's **System 1 single-hop Embodied Curiosity** (`embodied-curiosity.ts`), allowing Full Auto mode to turn toward uninspected sectors, step into open floor clearance, and escalate genuine visual discoveries to System 2 memory and speech.
+
+---
+
+## 6. Automated Servo Calibration & Virtual Simulation Manager workspaces
+
+Alongside the full-screen Cockpit overlay, Body Control's engineering tabs now ship two dedicated automation workspaces for physical bring-up and 3D simulation:
+
+- **Automated Servo Calibration (`#auto-calibration-card`, `Master/gateway/auto_calibration.py`, `/api/calibration/auto`):** Automates 12-channel zeroing and load-balanced alignment in either **`floor`** mode (4th-wire potentiometer sweep paired with IMU and shaft-load 4-leg balancing) or **`legs_free`** mode, verifying `0.00°` closure-error poses with an active **`25.0°` tilt abort guard** to protect hardware during sweeps.
+- **Virtual Simulation Manager (`Master/gateway/simulation.py`, `/api/simulation`):** Hosts [`simulator.ainek.io`](https://simulator.ainek.io/) locally on **`:8792`**, issues scoped virtual robot tokens (`ainekio-v{1,2,3}-sim`) plus **`ainekio-pair:` Quick Pair** and zero-log `#hash` launch links (`ws://127.0.0.1:8790/robot` or Cloudflare relay `wss://robot-gateway.ainek.io/robot`), and supervises the **24/7 headless Chromium runner** on the Brain host so virtual V1, V2, and V3 robots stay online even when browser tabs close (see the [Gateway & Simulator guide](/posts/gateway-and-simulator/)).

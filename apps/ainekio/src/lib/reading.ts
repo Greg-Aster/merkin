@@ -10,7 +10,7 @@ export const topics = {
   metahuman: { title: 'Ainekio OS (The Mind)', description: 'Local-first companion software for persistent memory, conversation, nightly consolidation, and robot reflexes.', reference: 'ainekio-os' },
   v1: { title: 'Ainekio V1 (8-servo)', description: 'The active eight-servo spider quadruped: functioning ESP32-S3 floor robot, 59-face OLED & 38-motion repertoire, and ongoing ESP32-P4 / 683ZZ / 4th-wire hardware & CAD development.', reference: 'ainekio-v1' },
 } satisfies Record<typeof topicIds[number], { title: string; description: string; reference: string }>
-export const generations = { v1: 'V1 · 8 servos', v2: 'V2 · 12 servos', v3: 'V3 · DS3235 (In Dev)', both: 'V1 · V2 · V3' }
+export const generations = { v1: 'V1 · 8 servos', v2: 'V2 · 12 servos', v3: 'V3 · DS3225 PRO (Sim Live)', both: 'V1 · V2 · V3' }
 export const kinds = { journal: 'Dated experiment', reference: 'Build reference', original: 'Early planning note' }
 
 export const readingSchema = z.object({

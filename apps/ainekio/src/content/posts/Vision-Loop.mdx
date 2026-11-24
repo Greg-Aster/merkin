@@ -1,15 +1,15 @@
 ---
-title: "ESP32-P4 Robot Vision & Face Display: Chin-Mounted OV5647 Camera, 59-Expression ST7789 LCD & Optical Flow"
+title: "ESP32-P4 Robot Vision & Face Displays: OV5647 Camera, ST7789 / Cyclops LCDs, RT-DETRv2 & MoGe-2"
 published: 2026-08-27T08:30:00-07:00
-updated: 2026-11-12
-description: "Ainekio V2's 1.9-inch ST7789 LCD face (59 expressions), lower-jaw chin-mounted OV5647 MIPI-CSI camera (10,000 µs motion-safe exposure cap), Cockpit HUD optical-flow obstacle range, YOLOE tracking, and depth odometry."
+updated: 2026-11-23
+description: "Ainekio's face displays (V1 0.96-inch SSD1306 OLED, V2 1.9-inch ST7789 59-expression LCD, V3 2.8-inch ILI9341 panoramic Cyclops optic), chin-mounted OV5647 MIPI-CSI camera, Apache-2.0 RT-DETRv2 + OWLv2 tracking, YuNet + SFace face recognition, MoGe-2 ViT-L corridor braking, SOLVEPNP_IPPE + PyrLK odometry, and 8-sector spatial curiosity."
 image: "/assets/ainekio/v2/vision-loop-concept.webp"
 avatarImage: "/assets/avatar/avatar.webp"
 authorName: "Greg the Mechanic"
 authorBio: "Builder of Ainekio & Ainekio OS"
 showImageOnPost: true
 showToc: true
-tags: [Ainekio, Camera, Vision, ST7789, OV5647, Optical Flow, Odometry, YOLOE, Ainekio OS]
+tags: [Ainekio, Camera, Vision, ST7789, ILI9341, OV5647, Optical Flow, Odometry, RT-DETRv2, OWLv2, MoGe-2, Ainekio OS]
 category: "Perception and Voice"
 draft: false
 lang: "en"
@@ -22,11 +22,15 @@ reading:
   related: ["ainekio-v2", "gateway-and-simulator", "ainekio-os", "2026-11-11-on-chip-neural-gait-and-ainekio-os"]
 ---
 
-Ainekio V2's removable front face carrier ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) pairs outward expression and forward perception in one compact nose assembly: a **1.9-inch `ST7789` color IPS LCD** (`320 × 170`) rendering **59 animated facial expressions**, and an **`OV5647` MIPI-CSI camera** tucked into the **lower-jaw / chin mount below the LCD** for action-correlated snapshots, Cockpit HUD obstacle range, object tracking, and monocular depth odometry.
+Ainekio's removable front face carrier ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot)) pairs outward expression and forward perception in one compact nose assembly: on V2, a **1.9-inch `ST7789` color IPS LCD** (`320 × 170`) rendering **59 animated facial expressions**, paired with an **`OV5647` MIPI-CSI camera** tucked into the **lower-jaw / chin mount below the LCD** for action-correlated snapshots, Apache-2.0 **`RT-DETRv2 + OWLv2`** open-vocabulary detection, **`YuNet + SFace`** face recognition, **`MoGe-2`** corridor braking, camera odometry, and an 8-sector spatial curiosity map.
 
-## 1.9-inch `ST7789` LCD face and 59 expressions
+## Face displays across generations: V1 `SSD1306`, V2 `ST7789` & V3 Cyclops optic
 
-The V2 display sits in a recessed red front bezel supported by four printed wireless spacers so Wi-Fi antenna clearance stays unobstructed. Onboard C firmware drives **59 procedural expression animations** at `15 fps`—covering idle blinking, directional eye glances, curiosity, sleep/doze states, live audio-synced voice bars during speech playback, Freestyle gesture accompaniments, `cosmic_horror`, and token-matched **body-contact reaction faces** when the robot is tipped, shaken, or stalled.
+Outward facial telemetry scales cleanly across all three hardware generations while sharing the same expression state model:
+
+- **V1 (`0.96"` `SSD1306` OLED)**: High-contrast monochrome `I²C` eyes and status icons on the eight-servo `ESP32-S3` build.
+- **V2 (`1.9"` `ST7789` color IPS LCD, `320 × 170`)**: Sits in a recessed red front bezel supported by four printed wireless spacers so Wi-Fi antenna clearance stays unobstructed. Onboard C firmware drives **59 procedural expression animations** at `15 fps`—covering idle blinking, directional eye glances, curiosity, sleep/doze states, live audio-synced voice bars during speech playback, Freestyle gesture accompaniments, `cosmic_horror`, and token-matched **body-contact reaction faces** when the robot is tipped, shaken, or stalled.
+- **V3 (panoramic `2.8"` `ILI9341` Cyclops optic, `face_cyclops.c`)**: Renders a **`320 × 170` active widescreen canvas** centered inside the `320 × 240` SPI TFT, replacing twin cartoon eyes with a single sweeping mechanical Cyclops iris ringed by **24 aperture ticks** and flanked by live telemetry **radar arcs**.
 
 ![Contact sheet of Ainekio's 59 animated ST7789 LCD facial expressions](/gallery/lcd-face-contact-sheet-1600.webp)
 
@@ -58,15 +62,16 @@ Instead of flooding a multimodal model with continuous room video, the gateway b
 | **Explicit snapshot** | `action_id` | On-demand visual look requested by Ainekio OS or the human operator |
 | **Post-motion verification frame** | `command_sequence_id` | Captured right before a movement's `done` receipt so Goal Review can confirm whether the physical move achieved its visual goal |
 | **Spoken utterance end (VAD)** | `utterance_id` | Pairs what someone said in the room with what Ainekio was looking at during that turn |
-| **Cockpit HUD, tracking & odometry** | `frame_id` + timestamp | Feeds live optical-flow obstacle range, YOLOE/ByteTrack object tracking, and depth odometry |
+| **Cockpit HUD, tracking & odometry** | `frame_id` + timestamp | Feeds Apache-2.0 `RT-DETRv2 + OWLv2` object tracking, `YuNet + SFace` face recognition, `MoGe-2` corridor braking, `SOLVEPNP_IPPE` / `PyrLK` odometry, and the 8-sector spatial curiosity map |
 
 Visual locomotion goals require actual camera confirmation through Ainekio OS's vision specialist role rather than assuming a finished walk command automatically reached the target.
 
-## Optical-flow obstacle range, object tracking, and depth odometry
+## Apache-2.0 detection, face recognition, `MoGe-2` depth, odometry & spatial curiosity
 
-On the host gateway ([gateway guide](/posts/gateway-and-simulator/)), the chin camera also drives active spatial measurement during walking:
+On the host gateway ([gateway guide](/posts/gateway-and-simulator/)), the chin camera drives an all-Apache-2.0 perception and spatial-measurement stack during live operation and walking:
 
-1. **Cockpit HUD optical-flow + monocular depth obstacle range**: During live walking, pyramidal Lucas-Kanade sparse optical flow is fused with Depth-Anything ground-plane contact projection to estimate real-time obstacle contact distance and approach clearance directly ahead of the chin lens.
-2. **Open-vocabulary YOLOE + ByteTrack tracking**: Open-vocabulary YOLOE detection paired with ByteTrack multi-frame association lets Ainekio search for, lock onto, and follow a specific person or object across frames—halting motion immediately if visual lock is lost during person-following.
-3. **OpenGV 2-point RANSAC depth odometry**: Combining monocular depth points with `208 Hz` `LSM6DS3` IMU rotation priors inside an OpenGV 2-point RANSAC solver transforms chin-camera motion into body-frame forward displacement and yaw progress.
-4. **On-demand metric depth (`MoGe-2`)**: Heavy metric depth weights load only while an active locomotion goal or gait trial needs visual distance verification, unloading automatically afterward so workstation memory stays free for conversational models.
+1. **Open-vocabulary object detection & tracking (`RT-DETRv2 + OWLv2`)**: **`RT-DETRv2 + OWLv2`** (`detector_backend.py`) provides Apache-2.0 open-vocabulary detection and multi-frame tracking so Ainekio can search for, lock onto, and follow a specific person or object across frames—halting motion immediately if visual lock is lost during person-following.
+2. **Face recognition (`YuNet + SFace`)**: **`YuNet + SFace`** extracts `128-D` embeddings against an enrolled face gallery of up to **`16` people**, supporting `single_person_resume` so Ainekio recognizes returning humans and resumes person-focused context automatically.
+3. **Metric depth, 2-ray RANSAC & `< 0.30 m` corridor braking (`MoGe-2` + SIFT)**: **`MoGe-2` (`ViT-L` FP16)** paired with **`2,000`-keypoint SIFT** and a **100-hypothesis 2-ray RANSAC** solver supplies metric floor/obstacle geometry and **`< 0.30 m` forward corridor braking**. Heavy metric depth weights load on demand while an active locomotion goal or gait trial needs visual distance verification, unloading automatically afterward so workstation VRAM stays free for conversational models.
+4. **Camera odometry (`SOLVEPNP_IPPE` + `PyrLK`)**: **Checkerboard `SOLVEPNP_IPPE`** calibration paired with **pyramidal Lucas-Kanade (`PyrLK`) optical flow** fuses with `208 Hz` `LSM6DS3` IMU attitude priors to estimate body-frame forward displacement and yaw progress.
+5. **8-sector (`8 × 45°`) spatial curiosity map**: `spatial_curiosity.py` continuously projects detected objects, recognized `YuNet + SFace` identities, and free-floor clearance into eight `45°` compass sectors, feeding **[Ainekio OS](/posts/ainekio-os/)**'s System 1 Embodied Curiosity loop so Full Auto mode turns toward uninspected room sectors and escalates genuine discoveries to System 2 memory and speech.

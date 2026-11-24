@@ -3,6 +3,7 @@ import { getCollection, getEntry } from 'astro:content'
 import gallery from '../data/gallery.json'
 import GalleryImage from './GalleryImage.astro'
 import RobotModelViewer from './RobotModelViewer.svelte'
+import SimulatorCta from './SimulatorCta.astro'
 import { topics, getReading, validateReadingPaths } from '../lib/reading'
 import { url } from '../utils/url-utils'
 
@@ -23,7 +24,7 @@ const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'nume
 const featuredVideo = gallery.find(item => item.id === 'ainekio-v2-neural-walk-first-run')!
 const stageTiles = [
   { item: gallery.find(item => item.id === 'ainekio-v2-physical-front')!, badge: 'Front CSI Cam & LCD', label: 'Front profile on carpet', fit: 'cover' },
-  { item: gallery.find(item => item.id === 'megameal-v2-lab-simulator')!, badge: '3D Web Robot Sim', label: 'game.megameal virtual V2 lab', fit: 'cover' },
+  { item: gallery.find(item => item.id === 'megameal-v2-lab-simulator')!, badge: 'Live 3D Simulator', label: 'simulator.ainek.io · V1/V2/V3 & Yggdrasil', fit: 'cover' },
   { item: gallery.find(item => item.id === 'lcd-face-contact-sheet')!, badge: '59 LCD Faces', label: 'Procedural 1.9" LCD face sheet', fit: 'cover' },
   { item: gallery.find(item => item.id === 'diagram-assembly-reference')!, badge: 'V2 Wiring & Buses', label: 'ESP32-P4 & 4th-wire schematic', fit: 'contain' },
 ]
@@ -53,7 +54,7 @@ const directoryCards = [
   {
     num: '03',
     title: 'Chassis, Shell & Power',
-    description: 'The 650 g V2 shell (34 Red STLs), V1 vertical-knee arms & under-arm 4-wire clock-springs, and V3 Option A-1 5-link armored DS3235 CAD.',
+    description: 'The 650 g V2 shell (34 Red STLs), V1 vertical-knee arms & under-arm 4-wire clock-springs, and V3 armored DS3225 PRO Option A-1 + self-leveling ankles.',
     primaryHref: '/posts/ainekio-v2/',
     primaryLabel: 'V2 Hardware & Wiring',
     secondaryHref: '/posts/ainekio-v3-preview/',
@@ -63,7 +64,7 @@ const directoryCards = [
   {
     num: '04',
     title: 'Cockpit, Web Sim & Jam Fuse',
-    description: 'Full-screen Cockpit HUD, game.megameal 3D web robot simulator alpha, 7-layer phantom-jam elimination, and per-channel I²t thermal fuse.',
+    description: 'Full-screen Cockpit HUD, live simulator.ainek.io (V1/V2/V3 + multiplayer), auto-calibration, and per-channel I²t thermal fuse.',
     primaryHref: '/posts/gateway-and-simulator/',
     primaryLabel: 'Gateway & 3D Web Sim',
     secondaryHref: '/posts/jam-protection-and-thermal-safety/',
@@ -95,20 +96,20 @@ const directoryCards = [
 const specs = [
   { label: 'Physical bodies', value: 'V1 (8-DOF) · V2 (650 g 12-DOF)' },
   { label: 'Onboard brain', value: 'ESP32-P4 · 50 Hz RL + NeuralPose v8' },
-  { label: '3D Web Simulator', value: 'game.megameal · 500 Hz MuJoCo alpha' },
+  { label: '3D Web Simulator', value: 'simulator.ainek.io · V1/V2/V3 + Multiplayer' },
   { label: 'Companion mind', value: 'Ainekio OS · Local memory & voice' },
 ]
 
 const generationCards = [
   {
     id: 'v1',
-    badge: 'V1 · Active 8-Servo + Clock-Springs',
+    badge: 'V1 · Active 8-Servo + Unified P4',
     tone: 'v1',
     title: 'Ainekio V1: Active 8-Servo Quadruped',
     image: '/posts/ainekio-v1/v1-cad-three-quarter.webp',
     imageAlt: '3D CAD render of Ainekio V1 showing its vertical-knee R2V10 arms, concentric under-arm 4-wire clock-springs, cobalt-blue sculpted spiked lower legs, Frame8 clock-spring bays, and 0.96-inch OLED eyes.',
-    specLine: '8× MG90S · Vertical-Knee Arms · Under-Arm Clock-Springs · 0.96" OLED',
-    description: 'Active 8-DOF quadruped walking and emoting on the floor (38 motions, 59 OLED faces) with a redesigned 174.8 × 155.5 × 84.1 mm CAD assembly: squared 36.2 mm R2V10 upper arms with vertical knee servos, concentric 3-part under-arm 4-wire clock-springs, 21,216-vert sculpted spiked legs, and ESP32-P4 + 4th-wire sensing.',
+    specLine: '8× MG90S · Unified P4 (body_v1.c) · v1-microduck-p4 (53.7 KB) · 0.96" SSD1306',
+    description: 'Active 8-DOF quadruped (174.8 × 155.5 × 84.1 mm) with squared R2V10 vertical-knee arms, under-arm 4-wire clock-springs, and unified ESP32-P4 firmware (body_v1.c, direct 8-ch ADC, 0.96" SSD1306 OLED). Runs trained v1-microduck-p4 (53.7 KB) walking + neural_pose_v1 emotes and is playable live in simulator.ainek.io.',
     primaryHref: '/posts/ainekio-v1/',
     primaryLabel: 'V1 Systems Guide',
     secondaryHref: '/posts/body-design-and-hardware/',
@@ -116,13 +117,13 @@ const generationCards = [
   },
   {
     id: 'v2',
-    badge: 'V2 · Active Floor & Virtual Twin',
+    badge: 'V2 · Active Floor & Live Sim Twin',
     tone: 'v2',
     title: 'Ainekio V2: 650 g 12-Servo ESP32-P4 Body',
     image: '/gallery/ainekio-v2-physical-three-quarter-960.webp',
     imageAlt: 'Physical 650 g twelve-servo Ainekio V2 quadruped standing on carpet in its red and black 3D-printed shell with four-bar legs and 4th-wire servo feedback harness.',
-    specLine: 'ESP32-P4 · 12× 4th-wire servos · NeuralPose v8 · 1.9" LCD + Web Sim',
-    description: 'Clean-sheet ~$85 rebuild with 35/20/28/38 mm four-bar linkages, 4th-wire shaft feedback + per-channel I²t thermal fuse, 59 color LCD faces, 50 Hz MicroDuck + NeuralPose v8 calibrated carpet recovery + 50 Hz NeuralPosePresence, and a live 500 Hz MuJoCo twin inside game.megameal.',
+    specLine: 'ESP32-P4 · 12× 4th-wire servos · Auto-Calibration · NeuralPose v8',
+    description: 'Clean-sheet ~$85 rebuild with 35/20/28/38 mm four-bar linkages, automated 4th-wire + IMU servo calibration, per-channel I²t thermal fuse, 59 color LCD faces, 50 Hz MicroDuck + NeuralPose v8 + NeuralPosePresence, and a live 500 Hz MuJoCo digital twin inside simulator.ainek.io.',
     primaryHref: '/posts/ainekio-v2/',
     primaryLabel: 'V2 Hardware Guide',
     secondaryHref: '/posts/gateway-and-simulator/',
@@ -130,13 +131,13 @@ const generationCards = [
   },
   {
     id: 'v3',
-    badge: 'V3 · Option A-1 5-Link CAD',
+    badge: 'V3 · Live in Simulator · Print Pending',
     tone: 'v3',
-    title: 'Ainekio V3: Armored DS3235 & Onboard Linux SBC',
+    title: 'Ainekio V3: Armored DS3225 PRO & Self-Leveling Ankles',
     image: '/posts/ainekio-v3/v3-armored-three-quarter.webp',
-    imageAlt: 'Blender CAD render of Ainekio V3 showing its safety-yellow and gunmetal AINEKIO V-003 shell, symmetric front fender arches, recessed 2.8-inch MSP2807 Cyclops eye, and compact Option A-1 5-link DS3235 crawler legs.',
-    specLine: '12× Waterproof DS3235 · Option A-1 5-Link · Radxa Q6A + P4 + 4× 21700',
-    description: 'Heavy-equipment 537-mesh armored quadruped (402.0 × 236.5 × 343.1 mm w/ whip) rescaled onto the Option A-1 compact 5-link pantograph (54/22/46/56/135 mm, +120% lift, 0.93:1 dual-servo balance), with lap-jointed belly armor, Clip 26 leaf-spring clamshell latch, 2.8" MSP2807 Cyclops eye, and Radxa Dragon Q6A + ESP32-P4.',
+    imageAlt: 'Blender CAD render of Ainekio V3 showing its safety-yellow and gunmetal AINEKIO V-003 shell, symmetric front fender arches, panoramic 2.8-inch ILI9341 Cyclops eye, and Option A-1 DS3225 PRO legs with self-leveling pivoting crawler feet.',
+    specLine: '12× DS3225 PRO HV · Option A-1 + Self-Leveling Ankles · 2.8" Cyclops · Q6A + P4',
+    description: 'Armored quadruped (406.4 × 236.5 × 385.6 mm) with 12× DS3225 PRO HV coreless servos, Option A-1 4-bar + 2-stage double-parallelogram self-leveling pivoting crawler feet, panoramic 2.8" ILI9341 Cyclops eye, and unified ESP32-P4 firmware (body_v3.c). Trained v3-microduck-p4 + neural_pose_v3 are playable live in simulator.ainek.io (physical print pending).',
     primaryHref: '/posts/ainekio-v3-preview/',
     primaryLabel: 'V3 Armored CAD',
     secondaryHref: '/archive/?generation=v3',
@@ -153,12 +154,18 @@ const generationCards = [
         <p class="home-eyebrow">Quadruped Robotics, Local AI &amp; Web Simulation</p>
         <h1 id="home-title">Ainekio: 3D-printed quadrupeds with a persistent mind</h1>
         <p class="home-intro">
-          Ainekio pairs custom 3D-printed walking quadrupeds—the active eight-servo clock-spring <strong><a href={url('/posts/ainekio-v1/')}>V1</a></strong> and <strong>650&nbsp;g</strong> twelve-servo <strong><a href={url('/posts/ainekio-v2/')}>V2</a></strong>, plus armored <strong><a href={url('/posts/ainekio-v3-preview/')}>V3</a></strong> in CAD (<a href="https://github.com/Greg-Aster/Ainekio-bot" target="_blank" rel="noreferrer">Ainekio-bot</a>) and an alpha <strong><a href={url('/posts/gateway-and-simulator/#game-megameal-simulator')}>3D web robot simulator</a></strong>—with <strong><a href={url('/posts/ainekio-os/')}>Ainekio OS</a></strong> (<a href="https://github.com/Greg-Aster/ainekio-os" target="_blank" rel="noreferrer">ainekio-os</a>), a local-first AI runtime for persistent memory, voice, and physical reflexes.
+          Ainekio pairs custom 3D-printed walking quadrupeds—the active eight-servo clock-spring <strong><a href={url('/posts/ainekio-v1/')}>V1</a></strong> and <strong>650&nbsp;g</strong> twelve-servo <strong><a href={url('/posts/ainekio-v2/')}>V2</a></strong>, plus armored <strong><a href={url('/posts/ainekio-v3-preview/')}>V3</a></strong> (<a href="https://github.com/Greg-Aster/Ainekio-bot" target="_blank" rel="noreferrer">Ainekio-bot</a>) and the <strong><a href="https://simulator.ainek.io/" target="_blank" rel="noopener noreferrer">live 3D web robot simulator</a></strong>—with <strong><a href={url('/posts/ainekio-os/')}>Ainekio OS</a></strong> (<a href="https://github.com/Greg-Aster/ainekio-os" target="_blank" rel="noreferrer">ainekio-os</a>), a local-first AI runtime for persistent memory, voice, and physical reflexes.
         </p>
 
         <div class="home-actions">
-          <a class="home-primary-link" href={url('/posts/project-overview/')}>Start with the Overview →</a>
-          <a class="home-secondary-link" href={url('/posts/gateway-and-simulator/#game-megameal-simulator')}>3D Web Simulator Alpha →</a>
+          <a class="home-primary-link" href="https://simulator.ainek.io/" target="_blank" rel="noopener noreferrer">
+            <span>Try the Simulator Now</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 17 17 7" />
+              <path d="M8 7h9v9" />
+            </svg>
+          </a>
+          <a class="home-secondary-link" href={url('/posts/project-overview/')}>Start with the Overview →</a>
           <a class="home-secondary-link" href={url('/posts/what-ainekio-can-do/')}>What It Can Do →</a>
           <a class="home-secondary-link" href={url('/gallery/')}>Photos &amp; Videos →</a>
         </div>
@@ -179,7 +186,7 @@ const generationCards = [
       eager={true}
       heroEmbed={true}
       initialModel="lineup"
-      caption="Live Blender CAD exports at 1:1 millimeter scale on a 100 mm major / 20 mm minor reference grid. Inspect the updated V1 clock-spring arms, 650 g V2 four-bar walker, and V3 Option A-1 crawler side by side, open Motions & Gaits to animate V1 and V2, or toggle X-Ray / Bare Core to inspect internal linkages and electronics."
+      caption="Live Blender CAD exports at 1:1 millimeter scale on a 100 mm major / 20 mm minor reference grid. Inspect the V1 clock-spring arms, 650 g V2 four-bar walker, and V3 DS3225 PRO self-leveling crawler side by side, open Motions & Gaits to animate V1 and V2 (or launch V3 live in simulator.ainek.io), or toggle X-Ray / Bare Core to inspect internal linkages and electronics."
     />
 
     <div class="hero-status-bar" aria-label="Current workbench status">
@@ -191,6 +198,10 @@ const generationCards = [
       <a class="hero-status-link" href={url('/posts/project-overview/#project-status')}>Full status &amp; next steps →</a>
     </div>
   </section>
+
+  <div class="home-sim-cta">
+    <SimulatorCta />
+  </div>
 
   <!-- ZONE 2: THREE ROBOT GENERATIONS (V1 · V2 · V3) -->
   <section id="generations" class="home-generations" aria-labelledby="home-generations-title">
@@ -361,6 +372,7 @@ const generationCards = [
     color: var(--text-color);
   }
   .ainekio-home > * { min-width: 0; }
+  .home-sim-cta :global(.sim-cta) { margin: 0; }
 
   h1 { font-size: clamp(1.85rem, 3.3vw, 2.65rem); line-height: 1.12; font-weight: 780; margin: 0.45rem 0 0.75rem; letter-spacing: -0.015em; }
   h2 { font-size: clamp(1.3rem, 2vw, 1.55rem); font-weight: 750; line-height: 1.24; }
@@ -408,7 +420,9 @@ const generationCards = [
 
   .home-actions { display: flex; flex-wrap: wrap; gap: 0.55rem; margin-top: 0.95rem; }
   .home-primary-link {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     padding: 0.58rem 1rem;
     border-radius: 0.45rem;
     background: var(--primary);

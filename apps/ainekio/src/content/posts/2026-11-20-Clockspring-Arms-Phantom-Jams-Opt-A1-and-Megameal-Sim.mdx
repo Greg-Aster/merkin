@@ -1,8 +1,8 @@
 ---
-title: "V1 Clock-Spring Arms, Hunting Phantom Leg Jams (NeuralPose v8), V3 Option A-1 Legs & the game.megameal 3D Web Simulator"
+title: "V1 Clock-Spring Arms, Hunting Phantom Leg Jams (NeuralPose v8), V3 Option A-1 Legs & the 3D Web Simulator"
 published: 2026-11-20T17:00:00-08:00
-updated: 2026-11-21
-description: "November 19–21 workbench milestone: redesigning Ainekio V1 around vertical-knee R2V10 arms and concentric under-arm 4-wire clock-springs; resolving seven interacting phantom leg-jam root causes across ESP32-P4 firmware and NeuralPose v5→v8 calibrated Schmitt-trigger carpet recovery; rescaling Ainekio V3 onto the Option A-1 5-link pantograph (+120% lift, 0.93:1 servo balance) with lap-joint belly armor and Clip 26 latches; and launching the live standalone browser alpha of the 3D robot simulator at simulator.ainek.io."
+updated: 2026-11-23
+description: "November 19–21 workbench milestone: redesigning Ainekio V1 around vertical-knee R2V10 arms and concentric under-arm 4-wire clock-springs; resolving seven interacting phantom leg-jam root causes across ESP32-P4 firmware and NeuralPose v5→v8 calibrated Schmitt-trigger carpet recovery; rescaling Ainekio V3 onto the Option A-1 5-link pantograph (+120% lift, 0.93:1 servo balance) with lap-joint belly armor and Clip 26 latches; and launching the live standalone browser 3D robot simulator at simulator.ainek.io."
 image: "/posts/2026-11-20-progress/cover-nov20-triptych.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Ainekio Project"
@@ -18,13 +18,13 @@ reading:
   topic: overview
   generation: both
   kind: journal
-  next: project-overview
+  next: 2026-11-23-unified-p4-firmware-v1-v3-simulator-multiplayer-and-auto-calibration
   related: ["ainekio-v1", "ainekio-v3-preview", "jam-protection-and-thermal-safety", "gait-development", "gateway-and-simulator"]
 ---
 import RobotModelViewer from '../../components/RobotModelViewer.svelte'
 import SimulatorCta from '../../components/SimulatorCta.astro'
 
-The past three days on the workbench split across four tightly connected fronts—two mechanical CAD leaps in `v3-2.blend`, a deep multi-layer firmware and reinforcement-learning hunt to eliminate phantom leg jams on physical carpet, and an alpha proof-of-concept for building and simulating robots directly in a browser 3D world:
+The past three days on the workbench split across four tightly connected fronts—two mechanical CAD leaps in `v3-2.blend`, a deep multi-layer firmware and reinforcement-learning hunt to eliminate phantom leg jams on physical carpet, and bringing a full-physics 3D web robot simulator live at **[`simulator.ainek.io`](https://simulator.ainek.io/)** (since expanded to all three robots and multiplayer in [Milestone #21](/posts/2026-11-23-unified-p4-firmware-v1-v3-simulator-multiplayer-and-auto-calibration/)):
 
 1. **[Ainekio V1](/posts/ainekio-v1/) received a vertical-knee arm setup and concentric under-arm 4-wire clock-springs (`174.8 × 155.5 × 84.1 mm`, `174` active meshes):** `R2V10` upper arms were shortened and squared (`36.17 × 36.17 × 37.50 mm`) to hold the knee `MG90S` servos vertically at the elbow, paired with standardized `21,216`-vertex sculpted spiked lower legs and a **3-part rotary clock-spring assembly** under each arm that winds and unwinds all four conductors (`PWM + 5V + GND + 4th-wire sense`) internally without exposed wire loops.
 2. **Seven interacting causes of "phantom leg jams" were traced and eliminated across ESP32-P4 C firmware and `NeuralPose` (`v5` → `v8-calibrated`):** What looked on the floor like mysterious leg stalls and crooked post-walk freezes turned out to be seven stacked interactions between C-side balance trims, inverted-carrier calibration ceilings (`above_calibration`), duplicate Python stall detectors, and re-locking carpet pile—now consolidated into **`neural-pose-v8-calibrated`** (`2.46M` GPU MuJoCo steps, Schmitt-trigger single-leg carpet stepping, `above_calibration_mask = 0`, `stalled_joints = 0`) and **`50 Hz` `NeuralPosePresence`**, while keeping the hardware **`I²t` winding thermal fuse** (`8–10 s` per-channel cutoff) 100% intact.

@@ -29,7 +29,7 @@ cleaned up remote Big Brother delegation and local model serving in MetaHuman OS
 
 ## First real-life neural network walk on the physical 650 g V2 robot
 
-After exporting the full 376-mesh Blender V2 CAD assembly into MuJoCo MJCF and working
+After exporting the full 375-mesh Blender V2 CAD assembly into MuJoCo MJCF and working
 through the stride and posture failure modes below, I deployed the trained policy onto
 the physical 12-servo Ainekio V2 quadruped on carpet. Under closed-loop neural control,
 the robot walks forward and backs up cleanly without dragging its hindquarters:
@@ -58,7 +58,7 @@ the robot walks forward and backs up cleanly without dragging its hindquarters:
 To move past hand-tuned sine tables and pure imitation learning, I stood up a GPU
 reinforcement-learning pipeline in **JAX 0.7.1 / Brax / MJX** combining ideas from
 **Walk in the Park (DroQ)** and **MicroDuck RL**, verified it first on a **Stock Pupper
-V3 MuJoCo baseline** (`+1.68 m` forward walk; [watch in the Gallery](/gallery/#pupper-v3-mujoco-baseline)),
+V3 MuJoCo baseline** (`+1.68 m` forward walk; [watch in the Gallery](/gallery/#pupper-mjx-800m-rollout)),
 and then imported the **full-CAD Ainekio V2 MJCF model** (`0.650 kg`, 12 servo
 actuators, 8 passive hinges, and 4 planar four-bar loop-closure equality constraints).
 
@@ -122,7 +122,7 @@ Penalizing off-center foot parking and shaping air-time and torso pitch across a
 
 <figure>
   <img src="/gallery/rl-progress-centered-200m-960.webp" alt="200M-step JAX/Brax/MJX PPO training reward curve reaching 28.97 episode reward." width="960" height="640" loading="lazy" />
-  <figcaption>200M-step PPO evaluation reward curve in JAX/Brax/MJX (`28.97 ± 13.18` across 201.5M environment steps).</figcaption>
+  <figcaption>200M-step PPO evaluation reward curve in JAX/Brax/MJX (<code>28.97 ± 13.18</code> across 201.5M environment steps).</figcaption>
 </figure>
 
 | Leg | Home `X_body` | Run #4 `X_body` Range (`mm`) | Run #4 Span | Run #5 `X_body` Range (`mm`) | Run #5 Mean | Run #5 Span | Improvement |
