@@ -1,0 +1,116 @@
+---
+title: "From Berkowitz to Kanzagroth: V2 Study A Leg Geometry, Crimson Scout Chassis Redesign, Stabilizing Neural Gait & Pose, and Diving Into Full Autonomy"
+published: 2026-11-25T19:00:00-08:00
+updated: 2026-11-25
+description: "November 24–25 milestone: evolving Ainekio V2 from its original 35/20/28/38 mm 'Berkowitz' build into 'Kanzagroth'—featuring the Study A 28/16/31/37 mm inverted-leverage four-bar leg, cogged Part_022 boot, and Crimson Scout multi-plate carapace with raised ST7789 visor; shipping microduck-v20-studya-p4 (2.61x faster Body Control walking) OTA to hardware and live to simulator.ainek.io with full PBR colors; and shifting focus deeper into the night onto the full autonomous system."
+image: "/posts/2026-11-25-kanzagroth/kanzagroth-crimson-scout-hero.webp"
+avatarImage: "/assets/avatar/assembly-september-20.webp"
+authorName: "Greg the Mechanic"
+authorBio: "Builder of Ainekio & Ainekio OS"
+showImageOnPost: true
+showToc: true
+tags: [Ainekio, V2, Kanzagroth, Berkowitz, Kinematics, Chassis, MicroDuck, NeuralPose, Autonomy, Simulator, ESP32-P4]
+category: "Build Journal"
+draft: false
+lang: "en"
+contentFormat: "report"
+reading:
+  topic: body
+  generation: v2
+  kind: journal
+  next: project-overview
+  related: ["ainekio-v2", "gait-development", "three-system-neural-architecture", "bounded-autonomy", "gateway-and-simulator", "2026-11-23-unified-p4-firmware-v1-v3-simulator-multiplayer-and-auto-calibration"]
+---
+import RobotModelViewer from '../../components/RobotModelViewer.svelte'
+import SimulatorCta from '../../components/SimulatorCta.astro'
+
+<SimulatorCta />
+
+Over November 24–25, the twelve-servo **Ainekio V2** quadruped crossed a major mechanical and control boundary—enough that it finally made sense to give the two halves of V2's lineage proper names on the bench:
+
+- **V2 "Berkowitz" (Oct 6 – Nov 23):** The original `650 g` wireless twelve-servo V2 floor prototype (`35 / 20 / 28 / 38 mm` four-bar linkage, curved rocking sole, early extracted `014` crimson carapace, and lower chin-level `1.9"` `ST7789` bezel) that proved untethered `ESP32-P4` L2-cached neural walking, 4th-wire `CD74HC4067` feedback, automated servo calibration, and per-joint `I²t` winding thermal protection on carpet.
+- **V2 "Kanzagroth" (Nov 24–25, active production V2):** A ground-up mechanical and visual overhaul combining the **Study A (`28 / 16 / 31 / 37 mm`)** inverted-leverage four-bar leg and cogged **`Part_022`** crimson/charcoal outer boot with the refitted **Crimson Scout** multi-plate chassis and carapace (`237.6 × 141.5 × 125.9 mm`), raised `ST7789` visor bezel, modular rear `2S` power carrier (`PC | 01..06`), and the newly trained **`microduck-v20-studya-p4`** neural gait policy (`2.61×` faster end-to-end Body Control walking, flashed over Wi-Fi OTA as `0.8.159-p4-studya-v20` and live on **[`simulator.ainek.io`](https://simulator.ainek.io/)**).
+
+With **Kanzagroth** physically flashed, the 3D web simulator and CAD studio updated with full PBR material fidelity, and both **Neural Gait (`MicroDuck v20`)** and **Neural Pose (`NeuralPose v8-calibrated`)** finally behaving predictably under closed-loop load, our late-night focus shifts squarely onto the piece of the project that has been stubbornly problematic for a while: **the full end-to-end autonomous system**.
+
+---
+
+## 1. Berkowitz vs. Kanzagroth: Chassis, Carapace & Display Redesign
+
+Berkowitz's early shell (`CARAPACE | Fitted extracted plates` + `MASK | Fitted panel assembly`) got V2 onto the living-room carpet quickly, but months of bench teardowns exposed its packaging compromises: the `1.9"` `ST7789` display sat low near the chin where floor clutter and close-up humans viewed it at a steep downward angle, the upper shell relied on monolithic extracted hull plates that were awkward to remove over the **Wireless Keeper Bridge**, and the open hip flanks left the shimmed `MG90S` brackets visually raw.
+
+<figure className="my-6">
+  <img src="/posts/2026-11-25-kanzagroth/berkowitz-vs-kanzagroth.webp" alt="Side-by-side 1:1 Blender CAD comparison of Ainekio V2 Berkowitz on the left (35/20/28/38 mm four-bar legs, smooth rocking soles, and early extracted crimson carapace with low LCD bezel) and Ainekio V2 Kanzagroth on the right (28/16/31/37 mm Study A legs, cogged Part_022 boots, forked oxblood prow cowl, raised ST7789 visor bezel, satin graphite dorsal hatches, and ivory-badged wheel-arch rails)." width="1600" height="900" loading="lazy" className="w-full rounded-xl" />
+  <figcaption><strong>1:1 CAD lineage comparison:</strong> Original V2 <strong>Berkowitz</strong> (left, <code>35/20/28/38 mm</code> linkage &amp; early extracted shell) beside redesigned V2 <strong>Kanzagroth</strong> (right, <code>28/16/31/37 mm</code> Study A linkage, cogged <code>Part_022</code> boots &amp; Crimson Scout multi-plate shell).</figcaption>
+</figure>
+
+**Kanzagroth** (`Scene 'v2 - Concept Shell'` in `v3-2.blend`) replaces that exterior and display layout around the existing `ESP32-P4-WIFI6` / `PCA9685` / `CD74HC4067` core without adding dead weight:
+
+| Subsystem | Original V2 "Berkowitz" | Redesigned V2 "Kanzagroth" |
+| --- | --- | --- |
+| **Four-bar linkage** | `35 mm` carrier · `20 mm` crank · `28 mm` pickup · `38 mm` rod (`1.40:1` crank-to-pickup step-up) | **`28 mm` carrier · `16 mm` crank · `37 mm` pickup · `31 mm` rod** (Study A inverted leverage, springless) |
+| **Distal leg & sole** | `55 mm` shin + smooth curved rocking sole | `55 mm` shin + **`Part_022` cogged-tread crimson/charcoal outer boot** & `Part_027` short-collar pickup |
+| **Overall CAD envelope** | `244.9 × 141.5 × 103.4 mm` (`L × W × H`) | **`237.6 × 141.5 × 125.9 mm`** (`L × W × H`, taller raised visor crown & tighter fore-aft stance) |
+| **Head, LCD & camera** | Low chin-level `1.9"` `ST7789` bezel (`z = 50–71 mm`) + lower-jaw `OV5647` | **Forked oxblood visor cowl** (`01`), **raised `ST7789` faceted visor bezel** (`z = 68–89 mm`), lower visor guards (`09`), temple shields (`10`), and faceted chin camera aperture (`14`, `x = 110–118 mm`) |
+| **Dorsal & flank armor** | Extracted `014.001`/`014.002` central & rear helmet plates | Modular **Crimson Scout** service deck: forward instrument cover (`04`), center service hatch (`05`), rear deck bridge (`06`), removable socket-head tail hatch (`07`), clipped ivory-marked tail fairing (`08`), swept wheel-arch rails (`02`), three-cell satin-graphite flank inserts (`03`), and concept-fitted shoulder side protectors |
+| **Rear `2S` power carrier** | Single-piece open rear frame | **17-part modular PETG power carrier (`PC | 01..06`)** with dedicated `Mini560` & `HiLetgo` rails, retainer bosses, rear stops, and top-accessible rocker switch |
+| **Production gait** | `microduck-v18-p4` / `microduck-v19-snag-p4` (`+0.036 m/s` Body Control E2E) | **`microduck-v20-studya-p4`** (`+0.094 m/s` nominal / `+0.128 m/s` fast-forward Body Control E2E, `0.8.159-p4-studya-v20`) |
+
+### Interactive 3D Studio & Full PBR Color Pipeline
+
+Inspect **V2 Kanzagroth** directly below—including `X-Ray` and `Bare Core` cutaways and all `47` retargeted Study A motion clips in **Motions & Gaits**:
+
+<RobotModelViewer
+  client:visible
+  initialModel="v2"
+  pageGeneration="v2"
+  compact={true}
+  caption="Interactive 1:1 CAD assembly of Ainekio V2 'Kanzagroth' (Study A 28/16/31/37 mm legs + Crimson Scout carapace). Toggle X-Ray or Bare Core to inspect the raised ST7789 visor display, chin OV5647 camera, ESP32-P4-WIFI6, PCA9685, CD74HC4067 mux, modular PC | 01..06 rear 2S carrier, and cogged Part_022 boots—or open Motions & Gaits to play 47 Study A clips."
+/>
+
+Updating the 3D export pipeline (`export-v2-simulator-assets.py`, `354` on-robot CAD parts across `27` articulated groups compressed to `5.88 MB` with WebP + Meshopt) also solved a subtle rendering bug that had left large parts of V2 looking **washed-out neutral greyish-white** in Three.js:
+
+1. **Solid-view `diffuse_color` vs. untouched `Principled BSDF` defaults:** Many STEP-imported and Solid-view-authored Blender materials (`STEP_FFFFFF.006` on all four crimson `Part_023` leg carriers, `STEP_FFFFFF` on the four `Part_003` shoulder mounts and servo horns, `Material.001`–`010` on the chassis panels and `Part_026` styled rods, and `Material.012` on `Part_009` cranks) stored their real colors in `material.diffuse_color` while leaving `Principled BSDF -> Base Color` at Blender's default `[0.8, 0.8, 0.8]` or `[1.0, 1.0, 1.0]`.
+2. **Legacy `MIX_RGB` livery nodes:** Kanzagroth's prow cowl (`Scout | Prow with ivory markings`) and tail fairing (`Scout | Tail with ivory markings`) blend oxblood crimson (`[0.33, 0.009, 0.014]`) and ivory (`[0.87, 0.76, 0.56]`) through a `Mix (Legacy)` shader node that standard glTF 2.0 exporters drop. The exporter now composites those masks directly into packed `sRGB` textures wired to `Principled BSDF -> Base Color`, preserves multi-slot face material indices across `bmesh` merges, and assigns brushed-steel, dark-horn, and charcoal-PETG fallbacks to unmaterialed CAD hardware.
+
+---
+
+## 2. Study A (`28 / 16 / 31 / 37 mm`) Leg Geometry: Why Leverage Inversion Matters
+
+Why change Berkowitz's working `35 / 20 / 28 / 38 mm` linkage at all? Watching Berkowitz across carpet and turn trials revealed a fundamental mechanical-advantage bottleneck in its knee transmission:
+
+- **Berkowitz (`35 mm` carrier, `20 mm` crank, `28 mm` pickup, `38 mm` rod):** A `20 mm` servo crank pulling a `28 mm` pickup radius meant the knee servo actually had a favorable reduction, *except* the long `35 mm` upper carrier demanded higher hip-carrier holding torque (`τ = F · 35 mm`) while the geometry crowded the coupler rod against the upper bracket during deep knee flexion.
+- **Kanzagroth Study A (`28 mm` carrier, `16 mm` crank, `37 mm` pickup, `31 mm` rod):**
+  1. **Shortening the upper carrier (`35 → 28 mm`)** cuts the carrier moment arm by `20%` (`+25%` effective vertical load authority at the carrier `MG90S` shaft) and scales crouch fold depth cleanly to `20.0 mm`.
+  2. **Shortening the input crank (`20 → 16 mm`) while lengthening the lower-leg pickup (`28 → 37 mm`)** boosts the four-bar's crank-to-shin mechanical reduction from `1.40:1` (`28 / 20`) to **`2.31:1` (`37 / 16`)**—an **`~65%` increase in knee torque leverage** right through mid-stance without adding torsion springs that fight swing-leg lift.
+  3. **Cogged `Part_022` outer boot + `5,896` CoACD collision hulls:** Replaces smooth rocking soles that slipped during yaw pivots with a multi-tooth cogged tread profile, packaged identically across firmware kinematics (`geometry.json` `studya-28-16-37-31-55-boot-20261124`), `auto_calibration.py` (`STAND_LEG_DEG = (0.0°, -5.46°, -62.08°)`), MuJoCo (`ainekio-v2-locomotion.xml`), and WebGL.
+
+---
+
+## 3. Stabilizing Neural Gait (`microduck-v20-studya-p4`) & Neural Pose in Production
+
+Because Kanzagroth's Study A linkage changes both the standing joint equilibrium (`(0.0°, -5.46°, -62.08°)` vs. Berkowitz's `(0.0°, +3.42°, -21.65°)`) and the Jacobian mapping Cartesian foot offsets to servo pulse widths, we warm-started and refined a dedicated Study A policy—**`microduck-v20-studya-p4`**—over **`7.81M` cumulative Study A hardware-twin steps** while carrying over every lesson from V2 and V3 training:
+
+- **Reward & exploration fixes (`microduck_mdp.py`, `microduck.py`):** Restored explicit zero-command drift suppression (`(~component_moving) & (delta < 0)`) in `tracking_twist` so the robot stands rock-still when commanded `0 m/s`, widened the `standing_pose` bounded cost budget (`2.5 → 12.0`) so stillness gradients never saturate, and lowered warm-start resume `entropy_coef` (`0.01 → 0.0015`) so policy action standard deviation stays tight instead of re-introducing high-frequency leg chatter.
+- **`2.61×` End-to-End Velocity Gain & Zero Falls:** Evaluated inside the full closed-loop `BodyControlEnvironment` (modeling `PCA9685` quantization, `CD74HC4067` ADC noise, `208 Hz` `LSM6DS3` filtering, and `40 ms` actuator delay), `microduck-v20-studya-p4` (`foot_action_scale_mm = [48, 28, 30]`) reached **`+0.0938 m/s`** nominal forward speed (`2.61×` Berkowitz `v19`'s `+0.0360 m/s`), **`+0.128 m/s`** fast-forward, **`-0.120 m/s`** straight reverse, and **`+0.830 / -1.069 rad/s`** yaw turns with **`0` falls**.
+- **Flashed to Physical Hardware & Live in `simulator.ainek.io`:** Compiled into a `107.8 KB` `int8` L2-cached actor (`policy.bin`), built into `ESP32-P4` firmware **`0.8.159-p4-studya-v20`**, and streamed over Wi-Fi OTA onto physical V2 (`ainekio-p4-e6ebe5`), passing full `0x1f` startup verification (`camera`, `mic`, `speaker`, `ST7789`, `PCA9685`, `ESP32-C6` Wi-Fi, `output_fault = 0`) alongside live deployment to **[`simulator.ainek.io`](https://simulator.ainek.io/)**.
+
+<figure className="my-6">
+  <img src="/posts/2026-11-25-kanzagroth/kanzagroth-simulator-live.webp" alt="Live browser capture from simulator.ainek.io showing Ainekio V2 Kanzagroth in its oxblood crimson, satin graphite, and ivory-badged Crimson Scout shell standing on the glowing calibration pad of the 19 m Robotics Lab Obstacle Course running microduck-v20-studya-p4 and neural-pose-v8-calibrated." width="1600" height="1000" loading="lazy" className="w-full rounded-xl" />
+  <figcaption><strong>V2 Kanzagroth live in <a href="https://simulator.ainek.io/"><code>simulator.ainek.io</code></a>:</strong> Crimson Scout oxblood/graphite/ivory livery, Study A <code>28/16/31/37 mm</code> legs, <code>microduck-v20-studya-p4</code> walking, and <code>neural-pose-v8-calibrated</code> emotes running at <code>500 Hz</code> in-browser.</figcaption>
+</figure>
+
+Paired with **System 2 (`neural-pose-v8-calibrated`)**—which already cleared `12/12` posture suites with zero phantom jams using Schmitt-trigger single-leg carpet stepping and `CARRIER_HOME_MARGIN_DEG = 3.0`—and **System 3 (`50 Hz` `NeuralPosePresence`)**, V2's lower-body locomotion and posture stack is finally reaching genuine day-to-day stability.
+
+---
+
+## 4. Diving Deeper Into the Night: Tackling the Full Autonomous System
+
+For months, every attempt to let Ainekio run **fully autonomously** for extended stretches kept getting muddied by lower-level body issues—if a carpet seam snagged a foot, a carrier horn tripped a false stall, or a gait drifted sideways during a turn, it was hard to separate mechanical trouble from cognitive bugs. Now that **Kanzagroth**, **`MicroDuck v20`**, and **`NeuralPose v8`** hold their end of the bargain, the remaining failure modes in **Full Auto** stand out in sharp relief—and that is what we are diving into tonight:
+
+1. **Closing the Perception-to-Action Freshness Gap:** In unscripted autonomy, an `OV5647` frame, `RT-DETRv2 + OWLv2` detection, and `MoGe-2` depth-corridor estimate must stay strictly causal with the body's *post-motion* pose. Issuing the next navigation hop from a pre-turn frame—or waiting on slow blocking barriers instead of asynchronous frame-epoch receipts—causes the planner to steer toward where an obstacle *used* to be.
+2. **Grounding Goal Progress Against Physical Reality:** Autonomous cognitive graphs in **[Ainekio OS](/posts/ainekio-os/)** (`embodied-curiosity.ts` and multi-step task graphs) have historically struggled when a command *executes cleanly at the protocol layer* (`ack` + completion receipt) without achieving the intended room-level effect (for example, turning toward a doorway that remains partially occluded, or approaching a target when carpet slip shortens net travel). True autonomy requires Closed-Loop Visual + Odometry Verification rather than trusting open-loop step counts.
+3. **Eliminating Mode Contention Between Curiosity, Conversation & Safety:** When wake-word speech, `8`-sector spatial curiosity, reactive bump/tilt reflexes, and multi-step navigation goals overlap in real time, admission, cancellation, replacement, and completion contracts across `Ainekio OS` and Body Control must agree on a single authoritative owner—without inventing arbitrary cooldown timers or freezing the robot between thoughts.
+4. **24/7 Proving Loop Across `simulator.ainek.io` & Physical Kanzagroth:** Because `Master/gateway/simulation.py` keeps a live headless **Kanzagroth** twin (`ainekio-v2-sim`) inside the `19 m` Robotics Lab (complete with slalom cones, AprilTags, ramps, and color targets) speaking the exact same `protocol-v1` WebSocket and camera stream as physical `ainekio-p4-e6ebe5`, we can stress-test long-horizon Full Auto runs continuously overnight before putting every fix onto the living-room floor.
+
+Check out the updated **[Ainekio V2 Hardware Guide](/posts/ainekio-v2/)**, **[Gait Development Guide](/posts/gait-development/)**, and **[Bounded Autonomy Guide](/posts/bounded-autonomy/)**, or spin up **V2 Kanzagroth** live right now at **[`simulator.ainek.io`](https://simulator.ainek.io/)**.

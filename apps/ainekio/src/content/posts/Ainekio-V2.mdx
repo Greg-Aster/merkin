@@ -1,8 +1,8 @@
 ---
 title: "Ainekio V2 Hardware: 3D-Printed 12-Servo ESP32-P4 Quadruped, 4th-Wire MG90S Feedback & Pinout"
 published: 2026-09-07T12:00:00-07:00
-updated: 2026-11-23
-description: "Complete V2 hardware reference: interactive 3D CAD model, 650 g 12-servo closed-loop chassis, 35/20/28/38/55 mm leg linkages, on-chip 107.8 KB L2-cached ESP32-P4 neural gait, per-joint I²t thermal fuse, automated servo calibration (auto_calibration.py), live simulator.ainek.io V2 twin, PCA9685 and CD74HC4067 (C4–C15 → GPIO49) wiring diagrams, and STL archives."
+updated: 2026-11-25
+description: "Complete V2 hardware reference ('Kanzagroth' & 'Berkowitz' lineage): interactive 3D CAD model, 650 g 12-servo closed-loop chassis, Study A 28/16/31/37 mm leg linkages & cogged Part_022 boots, Crimson Scout carapace with raised ST7789 visor, on-chip 107.8 KB L2-cached ESP32-P4 MicroDuck v20 neural gait, per-joint I²t thermal fuse, automated servo calibration, live simulator.ainek.io V2 twin, and wiring diagrams."
 image: "/assets/ainekio/2026-10-12-refresh/blender-front.webp"
 avatarImage: "/assets/avatar/assembly-september-20.webp"
 authorName: "Greg the Mechanic"
@@ -35,19 +35,19 @@ Ainekio V2 ([`Greg-Aster/Ainekio-bot`](https://github.com/Greg-Aster/Ainekio-bot
   initialModel="v2"
   pageGeneration="v2"
   compact={true}
-  caption="Interactive 3D CAD assembly of the active 650 g Ainekio V2 Wireless chassis. Toggle X-Ray or Bare Core to peel away the crimson carapace and front visor, exposing the 1.9-inch ST7789 LCD, OV5647 chin camera, ESP32-P4-WIFI6, PCA9685, CD74HC4067 4th-wire mux, Wireless Keeper Bridge 2S pack, and 35/20/28/38/55 mm four-bar legs."
+  caption="Interactive 3D CAD assembly of Ainekio V2 'Kanzagroth' (Study A 28/16/31/37 mm legs + Crimson Scout shell). Toggle X-Ray or Bare Core to peel away the oxblood crimson and satin-graphite carapace, exposing the raised 1.9-inch ST7789 visor LCD, OV5647 chin camera, ESP32-P4-WIFI6, PCA9685, CD74HC4067 4th-wire mux, modular rear 2S power carrier, and cogged Part_022 boots."
 />
 
 ![Ainekio V2 Assembly Reference](/gallery/diagram-assembly-reference-960.webp)
 
 ## Mechanical specification at a glance
 
-| Parameter | V2 Specification |
+| Parameter | V2 Specification ("Kanzagroth" active · "Berkowitz" baseline) |
 | --- | --- |
 | **Assembled mass** | `650 g` (complete body with 12 feedback servos, shell, LCD, chin camera, and `2S` battery carrier) |
-| **Overall envelope** | `244.9 × 141.5 × 103.4 mm` neutral CAD (`245.9 × 182.8 × 109.1 mm` splayed physical stance, `L × W × H`) |
+| **Overall envelope** | **`237.6 × 141.5 × 125.9 mm`** neutral CAD on **Kanzagroth** (`244.9 × 141.5 × 103.4 mm` on original **Berkowitz** build, `L × W × H`) |
 | **Degrees of freedom** | 12 actuated joints (3 per leg: shoulder roll, upper-carrier pitch, knee linkage crank) |
-| **Compact linkage geometry** | `35 mm` upper carrier, `20 mm` input crank, `28 mm` lower-leg pickup radius, `38 mm` connecting rod, `55 mm` distal lower leg with curved rocking sole |
+| **Compact linkage geometry** | **Kanzagroth Study A:** `28 mm` upper carrier, `16 mm` input crank, `37 mm` lower-leg pickup radius, `31 mm` connecting rod, `55 mm` shin + cogged `Part_022` boot *(evolved from **Berkowitz** `35/20/28/38/55 mm` curved-sole linkage)* |
 | **Actuators** | 12× Miuzei `MG90S` metal-gear micro servos modified with a 4th analog wiper feedback wire (housed in shimmed upper servo brackets) |
 | **PWM driver** | `HUAREW / Adafruit PCA9685` 16-channel 12-bit PWM controller over I2C (`50 Hz` frame rate with staggered channel phase offsets and selective per-channel jam cutoff) |
 | **Position feedback & thermal safety** | `CD74HC4067` 16-channel analog multiplexer routing 12 servo wiper voltages on **`C4–C15`** into `ESP32-P4` **`GPIO49`** (`ADC2_CH0`, select lines `S0–S3` on **`GPIO27–30`**) with One-Euro velocity filtering + **[`8–10 s` per-joint `I²t` winding thermal fuse](/posts/jam-protection-and-thermal-safety/)** |
@@ -128,6 +128,7 @@ All V2 structural parts—including the recessed `1.9"` LCD bezel and wireless s
 
 For photographs, CAD diffs, and bench measurements from each stage of the V2 mechanical build, follow the dated journal milestones:
 
+- **[Nov 25, 2026 — From Berkowitz to Kanzagroth: V2 Study A (`28/16/31/37 mm`) legs, Crimson Scout chassis redesign, `microduck-v20-studya-p4` OTA, and diving into Full Autonomy](/posts/2026-11-25-berkowitz-to-kanzagroth-v2-redesign-study-a-legs-and-full-autonomy/)**: Redesigning V2 from Berkowitz (`35/20/28/38 mm`) into Kanzagroth (`28/16/31/37 mm` Study A + cogged `Part_022` boots + Crimson Scout multi-plate carapace & raised `ST7789` visor), flashing `microduck-v20-studya-p4` (`2.61×` E2E walking speed) over OTA, and shifting late-night focus onto full autonomous operation.
 - **[Nov 23, 2026 — Unified ESP32-P4 firmware across V1/V2/V3, live browser simulator multiplayer, and Automated Servo Calibration (`auto_calibration.py`)](/posts/2026-11-23-unified-p4-firmware-v1-v3-simulator-multiplayer-and-auto-calibration/)**: Unified `ESP32-P4` firmware targets (`v1-8servo`, `v2-12servo`, `v3-12servo`), closed-loop `auto_calibration.py` with `25.0°` tilt abort guard, and live V1/V2/V3 twins with PeerJS multiplayer on `simulator.ainek.io`.
 - **[Nov 20, 2026 — V1 clock-spring arms, 7-layer phantom-jam fix, NeuralPose v8, and V3 Option A-1 pantograph](/posts/2026-11-20-clockspring-arms-phantom-jams-opt-a1-and-megameal-sim/)**: 7-layer phantom-jam resolution across firmware and `NeuralPose v8`, `CARRIER_HOME_MARGIN_DEG = 3.0`, clean `939`-row Freestyle library, and `50 Hz` `NeuralPosePresence`.
 - **[Nov 18, 2026 — V1 P4 CAD revisit, NeuralPose v5-adaptive, physical floor capability videos, and interactive 3D CAD studio](/posts/2026-11-18-v1-p4-revisit-neuralpose-v5-and-3d-cad/)**: `34` print-ready `Red/` V2 STLs, `!actively_leveling` firmware guard, physical carpet capability videos, and 1:1 millimeter Three.js CAD studio.

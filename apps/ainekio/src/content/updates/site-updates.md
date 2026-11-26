@@ -10,24 +10,30 @@ labels:
   updated: "Updated"
 maxEntries: 8
 current:
-  status: "All 3 robots (V1·V2·V3) + multiplayer live on simulator.ainek.io, unified ESP32-P4 firmware, V3 Cyclops optic & Body Control auto-calibration"
-  location: "Active V1 & 650 g V2 floor robots · V3 DS3225 PRO (live in sim, print pending) · simulator.ainek.io · Ainekio OS"
-  updated: 2026-11-23
-  mileage: "V1/V2/V3 live on simulator.ainek.io · PeerJS multiplayer · Unified P4 firmware · Auto-calibration · V3 Cyclops optic"
-  section: "Unified multi-model ESP32-P4 firmware (V1/V2/V3), all three robots + PeerJS multiplayer & 19 m Robotics Lab live on simulator.ainek.io, V3 DS3225 PRO self-leveling crawler feet & panoramic ILI9341 Cyclops face, Body Control automated 4th-wire + IMU servo calibration & Virtual Simulation Manager, and zero-pinning Ainekio OS auto-following"
-  nextStop: "Print and assemble V1's under-arm clock-spring ESP32-P4 deck and V3's DS3225 PRO Option A-1 self-leveling crawler leg while completing V3 MicroDuck pass 7 training."
-  note: "Over November 21–23, all three Ainekio generations converged onto a single unified ESP32-P4 firmware codebase (sdkconfig.v1-8servo with direct 8-channel ADC + SSD1306 OLED, default v2-12servo with ST7789 + CD74HC4067 mux, and sdkconfig.v3-12servo with 2.8-inch ILI9341 panoramic Cyclops optic) and went live together in the browser at https://simulator.ainek.io/—complete with trained MicroDuck & NeuralPose policies for V1, V2, and V3, PeerJS WebRTC multiplayer rooms, a 19 m multi-zone Robotics Lab obstacle course, and standalone @ainekio/engine v0.1.0. In parallel, Body Control shipped automated 4th-wire + IMU servo calibration (floor & legs_free modes with 25° tilt abort), a dedicated Virtual Simulation Manager (:8792, Quick Pair, 24/7 headless runner), and direct Cockpit text chat synced with Ainekio OS zero-pinning robot auto-following and AIKSPK01 spoken room-chat echo."
+  status: "V2 'Kanzagroth' (Study A 28/16/31/37 mm legs + Crimson Scout shell + MicroDuck v20) flashed & live in simulator.ainek.io; tackling full autonomy"
+  location: "Active V2 'Kanzagroth' (0.8.159-p4-studya-v20) & V1 floor robots · V3 DS3225 PRO (sim live) · simulator.ainek.io · Ainekio OS Full Auto"
+  updated: 2026-11-25
+  mileage: "V2 Berkowitz → Kanzagroth · Study A 28/16/31/37 mm · MicroDuck v20 (2.61× speed) · Full PBR sim · Full Autonomy push"
+  section: "Redesigning Ainekio V2 from 'Berkowitz' (35/20/28/38 mm) into 'Kanzagroth' (Study A 28/16/31/37 mm inverted-leverage four-bar + cogged Part_022 boot + Crimson Scout multi-plate carapace & raised ST7789 visor), flashing microduck-v20-studya-p4 OTA to hardware and live to simulator.ainek.io, and diving into end-to-end Full Autonomy"
+  nextStop: "Stress-test and harden the full end-to-end Ainekio OS autonomous perception, curiosity, and closed-loop goal verification pipeline overnight across simulator.ainek.io and physical V2 Kanzagroth."
+  note: "Over November 24–25, Ainekio V2 evolved from its original 'Berkowitz' prototype (35/20/28/38 mm four-bar linkage and early extracted carapace) into 'Kanzagroth': pairing the Study A 28/16/31/37 mm inverted-leverage linkage (+65% knee reduction, +25% carrier torque) and cogged Part_022 boots with the Crimson Scout oxblood/graphite/ivory carapace, raised 1.9-inch ST7789 visor bezel, and 17-part modular 2S power carrier. Warm-started microduck-v20-studya-p4 (7.81M Study A steps, 2.61× faster Body Control walking at 0.094–0.128 m/s, 0 falls) was flashed over Wi-Fi OTA onto physical V2 (0.8.159-p4-studya-v20) and deployed with full PBR color fidelity to simulator.ainek.io and ainek.io's 1:1 3D studio. With MicroDuck v20 and NeuralPose v8-calibrated now stable, late-night work moves squarely onto overhauling the full autonomous system."
   areas:
-    - label: "Unified P4 Firmware & V1·V2·V3"
-      status: "One ESP32-P4 codebase across V1, V2 & V3 + V3 Cyclops optic"
-      detail: "V1 compiles on P4 with 8 direct ADC channels (no mux), SSD1306 OLED, and v1-microduck-p4 (53.7 KB). V2 runs the 650 g floor build + NeuralPose v8 + I²t fuse. V3 (406.4 × 236.5 × 385.6 mm, 2.97 kg est.) runs DS3225 PRO HV servos, self-leveling double-parallelogram crawler feet (<= 0.27° error), panoramic ILI9341 Cyclops face, and v3-microduck-p4 (66.9 KB) + neural_pose_v3 live in MuJoCo."
-    - label: "simulator.ainek.io & @ainekio/engine"
-      status: "V1·V2·V3 live in browser + PeerJS multiplayer + 19 m Lab"
-      detail: "Zero-install 500 Hz MuJoCo WASM + compiled P4 firmware at https://simulator.ainek.io/ with live V1/V2/V3 hot-switching, PeerJS WebRTC multiplayer rooms, 6 worlds (19 m Robotics Lab, Yggdrasil, Observatory, Miranda Wreck, Solitude, Sci Fi Room), unified Comms Feed, and extracted @ainekio/engine v0.1.0."
-    - label: "Body Control & Ainekio OS"
-      status: "Auto-calibration, Virtual Simulation Manager & zero-pinning bridge"
-      detail: "Body Control adds automated floor/legs_free servo calibration (0.00° closure error, 25° tilt guard), Virtual Simulation Manager (:8792, ainekio-pair:, 24/7 headless runner), and Cockpit text input—paired with Ainekio OS zero-pinning auto-following (1,000/2,500 ms reconnect) and AIKSPK01 spoken text echo."
+    - label: "V2 'Kanzagroth' & Study A Legs"
+      status: "28/16/31/37 mm linkage + Crimson Scout shell + MicroDuck v20 OTA"
+      detail: "Kanzagroth replaces Berkowitz's 35/20/28/38 mm legs and early shell with Study A (28/16/31/37 mm + cogged Part_022 boot), a raised ST7789 visor & forked oxblood prow cowl, modular 2S carrier, and microduck-v20-studya-p4 (0.094–0.128 m/s, 0.8.159-p4-studya-v20) alongside V1 and V3."
+    - label: "3D Studio & simulator.ainek.io"
+      status: "Kanzagroth live w/ full PBR livery + V1·V2·V3 multiplayer"
+      detail: "Updated both ainek.io's 1:1 CAD studio (47 Study A clips) and https://simulator.ainek.io/ (500 Hz MuJoCo WASM + P4 firmware + PeerJS multiplayer) with the 354-part Kanzagroth GLB, baked ivory livery masks, and STEP/Solid-view PBR material color fixes."
+    - label: "Neural Stability → Full Autonomy"
+      status: "MicroDuck v20 + NeuralPose v8 stable; tackling Full Auto tonight"
+      detail: "With System 1 (MicroDuck v20) and System 2/3 (NeuralPose v8-calibrated + NeuralPosePresence) holding reliably, active engineering shifts onto fixing perceptual freshness, closed-loop visual/odometry goal verification, and mode ownership in Ainekio OS Full Autonomy."
 entries:
+  - title: "From Berkowitz to Kanzagroth: V2 Study A leg geometry, Crimson Scout chassis redesign, stabilizing neural gait/pose, and tackling full autonomy"
+    date: 2026-11-25
+    location: "V2 'Kanzagroth' CAD & OTA firmware (0.8.159-p4-studya-v20), simulator.ainek.io, ainek.io 3D studio & Ainekio OS Full Auto"
+    mileage: "V2 Berkowitz → Kanzagroth · 28/16/31/37 mm Study A · MicroDuck v20 (2.61× E2E speed) · Full PBR 3D sim · Full Autonomy push"
+    summary: "Evolving Ainekio V2 from 'Berkowitz' (35/20/28/38 mm) into 'Kanzagroth' (Study A 28/16/31/37 mm inverted-leverage linkage, cogged Part_022 boots, Crimson Scout oxblood/graphite/ivory carapace, and raised ST7789 visor); training and OTA-flashing microduck-v20-studya-p4 (2.61× faster Body Control walking) and updating both simulator.ainek.io and ainek.io's 3D viewer with full PBR colors; and pivoting late-night engineering onto the full autonomous system."
+    url: "/posts/2026-11-25-berkowitz-to-kanzagroth-v2-redesign-study-a-legs-and-full-autonomy/"
   - title: "Unified ESP32-P4 firmware (V1·V2·V3), all three robots & PeerJS multiplayer on simulator.ainek.io, V3 Cyclops optic & auto-calibration"
     date: 2026-11-23
     location: "Unified ESP32-P4 firmware, simulator.ainek.io (V1/V2/V3 + multiplayer), Body Control, Ainekio OS & @ainekio/engine"

@@ -94,15 +94,15 @@ type RobotRig = V1Rig | V2Rig
 
 const DEG2RAD = Math.PI / 180
 
-// V2 35-20-28-38 four-bar linkage constants (from Blender Wireless CAD)
+// V2 Kanzagroth Study A 28-16-31-37 four-bar linkage constants (from Blender Scene 'v2 - Concept Shell')
 const V2_A0 = -2.589563330529253
 const V2_T0 = -3.7982594562326515
-const V2_DX0 = 32.78664016723633
-const V2_DZ0 = 51.35725402832031
-const V2_BETA0 = 2.615800380706787
-const V2_PX0 = 34.24711227416992
-const V2_PZ0 = 93.42145538330078
-const V2_PHI0 = -2.312775135040283
+const V2_DX0 = 38.74687556847751
+const V2_DZ0 = 55.02816812469001
+const V2_BETA0 = 2.484875110627394
+const V2_PX0 = 37.41523755796805
+const V2_PZ0 = 90.97953218263883
+const V2_PHI0 = -2.695952349746787
 
 const V2_TO_V1_FALLBACK: Record<string, string> = {
   walk: 'walk_forward',
@@ -142,15 +142,15 @@ const ROBOTS: Record<RobotId, RobotMeta> = {
   },
   v2: {
     id: 'v2',
-    shortLabel: 'V2 (Active 650 g)',
-    title: 'Ainekio V2 · 650 g 12-Servo Closed-Loop Body',
-    badge: 'Active Floor Robot · 12 DOF',
+    shortLabel: 'V2 Kanzagroth (650 g)',
+    title: 'Ainekio V2 "Kanzagroth" · Study A Legs & Crimson Scout Shell',
+    badge: 'Active Floor Robot · Study A 12 DOF',
     glbPath: '/models/ainekio-v2.glb',
     motionPath: '/models/ainekio-v2-motions.json',
     clipCount: 47,
-    envelope: '244.9 × 141.5 × 103.4 mm',
-    actuators: '12× 4th-Wire Feedback MG90S',
-    compute: 'ESP32-P4 (50 Hz RL + NeuralPose v8) · 1.9" LCD',
+    envelope: '237.6 × 141.5 × 125.9 mm',
+    actuators: '12× 4th-Wire MG90S · 28/16/31/37 mm Study A',
+    compute: 'ESP32-P4 (50 Hz MicroDuck v20 + NeuralPose v8) · 1.9" Visor LCD',
     guideHref: '/posts/ainekio-v2/',
     guideLabel: 'V2 Hardware Guide',
     lineupX: -0.058,
@@ -708,15 +708,15 @@ function applySampleToRig(rig: RobotRig, ch: Float32Array, allowTravel: boolean,
 
     const a = V2_A0 + aDeg * DEG2RAD
     const t = V2_T0 + tDeg * DEG2RAD
-    const dx = 62.58781342006688 + 35 * Math.cos(a)
-    const dz = 69.71182170125783 + 35 * Math.sin(a)
-    const px = 50.08774121717073 + 20 * Math.cos(t)
-    const pz = 81.2118481681196 + 20 * Math.sin(t)
+    const dx = 62.58781342006688 + 28 * Math.cos(a)
+    const dz = 69.71182170125783 + 28 * Math.sin(a)
+    const px = 50.08774121717073 + 16 * Math.cos(t)
+    const pz = 81.2118481681196 + 16 * Math.sin(t)
     const wx = px - dx
     const wz = pz - dz
     const d = Math.max(1e-9, Math.hypot(wx, wz))
-    const along = Math.min(28, Math.max(-28, (784 - 1444 + d * d) / (2 * d)))
-    const height = Math.sqrt(Math.max(0, 784 - along * along))
+    const along = Math.min(37, Math.max(-37, (1369 - 961 + d * d) / (2 * d)))
+    const height = Math.sqrt(Math.max(0, 1369 - along * along))
     const ex = dx + (along * wx - height * wz) / d
     const ez = dz + (along * wz + height * wx) / d
     const beta = Math.atan2(ez - dz, ex - dx)
@@ -1422,7 +1422,7 @@ onDestroy(() => {
         {#if activeMode === 'lineup' && !isLoading && !loadError}
           <div class="rv-lineup-legend" aria-hidden="true">
             <span><strong>Left:</strong> V1 (175 mm · Clock-Spring)</span>
-            <span><strong>Center:</strong> V2 (245 mm · 650 g)</span>
+            <span><strong>Center:</strong> V2 Kanzagroth (238 mm · Study A)</span>
             <span><strong>Right:</strong> V3 (406 mm · Opt A-1 DS3225 PRO)</span>
           </div>
         {/if}
